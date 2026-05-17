@@ -13,11 +13,12 @@ const QUOTES = [
 interface Props {
   totalCycles: number;
   sessionDuration: number;
+  storageNote?: boolean;
   onRestart: () => void;
   onMenu: () => void;
 }
 
-export default function SessionComplete({ totalCycles, sessionDuration, onRestart, onMenu }: Props) {
+export default function SessionComplete({ totalCycles, sessionDuration, storageNote, onRestart, onMenu }: Props) {
   const minutes = Math.floor(sessionDuration / 60);
   const seconds = sessionDuration % 60;
   const [quote] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)]);
@@ -48,6 +49,12 @@ export default function SessionComplete({ totalCycles, sessionDuration, onRestar
             &ldquo;{quote}&rdquo;
           </p>
         </div>
+
+        {storageNote && (
+          <p className="text-white/28 text-xs font-light text-center leading-relaxed -mt-2">
+            Session history requires storage access to save.
+          </p>
+        )}
 
         <div className="flex flex-col gap-3 w-full mt-2">
           <button

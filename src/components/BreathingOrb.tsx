@@ -17,6 +17,7 @@ interface Props {
   currentPhase: PhaseConfig;
   phaseProgress: number;
   sessionProgress: number;
+  orbScale?: number;
 }
 
 const PARTICLE_COUNT = 60;
@@ -37,7 +38,7 @@ function lerpHSL(a: [number, number, number], b: [number, number, number], t: nu
   ];
 }
 
-export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgress }: Props) {
+export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgress, orbScale = 1 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const rafRef = useRef<number>(0);
@@ -46,6 +47,7 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
   const phaseRef = useRef(currentPhase);
   const phaseProgressRef = useRef(phaseProgress);
   const sessionProgressRef = useRef(sessionProgress);
+  const orbScaleRef = useRef(orbScale);
 
   // Color transition state
   const prevColorRef = useRef<[number, number, number]>(parseHSL(currentPhase.color));
@@ -67,6 +69,7 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
     phaseRef.current = currentPhase;
     phaseProgressRef.current = phaseProgress;
     sessionProgressRef.current = sessionProgress;
+    orbScaleRef.current = orbScale;
   });
 
   // Init particles
@@ -161,7 +164,10 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
       } else {
         animatedScale = phase.targetOrbScale;
       }
-      const orbRadius = ORB_MIN_RADIUS + (ORB_MAX_RADIUS - ORB_MIN_RADIUS) * animatedScale;
+      const sc = orbScaleRef.current;
+      const minR = ORB_MIN_RADIUS * sc;
+      const maxR = ORB_MAX_RADIUS * sc;
+      const orbRadius = minR + (maxR - minR) * animatedScale;
 
       // Glow
       [
@@ -200,7 +206,7 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
       ctx.stroke();
 
       // Phase progress ring
-      const ringR = ORB_MAX_RADIUS + 24;
+      const ringR = maxR + 24;
       ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${bl}%, 0.12)`;
       ctx.lineWidth = 3;
       ctx.lineCap = 'round';

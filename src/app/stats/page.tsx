@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { readStats, computeStats, SessionRecord } from '@/hooks/useSessionStats';
+import { readStats, computeStats, storageAvailable, SessionRecord } from '@/hooks/useSessionStats';
 
 function formatDate(dateStr: string): string {
   const today = new Date().toISOString().split('T')[0];
@@ -16,12 +16,14 @@ function formatDate(dateStr: string): string {
 export default function StatsPage() {
   const router = useRouter();
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
+  const [storageOk, setStorageOk] = useState(true);
 
   useEffect(() => {
+    setStorageOk(storageAvailable());
     setSessions(readStats().sessions);
   }, []);
 
-  const { totalSessions, totalMinutes, thisWeek, streak } = computeStats(sessions);
+  const { totalSessions, totalMinutes, thisWeek, streak, totalDays } = computeStats(sessions);
   const hours = Math.floor(totalMinutes / 60);
   const mins = totalMinutes % 60;
   const timeLabel = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
@@ -44,6 +46,12 @@ export default function StatsPage() {
           <p className="text-white/30 text-xs tracking-[0.15em] font-light">Your breathing history</p>
         </div>
 
+        {!storageOk && (
+          <p className="text-white/25 text-xs font-light text-center leading-relaxed -mb-4">
+            Session history requires storage access to save.
+          </p>
+        )}
+
         {totalSessions === 0 ? (
           <p className="text-white/30 text-sm font-light text-center leading-relaxed">
             No sessions yet. Complete your first session to begin tracking your practice.
@@ -55,7 +63,8 @@ export default function StatsPage() {
                 { label: 'Sessions', value: String(totalSessions) },
                 { label: 'This week', value: String(thisWeek) },
                 { label: 'Total time', value: timeLabel },
-                { label: 'Days practiced', value: String(streak) },
+                { label: 'Days practiced', value: String(totalDays) },
+                { label: 'Day streak', value: String(streak) },
               ].map(({ label, value }) => (
                 <div
                   key={label}

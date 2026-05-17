@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, Suspense } from 'react';
+import { useEffect, useRef, useState, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import BreathingOrb from '@/components/BreathingOrb';
 import GameHUD from '@/components/GameHUD';
@@ -49,22 +49,62 @@ function GameContent() {
   const { startAmbient, stopAmbient, pauseAmbient, resumeAmbient, playCue } = useAudioEngine();
   const { saveSession } = useSessionStats();
 
+  // Read orb scale once from localStorage — set on the home screen, not changed mid-session
+  const orbScale = useMemo<number>(() => {
+    try { return parseFloat(localStorage.getItem('exhale-orb-scale') ?? '1') || 1; } catch { return 1; }
+  }, []);
+
   const [audioActive, setAudioActive] = useState(false);
   const [showAudioPrompt, setShowAudioPrompt] = useState(false);
   const [showExitGuard, setShowExitGuard] = useState(false);
+  // Settling: 2.5s count-in before first breath. Skipped when resuming.
+  const [settling, setSettling] = useState(initialElapsed === 0);
+  const [sessionSaveError, setSessionSaveError] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [fullscreenSupported, setFullscreenSupported] = useState(false);
+
   const prevPhaseIndexRef = useRef(-1);
   const audioStartedRef = useRef(false);
   const sessionSavedRef = useRef(false);
 
-  // Clear any stale resume state on mount (we're resuming or starting fresh)
+  // Detect fullscreen support (not available on iOS Safari)
+  useEffect(() => {
+    setFullscreenSupported(!!document.documentElement.requestFullscreen);
+  }, []);
+
+  // Fullscreen state sync
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+
+  // Clear stale resume state on mount
   useEffect(() => {
     clearResumeState();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Start session immediately on mount
+  // Count-in settle, then start session
   useEffect(() => {
-    start();
-  }, [start]);
+    if (initialElapsed > 0) {
+      // Resuming — start immediately, no settle
+      start();
+      return;
+    }
+    const timer = setTimeout(() => {
+      setSettling(false);
+      start();
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Start audio on first user interaction (autoplay policy)
   useEffect(() => {
@@ -113,19 +153,20 @@ function GameContent() {
       clearResumeState();
       stopAmbient();
       setAudioActive(false);
-      saveSession({
+      const saved = saveSession({
         date: new Date().toISOString().split('T')[0],
         duration: sessionDuration,
         cycles: totalCycles,
         length: lengthParam,
       });
+      if (!saved) setSessionSaveError(true);
     }
   }, [sessionState, stopAmbient, saveSession, sessionDuration, totalCycles, lengthParam]);
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && sessionState !== 'complete') {
+      if (e.code === 'Space' && sessionState !== 'complete' && !settling) {
         e.preventDefault();
         if (sessionState === 'running') {
           pause();
@@ -135,7 +176,12 @@ function GameContent() {
           resumeAmbient();
         }
       }
-      if (e.code === 'Escape' && sessionState !== 'complete') {
+      if (e.code === 'KeyF' && fullscreenSupported) {
+        toggleFullscreen();
+      }
+      if (e.code === 'Escape' && sessionState !== 'complete' && !settling) {
+        // Let the browser handle fullscreen exit; don't also show exit guard
+        if (document.fullscreenElement) return;
         if (showExitGuard) {
           setShowExitGuard(false);
           if (sessionState === 'paused') { start(); resumeAmbient(); }
@@ -147,7 +193,7 @@ function GameContent() {
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [sessionState, pause, start, pauseAmbient, resumeAmbient, stopAmbient, router, lengthParam, elapsedTotal, showExitGuard]);
+  }, [sessionState, settling, pause, start, pauseAmbient, resumeAmbient, fullscreenSupported, showExitGuard]);
 
   const doExit = () => {
     if (sessionState === 'running' || sessionState === 'paused') {
@@ -157,8 +203,6 @@ function GameContent() {
     setAudioActive(false);
     router.push('/');
   };
-
-  const handleExit = () => doExit();
 
   const handleTogglePause = () => {
     if (sessionState === 'running') {
@@ -175,9 +219,11 @@ function GameContent() {
       <SessionComplete
         totalCycles={totalCycles}
         sessionDuration={sessionDuration}
+        storageNote={sessionSaveError}
         onRestart={() => {
           reset();
           sessionSavedRef.current = false;
+          sessionSaveError && setSessionSaveError(false);
           prevPhaseIndexRef.current = -1;
           setTimeout(() => {
             start();
@@ -198,6 +244,7 @@ function GameContent() {
           currentPhase={currentPhase}
           phaseProgress={phaseProgress}
           sessionProgress={sessionProgress}
+          orbScale={orbScale}
         />
       </div>
 
@@ -211,34 +258,62 @@ function GameContent() {
         audioActive={audioActive}
       />
 
+      {/* Settle-in overlay — shown for 2.5s before first breath */}
+      {settling && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+          <p
+            className="text-white/42 text-sm tracking-[0.36em] uppercase font-extralight"
+            style={{ textShadow: '0 1px 10px rgba(0,0,0,0.7)' }}
+          >
+            Settle in
+          </p>
+        </div>
+      )}
+
       {/* Pause/Resume button — top left */}
-      {(sessionState === 'running' || sessionState === 'paused') && (
+      {!settling && (sessionState === 'running' || sessionState === 'paused') && (
         <button
           onClick={handleTogglePause}
           className="absolute top-6 left-6 text-white/65 hover:text-white/90 text-xs tracking-[0.2em] uppercase font-light transition-colors duration-300"
           style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
           aria-label={sessionState === 'paused' ? 'Resume session' : 'Pause session'}
         >
-          {sessionState === 'paused' ? '▶ Resume' : '⏸ Pause'}
+          {sessionState === 'paused' ? 'Resume' : 'Pause'}
         </button>
       )}
 
       {/* Exit button — top right */}
-      <button
-        onClick={handleExit}
-        className="absolute top-6 right-6 text-white/45 hover:text-white/75 text-xs tracking-[0.2em] uppercase font-light transition-colors duration-300"
-        style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
-        aria-label="Exit session"
-      >
-        ✕ Exit
-      </button>
+      {!settling && (
+        <button
+          onClick={doExit}
+          className="absolute top-6 right-6 text-white/45 hover:text-white/75 text-xs tracking-[0.2em] uppercase font-light transition-colors duration-300"
+          style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
+          aria-label="Exit session"
+        >
+          ✕ Exit
+        </button>
+      )}
 
-      {/* Paused indicator */}
-      {sessionState === 'paused' && !showExitGuard && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <p className="text-white/25 text-sm tracking-[0.4em] uppercase font-extralight">
-            Paused
-          </p>
+      {/* Paused — tap anywhere on overlay or press Space to resume */}
+      {sessionState === 'paused' && !showExitGuard && !settling && (
+        <div
+          className="absolute inset-0 flex items-center justify-center cursor-pointer"
+          onClick={handleTogglePause}
+        >
+          <div className="flex flex-col items-center gap-2 pointer-events-none">
+            <p
+              className="text-white/55 text-sm tracking-[0.4em] uppercase font-extralight"
+              style={{ textShadow: '0 1px 8px rgba(0,0,0,0.7)' }}
+            >
+              Paused
+            </p>
+            <p
+              className="text-white/38 text-xs tracking-[0.18em] font-light"
+              style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
+            >
+              tap · space to resume
+            </p>
+          </div>
         </div>
       )}
 
@@ -252,10 +327,35 @@ function GameContent() {
         </p>
       )}
 
+      {/* Fullscreen toggle — bottom right (hidden on iOS Safari) */}
+      {fullscreenSupported && !showExitGuard && !settling && (
+        <button
+          onClick={toggleFullscreen}
+          aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+          className="absolute bottom-6 right-6 text-white/30 hover:text-white/65 transition-colors duration-300 p-1"
+        >
+          {isFullscreen ? (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="4 14 10 14 10 20" />
+              <polyline points="20 10 14 10 14 4" />
+              <line x1="10" y1="14" x2="3" y2="21" />
+              <line x1="21" y1="3" x2="14" y2="10" />
+            </svg>
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="15 3 21 3 21 9" />
+              <polyline points="9 21 3 21 3 15" />
+              <line x1="21" y1="3" x2="14" y2="10" />
+              <line x1="3" y1="21" x2="10" y2="14" />
+            </svg>
+          )}
+        </button>
+      )}
+
       {/* Exit guard overlay */}
       {showExitGuard && (
         <div
-          className="absolute inset-0 flex items-center justify-center bg-black/40 z-20"
+          className="absolute inset-0 flex items-center justify-center bg-emerald-950/40 z-20"
           onClick={() => { setShowExitGuard(false); if (sessionState === 'paused') { start(); resumeAmbient(); } }}
         >
           <div

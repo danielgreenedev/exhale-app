@@ -27,12 +27,24 @@ export function readStats(): StoredStats {
   }
 }
 
-function writeStats(stats: StoredStats): void {
-  if (typeof window === 'undefined') return;
+function writeStats(stats: StoredStats): boolean {
+  if (typeof window === 'undefined') return false;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
+    return true;
   } catch {
-    // localStorage unavailable or full
+    return false;
+  }
+}
+
+export function storageAvailable(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    localStorage.setItem('__exhale_test__', '1');
+    localStorage.removeItem('__exhale_test__');
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -47,6 +59,7 @@ export function computeStats(sessions: SessionRecord[]) {
   const today = new Date().toISOString().split('T')[0];
   const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const uniqueDays = [...new Set(sessions.map((s) => s.date))].sort().reverse();
+  const totalDays = uniqueDays.length;
   let streak = 0;
   let checkDate: string | null = uniqueDays[0] === today || uniqueDays[0] === yesterday ? uniqueDays[0] : null;
   if (checkDate) {
@@ -61,14 +74,14 @@ export function computeStats(sessions: SessionRecord[]) {
     }
   }
 
-  return { totalSessions, totalMinutes, thisWeek, streak };
+  return { totalSessions, totalMinutes, thisWeek, streak, totalDays };
 }
 
 export function useSessionStats() {
-  const saveSession = useCallback((record: SessionRecord) => {
+  const saveSession = useCallback((record: SessionRecord): boolean => {
     const stats = readStats();
     stats.sessions.push(record);
-    writeStats(stats);
+    return writeStats(stats);
   }, []);
 
   return { saveSession };

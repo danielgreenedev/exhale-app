@@ -29,6 +29,19 @@ export default function HomePage() {
   const router = useRouter();
   const [selected, setSelected] = useState<SessionLength>('short');
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
+  const [orbScale, setOrbScaleState] = useState<number>(1);
+
+  const updateOrbScale = (scale: number) => {
+    setOrbScaleState(scale);
+    try { localStorage.setItem('exhale-orb-scale', String(scale)); } catch { /* unavailable */ }
+  };
+
+  useEffect(() => {
+    try {
+      const v = parseFloat(localStorage.getItem('exhale-orb-scale') ?? '1') || 1;
+      setOrbScaleState(v);
+    } catch { /* unavailable */ }
+  }, []);
 
   useEffect(() => {
     try {
@@ -52,7 +65,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#090c0a] flex flex-col items-center justify-center px-6 text-white">
+    <div className="min-h-screen bg-[#090c0a] flex flex-col items-center px-6 text-white">
       {/* Warm forest glow */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -62,7 +75,7 @@ export default function HomePage() {
         }}
       />
 
-      <div className="relative z-10 flex flex-col items-center gap-12 max-w-sm w-full">
+      <div className="relative z-10 flex flex-col items-center gap-12 max-w-sm w-full my-auto py-10">
         {/* Logo orb — sage green, breathes gently */}
         <div className="flex flex-col items-center gap-6">
           <div className="relative orb-breathe" aria-hidden="true">
@@ -140,6 +153,31 @@ export default function HomePage() {
               <span className="text-xs tracking-widest opacity-60">{opt.description}</span>
             </button>
           ))}
+        </div>
+
+        {/* Orb size */}
+        <div className="flex items-center justify-between w-full px-1">
+          <span className="text-white/30 text-xs tracking-[0.14em] uppercase font-light">Orb size</span>
+          <div className="flex gap-4 items-end">
+            {([0.75, 1.0, 1.25] as const).map((scale, i) => {
+              const sizes = ['w-3 h-3', 'w-4 h-4', 'w-5 h-5'] as const;
+              const labels = ['S', 'M', 'L'] as const;
+              const active = Math.abs(orbScale - scale) < 0.01;
+              return (
+                <button
+                  key={scale}
+                  onClick={() => updateOrbScale(scale)}
+                  aria-label={`Orb size ${labels[i]}`}
+                  aria-pressed={active}
+                  className="flex flex-col items-center gap-1.5 p-1 transition-opacity duration-300"
+                  style={{ opacity: active ? 0.80 : 0.25 }}
+                >
+                  <div className={`${sizes[i]} rounded-full bg-white`} />
+                  <span className="text-white text-[9px] tracking-widest font-light">{labels[i]}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Start button */}

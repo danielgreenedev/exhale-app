@@ -120,13 +120,15 @@ export default function GameHUD({
             }}
           />
         </div>
-        <p
-          className="text-white/50 text-xs tracking-[0.15em] uppercase font-light mt-1"
-          style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
-        >
-          ~{minutesLeft} min remaining
-        </p>
-        <p className="text-white/22 text-xs tracking-[0.1em] font-light mt-1" aria-hidden="true">
+        {!settled && (
+          <p
+            className="text-white/50 text-xs tracking-[0.15em] uppercase font-light mt-1"
+            style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
+          >
+            ~{minutesLeft} min remaining
+          </p>
+        )}
+        <p className="text-white/38 text-xs tracking-[0.1em] font-light mt-1" aria-hidden="true">
           space · pause &nbsp;·&nbsp; esc · exit
         </p>
       </div>
