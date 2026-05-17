@@ -16,7 +16,12 @@
       "Skill(impeccable)",
       "Bash(node *)",
       "Bash(echo \"exit: $?\")",
-      "Bash(not exist *)"
+      "Bash(not exist *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(curl -s -o /dev/null -w \"home: %{http_code}\\\\n\" http://localhost:3000)",
+      "Bash(curl -s -o /dev/null -w \"game: %{http_code}\\\\n\" \"http://localhost:3000/game?length=short\")",
+      "Bash(curl -s -o /dev/null -w \"stats: %{http_code}\\\\n\" http://localhost:3000/stats)"
     ]
   }
 }
