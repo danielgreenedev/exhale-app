@@ -120,10 +120,10 @@ export function useAudioEngine() {
     });
   }, [getCtx]);
 
-  const stopAmbient = useCallback(() => {
+  const stopAmbient = useCallback((duration = 2.0) => {
     enabledRef.current = false;
     if (masterGainRef.current && ctxRef.current) {
-      masterGainRef.current.gain.linearRampToValueAtTime(0, ctxRef.current.currentTime + 2.0);
+      masterGainRef.current.gain.linearRampToValueAtTime(0, ctxRef.current.currentTime + duration);
     }
   }, []);
 

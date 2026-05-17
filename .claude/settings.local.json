@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(npm *)",
+      "WebFetch(domain:impeccable.style)",
+      "Bash(node .agents/skills/impeccable/scripts/critique-storage.mjs slug \"src/app/page.tsx\")",
+      "Bash(npx impeccable *)",
+      "Bash(node .agents/skills/impeccable/scripts/critique-storage.mjs trend src-app-page-tsx 5)",
+      "Bash(IMPECCABLE_CRITIQUE_META='{\"target\":\"exhale app full critique\",\"total_score\":28,\"p0_count\":0,\"p1_count\":1}' node .agents/skills/impeccable/scripts/critique-storage.mjs write src-app-page-tsx \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\exhale-critique-3.md\")",
+      "Bash(npx tsc *)",
+      "Bash(IMPECCABLE_CRITIQUE_META='{\"target\":\"exhale app full critique pass 3\",\"total_score\":34,\"p0_count\":0,\"p1_count\":0}' node .agents/skills/impeccable/scripts/critique-storage.mjs write src-app-page-tsx \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\exhale-critique-4.md\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(npm --version)",
+      "Bash(npm run *)",
+      "Skill(impeccable)",
+      "Bash(node *)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(not exist *)"
+    ]
+  }
+}

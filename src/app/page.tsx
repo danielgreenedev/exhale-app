@@ -30,6 +30,7 @@ export default function HomePage() {
   const [selected, setSelected] = useState<SessionLength>('short');
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
   const [orbScale, setOrbScaleState] = useState<number>(1);
+  const [firstVisit, setFirstVisit] = useState(false);
 
   const updateOrbScale = (scale: number) => {
     setOrbScaleState(scale);
@@ -40,6 +41,7 @@ export default function HomePage() {
     try {
       const v = parseFloat(localStorage.getItem('exhale-orb-scale') ?? '1') || 1;
       setOrbScaleState(v);
+      if (!localStorage.getItem('exhale-visited')) setFirstVisit(true);
     } catch { /* unavailable */ }
   }, []);
 
@@ -58,7 +60,15 @@ export default function HomePage() {
     }
   }, []);
 
-  const start = () => router.push(`/game?length=${selected}`);
+  const dismissFirstVisit = () => {
+    setFirstVisit(false);
+    try { localStorage.setItem('exhale-visited', '1'); } catch { /* unavailable */ }
+  };
+
+  const start = () => {
+    dismissFirstVisit();
+    router.push(`/game?length=${selected}`);
+  };
   const resume = () => {
     if (!resumeData) return;
     router.push(`/game?length=${resumeData.length}&resume=${resumeData.elapsed.toFixed(1)}`);
@@ -75,17 +85,17 @@ export default function HomePage() {
         }}
       />
 
-      <div className="relative z-10 flex flex-col items-center gap-12 max-w-sm w-full my-auto py-10">
-        {/* Logo orb — sage green, breathes gently */}
-        <div className="flex flex-col items-center gap-6">
+      <div className="relative z-10 flex flex-col items-center gap-5 max-w-sm w-full my-auto py-8">
+
+        {/* Logo orb */}
+        <div className="flex flex-col items-center gap-4">
           <div className="relative orb-breathe" aria-hidden="true">
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-300/60 to-emerald-600/40 shadow-[0_0_48px_rgba(110,231,183,0.22)]" />
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent" />
-            <div className="absolute inset-[-8px] rounded-full border border-emerald-400/14" />
-            <div className="absolute inset-[-18px] rounded-full border border-emerald-400/08" />
+            <div className="absolute inset-[-14px] rounded-full border border-emerald-400/20 shadow-[0_0_18px_rgba(110,231,183,0.12)]" />
           </div>
 
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-1.5">
             <h1 className="text-4xl sm:text-5xl font-extralight tracking-[0.25em] sm:tracking-[0.38em] uppercase text-white/90">
               Exhale
             </h1>
@@ -95,28 +105,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Pattern info */}
-        <div className="flex flex-col items-center gap-2 text-center">
-          <p className="text-white/35 text-xs tracking-[0.14em] uppercase font-light">
-            4 · 4 · 6 · 2 breathing pattern
-          </p>
-          <div
-            className="flex gap-4 text-white/28 text-xs font-light"
-            aria-label="Inhale 4 seconds, hold 4 seconds, exhale 6 seconds, rest 2 seconds"
-          >
-            <span>Inhale 4s</span>
-            <span aria-hidden="true">·</span>
-            <span>Hold 4s</span>
-            <span aria-hidden="true">·</span>
-            <span>Exhale 6s</span>
-            <span aria-hidden="true">·</span>
-            <span>Rest 2s</span>
-          </div>
-        </div>
-
-        {/* Session length picker */}
+        {/* Session length picker — label removed, implied by context */}
         <div
-          className="flex flex-col gap-3 w-full"
+          className="flex flex-col gap-2 w-full"
           role="radiogroup"
           aria-label="Session length"
           onKeyDown={(e) => {
@@ -130,9 +121,6 @@ export default function HomePage() {
             }
           }}
         >
-          <p className="text-white/38 text-xs tracking-[0.18em] uppercase font-light text-center mb-1">
-            Choose session length
-          </p>
           {SESSION_OPTIONS.map((opt) => (
             <button
               key={opt.length}
@@ -142,7 +130,7 @@ export default function HomePage() {
               aria-label={`${opt.label}, ${opt.description}`}
               tabIndex={selected === opt.length ? 0 : -1}
               className={`
-                w-full py-4 px-6 rounded-2xl border transition-all duration-300 text-left flex justify-between items-center
+                w-full py-3 px-6 rounded-2xl border transition-all duration-300 text-left flex justify-between items-center
                 ${selected === opt.length
                   ? 'border-emerald-400/45 bg-emerald-400/10 text-white/90'
                   : 'border-white/12 text-white/45 hover:border-white/22 hover:text-white/65'
@@ -155,32 +143,23 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Orb size */}
-        <div className="flex items-center justify-between w-full px-1">
-          <span className="text-white/30 text-xs tracking-[0.14em] uppercase font-light">Orb size</span>
-          <div className="flex gap-4 items-end">
-            {([0.75, 1.0, 1.25] as const).map((scale, i) => {
-              const sizes = ['w-3 h-3', 'w-4 h-4', 'w-5 h-5'] as const;
-              const labels = ['S', 'M', 'L'] as const;
-              const active = Math.abs(orbScale - scale) < 0.01;
-              return (
-                <button
-                  key={scale}
-                  onClick={() => updateOrbScale(scale)}
-                  aria-label={`Orb size ${labels[i]}`}
-                  aria-pressed={active}
-                  className="flex flex-col items-center gap-1.5 p-1 transition-opacity duration-300"
-                  style={{ opacity: active ? 0.80 : 0.25 }}
-                >
-                  <div className={`${sizes[i]} rounded-full bg-white`} />
-                  <span className="text-white text-[9px] tracking-widest font-light">{labels[i]}</span>
-                </button>
-              );
-            })}
+        {/* First-visit hint — one sentence, dismisses permanently */}
+        {firstVisit && (
+          <div className="flex items-start justify-between w-full gap-3 px-1 -mb-1">
+            <p className="text-white/38 text-xs font-light leading-relaxed">
+              The orb guides your pace — just follow along.
+            </p>
+            <button
+              onClick={dismissFirstVisit}
+              aria-label="Dismiss hint"
+              className="text-white/25 hover:text-white/50 text-xs shrink-0 transition-colors duration-200 mt-0.5"
+            >
+              ✕
+            </button>
           </div>
-        </div>
+        )}
 
-        {/* Start button */}
+        {/* Begin button */}
         <button
           onClick={start}
           aria-label={`Begin ${selected} session`}
@@ -194,7 +173,7 @@ export default function HomePage() {
           <button
             onClick={resume}
             aria-label={`Resume ${resumeData.length} session, ${formatDuration(Math.floor(resumeData.elapsed))} in`}
-            className="w-full py-4 px-6 rounded-2xl border border-white/15 text-white/45 hover:border-white/26 hover:text-white/65 transition-all duration-300 -mt-6 flex flex-col items-center gap-0.5"
+            className="w-full py-4 px-6 rounded-2xl border border-white/15 text-white/45 hover:border-white/26 hover:text-white/65 transition-all duration-300 -mt-2 flex flex-col items-center gap-0.5"
           >
             <span className="text-sm tracking-[0.18em] uppercase font-light">
               ↩ Resume {resumeData.length}
@@ -205,18 +184,41 @@ export default function HomePage() {
           </button>
         )}
 
-        <p className="text-white/28 text-xs font-light text-center leading-relaxed">
-          Find a comfortable position · breathe naturally · let the orb guide you
-        </p>
+        {/* Secondary controls — orb size and practice history together below the fold */}
+        <div className="flex flex-col gap-3 w-full pt-3 border-t border-white/6">
+          <div className="flex items-center justify-between w-full px-1">
+            <span className="text-white/30 text-xs tracking-[0.14em] uppercase font-light">Orb size</span>
+            <div className="flex gap-4 items-end">
+              {([0.75, 1.0, 1.25] as const).map((scale, i) => {
+                const sizes = ['w-3 h-3', 'w-4 h-4', 'w-5 h-5'] as const;
+                const labels = ['S', 'M', 'L'] as const;
+                const active = Math.abs(orbScale - scale) < 0.01;
+                return (
+                  <button
+                    key={scale}
+                    onClick={() => updateOrbScale(scale)}
+                    aria-label={`Orb size ${labels[i]}`}
+                    aria-pressed={active}
+                    className="flex flex-col items-center gap-1.5 p-1 transition-opacity duration-300"
+                    style={{ opacity: active ? 0.95 : 0.38 }}
+                  >
+                    <div className={`${sizes[i]} rounded-full bg-white`} />
+                    <span className="text-white text-[9px] tracking-widest font-light">{labels[i]}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-        {/* Stats link */}
-        <button
-          onClick={() => router.push('/stats')}
-          className="w-full py-3 rounded-2xl border border-white/18 text-white/45 text-xs tracking-[0.18em] uppercase font-light hover:border-white/32 hover:text-white/65 hover:bg-white/4 active:scale-[0.98] transition-all duration-300 -mt-8"
-          aria-label="View practice history"
-        >
-          Practice history
-        </button>
+          <button
+            onClick={() => router.push('/stats')}
+            className="w-full py-3 rounded-2xl border border-white/18 text-white/45 text-xs tracking-[0.18em] uppercase font-light hover:border-white/32 hover:text-white/65 hover:bg-white/4 active:scale-[0.98] transition-all duration-300"
+            aria-label="View practice history"
+          >
+            Practice history
+          </button>
+        </div>
+
       </div>
     </div>
   );

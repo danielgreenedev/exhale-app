@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-17T12:00:00Z",
+  "title": "Design System: Exhale",
+  "extensions": {
+    "colorMeta": {
+      "forest-night":  { "role": "neutral",   "displayName": "Forest Night",  "canonical": "oklch(5% 0.006 145)",   "tonalRamp": ["#030403","#090c0a","#111a12","#1a2a1c","#223526","#2e4a34","#3d6347","#527d5e"] },
+      "emerald-pulse": { "role": "primary",   "displayName": "Emerald Pulse", "canonical": "oklch(79% 0.185 156)", "tonalRamp": ["#0a2e1e","#0f4a2e","#166a41","#1f8f58","#28b870","#34d399","#6de4b8","#b4f4dd"] },
+      "sylvan-glow":   { "role": "neutral",   "displayName": "Sylvan Glow",   "canonical": "oklch(22% 0.045 145)", "tonalRamp": ["#0d1a0f","#122014","#17281a","#1d3221","#224f34","#2e6845","#3e855a","#55a372"] },
+      "coastal-haze":  { "role": "tertiary",  "displayName": "Coastal Haze",  "canonical": "oklch(71% 0.075 221)", "tonalRamp": ["#1a3545","#233f52","#2e5269","#3d6e8a","#528daa","#76b2cb","#9ecce0","#c6e5f2"] },
+      "amber-warmth":  { "role": "tertiary",  "displayName": "Amber Warmth",  "canonical": "oklch(73% 0.095 75)",  "tonalRamp": ["#352508","#4e360e","#6d4c17","#926522","#b8882e","#d2ae65","#e2cc98","#f0e4c6"] },
+      "forest-floor":  { "role": "tertiary",  "displayName": "Forest Floor",  "canonical": "oklch(68% 0.095 154)", "tonalRamp": ["#172b1f","#1e3828","#283f32","#38664f","#498568","#5db184","#82c9a2","#aaddc3"] },
+      "quiet-blush":   { "role": "tertiary",  "displayName": "Quiet Blush",   "canonical": "oklch(65% 0.085 7)",   "tonalRamp": ["#2e1319","#431c24","#5e2732","#7e3646","#a2505e","#cd8492","#e0adb6","#f0cdd3"] },
+      "warm-closure":  { "role": "secondary", "displayName": "Warm Closure",  "canonical": "oklch(84% 0.175 85)",  "tonalRamp": ["#3d2500","#5e3a00","#8c5900","#b87d00","#d9a300","#fbbf24","#fcd34d","#fde68a"] },
+      "still-white":   { "role": "neutral",   "displayName": "Still White",   "canonical": "oklch(97% 0.004 60)",  "tonalRamp": ["#404040","#606060","#808080","#a0a0a0","#c0c0c0","#dcdcda","#f0f0ee","#f5f5f2"] }
+    },
+    "typographyMeta": {
+      "display":  { "displayName": "Display",  "purpose": "The Exhale wordmark on home screen. One instance per app." },
+      "headline": { "displayName": "Headline", "purpose": "Screen titles: Practice, Complete. Airy and formal." },
+      "title":    { "displayName": "Title",    "purpose": "Active phase label during session only. The only semibold (600) in the system." },
+      "body":     { "displayName": "Body",     "purpose": "Taglines, descriptions, session complete quotes. Sentence case." },
+      "label":    { "displayName": "Label",    "purpose": "Button text, metadata, stat labels. Always uppercase, tracking 0.18em minimum." },
+      "timer":    { "displayName": "Timer",    "purpose": "Countdown during active session. Tabular nums, font-thin (100)." }
+    },
+    "shadows": [
+      { "name": "orb-glow-large",  "value": "0 0 48px rgba(110,231,183,0.22)", "purpose": "Home screen orb mark. Decorative — implies life, not elevation." },
+      { "name": "orb-glow-small",  "value": "0 0 36px rgba(110,231,183,0.20)", "purpose": "Stats screen orb mark. Proportionally reduced." },
+      { "name": "ring-glow",       "value": "0 0 18px rgba(110,231,183,0.12)", "purpose": "Outer ring on the static orb mark. Extends the glow subtly." },
+      { "name": "amber-glow",      "value": "0 0 60px rgba(251,191,36,0.30)",  "purpose": "Session complete orb. Warm closure signal." }
+    ],
+    "motion": [
+      { "name": "ease-standard",   "value": "cubic-bezier(0.4,0,0.2,1)",        "purpose": "Default state transitions (buttons, opacity changes). 300ms." },
+      { "name": "ease-in-out-cubic","value": "cubic-bezier(0.645,0.045,0.355,1)","purpose": "Orb scale animation via RAF. Applied in JS, not CSS." },
+      { "name": "orb-breathe",     "value": "scale(1) → scale(1.14), 8s ease-in-out infinite", "purpose": "Static orb mark on home and stats screens." },
+      { "name": "fade-in",         "value": "opacity 0 → 1, translateY 12px → 0, 1.2s ease-out", "purpose": "Session complete screen entrance." },
+      { "name": "settle-fade-in",  "value": "opacity 0 → 1, 0.7s ease, 50ms delay",  "purpose": "Settle-in heading appears 50ms after mount." },
+      { "name": "settle-fade-out", "value": "opacity 1 → 0, 0.7s ease, at 1700ms",   "purpose": "Settle-in overlay fades before first breath (2800ms total)." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px", "purpose": "Keyboard hints visible; logo tracking widens; title scale increases." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Begin Button",
+      "kind": "button",
+      "refersTo": "button-begin",
+      "description": "Primary CTA on home screen. One per screen. Emerald-tinted border and background.",
+      "html": "<button class=\"ds-btn-begin\">Begin</button>",
+      "css": ".ds-btn-begin { display: block; width: 100%; padding: 20px 24px; border-radius: 16px; border: 1px solid rgba(52,211,153,0.32); background: rgba(6,78,59,0.15); color: rgba(167,243,208,0.90); font-family: Inter, system-ui, sans-serif; font-size: 0.875rem; font-weight: 300; letter-spacing: 0.28em; text-transform: uppercase; cursor: pointer; transition: all 300ms ease; } .ds-btn-begin:hover { background: rgba(6,78,59,0.26); border-color: rgba(52,211,153,0.55); color: rgba(236,253,245,1); } .ds-btn-begin:active { transform: scale(0.98); }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action. Practice history, Back, Stats navigation. White border, no fill.",
+      "html": "<button class=\"ds-btn-ghost\">Practice history</button>",
+      "css": ".ds-btn-ghost { display: block; width: 100%; padding: 12px 24px; border-radius: 16px; border: 1px solid rgba(245,245,242,0.18); background: transparent; color: rgba(245,245,242,0.45); font-family: Inter, system-ui, sans-serif; font-size: 0.75rem; font-weight: 300; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; transition: all 300ms ease; } .ds-btn-ghost:hover { background: rgba(255,255,255,0.04); border-color: rgba(245,245,242,0.32); color: rgba(245,245,242,0.65); } .ds-btn-ghost:active { transform: scale(0.98); }"
+    },
+    {
+      "name": "Session Picker Option",
+      "kind": "button",
+      "refersTo": "button-session",
+      "description": "Session length radio option. Ghost by default, emerald-tinted when selected.",
+      "html": "<button class=\"ds-btn-session ds-btn-session--selected\" role=\"radio\" aria-checked=\"true\"><span class=\"ds-btn-session__label\">5 minutes</span><span class=\"ds-btn-session__meta\">20 breaths</span></button>",
+      "css": ".ds-btn-session { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 12px 24px; border-radius: 16px; border: 1px solid rgba(245,245,242,0.12); background: transparent; color: rgba(245,245,242,0.45); font-family: Inter, system-ui, sans-serif; cursor: pointer; transition: all 300ms ease; text-align: left; } .ds-btn-session:hover { border-color: rgba(245,245,242,0.22); color: rgba(245,245,242,0.65); } .ds-btn-session--selected { border-color: rgba(52,211,153,0.45); background: rgba(52,211,153,0.10); color: rgba(245,245,242,0.90); } .ds-btn-session__label { font-size: 1.125rem; font-weight: 200; letter-spacing: 0.05em; } .ds-btn-session__meta { font-size: 0.75rem; font-weight: 300; letter-spacing: 0.15em; opacity: 0.6; }"
+    },
+    {
+      "name": "Game Control Button",
+      "kind": "button",
+      "refersTo": "button-game-control",
+      "description": "Pause and Exit buttons during active session. Compact, white border, sits at canvas corners.",
+      "html": "<button class=\"ds-btn-game\">Pause</button>",
+      "css": ".ds-btn-game { padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(245,245,242,0.18); background: transparent; color: rgba(245,245,242,0.65); font-family: Inter, system-ui, sans-serif; font-size: 0.75rem; font-weight: 300; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; transition: all 300ms ease; } .ds-btn-game:hover { border-color: rgba(245,245,242,0.35); background: rgba(255,255,255,0.05); color: rgba(245,245,242,0.90); }"
+    },
+    {
+      "name": "Orb Mark",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "The Exhale brand mark. Large (80px) on home, small (56px) on stats. Always accompanied by the breathing animation.",
+      "html": "<div class=\"ds-orb-mark ds-orb-mark--large\"><div class=\"ds-orb-mark__body\"></div><div class=\"ds-orb-mark__highlight\"></div><div class=\"ds-orb-mark__ring\"></div></div>",
+      "css": ".ds-orb-mark { position: relative; display: inline-block; animation: ds-orb-breathe 8s ease-in-out infinite; } @media (prefers-reduced-motion: reduce) { .ds-orb-mark { animation: none; } } @keyframes ds-orb-breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.14); } } .ds-orb-mark--large { width: 80px; height: 80px; } .ds-orb-mark--small { width: 56px; height: 56px; } .ds-orb-mark__body { width: 100%; height: 100%; border-radius: 9999px; background: radial-gradient(circle at 35% 35%, rgba(110,231,183,0.60), rgba(5,150,105,0.40)); box-shadow: 0 0 48px rgba(110,231,183,0.22); } .ds-orb-mark--small .ds-orb-mark__body { box-shadow: 0 0 36px rgba(110,231,183,0.20); } .ds-orb-mark__highlight { position: absolute; inset: 0; border-radius: 9999px; background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.20), transparent); } .ds-orb-mark__ring { position: absolute; inset: -14px; border-radius: 9999px; border: 1px solid rgba(52,211,153,0.20); box-shadow: 0 0 18px rgba(110,231,183,0.12); } .ds-orb-mark--small .ds-orb-mark__ring { inset: -10px; }"
+    },
+    {
+      "name": "Milestone Badge",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Session count milestone. Unearned is pale and muted; earned glows emerald.",
+      "html": "<div class=\"ds-badge ds-badge--earned\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><rect x=\"8.5\" y=\"2\" width=\"3\" height=\"16\" rx=\"1.5\"/><rect x=\"2\" y=\"8.5\" width=\"16\" height=\"3\" rx=\"1.5\"/></svg></div><div class=\"ds-badge\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><rect x=\"8.5\" y=\"2\" width=\"3\" height=\"16\" rx=\"1.5\"/><rect x=\"2\" y=\"8.5\" width=\"16\" height=\"3\" rx=\"1.5\"/></svg></div>",
+      "css": ".ds-badge { width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); color: rgba(255,255,255,0.12); transition: all 300ms ease; } .ds-badge--earned { background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.30); color: rgba(110,231,183,0.85); }"
+    },
+    {
+      "name": "Stats Row",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Flat list row used in the Practice history screen. Label left, large value right. No cards.",
+      "html": "<div class=\"ds-stats-row\"><span class=\"ds-stats-row__label\">Day streak</span><span class=\"ds-stats-row__value\">7</span></div>",
+      "css": ".ds-stats-row { display: flex; justify-content: space-between; align-items: baseline; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.06); } .ds-stats-row__label { font-family: Inter, system-ui, sans-serif; font-size: 0.75rem; font-weight: 300; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(245,245,242,0.35); } .ds-stats-row__value { font-family: Inter, system-ui, sans-serif; font-size: 1.875rem; font-weight: 200; color: rgba(245,245,242,0.80); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Still Water",
+    "overview": "Exhale is a surface that reflects without distorting. It moves with the user but never against them — responsive to breath, invisible to anxiety. The design holds itself at rest: near-black ground, a single soft orb, text that barely whispers. Nothing competes for attention because the breath is the only thing that matters.\n\nThe system's restraint is deliberate. The target user has never opened a self-care app and will leave at the first sign of obligation. Every visual decision is filtered through one test: does this create friction, or does it dissolve it? Borders are present only to help the eye, not to impose structure. Color shifts with the breath cycle, teaching the rhythm without a word of instruction. Silence is not absence — it is the point.\n\nThis system explicitly rejects the language of productivity apps (progress bars as pressure, badges as obligation, streaks as guilt), the visual clichés of wellness software (gradients, glassmorphism, illustrated characters), and anything that requires the user to understand a concept before they can breathe.",
+    "keyCharacteristics": [
+      "Near-black ground with a warm forest glow that anchors without darkening",
+      "A single emerald accent, used sparingly; amber appears only at session close",
+      "Inter at extralight and light weights — airy, not thin to the point of strain",
+      "Wide tracking on all uppercase labels; sentence case for human-facing copy",
+      "Motion that follows breath rhythm; nothing decorates for its own sake",
+      "Flat surfaces, no shadows — depth via glow and opacity, never elevation",
+      "Session controls (Pause, Exit) at bottom corners — thumb zone on all phone sizes"
+    ],
+    "rules": [
+      { "name": "The Amber Exception Rule", "body": "Amber (#fbbf24) appears on one screen, for one purpose: session closure. If you are tempted to use amber anywhere else, the answer is no.", "section": "colors" },
+      { "name": "The One Accent Rule", "body": "Emerald is the only accent. Phase colors belong to the canvas, not the UI. Do not use phase colors for buttons, labels, borders, or dialog overlays outside the session canvas. The exit guard backdrop is rgba(0,0,0,0.65) — neutral, never emerald.", "section": "colors" },
+      { "name": "The Weight Ceiling Rule", "body": "Only one element uses font-semibold (600): the active phase label. Every other element uses 100, 200, or 300. font-normal (400) is also prohibited — it sits in no-man's-land between the permitted weights.", "section": "typography" },
+      { "name": "The No Italic Rule", "body": "There is no italic role in this system. Emphasis is conveyed via opacity, not decoration. Remove italic from all copy, including quotes on the complete screen.", "section": "typography" },
+      { "name": "The Uppercase Contract", "body": "Uppercase is for labels and controls only. Copy (taglines, instructions, quotes) is always sentence case.", "section": "typography" },
+      { "name": "The No Shadow Rule", "body": "No UI element uses box-shadow for structural depth. The orb glow is the only permitted exception, and it is decorative.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep emerald at ≤10% surface coverage on any screen outside the active session canvas",
+      "Do use opacity as the primary tool for hierarchy — white/90 to white/18 covers every level",
+      "Do apply wide tracking (0.18em minimum) to all uppercase labels",
+      "Do use amber exclusively on the session complete screen",
+      "Do respect prefers-reduced-motion: skip orb animation and particles entirely",
+      "Do surface stats as optional, secondary navigation — never on the critical path to breathing"
+    ],
+    "donts": [
+      "Don't use font-bold, font-normal, or any weight other than 100, 200, 300, or 600",
+      "Don't add shadows for structural elevation",
+      "Don't use glassmorphism: no backdrop-filter blur on UI chrome",
+      "Don't use gradient text (background-clip: text)",
+      "Don't use italic anywhere — no italic role exists in this system",
+      "Don't use a colored overlay for dialog backdrops — neutral black only, never emerald",
+      "Don't add a second accent color — emerald and amber are the full palette",
+      "Don't design like Headspace or Calm: no onboarding carousels, no premium gate framing, no illustrated characters",
+      "Don't design like a fitness app: no streak guilt, no achievement popups, no re-engagement pressure",
+      "Don't require an account, login, or cloud sync",
+      "Don't add push notifications, sharing features, or social comparisons",
+      "Don't use audio files — synthesis only, zero load time"
+    ]
+  }
+}

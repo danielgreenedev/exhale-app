@@ -57,8 +57,10 @@ function GameContent() {
   const [audioActive, setAudioActive] = useState(false);
   const [showAudioPrompt, setShowAudioPrompt] = useState(false);
   const [showExitGuard, setShowExitGuard] = useState(false);
-  // Settling: 2.5s count-in before first breath. Skipped when resuming.
+  // Settling: count-in before first breath. Skipped when resuming.
   const [settling, setSettling] = useState(initialElapsed === 0);
+  const [settleOpacity, setSettleOpacity] = useState(0);
+  const [settleSubOpacity, setSettleSubOpacity] = useState(0);
   const [sessionSaveError, setSessionSaveError] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fullscreenSupported, setFullscreenSupported] = useState(false);
@@ -99,11 +101,11 @@ function GameContent() {
       start();
       return;
     }
-    const timer = setTimeout(() => {
-      setSettling(false);
-      start();
-    }, 2500);
-    return () => clearTimeout(timer);
+    const fadeIn    = setTimeout(() => setSettleOpacity(1), 50);
+    const subFadeIn = setTimeout(() => setSettleSubOpacity(1), 1100);
+    const fadeOut   = setTimeout(() => { setSettleOpacity(0); setSettleSubOpacity(0); }, 2800);
+    const end       = setTimeout(() => { setSettling(false); start(); }, 3500);
+    return () => { clearTimeout(fadeIn); clearTimeout(subFadeIn); clearTimeout(fadeOut); clearTimeout(end); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Start audio on first user interaction (autoplay policy)
@@ -151,7 +153,7 @@ function GameContent() {
     if (sessionState === 'complete' && !sessionSavedRef.current) {
       sessionSavedRef.current = true;
       clearResumeState();
-      stopAmbient();
+      stopAmbient(5.0);
       setAudioActive(false);
       const saved = saveSession({
         date: new Date().toISOString().split('T')[0],
@@ -248,49 +250,55 @@ function GameContent() {
         />
       </div>
 
-      {/* HUD overlay */}
-      <GameHUD
-        currentPhase={currentPhase}
-        timeRemaining={timeRemaining}
-        cycleNumber={cycleNumber}
-        totalCycles={totalCycles}
-        sessionProgress={sessionProgress}
-        audioActive={audioActive}
-      />
+      {/* HUD overlay — hidden during the count-in so it doesn't clash with "Settle in" */}
+      {!settling && (
+        <GameHUD
+          currentPhase={currentPhase}
+          timeRemaining={timeRemaining}
+          cycleNumber={cycleNumber}
+          totalCycles={totalCycles}
+          sessionProgress={sessionProgress}
+          audioActive={audioActive}
+        />
+      )}
 
-      {/* Settle-in overlay — shown for 2.5s before first breath */}
+      {/* Settle-in overlay — fades in heading first, then subtitle, then both fade before breathing starts */}
       {settling && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 pointer-events-none z-10">
           <p
-            className="text-white/42 text-sm tracking-[0.36em] uppercase font-extralight"
-            style={{ textShadow: '0 1px 10px rgba(0,0,0,0.7)' }}
+            className="text-white/70 text-2xl tracking-[0.3em] uppercase font-extralight"
+            style={{ opacity: settleOpacity, transition: 'opacity 0.7s ease', textShadow: '0 2px 16px rgba(0,0,0,0.8)' }}
           >
             Settle in
+          </p>
+          <p
+            className="text-white/32 text-xs tracking-[0.22em] font-light"
+            style={{ opacity: settleSubOpacity, transition: 'opacity 0.7s ease', textShadow: '0 1px 8px rgba(0,0,0,0.6)' }}
+          >
+            breathe naturally
           </p>
         </div>
       )}
 
-      {/* Pause/Resume button — top left */}
+      {/* Pause/Resume button — bottom left */}
       {!settling && (sessionState === 'running' || sessionState === 'paused') && (
         <button
           onClick={handleTogglePause}
-          className="absolute top-6 left-6 text-white/65 hover:text-white/90 text-xs tracking-[0.2em] uppercase font-light transition-colors duration-300"
-          style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
+          className="absolute bottom-6 left-6 text-white/65 hover:text-white/90 text-xs tracking-[0.2em] uppercase font-light border border-white/18 hover:border-white/35 hover:bg-white/5 px-3 py-1.5 rounded-lg transition-all duration-300"
           aria-label={sessionState === 'paused' ? 'Resume session' : 'Pause session'}
         >
           {sessionState === 'paused' ? 'Resume' : 'Pause'}
         </button>
       )}
 
-      {/* Exit button — top right */}
+      {/* Exit button — bottom right */}
       {!settling && (
         <button
           onClick={doExit}
-          className="absolute top-6 right-6 text-white/45 hover:text-white/75 text-xs tracking-[0.2em] uppercase font-light transition-colors duration-300"
-          style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
+          className="absolute bottom-6 right-6 text-white/45 hover:text-white/75 text-xs tracking-[0.2em] uppercase font-light border border-white/18 hover:border-white/35 hover:bg-white/5 px-3 py-1.5 rounded-lg transition-all duration-300"
           aria-label="Exit session"
         >
-          ✕ Exit
+          ← Exit
         </button>
       )}
 
@@ -327,12 +335,12 @@ function GameContent() {
         </p>
       )}
 
-      {/* Fullscreen toggle — bottom right (hidden on iOS Safari) */}
+      {/* Fullscreen toggle — top right (hidden on iOS Safari) */}
       {fullscreenSupported && !showExitGuard && !settling && (
         <button
           onClick={toggleFullscreen}
           aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-          className="absolute bottom-6 right-6 text-white/30 hover:text-white/65 transition-colors duration-300 p-1"
+          className="absolute top-6 right-6 text-white/30 hover:text-white/65 transition-colors duration-300 p-1"
         >
           {isFullscreen ? (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -355,7 +363,7 @@ function GameContent() {
       {/* Exit guard overlay */}
       {showExitGuard && (
         <div
-          className="absolute inset-0 flex items-center justify-center bg-emerald-950/40 z-20"
+          className="absolute inset-0 flex items-center justify-center bg-black/65 z-20"
           onClick={() => { setShowExitGuard(false); if (sessionState === 'paused') { start(); resumeAmbient(); } }}
         >
           <div

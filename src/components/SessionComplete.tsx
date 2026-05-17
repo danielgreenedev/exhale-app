@@ -30,6 +30,7 @@ export default function SessionComplete({ totalCycles, sessionDuration, storageN
         <div className="relative">
           <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-300/75 to-amber-600/50 shadow-[0_0_60px_rgba(251,191,36,0.30)]" />
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent" />
+          <div className="absolute inset-[-14px] rounded-full border border-amber-400/20 shadow-[0_0_18px_rgba(251,191,36,0.10)]" />
         </div>
 
         <div className="flex flex-col gap-3">
@@ -45,14 +46,14 @@ export default function SessionComplete({ totalCycles, sessionDuration, storageN
         </div>
 
         <div className="flex flex-col gap-3 w-full mt-2">
-          <p className="text-white/40 text-sm font-light italic leading-relaxed">
+          <p className="text-white/40 text-sm font-light leading-relaxed">
             &ldquo;{quote}&rdquo;
           </p>
         </div>
 
         {storageNote && (
-          <p className="text-white/28 text-xs font-light text-center leading-relaxed -mt-2">
-            Session history requires storage access to save.
+          <p className="text-amber-200/45 text-xs font-light text-center leading-relaxed -mt-2 px-2">
+            This session wasn&apos;t saved — storage is unavailable (private browsing or quota exceeded).
           </p>
         )}
 
@@ -65,7 +66,7 @@ export default function SessionComplete({ totalCycles, sessionDuration, storageN
           </button>
           <button
             onClick={onMenu}
-            className="w-full py-2 text-white/28 text-xs tracking-[0.2em] uppercase font-light hover:text-white/50 transition-colors duration-300"
+            className="w-full py-3 rounded-2xl border border-white/15 text-white/38 text-xs tracking-[0.18em] uppercase font-light hover:border-white/28 hover:text-white/55 hover:bg-white/4 transition-all duration-300"
           >
             Back to Menu
           </button>

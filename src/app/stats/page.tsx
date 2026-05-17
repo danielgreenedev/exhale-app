@@ -39,15 +39,22 @@ export default function StatsPage() {
       />
 
       <div className="relative z-10 flex flex-col items-center gap-10 max-w-sm w-full">
-        <div className="flex flex-col items-center gap-2">
-          <h1 className="text-3xl font-extralight tracking-[0.4em] uppercase text-white/80">
-            Practice
-          </h1>
-          <p className="text-white/30 text-xs tracking-[0.15em] font-light">Your breathing history</p>
+        <div className="flex flex-col items-center gap-5">
+          <div className="relative orb-breathe" aria-hidden="true">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-300/60 to-emerald-600/40 shadow-[0_0_36px_rgba(110,231,183,0.20)]" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent" />
+            <div className="absolute inset-[-10px] rounded-full border border-emerald-400/20 shadow-[0_0_14px_rgba(110,231,183,0.10)]" />
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <h1 className="text-3xl font-extralight tracking-[0.3em] uppercase text-white/80">
+              Practice
+            </h1>
+            <p className="text-white/30 text-xs tracking-[0.15em] font-light">Your breathing history</p>
+          </div>
         </div>
 
         {!storageOk && (
-          <p className="text-white/25 text-xs font-light text-center leading-relaxed -mb-4">
+          <p className="text-amber-200/45 text-xs font-light text-center leading-relaxed -mb-4">
             Session history requires storage access to save.
           </p>
         )}
@@ -83,13 +90,13 @@ export default function StatsPage() {
               <p className="text-white/25 text-xs tracking-[0.15em] uppercase font-light">
                 Milestones
               </p>
-              <div className="flex gap-5">
+              <div className="grid grid-cols-4 gap-3">
                 {[25, 50, 75, 100].map((milestone) => {
                   const earned = totalSessions >= milestone;
                   return (
                     <div key={milestone} className="flex flex-col items-center gap-2">
                       <div
-                        className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-700"
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300"
                         style={{
                           background: earned ? 'rgba(52,211,153,0.12)' : 'rgba(255,255,255,0.03)',
                           border: earned ? '1px solid rgba(52,211,153,0.30)' : '1px solid rgba(255,255,255,0.07)',

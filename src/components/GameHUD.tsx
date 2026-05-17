@@ -75,7 +75,7 @@ export default function GameHUD({
           </h2>
 
           <p
-            className="text-white text-sm tracking-wide font-normal text-center"
+            className="text-white text-sm tracking-[0.12em] font-light text-center"
             style={{
               textShadow: '0 1px 10px rgba(0,0,0,0.85)',
               opacity: settled ? 0.28 : 0.78,
@@ -89,12 +89,11 @@ export default function GameHUD({
             className="text-6xl font-thin tabular-nums text-white/90 mt-1"
             style={{
               textShadow: '0 2px 20px rgba(0,0,0,0.9)',
-              opacity: settled ? 0 : 1,
+              opacity: settled ? 0.35 : 1,
               transition: 'opacity 4s ease',
             }}
             role="timer"
-            aria-hidden={settled ? 'true' : undefined}
-            aria-label={settled ? undefined : `${timeRemaining} seconds remaining`}
+            aria-label={`${timeRemaining} seconds remaining`}
           >
             {timeRemaining}
           </div>
@@ -102,7 +101,7 @@ export default function GameHUD({
       </div>
 
       {/* Bottom: session progress */}
-      <div className="pb-10 flex flex-col items-center gap-2">
+      <div className="pb-16 flex flex-col items-center gap-2">
         <div
           className="w-48 h-[2px] bg-white/15 rounded-full overflow-hidden"
           role="progressbar"
@@ -128,7 +127,7 @@ export default function GameHUD({
             ~{minutesLeft} min remaining
           </p>
         )}
-        <p className="text-white/38 text-xs tracking-[0.1em] font-light mt-1" aria-hidden="true">
+        <p className="hidden sm:block text-white/38 text-xs tracking-[0.1em] font-light mt-1" aria-hidden="true">
           space · pause &nbsp;·&nbsp; esc · exit
         </p>
       </div>

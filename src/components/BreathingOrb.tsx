@@ -20,7 +20,7 @@ interface Props {
   orbScale?: number;
 }
 
-const PARTICLE_COUNT = 60;
+const PARTICLE_COUNT = 38;
 const ORB_MIN_RADIUS = 60;
 const ORB_MAX_RADIUS = 140;
 
@@ -79,8 +79,8 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
       radius: 160 + Math.random() * 120,
       baseRadius: 160 + Math.random() * 120,
       size: 1.5 + Math.random() * 2.5,
-      speed: 0.0003 + Math.random() * 0.0004,
-      opacity: 0.15 + Math.random() * 0.45,
+      speed: 0.000005 + Math.random() * 0.000008,
+      opacity: 0.05 + Math.random() * 0.18,
       phase: Math.random() * Math.PI * 2,
     }));
   }, []);
@@ -244,13 +244,14 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
       particlesRef.current.forEach((p) => {
         p.angle += p.speed * dt;
         const breathFactor = 0.82 + 0.18 * animatedScale;
-        p.radius = p.baseRadius * breathFactor + Math.sin(now * 0.001 + p.phase) * 7;
+        p.radius = p.baseRadius * breathFactor;
         const px = cx + Math.cos(p.angle) * p.radius;
         const py = cy + Math.sin(p.angle) * p.radius;
-        const alpha = p.opacity * (0.45 + 0.55 * Math.sin(now * 0.0009 + p.phase));
+        const alpha = p.opacity * (0.675 + 0.325 * Math.sin(now * 0.00028 + p.phase));
+        const pulsedSize = p.size * (0.7 + 0.3 * Math.sin(now * 0.00019 + p.phase + 1.2));
         ctx.fillStyle = `hsla(${bh}, ${Math.min(bs + 18, 100)}%, ${Math.min(bl + 18, 96)}%, ${alpha})`;
         ctx.beginPath();
-        ctx.arc(px, py, p.size, 0, Math.PI * 2);
+        ctx.arc(px, py, Math.max(0.5, pulsedSize), 0, Math.PI * 2);
         ctx.fill();
       });
 

@@ -21,7 +21,10 @@ export function readStats(): StoredStats {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { sessions: [] };
-    return JSON.parse(raw) as StoredStats;
+    const parsed = JSON.parse(raw) as StoredStats;
+    // Guard against stored data that lost its shape
+    if (!Array.isArray(parsed?.sessions)) return { sessions: [] };
+    return parsed;
   } catch {
     return { sessions: [] };
   }
