@@ -10,7 +10,7 @@ import {
   getPhaseAtTime,
 } from '@/lib/breathing';
 
-export type SessionState = 'idle' | 'intro' | 'running' | 'complete';
+export type SessionState = 'idle' | 'intro' | 'running' | 'paused' | 'complete';
 
 export interface BreathingSessionState {
   sessionState: SessionState;
@@ -25,16 +25,16 @@ export interface BreathingSessionState {
   sessionDuration: number; // total session duration in seconds
 }
 
-export function useBreathingSession(sessionLength: SessionLength) {
+export function useBreathingSession(sessionLength: SessionLength, initialElapsed = 0) {
   const totalCycles = SESSION_CYCLES[sessionLength];
   const sessionDuration = totalCycles * CYCLE_DURATION;
 
   const [sessionState, setSessionState] = useState<SessionState>('idle');
-  const [elapsedTotal, setElapsedTotal] = useState(0);
+  const [elapsedTotal, setElapsedTotal] = useState(initialElapsed);
 
   const startTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
-  const pausedAtRef = useRef<number>(0);
+  const pausedAtRef = useRef<number>(initialElapsed);
 
   const tick = useCallback(() => {
     if (!startTimeRef.current) return;
@@ -56,6 +56,15 @@ export function useBreathingSession(sessionLength: SessionLength) {
     setSessionState('running');
     rafRef.current = requestAnimationFrame(tick);
   }, [tick]);
+
+  const pause = useCallback(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+    if (startTimeRef.current) {
+      pausedAtRef.current = (performance.now() - startTimeRef.current) / 1000;
+    }
+    setSessionState('paused');
+  }, []);
 
   const reset = useCallback(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -91,6 +100,7 @@ export function useBreathingSession(sessionLength: SessionLength) {
     elapsedTotal,
     sessionDuration,
     start,
+    pause,
     reset,
     totalPhasesCompleted: BREATHING_PATTERN.length * (cycleNumber - 1) + phaseIndex,
   };

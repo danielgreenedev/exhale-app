@@ -5,14 +5,12 @@ import { BreathingPhase } from '@/lib/breathing';
 
 export function useAudioEngine() {
   const ctxRef = useRef<AudioContext | null>(null);
-  const droneRef = useRef<OscillatorNode | null>(null);
-  const droneGainRef = useRef<GainNode | null>(null);
+  const masterGainRef = useRef<GainNode | null>(null);
+  const ambientNodesRef = useRef<AudioNode[]>([]);
   const enabledRef = useRef(false);
 
   const getCtx = useCallback(() => {
-    if (!ctxRef.current) {
-      ctxRef.current = new AudioContext();
-    }
+    if (!ctxRef.current) ctxRef.current = new AudioContext();
     return ctxRef.current;
   }, []);
 
@@ -20,70 +18,134 @@ export function useAudioEngine() {
     const ctx = getCtx();
     enabledRef.current = true;
 
-    // Low drone: two slightly detuned sine waves for warmth
-    const masterGain = ctx.createGain();
-    masterGain.gain.setValueAtTime(0, ctx.currentTime);
-    masterGain.gain.linearRampToValueAtTime(0.06, ctx.currentTime + 2);
-    masterGain.connect(ctx.destination);
-    droneGainRef.current = masterGain;
+    // Stop any previously running ambient nodes
+    ambientNodesRef.current.forEach((node) => {
+      try { (node as OscillatorNode | AudioBufferSourceNode).stop(); } catch { /* already stopped */ }
+    });
+    ambientNodesRef.current = [];
 
-    [174, 174.8].forEach((freq) => {
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0, ctx.currentTime);
+    master.gain.linearRampToValueAtTime(0.065, ctx.currentTime + 3);
+    master.connect(ctx.destination);
+    masterGainRef.current = master;
+
+    // Gentle breeze: band-pass filtered white noise
+    const bufSize = ctx.sampleRate * 4;
+    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = buf;
+    noise.loop = true;
+    ambientNodesRef.current.push(noise);
+
+    const bp1 = ctx.createBiquadFilter();
+    bp1.type = 'bandpass';
+    bp1.frequency.value = 260;
+    bp1.Q.value = 0.6;
+
+    const bp2 = ctx.createBiquadFilter();
+    bp2.type = 'bandpass';
+    bp2.frequency.value = 420;
+    bp2.Q.value = 0.5;
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.value = 0.22;
+
+    noise.connect(bp1);
+    bp1.connect(noiseGain);
+    noise.connect(bp2);
+    bp2.connect(noiseGain);
+    noiseGain.connect(master);
+    noise.start();
+
+    // Warm triangle chord: G3 + D4 + G4 (open, natural fifths)
+    const chordFreqs: [number, number, number][] = [
+      [196.0,  0.0,   1.0],   // G3, no detune, full weight
+      [293.66, 0.12,  0.55],  // D4, tiny detune
+      [392.0,  -0.08, 0.30],  // G4, tiny detune
+    ];
+
+    const chordGain = ctx.createGain();
+    chordGain.gain.value = 0.09;
+    chordGain.connect(master);
+
+    chordFreqs.forEach(([freq, detune, weight]) => {
       const osc = ctx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      osc.connect(masterGain);
+      osc.type = 'triangle';
+      osc.frequency.value = freq + detune;
+      const g = ctx.createGain();
+      g.gain.value = weight;
+      osc.connect(g);
+      g.connect(chordGain);
       osc.start();
-      // Store first one so we can stop later
-      if (freq === 174) droneRef.current = osc;
+      ambientNodesRef.current.push(osc);
     });
   }, [getCtx]);
 
   const stopAmbient = useCallback(() => {
     enabledRef.current = false;
-    if (droneGainRef.current) {
-      const ctx = getCtx();
-      droneGainRef.current.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.5);
+    if (masterGainRef.current && ctxRef.current) {
+      masterGainRef.current.gain.linearRampToValueAtTime(0, ctxRef.current.currentTime + 2.0);
     }
-  }, [getCtx]);
+  }, []);
 
-  // Plays a gentle tonal cue when the phase changes
+  const pauseAmbient = useCallback(() => {
+    if (masterGainRef.current && ctxRef.current) {
+      masterGainRef.current.gain.linearRampToValueAtTime(0, ctxRef.current.currentTime + 0.5);
+    }
+  }, []);
+
+  const resumeAmbient = useCallback(() => {
+    if (masterGainRef.current && ctxRef.current) {
+      masterGainRef.current.gain.linearRampToValueAtTime(0.065, ctxRef.current.currentTime + 1.2);
+    }
+  }, []);
+
+  // Gentle chime-like cue on each phase change
   const playCue = useCallback((phase: BreathingPhase) => {
     if (!enabledRef.current) return;
     const ctx = getCtx();
 
-    const freqMap: Record<BreathingPhase, number> = {
-      inhale: 528,
-      hold: 432,
-      exhale: 396,
-      rest: 285,
+    // Pentatonic notes — natural, consonant, non-clinical
+    const cueMap: Record<BreathingPhase, [number, number]> = {
+      inhale: [523.25, 783.99],  // C5 + G5 — light, open
+      hold:   [440.00, 659.25],  // A4 + E5 — warm, stable
+      exhale: [392.00, 587.33],  // G4 + D5 — soft, settling
+      rest:   [329.63, 493.88],  // E4 + B4 — quiet, grounded
     };
 
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.08);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
-    gain.connect(ctx.destination);
+    const [root, fifth] = cueMap[phase];
 
-    const osc = ctx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.value = freqMap[phase];
-    osc.connect(gain);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 1.3);
+    // Root note — triangle for warmth, soft bloom + gentle tail
+    const rootOsc = ctx.createOscillator();
+    rootOsc.type = 'triangle';
+    rootOsc.frequency.value = root;
+    const rootGain = ctx.createGain();
+    rootGain.gain.setValueAtTime(0, ctx.currentTime);
+    rootGain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.18);
+    rootGain.gain.setValueAtTime(0.055, ctx.currentTime + 0.5);
+    rootGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.0);
+    rootOsc.connect(rootGain);
+    rootGain.connect(ctx.destination);
+    rootOsc.start(ctx.currentTime);
+    rootOsc.stop(ctx.currentTime + 2.1);
 
-    // Add a soft harmonic overtone
-    const osc2 = ctx.createOscillator();
-    const gain2 = ctx.createGain();
-    gain2.gain.setValueAtTime(0, ctx.currentTime);
-    gain2.gain.linearRampToValueAtTime(0.04, ctx.currentTime + 0.08);
-    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.0);
-    gain2.connect(ctx.destination);
-    osc2.type = 'sine';
-    osc2.frequency.value = freqMap[phase] * 1.5;
-    osc2.connect(gain2);
-    osc2.start(ctx.currentTime);
-    osc2.stop(ctx.currentTime + 1.1);
+    // Fifth — softer, sits behind the root
+    const fifthOsc = ctx.createOscillator();
+    fifthOsc.type = 'triangle';
+    fifthOsc.frequency.value = fifth;
+    const fifthGain = ctx.createGain();
+    fifthGain.gain.setValueAtTime(0, ctx.currentTime);
+    fifthGain.gain.linearRampToValueAtTime(0.032, ctx.currentTime + 0.22);
+    fifthGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.6);
+    fifthOsc.connect(fifthGain);
+    fifthGain.connect(ctx.destination);
+    fifthOsc.start(ctx.currentTime);
+    fifthOsc.stop(ctx.currentTime + 1.7);
   }, [getCtx]);
 
-  return { startAmbient, stopAmbient, playCue };
+  return { startAmbient, stopAmbient, pauseAmbient, resumeAmbient, playCue };
 }

@@ -88,6 +88,7 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
     if (!canvas) return;
     const ctx = canvas.getContext('2d')!;
     let frameTime = performance.now();
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const resize = () => {
       const dpr = window.devicePixelRatio || 1;
@@ -114,13 +115,20 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
       ctx.clearRect(0, 0, w, h);
 
       // Background
-      ctx.fillStyle = '#05060f';
+      ctx.fillStyle = '#090c0a';
       ctx.fillRect(0, 0, w, h);
 
-      // Vignette
-      const vig = ctx.createRadialGradient(cx, cy, h * 0.15, cx, cy, h * 0.8);
+      // Warm forest glow — matches home screen
+      const forestGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.65);
+      forestGlow.addColorStop(0, 'hsla(145, 40%, 22%, 0.18)');
+      forestGlow.addColorStop(1, 'transparent');
+      ctx.fillStyle = forestGlow;
+      ctx.fillRect(0, 0, w, h);
+
+      // Soft vignette — keeps edges comfortable without a dark tunnel
+      const vig = ctx.createRadialGradient(cx, cy, h * 0.2, cx, cy, h * 0.9);
       vig.addColorStop(0, 'rgba(0,0,0,0)');
-      vig.addColorStop(1, 'rgba(0,0,0,0.6)');
+      vig.addColorStop(1, 'rgba(0,0,0,0.32)');
       ctx.fillStyle = vig;
       ctx.fillRect(0, 0, w, h);
 
@@ -134,10 +142,19 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
         easeInOutCubic(colorTRef.current)
       );
 
+      // Subtle phase-reactive background wash — ties the space to the orb color
+      const phaseBg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.5);
+      phaseBg.addColorStop(0, `hsla(${bh}, ${bs}%, ${Math.max(bl - 15, 8)}%, 0.07)`);
+      phaseBg.addColorStop(1, 'transparent');
+      ctx.fillStyle = phaseBg;
+      ctx.fillRect(0, 0, w, h);
+
       // Orb size — smoothly animated through phaseProgress
       // inhale: grow 0.45→1.0, exhale: shrink 1.0→0.45, hold/rest: maintain
       let animatedScale: number;
-      if (phase.phase === 'inhale') {
+      if (reducedMotion) {
+        animatedScale = phase.targetOrbScale;
+      } else if (phase.phase === 'inhale') {
         animatedScale = 0.45 + (1.0 - 0.45) * easeInOutCubic(pp);
       } else if (phase.phase === 'exhale') {
         animatedScale = 1.0 + (0.45 - 1.0) * easeInOutCubic(pp);
@@ -213,7 +230,11 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
         ctx.stroke();
       }
 
-      // Particles
+      // Particles (skipped when prefers-reduced-motion)
+      if (reducedMotion) {
+        rafRef.current = requestAnimationFrame(draw);
+        return;
+      }
       particlesRef.current.forEach((p) => {
         p.angle += p.speed * dt;
         const breathFactor = 0.82 + 0.18 * animatedScale;
