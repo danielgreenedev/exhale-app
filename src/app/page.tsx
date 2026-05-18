@@ -337,6 +337,22 @@ function HomeContent() {
         </button>
         </form>
 
+        {/* Resume button — only shown within 60s of exiting a session */}
+        {resumeData && (
+          <Link
+            href={`/game?length=${resumeData.length}&resume=${resumeData.elapsed.toFixed(1)}`}
+            aria-label={`Resume ${resumeData.length} session, ${formatDuration(Math.floor(resumeData.elapsed))} in`}
+            className="w-full py-4 px-6 rounded-2xl border border-still-white/18 text-still-white/60 hover:border-still-white/30 hover:text-still-white/78 transition-all duration-300 -mt-2 flex flex-col items-center gap-0.5"
+          >
+            <span className="text-sm tracking-[0.18em] uppercase font-light">
+              ↩ Resume {resumeData.length}
+            </span>
+            <span className="text-xs tracking-[0.1em] font-light text-still-white/58 normal-case">
+              {formatDuration(Math.floor(resumeData.elapsed))} in · from your last session
+            </span>
+          </Link>
+        )}
+
         <button
           type="button"
           onClick={() => setShowRhythmPreview((show) => !show)}
@@ -378,22 +394,6 @@ function HomeContent() {
               </div>
             ))}
           </section>
-        )}
-
-        {/* Resume button — only shown within 60s of exiting a session */}
-        {resumeData && (
-          <Link
-            href={`/game?length=${resumeData.length}&resume=${resumeData.elapsed.toFixed(1)}`}
-            aria-label={`Resume ${resumeData.length} session, ${formatDuration(Math.floor(resumeData.elapsed))} in`}
-            className="w-full py-4 px-6 rounded-2xl border border-still-white/18 text-still-white/60 hover:border-still-white/30 hover:text-still-white/78 transition-all duration-300 -mt-2 flex flex-col items-center gap-0.5"
-          >
-            <span className="text-sm tracking-[0.18em] uppercase font-light">
-              ↩ Resume {resumeData.length}
-            </span>
-            <span className="text-xs tracking-[0.1em] font-light text-still-white/58 normal-case">
-              {formatDuration(Math.floor(resumeData.elapsed))} in · from your last session
-            </span>
-          </Link>
         )}
 
         {/* Secondary controls — circle size and practice history together below the fold */}
