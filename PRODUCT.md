@@ -14,7 +14,7 @@ Design for the primary user. Don't break the experience for the secondary.
 
 ## Product Purpose
 
-Exhale is a guided breathing tool for learning paced breathing as an anxiety coping skill. It exists to make an anxiety-sensitive 4-4-6-4 breathing pattern accessible to anyone, regardless of prior experience or motivation.
+Exhale is a guided breathing tool for learning paced breathing as an anxiety coping skill. It exists to make an anxiety-sensitive 4-4-6-8 breathing pattern accessible to anyone, regardless of prior experience or motivation.
 
 Success: a first-time user completes a session without being confused, and returns voluntarily.
 
@@ -44,20 +44,6 @@ Emotional goal: the user should feel held, not guided. The orb teaches through m
 5. **Every screen feels like the same app.** The emerald orb mark anchors home and stats. Color, type, and spacing are consistent. The amber shift on session complete is the only intentional deviation.
 6. **Sync is optional.** Email sync exists only inside Practice History, only after the user chooses it, and only to carry history and preferences between devices. It includes practice history, timer length, Circle Size, and sound choice. It must never appear before a first session or become a condition for breathing.
 
-## Real User Feedback
-
-Recent hands-on browser feedback exposed where the product promise breaks down fastest:
-
-- If a selector looks clickable but does not change state, the user reads the app as stuck. Session length and Circle Size controls must use robust form semantics, clear selected states, and full hit areas around both text and icon targets.
-- If Begin leads to a blank or static screen, trust is lost immediately. The game route must always render a visible first state: the settle prompt, the orb canvas, and then the live breathing phases.
-- If the breathing page appears stuck on Inhale, the guide has failed its core job. The phase label, countdown, orb scale, sound cue, color wash, and progress rings must all advance from the same session state.
-- If the orb is missing, the product is missing. The orb, background motion, and audio affordance are not decorative extras; they are the primary teaching surface.
-- Alignment issues on secondary controls still matter because they signal care. Practice History and other optional actions should feel centered, calm, and intentionally secondary.
-- Background sound should support regulation without demanding taste or attention. Keep sound optional, synthesized, and easy to turn off; palettes should feel like environments, not songs.
-- Cross-device history needs its own sign-in step. Email links are single-use and fragile across devices, so the product uses 6-digit email codes for optional sync.
-
-Design implication: future audits should prioritize task completion and state reliability before visual nuance. Exhale can be quiet, but it can never look inert, broken, or ambiguous.
-
 ## Emotional Arc
 
 Each screen has a deliberate emotional register. New screens or features must fit within this arc or extend it intentionally:
@@ -86,7 +72,7 @@ These are decisions made and should not be revisited without strong cause:
 - Deployment source: GitHub `master`.
 - Preview branch: GitHub `preview`, deployed by Vercel as a pre-production branch.
 - Public domain: `https://exhale.guide`.
-- Optional sync depends on Supabase email OTP codes. The email template should visibly include the 6-digit token.
+- Optional sync depends on Supabase email OTP codes. The Magic Link and Change Email Address templates should visibly include `{{ .Token }}` instead of link-only copy.
 
 ## Accessibility & Inclusion
 

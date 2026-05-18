@@ -13,13 +13,13 @@ export const SOUND_PALETTES = [
   },
   {
     id: 'low',
-    label: 'Low',
-    ariaLabel: 'Low Ember, darker and more grounded',
+    label: 'Deep',
+    ariaLabel: 'Deep Ember, darker and more grounded',
   },
   {
     id: 'quiet',
-    label: 'Quiet',
-    ariaLabel: 'Quiet Room, nearly silent with very soft cues',
+    label: 'Still',
+    ariaLabel: 'Still Room, very quiet breath tone with very soft cues',
   },
   {
     id: 'off',

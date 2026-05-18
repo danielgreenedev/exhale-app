@@ -11,6 +11,7 @@ interface Props {
   sessionProgress: number;
   audioActive: boolean;
   audioPrompt?: boolean;
+  centerHidden?: boolean;
   onToggleAudio?: () => void;
 }
 
@@ -22,6 +23,7 @@ export default function GameHUD({
   sessionProgress,
   audioActive,
   audioPrompt = false,
+  centerHidden = false,
   onToggleAudio,
 }: Props) {
   const minutesLeft = Math.ceil(((totalCycles - cycleNumber + 1) * CYCLE_DURATION) / 60);
@@ -90,7 +92,8 @@ export default function GameHUD({
       </div>
 
       {/* Center: phase label + instruction + countdown — float in space, no backdrop */}
-      <div className="flex flex-col items-center gap-0 translate-y-[clamp(50px,13vh,110px)] landscape:translate-y-[clamp(30px,7vh,60px)]">
+      {!centerHidden && (
+        <div className="flex flex-col items-center gap-0 translate-y-[clamp(50px,13vh,110px)] landscape:translate-y-[clamp(30px,7vh,60px)]">
         <div className="flex flex-col items-center gap-3 px-10">
           <div className="relative h-10 min-w-64 flex items-center justify-center">
             {previousPhase && (
@@ -159,7 +162,8 @@ export default function GameHUD({
             {timeRemaining}
           </div>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Bottom: session progress */}
       <div className="pb-16 flex flex-col items-center gap-2">
@@ -172,9 +176,9 @@ export default function GameHUD({
           aria-label="Session progress"
         >
           <div
-            className="h-full rounded-full transition-all duration-300"
+            className="h-full w-full origin-left rounded-full transition-transform duration-300"
             style={{
-              width: `${sessionProgress * 100}%`,
+              transform: `scaleX(${sessionProgress})`,
               backgroundColor: currentPhase.color,
               opacity: 0.7,
             }}

@@ -60,13 +60,13 @@ spacing:
   xl: "24px"
 components:
   button-begin:
-    backgroundColor: "rgba(6,78,59,0.15)"
-    textColor: "rgba(167,243,208,0.90)"
+    backgroundColor: "#34d399"
+    textColor: "#090c0a"
     rounded: "{rounded.card}"
     padding: "20px 24px"
   button-begin-hover:
-    backgroundColor: "rgba(6,78,59,0.26)"
-    textColor: "rgba(236,253,245,1)"
+    backgroundColor: "#a7f3d0"
+    textColor: "#090c0a"
     rounded: "{rounded.card}"
     padding: "20px 24px"
   button-ghost:
@@ -121,17 +121,6 @@ This system explicitly rejects the language of productivity apps (progress bars 
 - Motion that follows breath rhythm; nothing decorates for its own sake
 - Flat surfaces, no shadows — depth via glow and opacity, never elevation
 - Session controls in the thumb zone (bottom corners); the top screen belongs to passive status
-
-### Field Feedback Guardrails
-
-These guardrails come from direct browser feedback and should shape future impeccable audits:
-
-- The first visible game state must never be blank. On session start, show the centered "Settle in" prompt with "breathe normally", then transition into the live guide.
-- The session guide must visibly advance through Inhale, Hold, Exhale, and Rest. Phase text, timer, orb scale, background wash, HUD progress, audio cues, and canvas rings should read as one synchronized system.
-- The orb is the core interface. The canvas must render an orb, a soft phase-reactive background, and an outer off-white guide ring with phase-colored progress before any HUD detail is considered polished.
-- Phase transitions should feel continuous rather than reset. Blend phase color over about 1.1 seconds, crossfade labels, fade the outgoing arc as the new one begins, soften Rest into Inhale with a brief growth delay, and reduce instruction opacity after the first cycle.
-- Native interaction semantics matter more than custom cleverness. Duration and Circle Size controls should remain keyboard-accessible radio controls with generous label hit areas and unmistakable checked states.
-- Secondary navigation still needs precision. Ghost buttons such as Practice History should center their label optically and geometrically, even when they are intentionally quiet.
 
 ## 2. Colors: The Still Water Palette
 
@@ -200,9 +189,9 @@ Dialog overlays (exit guard) use `background: rgba(0,0,0,0.65)` — a neutral da
 Soft and inviting — generous rounded corners (16px / `rounded-2xl`), borders that barely register, tinted backgrounds that confirm selection without demanding it. Low stakes, approachable for a user who has never tapped a wellness app before.
 
 - **Shape:** Generously curved (16px radius). Game controls use a tighter curve (8px / `rounded-lg`).
-- **Begin (Primary):** Emerald-tinted border (`emerald-400` at 32% opacity) with an emerald-tinted background (15% opacity). Text at `emerald-200` 90%. On hover: background lifts to 26%, border to 55%, text brightens. Tracks a 300ms ease-all transition.
+- **Begin (Primary):** Solid Emerald Pulse fill with Forest Night text. It is the only filled action on the home screen, so the start path is unmistakable even when the user is stressed or in low light. On hover, the fill warms slightly to emerald-200. Tracks a 300ms ease-all transition.
 - **Ghost (Secondary):** White border at 15–18% opacity, no background fill, text at 38–45% white. On hover: background tints to white at 4%, border to 28–32%, text to 55–65%. Used for "Practice history", "← Back", "Back to Menu", secondary navigation.
-- **Session Picker Options:** Ghost by default; selected state adds an `emerald-400` background at 10% and border at 45%. Full-width, left-aligned label with right-aligned breath count. Arrow key navigation via `role="radiogroup"`.
+- **Session Picker Options:** Ghost by default; selected state uses an emerald border, a 10% emerald tint, and green-lit text so it reads as active without competing with the solid Begin button. Arrow key navigation via `role="radiogroup"`.
 - **Game Controls (Pause/Exit):** 8px radius, white border at 18%, transparent background. Compact padding (6px 12px). Positioned at the bottom corners of the session canvas for thumb-zone access. Do not use at the top of the screen.
 
 ### The Breathing Orb (Signature Component)
@@ -214,6 +203,10 @@ The brand mark and the product itself. Three contexts:
 - **Complete (large, 96px):** Amber gradient (amber-300 at 75% to amber-600 at 50%), white highlight overlay, one outer ring (`inset -14px`, amber border at 20% opacity with amber glow). No breathe animation — the session is over.
 - **Session canvas:** Full canvas, rendered via `<canvas>`. Scales between 60–140px base radius (Circle Size preference S/M/L). Phase colors shift the entire orb and its multi-layer glow on every breath phase change.
 
+### Breathing Rhythm
+
+The core rhythm is 4-4-6-8: Inhale 4 seconds, Hold 4 seconds, Exhale 6 seconds, Rest 8 seconds. Rest is intentionally long enough to allow a normal catch-up breath, a yawn, or a soft reset before the next inhale. The pre-session Settle In state lasts 8 seconds and is skipped when resuming a session.
+
 ### Progress Indicators
 
 - **Phase ring:** Drawn on canvas around the orb — arc from `-π/2` sweeping with phase progress. Phase color at 80% opacity.
@@ -222,9 +215,13 @@ The brand mark and the product itself. Three contexts:
 
 ### Sound Palettes
 
-Sound is optional and synthesized only. The home screen exposes five radio choices: Air, Warm, Low, Quiet, and Off. Air is the default and should stay closest to silence: filtered air, a low grounding tone, and a sparse open pad. Warm can add more body. Low shifts the bed darker and lower. Quiet removes almost all tonality. Off must always be visible and respected during phase cues.
+Sound is optional and synthesized only. The home screen exposes four texture choices: Air, Warm, Deep, and Still. Air is the default and should stay closest to silence: filtered air, a low grounding tone, and a sparse open pad. Warm can add more body. Deep shifts the bed darker and lower. Still removes almost all tonality but remains audible as a very quiet breath tone. Off is separated as a mute icon beside the section label so users do not read it as another sound texture.
 
-The palette control belongs with Circle Size below the primary Begin flow. The selected option uses the same quiet emerald state as other radio controls. A compact Listen button previews the selected palette, but never becomes a required step before Begin.
+The palette control belongs with Circle Size below the primary Begin flow. Sound textures use the same quiet emerald selected state as other radio controls. Selecting Air, Warm, Deep, or Still plays a brief soft preview, shows a small selected-tile preview indicator, announces the preview to screen readers, then fades out. Selecting Off stops sound immediately. No sound plays on page load from a saved setting.
+
+### Circle Size
+
+Circle Size uses compact S/M/L radio controls. The active size uses the same emerald border, faint tint, and green-lit label as Time and Sound selections, so all home-screen preferences share one checked-state language while Begin stays the only solid green control.
 
 ### Stats Rows
 

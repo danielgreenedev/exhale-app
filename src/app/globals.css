@@ -62,12 +62,12 @@
 }
 
 .exhale-settle-title {
-  animation: exhaleSettleTitle 5.8s ease forwards;
+  animation: exhaleSettleTitle 7.8s ease forwards;
   opacity: 0;
 }
 
 .exhale-settle-subtitle {
-  animation: exhaleSettleSubtitle 5.8s ease forwards;
+  animation: exhaleSettleSubtitle 7.8s ease forwards;
   opacity: 0;
 }
 
@@ -86,7 +86,7 @@
 }
 
 .exhale-settle-hint {
-  animation: exhaleSettleHint 5.8s ease forwards;
+  animation: exhaleSettleHint 7.8s ease forwards;
   opacity: 0;
 }
 

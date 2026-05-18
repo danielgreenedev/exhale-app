@@ -9,8 +9,8 @@ import { useBreathingSession } from '@/hooks/useBreathingSession';
 import { useAudioEngine } from '@/hooks/useAudioEngine';
 import { useSessionStats } from '@/hooks/useSessionStats';
 import { SessionLength, BREATHING_PATTERN } from '@/lib/breathing';
-import { supabase } from '@/lib/supabase';
 import { useUserId } from '@/lib/auth';
+import { logAppEvent } from '@/lib/appEvents';
 import {
   DEFAULT_SOUND_PALETTE,
   isSoundPaletteId,
@@ -19,6 +19,7 @@ import {
 } from '@/lib/sound';
 
 const RESUME_KEY = 'exhale-resume';
+const SETTLE_DURATION_MS = 8000;
 
 function saveResumeState(length: SessionLength, elapsed: number) {
   try {
@@ -90,6 +91,8 @@ function GameContent() {
   const prevPhaseIndexRef = useRef(-1);
   const audioStartedRef = useRef(false);
   const sessionSavedRef = useRef(false);
+  const sessionStartedEventRef = useRef(false);
+  const settleTimerRef = useRef<number | null>(null);
   const exitGuardRef = useRef<HTMLDivElement>(null);
   const exitGuardResumeRef = useRef<HTMLButtonElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
@@ -140,6 +143,34 @@ function GameContent() {
     }
   };
 
+  const clearSettleTimer = useCallback(() => {
+    if (settleTimerRef.current === null) return;
+
+    window.clearTimeout(settleTimerRef.current);
+    settleTimerRef.current = null;
+  }, []);
+
+  const startGuidedSession = useCallback(() => {
+    clearSettleTimer();
+    setSettling(false);
+    start();
+  }, [clearSettleTimer, start]);
+
+  const scheduleGuidedStart = useCallback(() => {
+    clearSettleTimer();
+    settleTimerRef.current = window.setTimeout(startGuidedSession, SETTLE_DURATION_MS);
+  }, [clearSettleTimer, startGuidedSession]);
+
+  const handleExitGuardResume = useCallback(() => {
+    setShowExitGuard(false);
+    if (settling) {
+      scheduleGuidedStart();
+    } else if (sessionState === 'paused') {
+      start();
+      resumeAmbient();
+    }
+  }, [settling, scheduleGuidedStart, sessionState, start, resumeAmbient]);
+
   // Clear stale resume state on mount
   useEffect(() => {
     clearResumeState();
@@ -149,12 +180,13 @@ function GameContent() {
   useEffect(() => {
     if (initialElapsed > 0) {
       // Resuming — start immediately, no settle
+      setSettling(false);
       start();
       return;
     }
-    const end = window.setTimeout(() => { setSettling(false); start(); }, 6000);
-    return () => window.clearTimeout(end);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    scheduleGuidedStart();
+    return clearSettleTimer;
+  }, [clearSettleTimer, initialElapsed, scheduleGuidedStart, start]);
 
   // Start audio on first user interaction (autoplay policy)
   useEffect(() => {
@@ -182,6 +214,22 @@ function GameContent() {
     }
   }, [phaseIndex, sessionState, playCue]);
 
+  // Record a start only once the guided rhythm begins, not during the settle-in screen.
+  useEffect(() => {
+    if (sessionState !== 'running' || sessionStartedEventRef.current) return;
+
+    sessionStartedEventRef.current = true;
+    logAppEvent(userId, 'session_started', {
+      length: lengthParam,
+      duration: sessionDuration,
+      cycles: totalCycles,
+      resumed: initialElapsed > 0,
+      initial_elapsed: Math.round(initialElapsed),
+      sound: soundPalette,
+      orb_scale: orbScale,
+    });
+  }, [sessionState, userId, lengthParam, sessionDuration, totalCycles, initialElapsed, soundPalette, orbScale]);
+
   // Save session and stop audio on complete
   useEffect(() => {
     if (sessionState === 'complete' && !sessionSavedRef.current) {
@@ -196,15 +244,11 @@ function GameContent() {
         length: lengthParam,
       });
       if (!saved) setSessionSaveError(true);
-      if (userId) {
-        supabase.from('app_events').insert({
-          user_id: userId,
-          event: 'session_complete',
-          properties: { duration: sessionDuration, cycles: totalCycles, length: lengthParam },
-        }).then(({ error }) => {
-          if (error) console.error('[supabase] app_events insert failed:', error);
-        });
-      }
+      logAppEvent(userId, 'session_complete', {
+        duration: sessionDuration,
+        cycles: totalCycles,
+        length: lengthParam,
+      });
     }
   }, [sessionState, stopAmbient, saveSession, sessionDuration, totalCycles, lengthParam, userId]);
 
@@ -224,21 +268,21 @@ function GameContent() {
       if (e.code === 'KeyF' && fullscreenSupported) {
         toggleFullscreen();
       }
-      if (e.code === 'Escape' && sessionState !== 'complete' && !settling) {
+      if (e.code === 'Escape' && sessionState !== 'complete') {
         // Let the browser handle fullscreen exit; don't also show exit guard
         if (document.fullscreenElement) return;
         if (showExitGuard) {
-          setShowExitGuard(false);
-          if (sessionState === 'paused') { start(); resumeAmbient(); }
+          handleExitGuardResume();
           return;
         }
+        if (settling) { clearSettleTimer(); setShowExitGuard(true); return; }
         if (sessionState === 'running') { pause(); pauseAmbient(); }
         setShowExitGuard(true);
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [sessionState, settling, pause, start, pauseAmbient, resumeAmbient, fullscreenSupported, showExitGuard]);
+  }, [sessionState, settling, pause, start, pauseAmbient, resumeAmbient, fullscreenSupported, showExitGuard, clearSettleTimer, handleExitGuardResume]);
 
   useEffect(() => {
     if (!showExitGuard) return;
@@ -274,8 +318,29 @@ function GameContent() {
   }, [showExitGuard]);
 
   const doExit = () => {
-    if (sessionState === 'running' || sessionState === 'paused') {
+    if (settling) {
+      clearSettleTimer();
+      logAppEvent(userId, 'session_exited', {
+        length: lengthParam,
+        elapsed: 0,
+        duration: sessionDuration,
+        cycles: totalCycles,
+        phase: 'settle',
+        started: false,
+        resumed: false,
+      });
+    } else if (sessionState === 'running' || sessionState === 'paused') {
+      const elapsed = Math.round(elapsedRef.current);
       saveResumeState(lengthParam, elapsedRef.current);
+      logAppEvent(userId, 'session_exited', {
+        length: lengthParam,
+        elapsed,
+        duration: sessionDuration,
+        cycles: totalCycles,
+        cycle_number: cycleNumber,
+        phase: currentPhase.phase,
+        resumed: initialElapsed > 0,
+      });
     }
     stopAmbient();
     setAudioActive(false);
@@ -293,6 +358,11 @@ function GameContent() {
   };
 
   const requestExit = () => {
+    if (settling) {
+      clearSettleTimer();
+      setShowExitGuard(true);
+      return;
+    }
     if (sessionState === 'running') {
       pause();
       pauseAmbient();
@@ -334,6 +404,7 @@ function GameContent() {
           sessionProgress={sessionProgress}
           audioActive={audioActive}
           audioPrompt={showAudioPrompt}
+          centerHidden={sessionState === 'paused'}
           onToggleAudio={soundPalette !== 'off' ? toggleAudio : undefined}
         />
       )}
@@ -376,10 +447,10 @@ function GameContent() {
       )}
 
       {/* Exit button — bottom right */}
-      {!settling && (
+      {!showExitGuard && (settling || sessionState === 'running' || sessionState === 'paused') && (
         <button
           onClick={requestExit}
-          className="absolute bottom-6 right-6 min-h-11 min-w-20 text-still-white/62 hover:text-still-white/82 text-xs tracking-[0.2em] uppercase font-light border border-still-white/22 hover:border-still-white/38 hover:bg-still-white/5 px-4 py-2 rounded-lg transition-all duration-300"
+          className={`absolute bottom-6 right-6 min-h-11 min-w-20 text-xs tracking-[0.2em] uppercase font-light border px-4 py-2 rounded-lg transition-all duration-300 ${settling ? 'text-still-white/48 hover:text-still-white/72 border-still-white/16 hover:border-still-white/30 hover:bg-still-white/5' : 'text-still-white/62 hover:text-still-white/82 border-still-white/22 hover:border-still-white/38 hover:bg-still-white/5'}`}
           aria-label="Exit session"
         >
           ← Exit
@@ -439,7 +510,7 @@ function GameContent() {
       {showExitGuard && (
         <div
           className="absolute inset-0 flex items-center justify-center bg-forest-night/85 z-20"
-          onClick={() => { setShowExitGuard(false); if (sessionState === 'paused') { start(); resumeAmbient(); } }}
+          onClick={handleExitGuardResume}
         >
           <div
             ref={exitGuardRef}
@@ -463,13 +534,13 @@ function GameContent() {
                 className="text-still-white/62 text-xs tracking-[0.1em] font-light"
                 style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
               >
-                Your progress is saved for 60 seconds.
+                {settling ? 'You can come back whenever you are ready.' : 'Your progress is saved for 60 seconds.'}
               </p>
             </div>
             <div className="flex flex-col gap-3 w-52">
               <button
                 ref={exitGuardResumeRef}
-                onClick={() => { setShowExitGuard(false); if (sessionState === 'paused') { start(); resumeAmbient(); } }}
+                onClick={handleExitGuardResume}
                 className="w-full min-h-11 py-4 rounded-2xl border border-emerald-pulse/45 bg-emerald-pulse/10 text-emerald-100/95 text-sm tracking-[0.22em] uppercase font-light hover:bg-emerald-pulse/18 hover:border-emerald-pulse/65 transition-all duration-300"
               >
                 Resume

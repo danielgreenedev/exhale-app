@@ -44,7 +44,10 @@ Supabase stores:
 - `breathing_sessions`: practice history.
 - `user_settings`: timer length, Circle Size, and sound choice.
 
-The Supabase email template for sync should visibly include the 6-digit OTP token.
+The Supabase email templates for sync should visibly include the 6-digit OTP token:
+
+- Magic Link: include `{{ .Token }}` instead of a sign-in link.
+- Change Email Address: include `{{ .Token }}` instead of a confirmation link.
 
 ## Do Not Commit
 

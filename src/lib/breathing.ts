@@ -43,22 +43,22 @@ export const BREATHING_PATTERN: PhaseConfig[] = [
   },
   {
     phase: 'rest',
-    duration: 4,
+    duration: 8,
     label: 'Rest',
-    instruction: 'Rest naturally before the next breath',
+    instruction: 'Rest naturally, then return when ready',
     targetOrbScale: 0.45,
     color: PHASE_COLORS.rest.color,
     glowColor: PHASE_COLORS.rest.glowColor,
   },
 ];
 
-export const CYCLE_DURATION = BREATHING_PATTERN.reduce((acc, p) => acc + p.duration, 0); // 18s
+export const CYCLE_DURATION = BREATHING_PATTERN.reduce((acc, p) => acc + p.duration, 0); // 22s
 
 export const SESSION_CYCLES: Record<SessionLength, number> = {
-  quick: 10,   // 3m
-  short: 17,   // ~5m 6s
-  medium: 23,  // ~6m 54s
-  long: 33,    // ~9m 54s
+  quick: 8,    // ~2m 56s
+  short: 14,   // ~5m 8s
+  medium: 19,  // ~6m 58s
+  long: 27,    // ~9m 54s
 };
 
 export function getPhaseAtTime(elapsedInCycle: number): { config: PhaseConfig; timeInPhase: number; phaseIndex: number } {

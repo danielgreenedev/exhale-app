@@ -14,7 +14,7 @@ describe('BREATHING_PATTERN', () => {
   it('totals to CYCLE_DURATION', () => {
     const total = BREATHING_PATTERN.reduce((acc, p) => acc + p.duration, 0);
     expect(total).toBe(CYCLE_DURATION);
-    expect(CYCLE_DURATION).toBe(18);
+    expect(CYCLE_DURATION).toBe(22);
   });
 });
 
@@ -65,14 +65,14 @@ describe('getPhaseAtTime', () => {
     expect(phaseIndex).toBe(3);
   });
 
-  it('returns rest mid-phase at t=16', () => {
-    const { config, timeInPhase } = getPhaseAtTime(16);
+  it('returns rest mid-phase at t=18', () => {
+    const { config, timeInPhase } = getPhaseAtTime(18);
     expect(config.phase).toBe('rest');
-    expect(timeInPhase).toBe(2);
+    expect(timeInPhase).toBe(4);
   });
 
-  it('clamps at cycle end — returns last phase at t=18', () => {
-    const { config, phaseIndex } = getPhaseAtTime(18);
+  it('clamps at cycle end and returns last phase at t=22', () => {
+    const { config, phaseIndex } = getPhaseAtTime(22);
     expect(config.phase).toBe('rest');
     expect(phaseIndex).toBe(3);
   });

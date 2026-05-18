@@ -1,9 +1,8 @@
 import { renderHook, act } from '@testing-library/react';
 import { useBreathingSession } from '@/hooks/useBreathingSession';
 
-// --- Mock setup ---
 // jsdom's RAF schedules callbacks but never fires them synchronously.
-// We replace it (and performance.now) so tests can drive time explicitly.
+// Replace it, and performance.now, so tests can drive time explicitly.
 
 let mockTime = 0;
 const rafQueue: FrameRequestCallback[] = [];
@@ -29,11 +28,6 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-/**
- * Advance fake time by `ms` milliseconds.
- * Fires all pending RAF callbacks once, then wraps in act() so React
- * flushes the resulting state updates.
- */
 function advance(ms: number) {
   mockTime += ms;
   act(() => {
@@ -42,19 +36,17 @@ function advance(ms: number) {
   });
 }
 
-// ---------------------------------------------------------------------------
-
-describe('useBreathingSession — initial state', () => {
+describe('useBreathingSession - initial state', () => {
   it('starts in idle state', () => {
     const { result } = renderHook(() => useBreathingSession('short'));
     expect(result.current.sessionState).toBe('idle');
   });
 
   it('exposes the correct totalCycles for each session length', () => {
-    expect(renderHook(() => useBreathingSession('quick')).result.current.totalCycles).toBe(10);
-    expect(renderHook(() => useBreathingSession('short')).result.current.totalCycles).toBe(17);
-    expect(renderHook(() => useBreathingSession('medium')).result.current.totalCycles).toBe(23);
-    expect(renderHook(() => useBreathingSession('long')).result.current.totalCycles).toBe(33);
+    expect(renderHook(() => useBreathingSession('quick')).result.current.totalCycles).toBe(8);
+    expect(renderHook(() => useBreathingSession('short')).result.current.totalCycles).toBe(14);
+    expect(renderHook(() => useBreathingSession('medium')).result.current.totalCycles).toBe(19);
+    expect(renderHook(() => useBreathingSession('long')).result.current.totalCycles).toBe(27);
   });
 
   it('starts at cycle 1', () => {
@@ -68,7 +60,7 @@ describe('useBreathingSession — initial state', () => {
   });
 });
 
-describe('useBreathingSession — start / pause / resume', () => {
+describe('useBreathingSession - start / pause / resume', () => {
   it('transitions to running when start() is called', () => {
     const { result } = renderHook(() => useBreathingSession('short'));
     act(() => { result.current.start(); });
@@ -85,22 +77,21 @@ describe('useBreathingSession — start / pause / resume', () => {
   it('resumes from the same elapsed position after pause/resume', () => {
     const { result } = renderHook(() => useBreathingSession('short'));
     act(() => { result.current.start(); });
-    advance(2000); // 2 s into inhale
+    advance(2000);
 
     const elapsedBeforePause = result.current.elapsedTotal;
     act(() => { result.current.pause(); });
 
-    // Time advances on the clock but no RAF fires — elapsed should stay frozen
     mockTime += 5000;
     expect(result.current.elapsedTotal).toBeCloseTo(elapsedBeforePause, 1);
 
-    act(() => { result.current.start(); }); // resume
+    act(() => { result.current.start(); });
     advance(1000);
     expect(result.current.elapsedTotal).toBeGreaterThan(elapsedBeforePause);
   });
 });
 
-describe('useBreathingSession — reset', () => {
+describe('useBreathingSession - reset', () => {
   it('resets back to idle with zero elapsed', () => {
     const { result } = renderHook(() => useBreathingSession('short'));
     act(() => { result.current.start(); });
@@ -112,39 +103,39 @@ describe('useBreathingSession — reset', () => {
   });
 });
 
-describe('useBreathingSession — phase progression', () => {
-  it('is in inhale phase during t=0–4s', () => {
+describe('useBreathingSession - phase progression', () => {
+  it('is in inhale phase during t=0-4s', () => {
     const { result } = renderHook(() => useBreathingSession('short'));
     act(() => { result.current.start(); });
     advance(2000);
     expect(result.current.currentPhase.phase).toBe('inhale');
   });
 
-  it('is in hold phase during t=4–8s', () => {
+  it('is in hold phase during t=4-8s', () => {
     const { result } = renderHook(() => useBreathingSession('short'));
     act(() => { result.current.start(); });
     advance(5000);
     expect(result.current.currentPhase.phase).toBe('hold');
   });
 
-  it('is in exhale phase during t=8–14s', () => {
+  it('is in exhale phase during t=8-14s', () => {
     const { result } = renderHook(() => useBreathingSession('short'));
     act(() => { result.current.start(); });
     advance(10000);
     expect(result.current.currentPhase.phase).toBe('exhale');
   });
 
-  it('is in rest phase during t=14–18s', () => {
+  it('is in rest phase during t=14-22s', () => {
     const { result } = renderHook(() => useBreathingSession('short'));
     act(() => { result.current.start(); });
-    advance(15000);
+    advance(18000);
     expect(result.current.currentPhase.phase).toBe('rest');
   });
 
-  it('wraps back to inhale at the start of the second cycle (t≈18s)', () => {
+  it('wraps back to inhale at the start of the second cycle around t=22s', () => {
     const { result } = renderHook(() => useBreathingSession('short'));
     act(() => { result.current.start(); });
-    advance(18500);
+    advance(22500);
     expect(result.current.currentPhase.phase).toBe('inhale');
     expect(result.current.cycleNumber).toBe(2);
   });
@@ -152,17 +143,16 @@ describe('useBreathingSession — phase progression', () => {
   it('timeRemaining counts down within a phase', () => {
     const { result } = renderHook(() => useBreathingSession('short'));
     act(() => { result.current.start(); });
-    advance(1000); // 1 s into inhale (4 s phase)
+    advance(1000);
     expect(result.current.timeRemaining).toBeLessThanOrEqual(4);
     expect(result.current.timeRemaining).toBeGreaterThan(0);
   });
 });
 
-describe('useBreathingSession — session completion', () => {
+describe('useBreathingSession - session completion', () => {
   it('completes after all cycles elapse', () => {
-    const { result } = renderHook(() => useBreathingSession('quick')); // 10 × 18s = 180s
+    const { result } = renderHook(() => useBreathingSession('quick')); // 8 x 22s = 176s
     act(() => { result.current.start(); });
-    // Fire enough ticks to exceed sessionDuration
     for (let t = 0; t <= 181_000; t += 1000) advance(1000);
     expect(result.current.sessionState).toBe('complete');
   });
@@ -175,9 +165,8 @@ describe('useBreathingSession — session completion', () => {
   });
 });
 
-describe('useBreathingSession — resume from initialElapsed', () => {
+describe('useBreathingSession - resume from initialElapsed', () => {
   it('starts mid-session when initialElapsed is provided', () => {
-    // 9 s in = mid-exhale (exhale starts at 8 s)
     const { result } = renderHook(() => useBreathingSession('short', 9));
     expect(result.current.currentPhase.phase).toBe('exhale');
   });

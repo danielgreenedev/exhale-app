@@ -14,9 +14,9 @@ This means: no sign-up, no accounts, no onboarding gates, no streaks that guilt,
 
 ## Core Mechanic
 
-4-4-6-4 breathing pattern (inhale 4s → hold 4s → exhale 6s → rest 4s = 18s/cycle). Fully guided — no user input needed during a session. Session lengths: quick (~3m), short (~5m), medium (~7m), long (~10m).
+4-4-6-8 breathing pattern (inhale 4s, hold 4s, exhale 6s, rest 8s = 22s/cycle). Fully guided, with no user input needed during a session. Session lengths: quick (~3m), short (~5m), medium (~7m), long (~10m).
 
-The rest phase was extended from 2s to 4s based on direct user feedback (see below). The original 2s rest caused momentary anxiety in a user with anxiety and bipolar disorder — there wasn't enough time to complete a natural breath before the next inhale began, and the countdown felt rushed rather than restorative. 4s gives the body time to actually rest.
+The rest phase is intentionally long enough to allow a normal breath, yawn, or soft reset before the next inhale.
 
 ## Stack
 
@@ -66,7 +66,7 @@ Do not reuse these keys for new features:
 |-----|---------|---------|
 | `exhale-stats` | localStorage | Session records array |
 | `exhale-orb-scale` | localStorage | Circle size preference (0.75 / 1.0 / 1.25) |
-| `exhale-sound-palette` | localStorage | Sound palette preference (air / warm / low / quiet / off) |
+| `exhale-sound-palette` | localStorage | Sound palette preference (air / warm / deep / still / off) |
 | `exhale-visited` | localStorage | First-visit flag (cleared = first visit) |
 | `exhale-resume` | sessionStorage | In-progress session state, 60s TTL |
 
@@ -76,7 +76,7 @@ These are intentional — don't undo them without understanding the rationale:
 
 - **No user input during a session** — fully guided, not hold-to-breathe. Reduces intimidation for first-timers who don't know when to inhale.
 - **Abstract orb** — chosen over thematic visuals (ocean, lantern, mandala). More universal, less culturally loaded, works for any user.
-- **6s settle-in before first breath** — extended from 3.5s based on user feedback: 3.5s wasn't enough time for a grounding first breath before the guided pattern began. The settle-in is the user's moment to transition from "reading the screen" to "being in the session."
+- **8s settle-in before first breath** — gives the user a quiet transition from "reading the screen" to "being in the session."
 - **Session resume (60s window)** — exiting a session shows an exit guard; sessionStorage holds state for 60s so accidental exits don't lose progress.
 - **No phase instruction after cycle 2** — the HUD instruction fades; the orb has already taught the pattern by then.
 
@@ -90,34 +90,6 @@ Do not remove these without replacement:
 - `role="timer"` on countdown, `role="progressbar"` on session bar
 - Radio group keyboard navigation (arrow keys) on session picker
 - All interactive elements have `aria-label`
-
-## Founding User Feedback
-
-The following is unedited first-session feedback from the primary real-world test user. This person has anxiety, bipolar disorder, and formal training in graphic design and UI. Their feedback shaped several core decisions and should be treated as a primary design input — especially any future changes to timing, pacing, or the first-session experience.
-
-> **THE REST:** The rest segment is too short. It either needs to be removed or extended. There isn't enough time to "rest naturally before the next breath." I could hardly get a normal breath in there before it started again. The 2 second(?) countdown felt like I was rushed and made me momentarily anxious. I also could barely read the instruction tag in time before it was over and I didn't even get a chance to do what it said.
->
-> You may not even need it. But I would look at actual "timing it" with the breath and see if you can make the natural rhythm of those three sections more in sync to what feels natural and best. (The exhale-into rest-into inhale)
->
-> **SESSION STARTING PAGE:** I think once you start a session, the first "Settle in, breathe naturally" is also too short. It needs more time to settle and take a first breath. (There wasn't time for a starting first deep breath) which I feel like you do when you're about to settle into something.
->
-> I had to look up what an orb was and took me a few clicks to realize it changed the circle once you started a session. (Cause I clicked to change it from med to sm and nothing happened in reaction to that on that page, but I figured it out.)
->
-> **DIAGRAM (add a button):** Is it possible to have a button on the main page that when you click on it, shows you each "page" in the breathing session, so you could learn each action coming, and can read the info without a timer? (Technically it's the same info over and over again so eventually you'd know it.) But it was a little stressful the first time trying to read the information, understand what it said and do it before the timer was up for that "page" — especially the "subtitle/info line."
->
-> But I do like the content you have on those lines. That's good. I don't think it's too long or hard to read, just too fast on the slide time. [granted I am a slow reader so it might be just right for the average.]
->
-> **WHAT I LIKED:** Overall it's great! I liked the "portfolio" as a whole. The server looks good! I like the button color change and the user centric set up. I like the background music you picked. And the different colors for each circle. I like the colors you picked too. I like the motion of the orb and the number countdown and the top count of how many breaths left in the session/breaths complete. I found the exit and pause button which was great. I think it is really cool.
->
-> **BRAINSTORM — new adds:** Might be cool to add a variety of song choices of the different time length options. If someone's going to keep coming back a thousand times. Or if you could set it up where you can pick which song after you pick what time length you want. Plus have a separate button you can listen to all of them to test which one you like best.
-
-**What this feedback already drove:**
-- Rest phase extended from 2s → 4s
-- Settle-in extended from 3.5s → 6s
-- "Orb size" renamed to "Circle size" (the word "orb" was unfamiliar)
-- Home screen orb now resizes live when circle size is changed
-- "Preview rhythm" button added to home screen (addresses the diagram/learn-before-session request)
-- Sound palette picker with Listen preview button added (addresses the music variety request)
 
 ## What to Avoid
 

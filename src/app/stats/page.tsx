@@ -20,6 +20,22 @@ type SyncState = 'idle' | 'codeSent' | 'verifying' | 'synced';
 type SubmitMode = 'signin' | 'link';
 const SYNC_SCOPE_COPY = 'Only these sync: practice history, timer length, circle size, and sound choice.';
 
+export function friendlySyncError(message?: string): string {
+  const text = (message ?? '').toLowerCase();
+  if (text.includes('rate limit') || text.includes('too many') || text.includes('email rate')) {
+    return 'Please wait a minute, then try again.';
+  }
+  if (
+    text.includes('token') ||
+    text.includes('expired') ||
+    text.includes('invalid otp') ||
+    text.includes('invalid code')
+  ) {
+    return 'That code did not work. Check the email and try again.';
+  }
+  return message || 'Something went quiet on our side. Please try again.';
+}
+
 async function loadSyncedSessions(userId: string): Promise<{ sessions: SessionRecord[]; error?: string }> {
   const { data, error } = await supabase
     .from('breathing_sessions')
@@ -128,7 +144,7 @@ export default function StatsPage() {
     if (isUserNotFound) {
       const { error: updateError } = await supabase.auth.updateUser({ email: targetEmail });
       if (updateError) {
-        setError(updateError.message);
+        setError(friendlySyncError(updateError.message));
         setBusy(false);
         return;
       }
@@ -139,7 +155,7 @@ export default function StatsPage() {
       return;
     }
 
-    setError(signInError.message);
+    setError(friendlySyncError(signInError.message));
     setBusy(false);
   };
 
@@ -155,7 +171,7 @@ export default function StatsPage() {
     });
 
     if (verifyError) {
-      setError(verifyError.message);
+      setError(friendlySyncError(verifyError.message));
       setSyncState('codeSent');
       return;
     }
