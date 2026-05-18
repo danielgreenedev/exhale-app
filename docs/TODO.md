@@ -16,6 +16,7 @@ Last updated: May 18, 2026
 - View Sequence is more compact.
 - Begin remains the only solid green primary action.
 - Still is now audibly present.
+- After 3 completed sessions, Circle Size and Sound move into a quiet Settings disclosure.
 
 ## Completed From Sync And Measurement Follow-Up
 
@@ -44,9 +45,7 @@ Last updated: May 18, 2026
 
 5. After a few synced sessions, review Supabase event counts for timer selections, session starts, Settle In exits, early exits, and completions. Use that to check whether the default timer, sound choice, or first-use flow needs adjustment.
 
-6. Decide later whether Circle Size should stay on the home screen long term or eventually move into a quieter settings area. Leave it for now while users are still actively tuning the experience.
-
-7. Review and polish the Markdown documents for consistency, current product language, deployment accuracy, and clean handoff notes.
+6. Review and polish the Markdown documents for consistency, current product language, deployment accuracy, and clean handoff notes.
 
 ## Recommended Next Move
 

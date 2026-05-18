@@ -39,6 +39,7 @@ const SESSION_OPTIONS: { length: SessionLength; label: string; ariaLabel: string
 const SOUND_TEXTURE_PALETTES = SOUND_PALETTES.filter((palette) => palette.id !== 'off');
 const SOUND_OFF_PALETTE = SOUND_PALETTES.find((palette) => palette.id === 'off');
 const SELECTED_SETTING_CLASS = 'border-emerald-pulse/60 bg-emerald-pulse/10 text-emerald-100/90 hover:border-emerald-pulse/75 hover:bg-emerald-pulse/15 hover:text-emerald-50';
+const SETTINGS_COLLAPSE_SESSION_COUNT = 3;
 
 interface ResumeData {
   length: SessionLength;
@@ -75,6 +76,15 @@ function MutedSoundIcon() {
   );
 }
 
+function DisclosureCaret({ open }: { open: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`h-2 w-2 border-b border-r border-current transition-transform duration-300 ${open ? '-translate-y-0.5 rotate-[-135deg]' : '-translate-y-1 rotate-45'}`}
+    />
+  );
+}
+
 function HomeContent() {
   const searchParams = useSearchParams();
   const urlLength = searchParams.get('length');
@@ -87,6 +97,7 @@ function HomeContent() {
   const [soundPalette, setSoundPaletteState] = useState<SoundPaletteId>(DEFAULT_SOUND_PALETTE);
   const [firstVisit, setFirstVisit] = useState(false);
   const [showRhythmPreview, setShowRhythmPreview] = useState(false);
+  const [showSettings, setShowSettings] = useState(true);
   const [previewingSound, setPreviewingSound] = useState<SoundPaletteId | null>(null);
   const settingsSyncedRef = useRef(false);
   const previewStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -168,6 +179,7 @@ function HomeContent() {
       if (sessions.length > 0) {
         const { totalSessions } = computeStats(sessions);
         setHomeStat({ sessions: totalSessions });
+        setShowSettings(totalSessions < SETTINGS_COLLAPSE_SESSION_COUNT);
       }
     } catch { /* unavailable */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -237,6 +249,8 @@ function HomeContent() {
   };
 
   const previewingSoundLabel = SOUND_PALETTES.find((palette) => palette.id === previewingSound)?.label;
+  const completedSessions = homeStat?.sessions ?? 0;
+  const settingsCollapseEnabled = completedSessions >= SETTINGS_COLLAPSE_SESSION_COUNT;
 
   return (
     <main className="min-h-screen bg-forest-night flex flex-col items-center px-6 text-still-white">
@@ -331,10 +345,7 @@ function HomeContent() {
           className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 text-still-white/60 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:text-still-white/78 hover:bg-still-white/5 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 text-center"
         >
           <span>View sequence</span>
-          <span
-            aria-hidden="true"
-            className={`h-2 w-2 border-b border-r border-current transition-transform duration-300 ${showRhythmPreview ? '-translate-y-0.5 rotate-[-135deg]' : '-translate-y-1 rotate-45'}`}
-          />
+          <DisclosureCaret open={showRhythmPreview} />
         </button>
 
         {showRhythmPreview && (
@@ -387,6 +398,21 @@ function HomeContent() {
 
         {/* Secondary controls — circle size and practice history together below the fold */}
         <div className="flex flex-col gap-3 w-full pt-3 border-t border-still-white/10">
+          {settingsCollapseEnabled && (
+            <button
+              type="button"
+              onClick={() => setShowSettings((show) => !show)}
+              aria-expanded={showSettings}
+              aria-controls="home-settings"
+              className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 text-still-white/60 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:text-still-white/78 hover:bg-still-white/5 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 text-center"
+            >
+              <span>Settings</span>
+              <DisclosureCaret open={showSettings} />
+            </button>
+          )}
+
+          {(!settingsCollapseEnabled || showSettings) && (
+            <div id="home-settings" className="flex flex-col gap-3 w-full">
           <div className="flex items-center justify-between w-full px-1">
             <span className="text-still-white/62 text-xs tracking-[0.14em] uppercase font-light">Circle size</span>
             <div className="flex gap-4 items-end" role="radiogroup" aria-label="Circle size">
@@ -499,6 +525,8 @@ function HomeContent() {
               {previewingSoundLabel ? `Previewing ${previewingSoundLabel} sound.` : soundPalette === 'off' ? 'Sound is off.' : ''}
             </p>
           </div>
+            </div>
+          )}
 
           <Link
             href="/stats"
