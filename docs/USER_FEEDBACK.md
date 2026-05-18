@@ -65,6 +65,33 @@ Send a short, open prompt so feedback stays practical:
 
 1. 
 
+## Recent Feedback Notes
+
+### 2026-05-18, Production iPhone Beta
+
+#### What Worked
+
+- Settle In felt useful and gave the session a good intro space.
+- The phase-marker sounds during the session felt well chosen.
+- Pause length felt good.
+- The main menu interface was easy to follow and explore.
+- Changing "orb" to "circle" made the setting feel more accessible.
+- Low-light readability was usable on the tester's normal low-brightness phone setup.
+
+#### Friction
+
+- The tester noticed performance pressure around matching breath timing and being ready for the next prompt.
+- Hold copy that mentions strain can accidentally make the user think about straining.
+- Exhale may feel slightly long for some users; this needs more validation before changing the core 4-4-6-8 rhythm.
+- In-session sound control is small in the top-right, and iPhone silent mode made sound behavior harder to diagnose.
+
+#### Actionable Recommendations
+
+1. Remove "strain" from Hold copy and keep the language permissive.
+2. Validate rhythm comfort with more testers before changing Exhale duration; consider testing a 4-4-5-8 or relaxed variant if this pattern repeats.
+3. Improve the in-session sound affordance for mobile, especially touch size, visibility, and silent-mode confusion.
+4. Preserve Settle In, pause length, phase sounds, the main menu structure, the Circle label, and the low-light palette.
+
 ## Critique Categories
 
 ### First-Use Clarity

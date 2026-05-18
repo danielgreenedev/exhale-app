@@ -3,7 +3,13 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { BREATHING_PATTERN, SessionLength, SESSION_CYCLES } from '@/lib/breathing';
+import {
+  BREATHING_PATTERN,
+  DEFAULT_ORB_SCALE,
+  DEFAULT_SESSION_LENGTH,
+  SessionLength,
+  SESSION_CYCLES,
+} from '@/lib/breathing';
 import { useAudioEngine } from '@/hooks/useAudioEngine';
 import {
   DEFAULT_SOUND_PALETTE,
@@ -39,7 +45,6 @@ const SESSION_OPTIONS: { length: SessionLength; label: string; ariaLabel: string
 const SOUND_TEXTURE_PALETTES = SOUND_PALETTES.filter((palette) => palette.id !== 'off');
 const SOUND_OFF_PALETTE = SOUND_PALETTES.find((palette) => palette.id === 'off');
 const SELECTED_SETTING_CLASS = 'border-emerald-pulse/60 bg-emerald-pulse/10 text-emerald-100/90 hover:border-emerald-pulse/75 hover:bg-emerald-pulse/15 hover:text-emerald-50';
-const SETTINGS_COLLAPSE_SESSION_COUNT = 3;
 
 interface ResumeData {
   length: SessionLength;
@@ -88,16 +93,15 @@ function DisclosureCaret({ open }: { open: boolean }) {
 function HomeContent() {
   const searchParams = useSearchParams();
   const urlLength = searchParams.get('length');
-  const initialLength: SessionLength = isSessionLength(urlLength) ? urlLength : 'short';
+  const initialLength: SessionLength = isSessionLength(urlLength) ? urlLength : DEFAULT_SESSION_LENGTH;
 
   const [selectedLength, setSelectedLength] = useState<SessionLength>(initialLength);
   const [homeStat, setHomeStat] = useState<{ sessions: number } | null>(null);
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
-  const [orbScale, setOrbScaleState] = useState<number>(1);
+  const [orbScale, setOrbScaleState] = useState<number>(DEFAULT_ORB_SCALE);
   const [soundPalette, setSoundPaletteState] = useState<SoundPaletteId>(DEFAULT_SOUND_PALETTE);
   const [firstVisit, setFirstVisit] = useState(false);
-  const [showRhythmPreview, setShowRhythmPreview] = useState(false);
-  const [showSettings, setShowSettings] = useState(true);
+  const [showSessionSetup, setShowSessionSetup] = useState(false);
   const [previewingSound, setPreviewingSound] = useState<SoundPaletteId | null>(null);
   const settingsSyncedRef = useRef(false);
   const previewStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -166,7 +170,7 @@ function HomeContent() {
 
   useEffect(() => {
     try {
-      const v = parseFloat(localStorage.getItem('exhale-orb-scale') ?? '1') || 1;
+      const v = parseFloat(localStorage.getItem('exhale-orb-scale') ?? String(DEFAULT_ORB_SCALE)) || DEFAULT_ORB_SCALE;
       setOrbScaleState(v);
       const storedSound = localStorage.getItem(SOUND_STORAGE_KEY);
       if (isSoundPaletteId(storedSound)) setSoundPaletteState(storedSound);
@@ -179,7 +183,6 @@ function HomeContent() {
       if (sessions.length > 0) {
         const { totalSessions } = computeStats(sessions);
         setHomeStat({ sessions: totalSessions });
-        setShowSettings(totalSessions < SETTINGS_COLLAPSE_SESSION_COUNT);
       }
     } catch { /* unavailable */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -205,7 +208,7 @@ function HomeContent() {
             if (!isSessionLength(urlLength)) setSelectedLength(length);
           }
         } else {
-          const localScale = parseFloat(localStorage.getItem('exhale-orb-scale') ?? '1') || 1;
+          const localScale = parseFloat(localStorage.getItem('exhale-orb-scale') ?? String(DEFAULT_ORB_SCALE)) || DEFAULT_ORB_SCALE;
           const localSound = localStorage.getItem(SOUND_STORAGE_KEY) ?? DEFAULT_SOUND_PALETTE;
           const localLength = localStorage.getItem('exhale-session-length') ?? selectedLength;
           supabase.from('user_settings')
@@ -249,8 +252,6 @@ function HomeContent() {
   };
 
   const previewingSoundLabel = SOUND_PALETTES.find((palette) => palette.id === previewingSound)?.label;
-  const completedSessions = homeStat?.sessions ?? 0;
-  const settingsCollapseEnabled = completedSessions >= SETTINGS_COLLAPSE_SESSION_COUNT;
 
   return (
     <main className="min-h-screen bg-forest-night flex flex-col items-center px-6 text-still-white">
@@ -355,20 +356,20 @@ function HomeContent() {
 
         <button
           type="button"
-          onClick={() => setShowRhythmPreview((show) => !show)}
-          aria-expanded={showRhythmPreview}
-          aria-controls="rhythm-preview"
+          onClick={() => setShowSessionSetup((show) => !show)}
+          aria-expanded={showSessionSetup}
+          aria-controls="session-setup"
           className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 text-still-white/60 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:text-still-white/78 hover:bg-still-white/5 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 text-center"
         >
-          <span>View sequence</span>
-          <DisclosureCaret open={showRhythmPreview} />
+          <span>Session setup</span>
+          <DisclosureCaret open={showSessionSetup} />
         </button>
 
-        {showRhythmPreview && (
+        {showSessionSetup && (
           <section
-            id="rhythm-preview"
-            aria-label="Breathing rhythm preview"
-            className="w-full border-y border-still-white/10 py-1"
+            id="session-setup"
+            aria-label="Session setup"
+            className="w-full border-y border-still-white/10 py-1 flex flex-col gap-3"
           >
             {BREATHING_PATTERN.map((phase) => (
               <div
@@ -393,141 +394,126 @@ function HomeContent() {
                 </span>
               </div>
             ))}
+            <div className="h-px w-full bg-still-white/10" aria-hidden="true" />
+
+            <div className="flex flex-col gap-3 w-full">
+              <div className="flex items-center justify-between w-full px-1">
+                <span className="text-still-white/62 text-xs tracking-[0.14em] uppercase font-light">Circle size</span>
+                <div className="flex gap-4 items-end" role="radiogroup" aria-label="Circle size">
+                  {([0.75, 1.0, 1.25] as const).map((scale, i) => {
+                    const sizes = ['w-3 h-3', 'w-4 h-4', 'w-5 h-5'] as const;
+                    const labels = ['S', 'M', 'L'] as const;
+                    const active = Math.abs(orbScale - scale) < 0.01;
+                    return (
+                      <label
+                        key={scale}
+                        className={`
+                          min-h-11 min-w-11 flex flex-col items-center justify-center gap-1.5 rounded-lg border cursor-pointer transition-all duration-300
+                          ${active
+                            ? SELECTED_SETTING_CLASS
+                            : 'border-transparent text-still-white/60 hover:border-still-white/16 hover:bg-still-white/5 hover:text-still-white/80'}
+                          has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-emerald-200/80
+                        `}
+                      >
+                        <input
+                          type="radio"
+                          name="orb"
+                          value={scale}
+                          form="session-form"
+                          checked={active}
+                          aria-label={`Circle size ${labels[i]}`}
+                          onChange={() => updateOrbScale(scale)}
+                          className="sr-only"
+                        />
+                        <div className={`${sizes[i]} rounded-full transition-colors duration-300 ${active ? 'bg-emerald-pulse' : 'bg-still-white/70'}`} />
+                        <span className="text-[10px] tracking-widest font-light">{labels[i]}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2 w-full px-1" role="radiogroup" aria-labelledby="sound-label">
+                <div className="flex items-center justify-between gap-3">
+                  <span id="sound-label" className="text-still-white/62 text-xs tracking-[0.14em] uppercase font-light">
+                    Sound
+                  </span>
+
+                  {SOUND_OFF_PALETTE && (
+                    <label
+                      title={SOUND_OFF_PALETTE.ariaLabel}
+                      className={`
+                        min-h-11 min-w-11 flex items-center justify-center rounded-lg border cursor-pointer transition-all duration-300
+                        ${soundPalette === SOUND_OFF_PALETTE.id
+                          ? SELECTED_SETTING_CLASS
+                          : 'border-still-white/16 text-still-white/58 hover:border-still-white/30 hover:bg-still-white/5 hover:text-still-white/78'}
+                        has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-3 has-[:focus-visible]:outline-emerald-200/80
+                      `}
+                    >
+                      <input
+                        type="radio"
+                        name="sound"
+                        value={SOUND_OFF_PALETTE.id}
+                        form="session-form"
+                        checked={soundPalette === SOUND_OFF_PALETTE.id}
+                        aria-label={SOUND_OFF_PALETTE.ariaLabel}
+                        onChange={() => updateSoundPalette(SOUND_OFF_PALETTE.id)}
+                        className="sr-only"
+                      />
+                      <MutedSoundIcon />
+                    </label>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-1.5">
+                  {SOUND_TEXTURE_PALETTES.map((palette) => {
+                    const active = soundPalette === palette.id;
+                    const previewing = previewingSound === palette.id;
+                    return (
+                      <label
+                        key={palette.id}
+                        title={palette.ariaLabel}
+                        className={`
+                          min-h-11 flex items-center justify-center rounded-lg border px-1 text-[10px] tracking-[0.12em] uppercase font-light cursor-pointer transition-all duration-300
+                          ${active
+                            ? SELECTED_SETTING_CLASS
+                            : 'border-still-white/16 text-still-white/58 hover:border-still-white/30 hover:text-still-white/78'}
+                          has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-3 has-[:focus-visible]:outline-emerald-200/80
+                        `}
+                      >
+                        <input
+                          type="radio"
+                          name="sound"
+                          value={palette.id}
+                          form="session-form"
+                          checked={active}
+                          aria-label={palette.ariaLabel}
+                          onChange={() => updateSoundPalette(palette.id)}
+                          className="sr-only"
+                        />
+                        <span className="flex items-center justify-center gap-1.5">
+                          {palette.label}
+                          {previewing && (
+                            <span
+                              aria-hidden="true"
+                              className="h-1.5 w-1.5 rounded-full bg-emerald-100 motion-safe:animate-pulse"
+                            />
+                          )}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+
+                <p className="sr-only" aria-live="polite">
+                  {previewingSoundLabel ? `Previewing ${previewingSoundLabel} sound.` : soundPalette === 'off' ? 'Sound is off.' : ''}
+                </p>
+              </div>
+            </div>
           </section>
         )}
 
-        {/* Secondary controls — circle size and practice history together below the fold */}
         <div className="flex flex-col gap-3 w-full pt-3 border-t border-still-white/10">
-          {settingsCollapseEnabled && (
-            <button
-              type="button"
-              onClick={() => setShowSettings((show) => !show)}
-              aria-expanded={showSettings}
-              aria-controls="home-settings"
-              className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 text-still-white/60 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:text-still-white/78 hover:bg-still-white/5 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 text-center"
-            >
-              <span>Settings</span>
-              <DisclosureCaret open={showSettings} />
-            </button>
-          )}
-
-          {(!settingsCollapseEnabled || showSettings) && (
-            <div id="home-settings" className="flex flex-col gap-3 w-full">
-          <div className="flex items-center justify-between w-full px-1">
-            <span className="text-still-white/62 text-xs tracking-[0.14em] uppercase font-light">Circle size</span>
-            <div className="flex gap-4 items-end" role="radiogroup" aria-label="Circle size">
-              {([0.75, 1.0, 1.25] as const).map((scale, i) => {
-                const sizes = ['w-3 h-3', 'w-4 h-4', 'w-5 h-5'] as const;
-                const labels = ['S', 'M', 'L'] as const;
-                const active = Math.abs(orbScale - scale) < 0.01;
-                return (
-                  <label
-                    key={scale}
-                    className={`
-                      min-h-11 min-w-11 flex flex-col items-center justify-center gap-1.5 rounded-lg border cursor-pointer transition-all duration-300
-                      ${active
-                        ? SELECTED_SETTING_CLASS
-                        : 'border-transparent text-still-white/60 hover:border-still-white/16 hover:bg-still-white/5 hover:text-still-white/80'}
-                      has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-emerald-200/80
-                    `}
-                  >
-                    <input
-                      type="radio"
-                      name="orb"
-                      value={scale}
-                      form="session-form"
-                      checked={active}
-                      aria-label={`Circle size ${labels[i]}`}
-                      onChange={() => updateOrbScale(scale)}
-                      className="sr-only"
-                    />
-                    <div className={`${sizes[i]} rounded-full transition-colors duration-300 ${active ? 'bg-emerald-pulse' : 'bg-still-white/70'}`} />
-                    <span className="text-[10px] tracking-widest font-light">{labels[i]}</span>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2 w-full px-1" role="radiogroup" aria-labelledby="sound-label">
-            <div className="flex items-center justify-between gap-3">
-              <span id="sound-label" className="text-still-white/62 text-xs tracking-[0.14em] uppercase font-light">
-                Sound
-              </span>
-
-              {SOUND_OFF_PALETTE && (
-                <label
-                  title={SOUND_OFF_PALETTE.ariaLabel}
-                  className={`
-                    min-h-11 min-w-11 flex items-center justify-center rounded-lg border cursor-pointer transition-all duration-300
-                    ${soundPalette === SOUND_OFF_PALETTE.id
-                      ? SELECTED_SETTING_CLASS
-                      : 'border-still-white/16 text-still-white/58 hover:border-still-white/30 hover:bg-still-white/5 hover:text-still-white/78'}
-                    has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-3 has-[:focus-visible]:outline-emerald-200/80
-                  `}
-                >
-                  <input
-                    type="radio"
-                    name="sound"
-                    value={SOUND_OFF_PALETTE.id}
-                    form="session-form"
-                    checked={soundPalette === SOUND_OFF_PALETTE.id}
-                    aria-label={SOUND_OFF_PALETTE.ariaLabel}
-                    onChange={() => updateSoundPalette(SOUND_OFF_PALETTE.id)}
-                    className="sr-only"
-                  />
-                  <MutedSoundIcon />
-                </label>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-1.5">
-              {SOUND_TEXTURE_PALETTES.map((palette) => {
-                const active = soundPalette === palette.id;
-                const previewing = previewingSound === palette.id;
-                return (
-                  <label
-                    key={palette.id}
-                    title={palette.ariaLabel}
-                    className={`
-                      min-h-11 flex items-center justify-center rounded-lg border px-1 text-[10px] tracking-[0.12em] uppercase font-light cursor-pointer transition-all duration-300
-                      ${active
-                        ? SELECTED_SETTING_CLASS
-                        : 'border-still-white/16 text-still-white/58 hover:border-still-white/30 hover:text-still-white/78'}
-                      has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-3 has-[:focus-visible]:outline-emerald-200/80
-                    `}
-                  >
-                    <input
-                      type="radio"
-                      name="sound"
-                      value={palette.id}
-                      form="session-form"
-                      checked={active}
-                      aria-label={palette.ariaLabel}
-                      onChange={() => updateSoundPalette(palette.id)}
-                      className="sr-only"
-                    />
-                    <span className="flex items-center justify-center gap-1.5">
-                      {palette.label}
-                      {previewing && (
-                        <span
-                          aria-hidden="true"
-                          className="h-1.5 w-1.5 rounded-full bg-emerald-100 motion-safe:animate-pulse"
-                        />
-                      )}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-
-            <p className="sr-only" aria-live="polite">
-              {previewingSoundLabel ? `Previewing ${previewingSoundLabel} sound.` : soundPalette === 'off' ? 'Sound is off.' : ''}
-            </p>
-          </div>
-            </div>
-          )}
-
           <Link
             href="/stats"
             className="w-full min-h-14 py-3 rounded-2xl border border-still-white/20 text-still-white/60 hover:border-still-white/34 hover:text-still-white/78 hover:bg-still-white/5 active:scale-[0.98] transition-all duration-300 flex flex-col items-center justify-center gap-0.5 text-center"

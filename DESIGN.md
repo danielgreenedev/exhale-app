@@ -190,9 +190,9 @@ Soft and inviting — generous rounded corners (16px / `rounded-2xl`), borders t
 
 - **Shape:** Generously curved (16px radius). Game controls use a tighter curve (8px / `rounded-lg`).
 - **Begin (Primary):** Solid Emerald Pulse fill with Forest Night text. It is the only filled action on the home screen, so the start path is unmistakable even when the user is stressed or in low light. On hover, the fill warms slightly to emerald-200. Tracks a 300ms ease-all transition.
-- **Resume (Contextual):** Appears only when a session can be resumed within the 60-second window. It sits directly below Begin and above View Sequence so continuation remains close to the primary action without competing with it.
+- **Resume (Contextual):** Appears only when a session can be resumed within the 60-second window. It sits directly below Begin and above Session Setup so continuation remains close to the primary action without competing with it.
 - **Ghost (Secondary):** White border at 15–18% opacity, no background fill, text at 38–45% white. On hover: background tints to white at 4%, border to 28–32%, text to 55–65%. Used for "Practice history", "← Back", "Back to Menu", secondary navigation.
-- **Session Picker Options:** Ghost by default; selected state uses an emerald border, a 10% emerald tint, and green-lit text so it reads as active without competing with the solid Begin button. Arrow key navigation via `role="radiogroup"`.
+- **Session Picker Options:** Ghost by default; selected state uses an emerald border, a 10% emerald tint, and green-lit text so it reads as active without competing with the solid Begin button. New users default to Quick / 3 min. Arrow key navigation via `role="radiogroup"`.
 - **Game Controls (Pause/Exit):** 8px radius, white border at 18%, transparent background. Compact padding (6px 12px). Positioned at the bottom corners of the session canvas for thumb-zone access. Do not use at the top of the screen.
 
 ### The Breathing Orb (Signature Component)
@@ -218,15 +218,15 @@ The core rhythm is 4-4-6-8: Inhale 4 seconds, Hold 4 seconds, Exhale 6 seconds, 
 
 Sound is optional and synthesized only. The home screen exposes four texture choices: Air, Warm, Deep, and Still. Air is the default and should stay closest to silence: filtered air, a low grounding tone, and a sparse open pad. Warm can add more body. Deep shifts the bed darker and lower. Still removes almost all tonality but remains audible as a very quiet breath tone. Off is separated as a mute icon beside the section label so users do not read it as another sound texture.
 
-The palette control belongs with Circle Size below the primary Begin flow. Sound textures use the same quiet emerald selected state as other radio controls. Selecting Air, Warm, Deep, or Still plays a brief soft preview, shows a small selected-tile preview indicator, announces the preview to screen readers, then fades out. Selecting Off stops sound immediately. No sound plays on page load from a saved setting.
+The palette control belongs with Circle Size inside Session Setup, below the primary Begin flow. Sound textures use the same quiet emerald selected state as other radio controls. Selecting Air, Warm, Deep, or Still plays a brief soft preview, shows a small selected-tile preview indicator, announces the preview to screen readers, then fades out. Selecting Off stops sound immediately. No sound plays on page load from a saved setting.
 
 ### Circle Size
 
-Circle Size uses compact S/M/L radio controls. The active size uses the same emerald border, faint tint, and green-lit label as Time and Sound selections, so all home-screen preferences share one checked-state language while Begin stays the only solid green control.
+Circle Size uses compact S/M/L radio controls. New users default to M. The active size uses the same emerald border, faint tint, and green-lit label as Time and Sound selections, so all home-screen preferences share one checked-state language while Begin stays the only solid green control.
 
-### Settings Disclosure
+### Session Setup Disclosure
 
-Circle Size and Sound remain visible for the first two completed sessions so new users can tune the experience. Starting at three completed sessions, both controls move into a quiet Settings disclosure with the same caret language as View Sequence. Practice History stays visible outside Settings because it is navigation, not a preference.
+Session Setup is the single push-down disclosure below Begin and Resume. It contains the static 4-step sequence first, a faint divider, then Circle Size and Sound. It is collapsed by default for everyone, with no completed-session rule. Practice History stays visible outside Session Setup because it is navigation, not a preference.
 
 ### Stats Rows
 

@@ -8,7 +8,7 @@ import SessionComplete from '@/components/SessionComplete';
 import { useBreathingSession } from '@/hooks/useBreathingSession';
 import { useAudioEngine } from '@/hooks/useAudioEngine';
 import { useSessionStats } from '@/hooks/useSessionStats';
-import { SessionLength, BREATHING_PATTERN } from '@/lib/breathing';
+import { DEFAULT_ORB_SCALE, DEFAULT_SESSION_LENGTH, SessionLength, BREATHING_PATTERN } from '@/lib/breathing';
 import { useUserId } from '@/lib/auth';
 import { logAppEvent } from '@/lib/appEvents';
 import {
@@ -36,7 +36,7 @@ function clearResumeState() {
 function GameContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const lengthParam = (searchParams.get('length') ?? 'medium') as SessionLength;
+  const lengthParam = (searchParams.get('length') ?? DEFAULT_SESSION_LENGTH) as SessionLength;
   const initialElapsed = Math.max(0, parseFloat(searchParams.get('resume') ?? '0') || 0);
   const isFirstVisit = searchParams.get('first') === '1';
   const orbParam = parseFloat(searchParams.get('orb') ?? '');
@@ -64,7 +64,7 @@ function GameContent() {
   // Read orb scale once from localStorage — set on the home screen, not changed mid-session
   const orbScale = useMemo<number>(() => {
     if (Number.isFinite(orbParam) && orbParam >= 0.75 && orbParam <= 1.25) return orbParam;
-    try { return parseFloat(localStorage.getItem('exhale-orb-scale') ?? '1') || 1; } catch { return 1; }
+    try { return parseFloat(localStorage.getItem('exhale-orb-scale') ?? String(DEFAULT_ORB_SCALE)) || DEFAULT_ORB_SCALE; } catch { return DEFAULT_ORB_SCALE; }
   }, [orbParam]);
 
   const soundPalette = useMemo<SoundPaletteId>(() => {

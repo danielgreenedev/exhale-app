@@ -3,6 +3,9 @@ import { PHASE_COLORS } from '@/lib/colors';
 export type BreathingPhase = 'inhale' | 'hold' | 'exhale' | 'rest';
 export type SessionLength = 'quick' | 'short' | 'medium' | 'long';
 
+export const DEFAULT_SESSION_LENGTH: SessionLength = 'quick';
+export const DEFAULT_ORB_SCALE = 1;
+
 export interface PhaseConfig {
   phase: BreathingPhase;
   duration: number; // seconds
@@ -27,7 +30,7 @@ export const BREATHING_PATTERN: PhaseConfig[] = [
     phase: 'hold',
     duration: 4,
     label: 'Hold',
-    instruction: 'Hold softly, without strain',
+    instruction: 'Hold gently, keep it easy',
     targetOrbScale: 1.0,
     color: PHASE_COLORS.hold.color,
     glowColor: PHASE_COLORS.hold.glowColor,

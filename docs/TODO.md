@@ -13,11 +13,11 @@ Last updated: May 18, 2026
 - Sound preview has visible state plus screen-reader status.
 - Off is separated from sound textures and uses a mute icon.
 - Time, Circle Size, and Sound selected states share one quieter visual language.
-- View Sequence is more compact.
+- View Sequence and Settings were merged into one Session Setup drawer.
 - Begin remains the only solid green primary action.
 - Still is now audibly present.
-- After 3 completed sessions, Circle Size and Sound move into a quiet Settings disclosure.
-- When available, Resume now appears directly below Begin and before View Sequence.
+- Circle Size and Sound live inside Session Setup from the start; the 3-session hiding rule was removed.
+- When available, Resume now appears directly below Begin and before Session Setup.
 
 ## Completed From Sync And Measurement Follow-Up
 
@@ -46,12 +46,12 @@ Last updated: May 18, 2026
 
 ## Completed Local Smoke Test
 
-- Local Home, Begin, View Sequence, running breathing session, exit guard, Settings disclosure, audio choice selection, Practice History, and sync copy were smoke tested with no browser console errors.
+- Local Home, Begin, Session Setup, running breathing session, exit guard, audio choice selection, Practice History, and sync copy were smoke tested with no browser console errors.
 - The latest Vercel preview URL was found, but it currently redirects to Vercel login before the app loads.
 
 ## Completed Documentation Polish
 
-- Markdown docs were aligned with the current Next.js version, Resume placement, Settings disclosure, Supabase tables, Vercel preview access note, and beta handoff flow.
+- Markdown docs were aligned with the current Next.js version, Resume placement, Session Setup, Supabase tables, Vercel preview access note, and beta handoff flow.
 - `docs/USER_FEEDBACK.md` now includes a current test surface and a short beta test prompt.
 
 ## Completed Beta Surface Decision
@@ -65,12 +65,20 @@ Last updated: May 18, 2026
 
 2. Finish cross-device sync testing once Supabase rate limiting clears: request OTP, confirm the email sends a 6-digit code, sign in on Device B, and verify Practice History, timer length, Circle Size, and sound choice sync.
 
-3. Do a low-light human visual pass: check Home, expanded View Sequence, Practice History count contrast, selected setting readability, and the Settle In exit affordance with phone brightness low.
+3. Do a low-light human visual pass: check Home, expanded Session Setup, Practice History count contrast, selected setting readability, and the Settle In exit affordance with phone brightness low.
 
-4. Run one more first-use clarity check: "Can you start breathing without thinking?", "Did any sound behavior surprise you?", and "Did Settle In feel optional enough?"
+4. Run one more first-use clarity and rhythm comfort check: "Can you start breathing without thinking?", "Did matching the prompts feel pressuring?", "Did Exhale feel too long?", "Did any sound behavior surprise you?", and "Did Settle In feel optional enough?"
 
 5. After a few synced sessions, review Supabase event counts for timer selections, session starts, Settle In exits, early exits, and completions. Use that to check whether the default timer, sound choice, or first-use flow needs adjustment.
 
+6. Design and build selectable app skins. The current visual direction reads sci-fi and cool; explore a warmer set of user-selectable themes so people can choose the environment that feels safest and most inviting to them.
+
+7. Replace the email OTP-only Practice History sync flow with auth sign-in, so a user can sign in on any device and reliably track Practice History. Make sure the new sign-in flow integrates cleanly with the Supabase database, existing `breathing_sessions`, `user_settings`, and `app_events` records.
+
+8. Improve the in-session sound control for mobile. Make the control easier to notice and tap during a session, and explore a gentle way to clarify iPhone silent-mode behavior when sound appears unavailable.
+
+9. If more testers report breath-timing pressure or a too-long Exhale, test a softer rhythm option such as 4-4-5-8 or a relaxed mode before changing the default 4-4-6-8 pattern.
+
 ## Recommended Next Move
 
-Share `https://exhale.guide` with the next beta tester and capture their notes in `docs/USER_FEEDBACK.md`.
+Run one focused iPhone follow-up on rhythm comfort and sound control, then capture the notes in `docs/USER_FEEDBACK.md`.

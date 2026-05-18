@@ -90,9 +90,10 @@ These are intentional — don't undo them without understanding the rationale:
 - **No user input during a session** — fully guided, not hold-to-breathe. Reduces intimidation for first-timers who don't know when to inhale.
 - **Abstract orb** — chosen over thematic visuals (ocean, lantern, mandala). More universal, less culturally loaded, works for any user.
 - **8s settle-in before first breath** — gives the user a quiet transition from "reading the screen" to "being in the session."
+- **New-user defaults** — Quick / 3 min and medium Circle Size are the first-run defaults so the first session feels short and visually balanced.
 - **Session resume (60s window)** — exiting a session shows an exit guard; sessionStorage holds state for 60s so accidental exits don't lose progress.
-- **Resume directly below Begin** — when a resumable session exists, the continuation action sits next to the primary start action before View Sequence.
-- **Settings disclosure after 3 sessions** — Circle Size and Sound stay visible for early tuning, then collapse into Settings once the user has some familiarity.
+- **Resume directly below Begin** — when a resumable session exists, the continuation action sits next to the primary start action before Session Setup.
+- **Session Setup disclosure** — one quiet drawer below Begin/Resume contains the sequence, Circle Size, and Sound for everyone. There is no completed-session rule for hiding controls.
 - **No phase instruction after cycle 2** — the HUD instruction fades; the orb has already taught the pattern by then.
 
 ## Accessibility Baseline (Already Built)
