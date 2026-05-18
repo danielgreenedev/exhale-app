@@ -9,10 +9,7 @@ interface Props {
   cycleNumber: number;
   totalCycles: number;
   sessionProgress: number;
-  audioActive: boolean;
-  audioPrompt?: boolean;
   centerHidden?: boolean;
-  onToggleAudio?: () => void;
 }
 
 export default function GameHUD({
@@ -21,10 +18,7 @@ export default function GameHUD({
   cycleNumber,
   totalCycles,
   sessionProgress,
-  audioActive,
-  audioPrompt = false,
   centerHidden = false,
-  onToggleAudio,
 }: Props) {
   const minutesLeft = Math.ceil(((totalCycles - cycleNumber + 1) * CYCLE_DURATION) / 60);
   const settled = cycleNumber >= 2;
@@ -46,7 +40,7 @@ export default function GameHUD({
 
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-between pointer-events-none select-none">
-      {/* Top: cycle count + audio indicator */}
+      {/* Top: cycle count */}
       <div className="pt-8 w-full flex items-start justify-center relative">
         <p
           className="text-still-white/65 text-sm tracking-[0.2em] uppercase font-light"
@@ -56,39 +50,6 @@ export default function GameHUD({
         >
           Breath {cycleNumber} of {totalCycles}
         </p>
-        <button
-          onClick={onToggleAudio}
-          disabled={!onToggleAudio}
-          className="absolute right-6 top-0 flex flex-col items-end gap-1 pointer-events-auto min-h-11 min-w-11 justify-center rounded-lg hover:bg-still-white/5 transition-colors duration-300 disabled:pointer-events-none"
-          aria-label={audioActive ? 'Mute audio' : 'Enable audio'}
-          aria-pressed={audioActive}
-        >
-          {audioActive ? (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="opacity-58">
-              <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" />
-              <path
-                d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="opacity-30">
-              <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" />
-              <line x1="23" y1="9" x2="17" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              <line x1="17" y1="9" x2="23" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          )}
-          {audioPrompt && (
-            <p
-              className="text-still-white/55 text-[10px] tracking-[0.12em] font-light whitespace-nowrap"
-              style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
-            >
-              tap to enable
-            </p>
-          )}
-        </button>
       </div>
 
       {/* Center: phase label + instruction + countdown — float in space, no backdrop */}

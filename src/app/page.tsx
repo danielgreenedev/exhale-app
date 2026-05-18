@@ -13,20 +13,23 @@ import {
 import { useAudioEngine } from '@/hooks/useAudioEngine';
 import {
   DEFAULT_SOUND_PALETTE,
-  isSoundPaletteId,
   SOUND_PALETTES,
-  SOUND_STORAGE_KEY,
   SoundPaletteId,
 } from '@/lib/sound';
 import { readStats, computeStats } from '@/hooks/useSessionStats';
 import { SURFACE_GLOWS } from '@/lib/colors';
-import { supabase } from '@/lib/supabase';
 import { useUserId } from '@/lib/auth';
 import { logAppEvent } from '@/lib/appEvents';
+import {
+  isSessionLengthValue,
+  readLocalPracticeSettings,
+  saveUserSettings,
+  syncUserSettings,
+  writeLocalPracticeSettings,
+} from '@/lib/settingsSync';
 
-const SESSION_LENGTHS: SessionLength[] = ['quick', 'short', 'medium', 'long'];
 function isSessionLength(v: unknown): v is SessionLength {
-  return SESSION_LENGTHS.includes(v as SessionLength);
+  return isSessionLengthValue(v);
 }
 
 function formatDuration(totalSeconds: number): string {
@@ -110,10 +113,9 @@ function HomeContent() {
 
   const updateOrbScale = (scale: number) => {
     setOrbScaleState(scale);
-    try { localStorage.setItem('exhale-orb-scale', String(scale)); } catch { /* unavailable */ }
+    try { writeLocalPracticeSettings({ orbScale: scale }); } catch { /* unavailable */ }
     if (userId) {
-      supabase.from('user_settings')
-        .upsert({ user_id: userId, orb_scale: scale, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+      saveUserSettings(userId, { orbScale: scale })
         .then(({ error }) => {
           if (error) console.error('[supabase] user_settings upsert failed:', error);
         });
@@ -127,7 +129,7 @@ function HomeContent() {
     }
 
     setSoundPaletteState(palette);
-    try { localStorage.setItem(SOUND_STORAGE_KEY, palette); } catch { /* unavailable */ }
+    try { writeLocalPracticeSettings({ soundPalette: palette }); } catch { /* unavailable */ }
     if (palette === 'off') {
       setPreviewingSound(null);
       stopAmbient(0.45);
@@ -147,8 +149,7 @@ function HomeContent() {
       });
     }
     if (userId) {
-      supabase.from('user_settings')
-        .upsert({ user_id: userId, sound_palette: palette, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+      saveUserSettings(userId, { soundPalette: palette })
         .then(({ error }) => {
           if (error) console.error('[supabase] user_settings upsert failed:', error);
         });
@@ -157,11 +158,10 @@ function HomeContent() {
 
   const updateSessionLength = (length: SessionLength) => {
     setSelectedLength(length);
-    try { localStorage.setItem('exhale-session-length', length); } catch { /* unavailable */ }
+    try { writeLocalPracticeSettings({ sessionLength: length }); } catch { /* unavailable */ }
     logAppEvent(userId, 'timer_selected', { length });
     if (userId) {
-      supabase.from('user_settings')
-        .upsert({ user_id: userId, session_length: length, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+      saveUserSettings(userId, { sessionLength: length })
         .then(({ error }) => {
           if (error) console.error('[supabase] user_settings upsert failed:', error);
         });
@@ -170,13 +170,11 @@ function HomeContent() {
 
   useEffect(() => {
     try {
-      const v = parseFloat(localStorage.getItem('exhale-orb-scale') ?? String(DEFAULT_ORB_SCALE)) || DEFAULT_ORB_SCALE;
-      setOrbScaleState(v);
-      const storedSound = localStorage.getItem(SOUND_STORAGE_KEY);
-      if (isSoundPaletteId(storedSound)) setSoundPaletteState(storedSound);
-      const storedLength = localStorage.getItem('exhale-session-length');
-      if (isSessionLength(storedLength) && !isSessionLength(urlLength)) {
-        setSelectedLength(storedLength);
+      const settings = readLocalPracticeSettings(initialLength);
+      setOrbScaleState(settings.orbScale);
+      setSoundPaletteState(settings.soundPalette);
+      if (!isSessionLength(urlLength)) {
+        setSelectedLength(settings.sessionLength);
       }
       if (!localStorage.getItem('exhale-visited')) setFirstVisit(true);
       const { sessions } = readStats();
@@ -193,29 +191,13 @@ function HomeContent() {
     if (!userId || settingsSyncedRef.current) return;
     settingsSyncedRef.current = true;
 
-    supabase.from('user_settings').select('orb_scale, sound_palette, session_length').eq('user_id', userId).maybeSingle()
-      .then(({ data }) => {
-        if (data) {
-          const scale = data.orb_scale as number;
-          const sound = data.sound_palette as string;
-          const length = data.session_length as string | null;
-          try { localStorage.setItem('exhale-orb-scale', String(scale)); } catch { /* unavailable */ }
-          try { localStorage.setItem(SOUND_STORAGE_KEY, sound); } catch { /* unavailable */ }
-          setOrbScaleState(scale);
-          if (isSoundPaletteId(sound)) setSoundPaletteState(sound);
-          if (isSessionLength(length)) {
-            try { localStorage.setItem('exhale-session-length', length); } catch { /* unavailable */ }
-            if (!isSessionLength(urlLength)) setSelectedLength(length);
-          }
-        } else {
-          const localScale = parseFloat(localStorage.getItem('exhale-orb-scale') ?? String(DEFAULT_ORB_SCALE)) || DEFAULT_ORB_SCALE;
-          const localSound = localStorage.getItem(SOUND_STORAGE_KEY) ?? DEFAULT_SOUND_PALETTE;
-          const localLength = localStorage.getItem('exhale-session-length') ?? selectedLength;
-          supabase.from('user_settings')
-            .upsert({ user_id: userId, orb_scale: localScale, sound_palette: localSound, session_length: localLength }, { onConflict: 'user_id' })
-            .then(({ error }) => {
-              if (error) console.error('[supabase] user_settings upsert failed:', error);
-            });
+    syncUserSettings(userId, selectedLength)
+      .then(({ settings, error }) => {
+        setOrbScaleState(settings.orbScale);
+        setSoundPaletteState(settings.soundPalette);
+        if (!isSessionLength(urlLength)) setSelectedLength(settings.sessionLength);
+        if (error) {
+          console.error('[supabase] user_settings sync failed:', error);
         }
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps

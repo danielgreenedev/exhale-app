@@ -20,6 +20,7 @@ import {
 
 const RESUME_KEY = 'exhale-resume';
 const SETTLE_DURATION_MS = 8000;
+const SILENT_MODE_HINT_MS = 5000;
 
 function saveResumeState(length: SessionLength, elapsed: number) {
   try {
@@ -31,6 +32,36 @@ function saveResumeState(length: SessionLength, elapsed: number) {
 
 function clearResumeState() {
   try { sessionStorage.removeItem(RESUME_KEY); } catch { /* unavailable */ }
+}
+
+function SoundOnIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M11 5L6 9H3v6h3l5 4V5z" fill="currentColor" opacity="0.78" />
+      <path
+        d="M17.2 8.7a4.7 4.7 0 0 1 0 6.6M20.4 5.5a9.2 9.2 0 0 1 0 13"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        opacity="0.72"
+      />
+    </svg>
+  );
+}
+
+function SoundOffIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M11 5L6 9H3v6h3l5 4V5z" fill="currentColor" opacity="0.62" />
+      <path
+        d="m18 9 4 4m0-4-4 4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        opacity="0.72"
+      />
+    </svg>
+  );
 }
 
 function GameContent() {
@@ -87,12 +118,14 @@ function GameContent() {
   const [sessionSaveError, setSessionSaveError] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fullscreenSupported, setFullscreenSupported] = useState(false);
+  const [showSilentModeHint, setShowSilentModeHint] = useState(false);
 
   const prevPhaseIndexRef = useRef(-1);
   const audioStartedRef = useRef(false);
   const sessionSavedRef = useRef(false);
   const sessionStartedEventRef = useRef(false);
   const settleTimerRef = useRef<number | null>(null);
+  const silentHintTimerRef = useRef<number | null>(null);
   const exitGuardRef = useRef<HTMLDivElement>(null);
   const exitGuardResumeRef = useRef<HTMLButtonElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
@@ -114,12 +147,23 @@ function GameContent() {
 
   const toggleAudio = useCallback(async () => {
     if (audioActive) {
+      setShowSilentModeHint(false);
+      if (silentHintTimerRef.current !== null) {
+        window.clearTimeout(silentHintTimerRef.current);
+        silentHintTimerRef.current = null;
+      }
       stopAmbient(0.5);
       setAudioActive(false);
       audioStartedRef.current = false;
     } else {
       audioStartedRef.current = false;
       await beginAudio();
+      setShowSilentModeHint(true);
+      if (silentHintTimerRef.current !== null) window.clearTimeout(silentHintTimerRef.current);
+      silentHintTimerRef.current = window.setTimeout(() => {
+        setShowSilentModeHint(false);
+        silentHintTimerRef.current = null;
+      }, SILENT_MODE_HINT_MS);
     }
   }, [audioActive, stopAmbient, beginAudio]);
 
@@ -203,6 +247,10 @@ function GameContent() {
       window.removeEventListener('click', handleInteract);
       window.removeEventListener('touchstart', handleInteract);
       window.removeEventListener('keydown', handleInteract);
+      if (silentHintTimerRef.current !== null) {
+        window.clearTimeout(silentHintTimerRef.current);
+        silentHintTimerRef.current = null;
+      }
     };
   }, [beginAudio]);
 
@@ -402,10 +450,7 @@ function GameContent() {
           cycleNumber={cycleNumber}
           totalCycles={totalCycles}
           sessionProgress={sessionProgress}
-          audioActive={audioActive}
-          audioPrompt={showAudioPrompt}
           centerHidden={sessionState === 'paused'}
-          onToggleAudio={soundPalette !== 'off' ? toggleAudio : undefined}
         />
       )}
 
@@ -439,7 +484,7 @@ function GameContent() {
       {!settling && (sessionState === 'running' || sessionState === 'paused') && (
         <button
           onClick={handleTogglePause}
-          className="absolute bottom-6 left-6 min-h-11 min-w-20 text-still-white/72 hover:text-still-white/92 text-xs tracking-[0.2em] uppercase font-light border border-still-white/22 hover:border-still-white/38 hover:bg-still-white/5 px-4 py-2 rounded-lg transition-all duration-300"
+          className="absolute bottom-[max(1.5rem,calc(env(safe-area-inset-bottom)+0.75rem))] left-6 min-h-11 min-w-20 text-still-white/72 hover:text-still-white/92 text-xs tracking-[0.2em] uppercase font-light border border-still-white/22 hover:border-still-white/38 hover:bg-still-white/5 px-4 py-2 rounded-lg transition-all duration-300"
           aria-label={sessionState === 'paused' ? 'Resume session' : 'Pause session'}
         >
           {sessionState === 'paused' ? 'Resume' : 'Pause'}
@@ -450,11 +495,56 @@ function GameContent() {
       {!showExitGuard && (settling || sessionState === 'running' || sessionState === 'paused') && (
         <button
           onClick={requestExit}
-          className={`absolute bottom-6 right-6 min-h-11 min-w-20 text-xs tracking-[0.2em] uppercase font-light border px-4 py-2 rounded-lg transition-all duration-300 ${settling ? 'text-still-white/48 hover:text-still-white/72 border-still-white/16 hover:border-still-white/30 hover:bg-still-white/5' : 'text-still-white/62 hover:text-still-white/82 border-still-white/22 hover:border-still-white/38 hover:bg-still-white/5'}`}
+          className={`absolute bottom-[max(1.5rem,calc(env(safe-area-inset-bottom)+0.75rem))] right-6 min-h-11 min-w-20 text-xs tracking-[0.2em] uppercase font-light border px-4 py-2 rounded-lg transition-all duration-300 ${settling ? 'text-still-white/48 hover:text-still-white/72 border-still-white/16 hover:border-still-white/30 hover:bg-still-white/5' : 'text-still-white/62 hover:text-still-white/82 border-still-white/22 hover:border-still-white/38 hover:bg-still-white/5'}`}
           aria-label="Exit session"
         >
           ← Exit
         </button>
+      )}
+
+      {/* Sound toggle — bottom center, away from fullscreen */}
+      {!showExitGuard && !settling && (sessionState === 'running' || sessionState === 'paused') && (
+        <div className="absolute bottom-[max(1.5rem,calc(env(safe-area-inset-bottom)+0.75rem))] left-1/2 z-10 -translate-x-1/2">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (soundPalette !== 'off') void toggleAudio();
+            }}
+            onKeyDown={(e) => e.stopPropagation()}
+            disabled={soundPalette === 'off'}
+            aria-label={
+              soundPalette === 'off'
+                ? 'Sound is off from Session setup'
+                : audioActive
+                  ? 'Turn sound off'
+                  : 'Turn sound on'
+            }
+            aria-pressed={soundPalette !== 'off' ? audioActive : false}
+            title={
+              soundPalette === 'off'
+                ? 'Sound is off from Session setup'
+                : audioActive
+                  ? 'Turn sound off'
+                  : 'Turn sound on'
+            }
+            className={`min-h-11 min-w-11 rounded-lg border transition-all duration-300 flex items-center justify-center ${
+              audioActive
+                ? 'border-emerald-pulse/34 bg-emerald-pulse/10 text-emerald-100/90 hover:border-emerald-pulse/52 hover:bg-emerald-pulse/15'
+                : 'border-still-white/22 text-still-white/62 hover:border-still-white/38 hover:bg-still-white/5 hover:text-still-white/82'
+            } disabled:pointer-events-none disabled:border-still-white/12 disabled:text-still-white/28`}
+          >
+            {audioActive ? <SoundOnIcon /> : <SoundOffIcon />}
+          </button>
+          {(showAudioPrompt || showSilentModeHint) && soundPalette !== 'off' && (
+            <p
+              className="absolute bottom-full left-1/2 mb-2 w-max max-w-[13rem] -translate-x-1/2 text-center text-[10px] font-light tracking-[0.12em] text-still-white/58"
+              style={{ textShadow: '0 1px 6px rgba(0,0,0,0.65)' }}
+            >
+              {showAudioPrompt ? 'tap for sound' : 'still quiet? check silent mode'}
+            </p>
+          )}
+        </div>
       )}
 
       {/* Paused — tap anywhere on overlay or press Space to resume */}

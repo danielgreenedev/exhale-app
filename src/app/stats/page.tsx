@@ -6,6 +6,8 @@ import { readStats, computeStats, storageAvailable, SessionRecord } from '@/hook
 import { SURFACE_GLOWS } from '@/lib/colors';
 import { mergeSyncedSessions, missingLocalSessions } from '@/lib/sessionSync';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth';
+import { syncUserSettings } from '@/lib/settingsSync';
 
 function formatDate(dateStr: string): string {
   const today = new Date().toISOString().split('T')[0];
@@ -19,6 +21,25 @@ function formatDate(dateStr: string): string {
 type SyncState = 'idle' | 'codeSent' | 'verifying' | 'synced';
 type SubmitMode = 'signin' | 'link';
 const SYNC_SCOPE_COPY = 'Only these sync: practice history, timer length, circle size, and sound choice.';
+
+function looksLikeExistingEmailError(message?: string): boolean {
+  const text = (message ?? '').toLowerCase();
+  return (
+    text.includes('already registered') ||
+    text.includes('already exists') ||
+    text.includes('already been registered') ||
+    text.includes('email address is already')
+  );
+}
+
+function looksLikeMissingEmailError(message?: string): boolean {
+  const text = (message ?? '').toLowerCase();
+  return (
+    text.includes('signups not allowed') ||
+    text.includes('user not found') ||
+    text.includes('not registered')
+  );
+}
 
 export function friendlySyncError(message?: string): string {
   const text = (message ?? '').toLowerCase();
@@ -76,6 +97,15 @@ async function loadSyncedSessions(userId: string): Promise<{ sessions: SessionRe
 }
 
 export default function StatsPage() {
+  const {
+    userId,
+    email: authEmail,
+    pendingEmail,
+    isAnonymous,
+    ready,
+    refreshUser,
+    signOutToAnonymous,
+  } = useAuth();
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
   const [storageOk, setStorageOk] = useState(true);
 
@@ -91,25 +121,32 @@ export default function StatsPage() {
     setStorageOk(storageAvailable());
 
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      if (!ready || syncState === 'codeSent' || syncState === 'verifying') return;
 
-      if (user?.email && user.email_confirmed_at) {
-        setSyncedEmail(user.email);
+      if (userId && authEmail && !isAnonymous) {
+        setSyncedEmail(authEmail);
+        setEmail(authEmail);
         setSyncState('synced');
-        const result = await loadSyncedSessions(user.id);
+        const [result, settingsResult] = await Promise.all([
+          loadSyncedSessions(userId),
+          syncUserSettings(userId),
+        ]);
         setSessions(result.sessions);
-        if (result.error) setError(result.error);
+        setError(result.error ?? settingsResult.error ?? '');
       } else {
         setSessions(readStats().sessions);
-        if (user?.new_email) {
-          setSyncedEmail(user.new_email);
-          setEmail(user.new_email);
+        if (pendingEmail) {
+          setSyncedEmail(pendingEmail);
+          setEmail(pendingEmail);
           setSubmitMode('link');
           setSyncState('codeSent');
+        } else {
+          setSyncState('idle');
+          setSyncedEmail(null);
         }
       }
     })();
-  }, []);
+  }, [authEmail, isAnonymous, pendingEmail, ready, syncState, userId]);
 
   const handleSendCode = async (e: FormEvent) => {
     e.preventDefault();
@@ -120,6 +157,24 @@ export default function StatsPage() {
     if (!targetEmail) {
       setBusy(false);
       return;
+    }
+
+    if (isAnonymous) {
+      const { error: updateError } = await supabase.auth.updateUser({ email: targetEmail });
+
+      if (!updateError) {
+        setSubmitMode('link');
+        setSyncedEmail(targetEmail);
+        setSyncState('codeSent');
+        setBusy(false);
+        return;
+      }
+
+      if (!looksLikeExistingEmailError(updateError.message)) {
+        setError(friendlySyncError(updateError.message));
+        setBusy(false);
+        return;
+      }
     }
 
     const { error: signInError } = await supabase.auth.signInWithOtp({
@@ -135,22 +190,8 @@ export default function StatsPage() {
       return;
     }
 
-    const text = (signInError.message ?? '').toLowerCase();
-    const isUserNotFound =
-      text.includes('signups not allowed') ||
-      text.includes('user not found') ||
-      text.includes('not registered');
-
-    if (isUserNotFound) {
-      const { error: updateError } = await supabase.auth.updateUser({ email: targetEmail });
-      if (updateError) {
-        setError(friendlySyncError(updateError.message));
-        setBusy(false);
-        return;
-      }
-      setSubmitMode('link');
-      setSyncedEmail(targetEmail);
-      setSyncState('codeSent');
+    if (looksLikeMissingEmailError(signInError.message) && !isAnonymous) {
+      setError('Sign out first, then use this email to start syncing on this device.');
       setBusy(false);
       return;
     }
@@ -164,7 +205,7 @@ export default function StatsPage() {
     setSyncState('verifying');
     setError('');
 
-    const { error: verifyError } = await supabase.auth.verifyOtp({
+    const { data, error: verifyError } = await supabase.auth.verifyOtp({
       email: syncedEmail,
       token: codeValue,
       type: submitMode === 'signin' ? 'email' : 'email_change',
@@ -176,8 +217,25 @@ export default function StatsPage() {
       return;
     }
 
-    // Reload so the new session, settings, and cloud sessions all pick up fresh
-    window.location.reload();
+    let signedInUserId = data.user?.id ?? data.session?.user.id;
+    await refreshUser();
+
+    if (!signedInUserId) {
+      const { data: { user } } = await supabase.auth.getUser();
+      signedInUserId = user?.id;
+    }
+
+    if (signedInUserId) {
+      const [sessionsResult, settingsResult] = await Promise.all([
+        loadSyncedSessions(signedInUserId),
+        syncUserSettings(signedInUserId),
+      ]);
+      setSessions(sessionsResult.sessions);
+      setError(sessionsResult.error ?? settingsResult.error ?? '');
+    }
+
+    setSyncState('synced');
+    setEmail(syncedEmail);
   };
 
   const handleCodeChange = (value: string) => {
@@ -190,6 +248,17 @@ export default function StatsPage() {
 
   const handleVerifyClick = () => {
     if (code.length === 6) void submitCode(code);
+  };
+
+  const handleStopSync = async () => {
+    setBusy(true);
+    setError('');
+    await signOutToAnonymous();
+    setSyncState('idle');
+    setSyncedEmail(null);
+    setCode('');
+    setSessions(readStats().sessions);
+    setBusy(false);
   };
 
   const { totalSessions, totalMinutes, thisWeek, streak, totalDays } = computeStats(sessions);
@@ -341,14 +410,28 @@ export default function StatsPage() {
             Sync across devices
           </p>
 
-          {syncState === 'synced' && syncedEmail ? (
+          {!ready ? (
             <div className="flex flex-col gap-2">
+              <p className="text-still-white/48 text-xs font-light leading-relaxed -mt-1">
+                Checking sync on this device.
+              </p>
+            </div>
+          ) : syncState === 'synced' && syncedEmail ? (
+            <div className="flex flex-col gap-3">
               <p className="text-still-white/58 text-sm font-light leading-relaxed">
-                Synced to {syncedEmail}. Use this email on another device to access your practice there.
+                Signed in as {syncedEmail}. Use this email on another device to bring your practice there.
               </p>
               <p className="text-still-white/42 text-xs font-light leading-relaxed">
                 {SYNC_SCOPE_COPY}
               </p>
+              <button
+                type="button"
+                onClick={handleStopSync}
+                disabled={busy}
+                className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 text-still-white/58 text-xs tracking-[0.2em] uppercase font-light hover:border-still-white/30 hover:text-still-white/75 hover:bg-still-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+              >
+                {busy ? 'Signing out...' : 'Stop syncing here'}
+              </button>
               {error && (
                 <p className="text-amber-100/72 text-xs font-light leading-relaxed">
                   {error}
@@ -395,7 +478,7 @@ export default function StatsPage() {
           ) : (
             <form onSubmit={handleSendCode} className="flex flex-col gap-2">
               <p className="text-still-white/48 text-xs font-light leading-relaxed -mt-1">
-                Enter your email and we&apos;ll send a 6-digit code. Use the same email on another device to keep your practice in sync.
+                Sign in with email and a 6-digit code. Use the same email on another device to keep your practice in sync.
               </p>
               <p className="text-still-white/42 text-xs font-light leading-relaxed">
                 {SYNC_SCOPE_COPY}
@@ -417,7 +500,7 @@ export default function StatsPage() {
                 disabled={busy || !email.trim()}
                 className="w-full min-h-11 py-3 rounded-2xl border border-emerald-pulse/35 bg-emerald-pulse/10 text-emerald-100/95 text-xs tracking-[0.2em] uppercase font-light hover:border-emerald-pulse/55 hover:bg-emerald-pulse/16 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
               >
-                {busy ? 'Sending...' : 'Send code'}
+                {busy ? 'Sending...' : 'Sign in'}
               </button>
               {error && (
                 <p className="text-amber-100/72 text-xs font-light leading-relaxed text-center mt-1">

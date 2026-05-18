@@ -25,9 +25,9 @@ Last updated: May 18, 2026
 - App events are logged for email-synced users when they select a timer, start a session, exit early through the app, or complete a session.
 - Practice completion is still recorded in `breathing_sessions`; behavioral counts now have a lightweight path through `app_events`.
 
-## Completed From Full Impeccable Audit
+## Completed From Full UI Audit
 
-- Full impeccable audit was run against the current local UI, with browser checks for Home, Stats, Settle In, and the running breathing page.
+- Full UI audit was run against the current local UI, with browser checks for Home, Stats, Settle In, and the running breathing page.
 - Settle In now has an immediate quiet Exit path, and Escape opens the exit guard during the 8-second buffer.
 - Opening the exit guard during Settle In pauses the settle timer; Resume returns to Settle In instead of starting the session behind the dialog.
 - The mute control now meets the 44x44 touch target floor.
@@ -43,6 +43,7 @@ Last updated: May 18, 2026
 
 - The latest work was pushed to both `preview` and `master`.
 - Vercel reported the production deployment complete for commit `c6ca1b6`.
+- Commit `fbaf95b` was pushed to both `master` and `preview` with Session Setup, beta feedback capture, default-setting, and Hold-copy polish.
 
 ## Completed Local Smoke Test
 
@@ -59,26 +60,37 @@ Last updated: May 18, 2026
 - For the current beta round, testers will use the live production site at `https://exhale.guide`.
 - Vercel preview access can wait until a future test needs non-production changes.
 
+## Completed iPhone Beta Feedback Follow-Up
+
+- Production iPhone tester notes were captured in `docs/USER_FEEDBACK.md`.
+- Hold copy was softened to avoid mentioning strain.
+- One low-light iPhone readability pass reported that the color changes were clear and usable.
+- Settle In, pause length, phase-marker sounds, the main menu structure, and the Circle label were validated as working well.
+
+## Completed Auth Sign-In Sync
+
+- Practice History now has an optional email sign-in flow instead of an OTP-only sync branch.
+- New email sign-ins convert the current anonymous Supabase user where possible, preserving existing `breathing_sessions`, `user_settings`, and `app_events` rows under the same user id.
+- Existing email sign-ins merge local practice history into the signed-in `breathing_sessions` records and restore synced timer length, Circle Size, and sound choice through `user_settings`.
+
+## Completed Mobile Sound Control
+
+- The in-session sound control now sits bottom-center between Pause and Exit, away from the top-right fullscreen toggle.
+- The sound control has a 44px mobile tap target, a clearer on/off icon state, and safe-area-aware bottom placement for iPhone.
+- After sound is turned on during a session, a short hint appears: "still quiet? check silent mode".
+
 ## Remaining To-Do
 
-1. Share `https://exhale.guide` with a beta tester and capture anonymized notes in `docs/USER_FEEDBACK.md`.
+1. Test cross-device sync on Device B and verify Practice History, timer length, Circle Size, and sound choice sync correctly through Supabase.
 
-2. Finish cross-device sync testing once Supabase rate limiting clears: request OTP, confirm the email sends a 6-digit code, sign in on Device B, and verify Practice History, timer length, Circle Size, and sound choice sync.
+2. Run one more first-use clarity and rhythm comfort check: "Can you start breathing without thinking?", "Did matching the prompts feel pressuring?", "Did Exhale feel too long?", "Did any sound behavior surprise you?", and "Did Settle In feel optional enough?"
 
-3. Do a low-light human visual pass: check Home, expanded Session Setup, Practice History count contrast, selected setting readability, and the Settle In exit affordance with phone brightness low.
+3. After a few synced sessions, review Supabase event counts for timer selections, session starts, Settle In exits, early exits, and completions. Use that to check whether the default timer, sound choice, or first-use flow needs adjustment.
 
-4. Run one more first-use clarity and rhythm comfort check: "Can you start breathing without thinking?", "Did matching the prompts feel pressuring?", "Did Exhale feel too long?", "Did any sound behavior surprise you?", and "Did Settle In feel optional enough?"
+4. Design and build selectable app skins. The current visual direction reads sci-fi and cool; explore a warmer set of user-selectable themes so people can choose the environment that feels safest and most inviting to them.
 
-5. After a few synced sessions, review Supabase event counts for timer selections, session starts, Settle In exits, early exits, and completions. Use that to check whether the default timer, sound choice, or first-use flow needs adjustment.
-
-6. Design and build selectable app skins. The current visual direction reads sci-fi and cool; explore a warmer set of user-selectable themes so people can choose the environment that feels safest and most inviting to them.
-
-7. Replace the email OTP-only Practice History sync flow with auth sign-in, so a user can sign in on any device and reliably track Practice History. Make sure the new sign-in flow integrates cleanly with the Supabase database, existing `breathing_sessions`, `user_settings`, and `app_events` records.
-
-8. Improve the in-session sound control for mobile. Make the control easier to notice and tap during a session, and explore a gentle way to clarify iPhone silent-mode behavior when sound appears unavailable.
-
-9. If more testers report breath-timing pressure or a too-long Exhale, test a softer rhythm option such as 4-4-5-8 or a relaxed mode before changing the default 4-4-6-8 pattern.
+5. If more testers report breath-timing pressure or a too-long Exhale, test a softer rhythm option such as 4-4-5-8 or a relaxed mode before changing the default 4-4-6-8 pattern.
 
 ## Recommended Next Move
 
-Run one focused iPhone follow-up on rhythm comfort and sound control, then capture the notes in `docs/USER_FEEDBACK.md`.
+Test the new email sign-in on Device B, then run a focused iPhone follow-up on sound clarity and rhythm comfort.
