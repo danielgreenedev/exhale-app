@@ -18,7 +18,7 @@ Exhale is a guided breathing tool for learning paced breathing as an anxiety cop
 
 Success: a first-time user completes a session without being confused, and returns voluntarily.
 
-No account, no onboarding gate, no premium framing. The product should be ready to use in two taps from landing.
+No required account, no onboarding gate, no premium framing. The product should be ready to use in two taps from landing.
 
 ## Brand Personality
 
@@ -42,6 +42,7 @@ Emotional goal: the user should feel held, not guided. The orb teaches through m
 3. **Silence is a feature.** Empty states, pauses, and minimal copy are not gaps; they are the product.
 4. **History is optional.** Stats exist for users who want them. They are never surfaced as a primary motivation or a source of pressure. Never on the critical path to breathing.
 5. **Every screen feels like the same app.** The emerald orb mark anchors home and stats. Color, type, and spacing are consistent. The amber shift on session complete is the only intentional deviation.
+6. **Sync is optional.** Email sync exists only inside Practice History, only after the user chooses it, and only to carry history and preferences between devices. It includes practice history, timer length, Circle Size, and sound choice. It must never appear before a first session or become a condition for breathing.
 
 ## Real User Feedback
 
@@ -53,6 +54,7 @@ Recent hands-on browser feedback exposed where the product promise breaks down f
 - If the orb is missing, the product is missing. The orb, background motion, and audio affordance are not decorative extras; they are the primary teaching surface.
 - Alignment issues on secondary controls still matter because they signal care. Practice History and other optional actions should feel centered, calm, and intentionally secondary.
 - Background sound should support regulation without demanding taste or attention. Keep sound optional, synthesized, and easy to turn off; palettes should feel like environments, not songs.
+- Cross-device history needs its own sign-in step. Email links are single-use and fragile across devices, so the product uses 6-digit email codes for optional sync.
 
 Design implication: future audits should prioritize task completion and state reliability before visual nuance. Exhale can be quiet, but it can never look inert, broken, or ambiguous.
 
@@ -74,8 +76,17 @@ These are decisions made and should not be revisited without strong cause:
 - No audio files: synthesis only (zero load time is part of the low-friction promise)
 - No hold-to-breathe interaction during sessions: the orb guides, the user follows
 - No mascot, named persona, or illustrated character
-- No account system, login, or cloud sync
+- No required account, required login, or sync prompt before breathing
 - No paywall or premium tier framing in UI copy
+
+## Infrastructure
+
+- Database: Supabase.
+- Production host: Vercel.
+- Deployment source: GitHub `master`.
+- Preview branch: GitHub `preview`, deployed by Vercel as a pre-production branch.
+- Public domain: `https://exhale.guide`.
+- Optional sync depends on Supabase email OTP codes. The email template should visibly include the 6-digit token.
 
 ## Accessibility & Inclusion
 

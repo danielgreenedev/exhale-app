@@ -355,7 +355,7 @@ export default function BreathingOrb({ currentPhase, elapsedRef, sessionDuration
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener('resize', resize);
     };
-  }, []);
+  }, [elapsedRef, sessionDuration]);
 
   return <canvas ref={canvasRef} aria-hidden="true" className="w-full h-full block" />;
 }

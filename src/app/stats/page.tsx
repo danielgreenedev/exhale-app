@@ -4,6 +4,7 @@ import { useEffect, useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { readStats, computeStats, storageAvailable, SessionRecord } from '@/hooks/useSessionStats';
 import { SURFACE_GLOWS } from '@/lib/colors';
+import { mergeSyncedSessions, missingLocalSessions } from '@/lib/sessionSync';
 import { supabase } from '@/lib/supabase';
 
 function formatDate(dateStr: string): string {
@@ -15,62 +16,164 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
+type SyncState = 'idle' | 'codeSent' | 'verifying' | 'synced';
+type SubmitMode = 'signin' | 'link';
+const SYNC_SCOPE_COPY = 'Only these sync: practice history, timer length, circle size, and sound choice.';
+
+async function loadSyncedSessions(userId: string): Promise<{ sessions: SessionRecord[]; error?: string }> {
+  const { data, error } = await supabase
+    .from('breathing_sessions')
+    .select('date, duration, cycles, length')
+    .eq('user_id', userId)
+    .order('date', { ascending: true });
+
+  if (error) {
+    return {
+      sessions: readStats().sessions,
+      error: 'Cloud history could not load. Showing sessions saved on this device.',
+    };
+  }
+
+  const cloudSessions = (data ?? []) as SessionRecord[];
+  const localSessions = readStats().sessions;
+  const sessionsToSync = missingLocalSessions(localSessions, cloudSessions);
+
+  if (sessionsToSync.length === 0) {
+    return { sessions: cloudSessions };
+  }
+
+  const { data: inserted, error: insertError } = await supabase
+    .from('breathing_sessions')
+    .insert(sessionsToSync.map((session) => ({ user_id: userId, ...session })))
+    .select('date, duration, cycles, length');
+
+  if (insertError) {
+    return {
+      sessions: cloudSessions.length > 0 ? cloudSessions : localSessions,
+      error: 'Some sessions are saved on this device but could not sync yet.',
+    };
+  }
+
+  return {
+    sessions: mergeSyncedSessions(cloudSessions, (inserted ?? sessionsToSync) as SessionRecord[]),
+  };
+}
+
 export default function StatsPage() {
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
   const [storageOk, setStorageOk] = useState(true);
 
   const [email, setEmail] = useState('');
-  const [linkedEmail, setLinkedEmail] = useState<string | null>(null);
-  const [linkConfirmed, setLinkConfirmed] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [linkError, setLinkError] = useState('');
+  const [code, setCode] = useState('');
+  const [syncState, setSyncState] = useState<SyncState>('idle');
+  const [submitMode, setSubmitMode] = useState<SubmitMode | null>(null);
+  const [syncedEmail, setSyncedEmail] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     setStorageOk(storageAvailable());
-    setSessions(readStats().sessions);
 
-    supabase.auth.getUser().then(({ data }) => {
-      const user = data.user;
-      if (!user) return;
-      if (user.email && user.email_confirmed_at) {
-        setLinkedEmail(user.email);
-        setLinkConfirmed(true);
-      } else if (user.new_email) {
-        setLinkedEmail(user.new_email);
-        setLinkConfirmed(false);
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user?.email && user.email_confirmed_at) {
+        setSyncedEmail(user.email);
+        setSyncState('synced');
+        const result = await loadSyncedSessions(user.id);
+        setSessions(result.sessions);
+        if (result.error) setError(result.error);
+      } else {
+        setSessions(readStats().sessions);
+        if (user?.new_email) {
+          setSyncedEmail(user.new_email);
+          setEmail(user.new_email);
+          setSubmitMode('link');
+          setSyncState('codeSent');
+        }
       }
-    });
+    })();
   }, []);
 
-  const handleLink = async (e: FormEvent) => {
+  const handleSendCode = async (e: FormEvent) => {
     e.preventDefault();
-    setSubmitting(true);
-    setLinkError('');
-    const { error } = await supabase.auth.updateUser({ email });
-    setSubmitting(false);
-    if (error) {
-      setLinkError(error.message);
-    } else {
-      setLinkedEmail(email);
-      setLinkConfirmed(false);
-      setEmail('');
+    setBusy(true);
+    setError('');
+    setCode('');
+    const targetEmail = email.trim().toLowerCase();
+    if (!targetEmail) {
+      setBusy(false);
+      return;
+    }
+
+    const { error: signInError } = await supabase.auth.signInWithOtp({
+      email: targetEmail,
+      options: { shouldCreateUser: false },
+    });
+
+    if (!signInError) {
+      setSubmitMode('signin');
+      setSyncedEmail(targetEmail);
+      setSyncState('codeSent');
+      setBusy(false);
+      return;
+    }
+
+    const text = (signInError.message ?? '').toLowerCase();
+    const isUserNotFound =
+      text.includes('signups not allowed') ||
+      text.includes('user not found') ||
+      text.includes('not registered');
+
+    if (isUserNotFound) {
+      const { error: updateError } = await supabase.auth.updateUser({ email: targetEmail });
+      if (updateError) {
+        setError(updateError.message);
+        setBusy(false);
+        return;
+      }
+      setSubmitMode('link');
+      setSyncedEmail(targetEmail);
+      setSyncState('codeSent');
+      setBusy(false);
+      return;
+    }
+
+    setError(signInError.message);
+    setBusy(false);
+  };
+
+  const submitCode = async (codeValue: string) => {
+    if (codeValue.length !== 6 || !syncedEmail || !submitMode) return;
+    setSyncState('verifying');
+    setError('');
+
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      email: syncedEmail,
+      token: codeValue,
+      type: submitMode === 'signin' ? 'email' : 'email_change',
+    });
+
+    if (verifyError) {
+      setError(verifyError.message);
+      setSyncState('codeSent');
+      return;
+    }
+
+    // Reload so the new session, settings, and cloud sessions all pick up fresh
+    window.location.reload();
+  };
+
+  const handleCodeChange = (value: string) => {
+    const cleaned = value.replace(/\D/g, '').slice(0, 6);
+    setCode(cleaned);
+    if (cleaned.length === 6) {
+      void submitCode(cleaned);
     }
   };
 
-  const handleResend = async () => {
-    if (!linkedEmail) return;
-    setSubmitting(true);
-    setLinkError('');
-    const { error } = await supabase.auth.updateUser({ email: linkedEmail });
-    setSubmitting(false);
-    if (error) setLinkError(error.message);
-  };
-
-  const handleReset = () => {
-    setLinkedEmail(null);
-    setLinkConfirmed(false);
-    setLinkError('');
-    setEmail('');
+  const handleVerifyClick = () => {
+    if (code.length === 6) void submitCode(code);
   };
 
   const { totalSessions, totalMinutes, thisWeek, streak, totalDays } = computeStats(sessions);
@@ -132,7 +235,6 @@ export default function StatsPage() {
               ))}
             </div>
 
-            {/* Milestones */}
             <div className="flex flex-col gap-4 w-full">
               <p className="text-still-white/52 text-xs tracking-[0.15em] uppercase font-light">
                 Milestones
@@ -220,67 +322,90 @@ export default function StatsPage() {
 
         <div className="flex flex-col gap-3 w-full pt-2 border-t border-still-white/10">
           <p className="text-still-white/52 text-xs tracking-[0.15em] uppercase font-light">
-            Remember on other devices
+            Sync across devices
           </p>
-          {linkConfirmed && linkedEmail ? (
-            <p className="text-still-white/58 text-sm font-light leading-relaxed">
-              Synced to {linkedEmail}. Sign in with the same email on any device to sync your practice there.
-            </p>
-          ) : linkedEmail ? (
+
+          {syncState === 'synced' && syncedEmail ? (
+            <div className="flex flex-col gap-2">
+              <p className="text-still-white/58 text-sm font-light leading-relaxed">
+                Synced to {syncedEmail}. Use this email on another device to access your practice there.
+              </p>
+              <p className="text-still-white/42 text-xs font-light leading-relaxed">
+                {SYNC_SCOPE_COPY}
+              </p>
+              {error && (
+                <p className="text-amber-100/72 text-xs font-light leading-relaxed">
+                  {error}
+                </p>
+              )}
+            </div>
+          ) : (syncState === 'codeSent' || syncState === 'verifying') && syncedEmail ? (
             <div className="flex flex-col gap-3">
               <p className="text-still-white/58 text-sm font-light leading-relaxed">
-                Check {linkedEmail} for a confirmation link. Open it on any device to start syncing your practice there.
+                We sent a 6-digit code to {syncedEmail}. Open the email and enter the code below.
               </p>
-              <p className="text-still-white/48 text-xs font-light leading-relaxed">
-                On mobile, long-press the link and choose <span className="text-still-white/70">copy link address</span>, then paste it into your browser. Some mail apps quietly preview the link first, which can invalidate it.
+              <p className="text-still-white/42 text-xs font-light leading-relaxed -mt-1">
+                {SYNC_SCOPE_COPY}
               </p>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={handleResend}
-                  disabled={submitting}
-                  className="flex-1 min-h-11 py-2 rounded-2xl border border-still-white/18 text-still-white/68 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:text-still-white/85 hover:bg-still-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
-                >
-                  {submitting ? 'Sending…' : 'Send again'}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  disabled={submitting}
-                  className="flex-1 min-h-11 py-2 rounded-2xl text-still-white/52 text-xs tracking-[0.18em] uppercase font-light hover:text-still-white/75 hover:bg-still-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors duration-300"
-                >
-                  Use another
-                </button>
-              </div>
-              {linkError && (
+              <label htmlFor="otp-code" className="sr-only">6-digit code</label>
+              <input
+                id="otp-code"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                value={code}
+                onChange={(e) => handleCodeChange(e.target.value)}
+                placeholder="------"
+                disabled={syncState === 'verifying'}
+                autoComplete="one-time-code"
+                aria-label="6-digit confirmation code"
+                className="w-full min-h-14 px-4 py-3 rounded-2xl bg-transparent border border-still-white/18 text-still-white/90 placeholder:text-still-white/25 text-2xl tracking-[0.5em] font-light text-center tabular-nums focus:border-still-white/40 focus:outline-none transition-colors duration-300 disabled:opacity-50"
+              />
+              <button
+                type="button"
+                onClick={handleVerifyClick}
+                disabled={code.length !== 6 || syncState === 'verifying'}
+                className="w-full min-h-11 py-3 rounded-2xl border border-emerald-pulse/35 bg-emerald-pulse/10 text-emerald-100/95 text-xs tracking-[0.2em] uppercase font-light hover:border-emerald-pulse/55 hover:bg-emerald-pulse/16 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+              >
+                {syncState === 'verifying' ? 'Verifying...' : 'Confirm'}
+              </button>
+              {error && (
                 <p className="text-amber-100/72 text-xs font-light leading-relaxed text-center">
-                  {linkError}
+                  {error}
                 </p>
               )}
             </div>
           ) : (
-            <form onSubmit={handleLink} className="flex flex-col gap-2">
-              <label htmlFor="link-email" className="sr-only">Email</label>
+            <form onSubmit={handleSendCode} className="flex flex-col gap-2">
+              <p className="text-still-white/48 text-xs font-light leading-relaxed -mt-1">
+                Enter your email and we&apos;ll send a 6-digit code. Use the same email on another device to keep your practice in sync.
+              </p>
+              <p className="text-still-white/42 text-xs font-light leading-relaxed">
+                {SYNC_SCOPE_COPY}
+              </p>
+              <label htmlFor="sync-email" className="sr-only">Email</label>
               <input
-                id="link-email"
+                id="sync-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your email"
                 required
-                disabled={submitting}
+                disabled={busy}
+                autoComplete="email"
                 className="w-full min-h-11 px-4 py-3 rounded-2xl bg-transparent border border-still-white/18 text-still-white/85 placeholder:text-still-white/40 text-sm tracking-[0.04em] font-light focus:border-still-white/35 focus:outline-none transition-colors duration-300 disabled:opacity-50"
               />
               <button
                 type="submit"
-                disabled={submitting || !email}
+                disabled={busy || !email.trim()}
                 className="w-full min-h-11 py-3 rounded-2xl border border-emerald-pulse/35 bg-emerald-pulse/10 text-emerald-100/95 text-xs tracking-[0.2em] uppercase font-light hover:border-emerald-pulse/55 hover:bg-emerald-pulse/16 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
               >
-                {submitting ? 'Sending…' : 'Send link'}
+                {busy ? 'Sending...' : 'Send code'}
               </button>
-              {linkError && (
+              {error && (
                 <p className="text-amber-100/72 text-xs font-light leading-relaxed text-center mt-1">
-                  {linkError}
+                  {error}
                 </p>
               )}
             </form>

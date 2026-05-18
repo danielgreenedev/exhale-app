@@ -230,6 +230,10 @@ The palette control belongs with Circle Size below the primary Begin flow. The s
 
 Flat list — no cards, no side borders. Each row: `border-b border-white/6`, `py-5`, label in label style at 35% white, value in headline style at 80% white. The asymmetry (tiny label, large value) creates hierarchy without structural chrome.
 
+### Optional Sync
+
+Sync belongs only on the Practice screen, below the reflective history content. It is an optional recovery and continuity affordance, not an account system. It syncs practice history, timer length, Circle Size, and sound choice. The flow is quiet and linear: email field, Send code, 6-digit code field, Confirm. The privacy reassurance is: "Only these sync: practice history, timer length, circle size, and sound choice." User-facing sync copy should not use account, profile, or login language. Do not use magic-link copy, resend loops, avatars, account settings, or anything that makes breathing feel gated.
+
 ### Milestone Badges
 
 `48x48px rounded-2xl`. Unearned: white at 3% background, white at 7% border. Earned: emerald at 12% background, emerald at 30% border, emerald icon at 85%. Transition: 300ms ease-all. These are reflective markers, not achievement prompts — they should never be accompanied by fanfare.
@@ -244,6 +248,7 @@ Flat list — no cards, no side borders. Each row: `border-b border-white/6`, `p
 - **Do** keep all button text at `font-light` (300) or lighter, uppercase, with tracking `≥0.18em`. The "Begin" button uses `0.28em`.
 - **Do** respect `prefers-reduced-motion`: skip the orb breathe animation and canvas particle system entirely when the OS requests it.
 - **Do** surface stats and practice history as optional, secondary navigation. Never on the critical path to breathing.
+- **Do** keep sync optional, quiet, and confined to Practice History. It is for carrying history across devices, not for onboarding.
 - **Do** place session controls (Pause, Exit) in the bottom corners of the session screen — the thumb zone on all phone sizes.
 - **Do** give every orb mark (home, stats, complete) its outer ring at `inset -14px`, colored to match the orb's accent (emerald for home/stats, amber for complete).
 
@@ -257,6 +262,6 @@ Flat list — no cards, no side borders. Each row: `border-b border-white/6`, `p
 - **Don't** use `italic` anywhere in the interface. There is no italic role in this system. Emphasis is conveyed via opacity, not decoration.
 - **Don't** design like Headspace or Calm — no onboarding carousels, no premium gate framing, no illustrated brand characters, no teacher voices.
 - **Don't** design like a fitness app — no streak counters as pressure, no achievement popups, no guilt mechanics.
-- **Don't** require an account, login, or cloud sync. Session data lives in localStorage. The user owns it; you don't.
+- **Don't** require an account, login, or cloud sync before breathing. Optional email sync must never block first use.
 - **Don't** add push notifications, sharing features, or social comparisons. The experience is private and self-contained.
 - **Don't** use audio files. All sound is synthesized via Web Audio API. Zero load time is part of the low-friction promise.
