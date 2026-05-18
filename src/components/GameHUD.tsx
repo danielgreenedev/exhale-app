@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { PhaseConfig, CYCLE_DURATION } from '@/lib/breathing';
 
 interface Props {
@@ -9,6 +10,8 @@ interface Props {
   totalCycles: number;
   sessionProgress: number;
   audioActive: boolean;
+  audioPrompt?: boolean;
+  onToggleAudio?: () => void;
 }
 
 export default function GameHUD({
@@ -18,29 +21,48 @@ export default function GameHUD({
   totalCycles,
   sessionProgress,
   audioActive,
+  audioPrompt = false,
+  onToggleAudio,
 }: Props) {
   const minutesLeft = Math.ceil(((totalCycles - cycleNumber + 1) * CYCLE_DURATION) / 60);
   const settled = cycleNumber >= 2;
+  const [previousPhase, setPreviousPhase] = useState<PhaseConfig | null>(null);
+  const lastPhaseRef = useRef(currentPhase);
+
+  useEffect(() => {
+    if (currentPhase.phase === lastPhaseRef.current.phase) return;
+
+    setPreviousPhase(lastPhaseRef.current);
+    lastPhaseRef.current = currentPhase;
+
+    const timeout = window.setTimeout(() => setPreviousPhase(null), 520);
+    return () => window.clearTimeout(timeout);
+  }, [currentPhase]);
+
+  const labelOpacity = settled ? 0.7 : 1;
+  const instructionOpacity = settled ? 0 : 0.82;
 
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-between pointer-events-none select-none">
       {/* Top: cycle count + audio indicator */}
       <div className="pt-8 w-full flex items-start justify-center relative">
         <p
-          className="text-white/60 text-sm tracking-[0.2em] uppercase font-light"
+          className="text-still-white/65 text-sm tracking-[0.2em] uppercase font-light"
           style={{ textShadow: '0 1px 8px rgba(0,0,0,0.7)' }}
           aria-live="polite"
           aria-label={`Breath ${cycleNumber} of ${totalCycles}`}
         >
           Breath {cycleNumber} of {totalCycles}
         </p>
-        <div
-          className="absolute right-6 top-0"
-          aria-label={audioActive ? 'Audio on' : 'Audio off'}
-          title={audioActive ? 'Audio on' : 'Audio off'}
+        <button
+          onClick={onToggleAudio}
+          disabled={!onToggleAudio}
+          className="absolute right-6 top-0 flex flex-col items-end gap-1 pointer-events-auto min-h-11 min-w-11 justify-center rounded-lg hover:bg-still-white/5 transition-colors duration-300 disabled:pointer-events-none"
+          aria-label={audioActive ? 'Mute audio' : 'Enable audio'}
+          aria-pressed={audioActive}
         >
           {audioActive ? (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="opacity-40">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="opacity-58">
               <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" />
               <path
                 d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"
@@ -50,46 +72,85 @@ export default function GameHUD({
               />
             </svg>
           ) : (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="opacity-20">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="opacity-30">
               <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" />
               <line x1="23" y1="9" x2="17" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               <line x1="17" y1="9" x2="23" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
           )}
-        </div>
+          {audioPrompt && (
+            <p
+              className="text-still-white/55 text-[10px] tracking-[0.12em] font-light whitespace-nowrap"
+              style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
+            >
+              tap to enable
+            </p>
+          )}
+        </button>
       </div>
 
       {/* Center: phase label + instruction + countdown — float in space, no backdrop */}
-      <div className="flex flex-col items-center gap-0 translate-y-[110px] landscape:translate-y-[60px]">
+      <div className="flex flex-col items-center gap-0 translate-y-[clamp(50px,13vh,110px)] landscape:translate-y-[clamp(30px,7vh,60px)]">
         <div className="flex flex-col items-center gap-3 px-10">
-          <h2
-            className="text-3xl font-semibold tracking-[0.3em] uppercase text-white"
-            style={{
-              textShadow: '0 2px 16px rgba(0,0,0,0.85), 0 1px 4px rgba(0,0,0,0.9)',
-              opacity: settled ? 0.55 : 1,
-              transition: 'opacity 4s ease',
-            }}
-            aria-live="polite"
-          >
-            {currentPhase.label}
-          </h2>
+          <div className="relative h-10 min-w-64 flex items-center justify-center">
+            {previousPhase && (
+              <h2
+                className="exhale-phase-out absolute inset-x-0 text-center text-3xl font-semibold tracking-[0.3em] uppercase text-still-white"
+                style={{
+                  ['--phase-opacity' as string]: labelOpacity,
+                  textShadow: '0 2px 16px rgba(0,0,0,0.85), 0 1px 4px rgba(0,0,0,0.9)',
+                  opacity: labelOpacity,
+                }}
+                aria-hidden="true"
+              >
+                {previousPhase.label}
+              </h2>
+            )}
+            <h2
+              className={`absolute inset-x-0 text-center text-3xl font-semibold tracking-[0.3em] uppercase text-still-white ${previousPhase ? 'exhale-phase-in' : ''}`}
+              style={{
+                ['--phase-opacity' as string]: labelOpacity,
+                textShadow: '0 2px 16px rgba(0,0,0,0.85), 0 1px 4px rgba(0,0,0,0.9)',
+                opacity: labelOpacity,
+              }}
+              aria-live="polite"
+            >
+              {currentPhase.label}
+            </h2>
+          </div>
 
-          <p
-            className="text-white text-sm tracking-[0.12em] font-light text-center"
-            style={{
-              textShadow: '0 1px 10px rgba(0,0,0,0.85)',
-              opacity: settled ? 0.28 : 0.78,
-              transition: 'opacity 5s ease',
-            }}
-          >
-            {currentPhase.instruction}
-          </p>
+          <div className="relative min-h-6 w-[min(80vw,26rem)] flex items-center justify-center">
+            {previousPhase && (
+              <p
+                className="exhale-phase-out absolute inset-x-0 text-still-white text-sm tracking-[0.12em] font-light text-center"
+                style={{
+                  ['--phase-opacity' as string]: instructionOpacity,
+                  textShadow: '0 1px 10px rgba(0,0,0,0.85)',
+                  opacity: instructionOpacity,
+                }}
+                aria-hidden="true"
+              >
+                {previousPhase.instruction}
+              </p>
+            )}
+            <p
+              className={`absolute inset-x-0 text-still-white text-sm tracking-[0.12em] font-light text-center ${previousPhase ? 'exhale-phase-in' : ''}`}
+              style={{
+                ['--phase-opacity' as string]: instructionOpacity,
+                textShadow: '0 1px 10px rgba(0,0,0,0.85)',
+                opacity: instructionOpacity,
+                transition: 'opacity 5s ease',
+              }}
+            >
+              {currentPhase.instruction}
+            </p>
+          </div>
 
           <div
-            className="text-6xl font-thin tabular-nums text-white/90 mt-1"
+            className="text-6xl font-thin tabular-nums text-still-white/90 mt-1"
             style={{
               textShadow: '0 2px 20px rgba(0,0,0,0.9)',
-              opacity: settled ? 0.35 : 1,
+              opacity: settled ? 0.58 : 1,
               transition: 'opacity 4s ease',
             }}
             role="timer"
@@ -103,7 +164,7 @@ export default function GameHUD({
       {/* Bottom: session progress */}
       <div className="pb-16 flex flex-col items-center gap-2">
         <div
-          className="w-48 h-[2px] bg-white/15 rounded-full overflow-hidden"
+          className="w-48 h-[2px] bg-still-white/18 rounded-full overflow-hidden"
           role="progressbar"
           aria-valuenow={Math.round(sessionProgress * 100)}
           aria-valuemin={0}
@@ -121,13 +182,13 @@ export default function GameHUD({
         </div>
         {!settled && (
           <p
-            className="text-white/50 text-xs tracking-[0.15em] uppercase font-light mt-1"
+            className="text-still-white/62 text-xs tracking-[0.15em] uppercase font-light mt-1"
             style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
           >
             ~{minutesLeft} min remaining
           </p>
         )}
-        <p className="hidden sm:block text-white/38 text-xs tracking-[0.1em] font-light mt-1" aria-hidden="true">
+        <p className="hidden sm:block text-still-white/55 text-xs tracking-[0.1em] font-light mt-1" aria-hidden="true">
           space · pause &nbsp;·&nbsp; esc · exit
         </p>
       </div>

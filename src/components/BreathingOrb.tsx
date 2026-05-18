@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { PhaseConfig, easeInOutCubic } from '@/lib/breathing';
+import { PhaseConfig, easeInOutCubic, getPhaseAtTime, CYCLE_DURATION } from '@/lib/breathing';
+import { APP_COLORS, CANVAS_COLORS } from '@/lib/colors';
 
 interface Particle {
   angle: number;
@@ -15,14 +16,18 @@ interface Particle {
 
 interface Props {
   currentPhase: PhaseConfig;
-  phaseProgress: number;
-  sessionProgress: number;
+  elapsedRef: { current: number };
+  sessionDuration: number;
   orbScale?: number;
 }
 
 const PARTICLE_COUNT = 38;
 const ORB_MIN_RADIUS = 60;
 const ORB_MAX_RADIUS = 140;
+const COLOR_TRANSITION_MS = 1100;
+const ARC_FADE_MS = 700;
+const FLASH_MS = 350;
+const INHALE_TURNAROUND_DELAY_SECONDS = 0.25;
 
 function parseHSL(hsl: string): [number, number, number] {
   const m = hsl.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
@@ -38,23 +43,24 @@ function lerpHSL(a: [number, number, number], b: [number, number, number], t: nu
   ];
 }
 
-export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgress, orbScale = 1 }: Props) {
+export default function BreathingOrb({ currentPhase, elapsedRef, sessionDuration, orbScale = 1 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const rafRef = useRef<number>(0);
+  const canvasSizeRef = useRef({ width: 0, height: 0 });
 
-  // Live state refs — updated each render, read inside the draw loop
-  const phaseRef = useRef(currentPhase);
-  const phaseProgressRef = useRef(phaseProgress);
-  const sessionProgressRef = useRef(sessionProgress);
+  // orbScaleRef: updated each render, read inside the draw loop
   const orbScaleRef = useRef(orbScale);
 
   // Color transition state
   const prevColorRef = useRef<[number, number, number]>(parseHSL(currentPhase.color));
   const targetColorRef = useRef<[number, number, number]>(parseHSL(currentPhase.color));
   const colorTRef = useRef(1); // 0→1 transition progress
+  const outgoingArcRef = useRef<{ color: [number, number, number]; progress: number } | null>(null);
+  const outgoingArcTRef = useRef(1);
+  const flashRef = useRef<{ t: number } | null>(null);
 
-  // Keep refs in sync with props each render
+  // Detect phase color changes each render; canvas reads elapsedRef directly for smooth animation
   useEffect(() => {
     const newTarget = parseHSL(currentPhase.color);
     if (
@@ -63,12 +69,13 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
       newTarget[2] !== targetColorRef.current[2]
     ) {
       prevColorRef.current = lerpHSL(prevColorRef.current, targetColorRef.current, colorTRef.current);
+      // Phase transitions happen at exact phase boundaries — outgoing arc completed fully
+      outgoingArcRef.current = { color: prevColorRef.current, progress: 0.96 };
+      outgoingArcTRef.current = 0;
       targetColorRef.current = newTarget;
       colorTRef.current = 0;
+      flashRef.current = { t: 0 };
     }
-    phaseRef.current = currentPhase;
-    phaseProgressRef.current = phaseProgress;
-    sessionProgressRef.current = sessionProgress;
     orbScaleRef.current = orbScale;
   });
 
@@ -95,8 +102,11 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
 
     const resize = () => {
       const dpr = window.devicePixelRatio || 1;
-      canvas.width = canvas.offsetWidth * dpr;
-      canvas.height = canvas.offsetHeight * dpr;
+      const width = canvas.offsetWidth;
+      const height = canvas.offsetHeight;
+      canvasSizeRef.current = { width, height };
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
@@ -106,38 +116,49 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
       const dt = Math.min(now - frameTime, 50); // cap at 50ms to avoid jumps
       frameTime = now;
 
-      const phase = phaseRef.current;
-      const pp = phaseProgressRef.current;
-      const sp = sessionProgressRef.current;
+      // Compute phase data directly from the continuously-updated elapsed ref —
+      // bypasses React re-renders so orb animation stays smooth at 60fps
+      const elapsed = elapsedRef.current;
+      const { config: phase, timeInPhase } = getPhaseAtTime(elapsed % CYCLE_DURATION);
+      const pp = timeInPhase / phase.duration;
+      const sp = Math.min(1, elapsed / sessionDuration);
 
-      const w = canvas.offsetWidth;
-      const h = canvas.offsetHeight;
+      const { width: w, height: h } = canvasSizeRef.current;
+      if (w === 0 || h === 0) {
+        rafRef.current = requestAnimationFrame(draw);
+        return;
+      }
       const cx = w / 2;
       const cy = h / 2;
 
       ctx.clearRect(0, 0, w, h);
 
       // Background
-      ctx.fillStyle = '#090c0a';
+      ctx.fillStyle = APP_COLORS.forestNight;
       ctx.fillRect(0, 0, w, h);
 
       // Warm forest glow — matches home screen
       const forestGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.65);
-      forestGlow.addColorStop(0, 'hsla(145, 40%, 22%, 0.18)');
-      forestGlow.addColorStop(1, 'transparent');
+      forestGlow.addColorStop(0, CANVAS_COLORS.forestGlow);
+      forestGlow.addColorStop(1, CANVAS_COLORS.transparent);
       ctx.fillStyle = forestGlow;
       ctx.fillRect(0, 0, w, h);
 
       // Soft vignette — keeps edges comfortable without a dark tunnel
       const vig = ctx.createRadialGradient(cx, cy, h * 0.2, cx, cy, h * 0.9);
-      vig.addColorStop(0, 'rgba(0,0,0,0)');
-      vig.addColorStop(1, 'rgba(0,0,0,0.32)');
+      vig.addColorStop(0, CANVAS_COLORS.transparent);
+      vig.addColorStop(1, CANVAS_COLORS.edgeVignette);
       ctx.fillStyle = vig;
       ctx.fillRect(0, 0, w, h);
 
       // Advance color transition
       if (colorTRef.current < 1) {
-        colorTRef.current = Math.min(1, colorTRef.current + dt / 700);
+        colorTRef.current = Math.min(1, colorTRef.current + dt / COLOR_TRANSITION_MS);
+      }
+      if (outgoingArcRef.current && outgoingArcTRef.current < 1) {
+        outgoingArcTRef.current = Math.min(1, outgoingArcTRef.current + dt / ARC_FADE_MS);
+      } else if (outgoingArcTRef.current >= 1) {
+        outgoingArcRef.current = null;
       }
       const [bh, bs, bl] = lerpHSL(
         prevColorRef.current,
@@ -158,10 +179,16 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
       if (reducedMotion) {
         animatedScale = phase.targetOrbScale;
       } else if (phase.phase === 'inhale') {
-        animatedScale = 0.45 + (1.0 - 0.45) * easeInOutCubic(pp);
+        const delayProgress = INHALE_TURNAROUND_DELAY_SECONDS / phase.duration;
+        const softenedProgress = Math.max(0, (pp - delayProgress) / (1 - delayProgress));
+        animatedScale = 0.45 + (1.0 - 0.45) * easeInOutCubic(softenedProgress);
       } else if (phase.phase === 'exhale') {
         animatedScale = 1.0 + (0.45 - 1.0) * easeInOutCubic(pp);
+      } else if (phase.phase === 'hold') {
+        // Subtle held-breath swell: sine arc peaks at midpoint, ~2% scale
+        animatedScale = phase.targetOrbScale + 0.022 * Math.sin(pp * Math.PI);
       } else {
+        // rest: completely still
         animatedScale = phase.targetOrbScale;
       }
       const sc = orbScaleRef.current;
@@ -205,6 +232,29 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
       ctx.arc(cx, cy, orbRadius, 0, Math.PI * 2);
       ctx.stroke();
 
+      // Phase-transition ring flash — expands outward from orb edge, fades in ~350ms
+      if (flashRef.current !== null) {
+        flashRef.current.t = Math.min(1, flashRef.current.t + dt / FLASH_MS);
+        const ft = flashRef.current.t;
+
+        if (!reducedMotion) {
+          const easedT = 1 - Math.pow(1 - ft, 3);
+          const [fh, fs, fl] = targetColorRef.current;
+          const flashRingR = orbRadius * (1.05 + easedT * 1.6);
+          const flashOpacity = (1 - ft) * 0.38;
+          ctx.strokeStyle = `hsla(${fh}, ${fs}%, ${Math.min(fl + 22, 95)}%, ${flashOpacity})`;
+          ctx.lineWidth = Math.max(0.5, 2.2 * (1 - ft * 0.5));
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.arc(cx, cy, flashRingR, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        if (flashRef.current.t >= 1) {
+          flashRef.current = null;
+        }
+      }
+
       // Phase progress ring
       const ringR = maxR + 24;
       ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${bl}%, 0.12)`;
@@ -214,11 +264,24 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
       ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
       ctx.stroke();
 
-      ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${bl}%, 0.8)`;
+      const incomingArcOpacity = outgoingArcRef.current
+        ? 0.45 + 0.35 * easeInOutCubic(outgoingArcTRef.current)
+        : 0.8;
+      ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${bl}%, ${incomingArcOpacity})`;
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.arc(cx, cy, ringR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * pp);
       ctx.stroke();
+
+      if (outgoingArcRef.current) {
+        const [oh, os, ol] = outgoingArcRef.current.color;
+        const oldOpacity = 0.46 * (1 - easeInOutCubic(outgoingArcTRef.current));
+        ctx.strokeStyle = `hsla(${oh}, ${os}%, ${ol}%, ${oldOpacity})`;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(cx, cy, ringR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * outgoingArcRef.current.progress);
+        ctx.stroke();
+      }
 
       // Session progress ring
       const sessR = ringR + 14;
@@ -233,6 +296,35 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(cx, cy, sessR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * sp);
+        ctx.stroke();
+      }
+
+      // Outer guide ring: off-white breath rail with phase-colored progress.
+      const guideR = sessR + 18;
+      const guidePulse = reducedMotion ? 0.18 : 0.16 + 0.08 * Math.sin(now * 0.0024);
+      ctx.strokeStyle = `rgba(${CANVAS_COLORS.guideRing}, ${guidePulse})`;
+      ctx.lineWidth = 2.25;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.arc(cx, cy, guideR, 0, Math.PI * 2);
+      ctx.stroke();
+
+      const guideIncomingOpacity = outgoingArcRef.current
+        ? 0.5 + 0.4 * easeInOutCubic(outgoingArcTRef.current)
+        : 0.9;
+      ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${Math.min(bl + 8, 92)}%, ${guideIncomingOpacity})`;
+      ctx.lineWidth = 3.25;
+      ctx.beginPath();
+      ctx.arc(cx, cy, guideR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * pp);
+      ctx.stroke();
+
+      if (outgoingArcRef.current) {
+        const [oh, os, ol] = outgoingArcRef.current.color;
+        const oldOpacity = 0.52 * (1 - easeInOutCubic(outgoingArcTRef.current));
+        ctx.strokeStyle = `hsla(${oh}, ${os}%, ${Math.min(ol + 8, 92)}%, ${oldOpacity})`;
+        ctx.lineWidth = 2.75;
+        ctx.beginPath();
+        ctx.arc(cx, cy, guideR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * outgoingArcRef.current.progress);
         ctx.stroke();
       }
 
@@ -265,5 +357,5 @@ export default function BreathingOrb({ currentPhase, phaseProgress, sessionProgr
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="w-full h-full block" />;
+  return <canvas ref={canvasRef} aria-hidden="true" className="w-full h-full block" />;
 }

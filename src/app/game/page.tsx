@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useMemo, Suspense } from 'react';
+import { useCallback, useEffect, useRef, useState, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import BreathingOrb from '@/components/BreathingOrb';
 import GameHUD from '@/components/GameHUD';
@@ -9,6 +9,14 @@ import { useBreathingSession } from '@/hooks/useBreathingSession';
 import { useAudioEngine } from '@/hooks/useAudioEngine';
 import { useSessionStats } from '@/hooks/useSessionStats';
 import { SessionLength, BREATHING_PATTERN } from '@/lib/breathing';
+import { supabase } from '@/lib/supabase';
+import { useUserId } from '@/lib/auth';
+import {
+  DEFAULT_SOUND_PALETTE,
+  isSoundPaletteId,
+  SOUND_STORAGE_KEY,
+  SoundPaletteId,
+} from '@/lib/sound';
 
 const RESUME_KEY = 'exhale-resume';
 
@@ -29,38 +37,52 @@ function GameContent() {
   const searchParams = useSearchParams();
   const lengthParam = (searchParams.get('length') ?? 'medium') as SessionLength;
   const initialElapsed = Math.max(0, parseFloat(searchParams.get('resume') ?? '0') || 0);
+  const isFirstVisit = searchParams.get('first') === '1';
+  const orbParam = parseFloat(searchParams.get('orb') ?? '');
+  const soundParam = searchParams.get('sound');
 
   const {
     sessionState,
     currentPhase,
     phaseIndex,
-    phaseProgress,
     sessionProgress,
     cycleNumber,
     totalCycles,
     timeRemaining,
     elapsedTotal,
+    elapsedRef,
     sessionDuration,
     start,
     pause,
     reset,
   } = useBreathingSession(lengthParam, initialElapsed);
 
-  const { startAmbient, stopAmbient, pauseAmbient, resumeAmbient, playCue } = useAudioEngine();
   const { saveSession } = useSessionStats();
+  const userId = useUserId();
 
   // Read orb scale once from localStorage — set on the home screen, not changed mid-session
   const orbScale = useMemo<number>(() => {
+    if (Number.isFinite(orbParam) && orbParam >= 0.75 && orbParam <= 1.25) return orbParam;
     try { return parseFloat(localStorage.getItem('exhale-orb-scale') ?? '1') || 1; } catch { return 1; }
-  }, []);
+  }, [orbParam]);
+
+  const soundPalette = useMemo<SoundPaletteId>(() => {
+    if (isSoundPaletteId(soundParam)) return soundParam;
+    try {
+      const stored = localStorage.getItem(SOUND_STORAGE_KEY);
+      return isSoundPaletteId(stored) ? stored : DEFAULT_SOUND_PALETTE;
+    } catch {
+      return DEFAULT_SOUND_PALETTE;
+    }
+  }, [soundParam]);
+
+  const { startAmbient, stopAmbient, pauseAmbient, resumeAmbient, playCue } = useAudioEngine(soundPalette);
 
   const [audioActive, setAudioActive] = useState(false);
   const [showAudioPrompt, setShowAudioPrompt] = useState(false);
   const [showExitGuard, setShowExitGuard] = useState(false);
   // Settling: count-in before first breath. Skipped when resuming.
   const [settling, setSettling] = useState(initialElapsed === 0);
-  const [settleOpacity, setSettleOpacity] = useState(0);
-  const [settleSubOpacity, setSettleSubOpacity] = useState(0);
   const [sessionSaveError, setSessionSaveError] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fullscreenSupported, setFullscreenSupported] = useState(false);
@@ -68,6 +90,35 @@ function GameContent() {
   const prevPhaseIndexRef = useRef(-1);
   const audioStartedRef = useRef(false);
   const sessionSavedRef = useRef(false);
+  const exitGuardRef = useRef<HTMLDivElement>(null);
+  const exitGuardResumeRef = useRef<HTMLButtonElement>(null);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
+
+  const beginAudio = useCallback(async () => {
+    if (audioStartedRef.current) return;
+
+    audioStartedRef.current = true;
+    try {
+      const started = await startAmbient();
+      setAudioActive(started);
+      setShowAudioPrompt(false);
+    } catch {
+      audioStartedRef.current = false;
+      setAudioActive(false);
+      setShowAudioPrompt(soundPalette !== 'off');
+    }
+  }, [soundPalette, startAmbient]);
+
+  const toggleAudio = useCallback(async () => {
+    if (audioActive) {
+      stopAmbient(0.5);
+      setAudioActive(false);
+      audioStartedRef.current = false;
+    } else {
+      audioStartedRef.current = false;
+      await beginAudio();
+    }
+  }, [audioActive, stopAmbient, beginAudio]);
 
   // Detect fullscreen support (not available on iOS Safari)
   useEffect(() => {
@@ -92,7 +143,7 @@ function GameContent() {
   // Clear stale resume state on mount
   useEffect(() => {
     clearResumeState();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Count-in settle, then start session
   useEffect(() => {
@@ -101,44 +152,27 @@ function GameContent() {
       start();
       return;
     }
-    const fadeIn    = setTimeout(() => setSettleOpacity(1), 50);
-    const subFadeIn = setTimeout(() => setSettleSubOpacity(1), 1100);
-    const fadeOut   = setTimeout(() => { setSettleOpacity(0); setSettleSubOpacity(0); }, 2800);
-    const end       = setTimeout(() => { setSettling(false); start(); }, 3500);
-    return () => { clearTimeout(fadeIn); clearTimeout(subFadeIn); clearTimeout(fadeOut); clearTimeout(end); };
+    const end = window.setTimeout(() => { setSettling(false); start(); }, 6000);
+    return () => window.clearTimeout(end);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Start audio on first user interaction (autoplay policy)
   useEffect(() => {
     const handleInteract = () => {
-      if (!audioStartedRef.current) {
-        audioStartedRef.current = true;
-        startAmbient();
-        setAudioActive(true);
-        setShowAudioPrompt(false);
-      }
+      void beginAudio();
     };
     window.addEventListener('click', handleInteract, { once: true });
     window.addEventListener('touchstart', handleInteract, { once: true });
     window.addEventListener('keydown', handleInteract, { once: true });
 
-    const tryAutoStart = async () => {
-      try {
-        startAmbient();
-        audioStartedRef.current = true;
-        setAudioActive(true);
-      } catch {
-        setShowAudioPrompt(true);
-      }
-    };
-    tryAutoStart();
+    void beginAudio();
 
     return () => {
       window.removeEventListener('click', handleInteract);
       window.removeEventListener('touchstart', handleInteract);
       window.removeEventListener('keydown', handleInteract);
     };
-  }, [startAmbient]);
+  }, [beginAudio]);
 
   // Play phase cue when phase changes
   useEffect(() => {
@@ -162,8 +196,17 @@ function GameContent() {
         length: lengthParam,
       });
       if (!saved) setSessionSaveError(true);
+      if (userId) {
+        supabase.from('app_events').insert({
+          user_id: userId,
+          event: 'session_complete',
+          properties: { duration: sessionDuration, cycles: totalCycles, length: lengthParam },
+        }).then(({ error }) => {
+          if (error) console.error('[supabase] app_events insert failed:', error);
+        });
+      }
     }
-  }, [sessionState, stopAmbient, saveSession, sessionDuration, totalCycles, lengthParam]);
+  }, [sessionState, stopAmbient, saveSession, sessionDuration, totalCycles, lengthParam, userId]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -197,9 +240,42 @@ function GameContent() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [sessionState, settling, pause, start, pauseAmbient, resumeAmbient, fullscreenSupported, showExitGuard]);
 
+  useEffect(() => {
+    if (!showExitGuard) return;
+
+    restoreFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    exitGuardResumeRef.current?.focus();
+
+    const handleTrap = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      const dialog = exitGuardRef.current;
+      if (!dialog) return;
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+      ).filter((el) => !el.hasAttribute('disabled'));
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleTrap);
+    return () => {
+      document.removeEventListener('keydown', handleTrap);
+      restoreFocusRef.current?.focus();
+    };
+  }, [showExitGuard]);
+
   const doExit = () => {
     if (sessionState === 'running' || sessionState === 'paused') {
-      saveResumeState(lengthParam, elapsedTotal);
+      saveResumeState(lengthParam, elapsedRef.current);
     }
     stopAmbient();
     setAudioActive(false);
@@ -216,36 +292,34 @@ function GameContent() {
     }
   };
 
+  const requestExit = () => {
+    if (sessionState === 'running') {
+      pause();
+      pauseAmbient();
+    }
+    setShowExitGuard(true);
+  };
+
   if (sessionState === 'complete') {
     return (
       <SessionComplete
         totalCycles={totalCycles}
         sessionDuration={sessionDuration}
         storageNote={sessionSaveError}
-        onRestart={() => {
-          reset();
-          sessionSavedRef.current = false;
-          sessionSaveError && setSessionSaveError(false);
-          prevPhaseIndexRef.current = -1;
-          setTimeout(() => {
-            start();
-            startAmbient();
-            setAudioActive(true);
-          }, 300);
-        }}
+        onRestart={() => router.push(`/?length=${lengthParam}`)}
         onMenu={() => router.push('/')}
       />
     );
   }
 
   return (
-    <div className="relative w-screen h-screen bg-[#090c0a] overflow-hidden">
+    <main className="relative w-screen h-screen bg-forest-night overflow-hidden" data-exhale-game data-settled={settling ? 'false' : 'true'}>
       {/* Canvas fills the whole screen */}
       <div className="absolute inset-0">
         <BreathingOrb
           currentPhase={currentPhase}
-          phaseProgress={phaseProgress}
-          sessionProgress={sessionProgress}
+          elapsedRef={elapsedRef}
+          sessionDuration={sessionDuration}
           orbScale={orbScale}
         />
       </div>
@@ -259,24 +333,34 @@ function GameContent() {
           totalCycles={totalCycles}
           sessionProgress={sessionProgress}
           audioActive={audioActive}
+          audioPrompt={showAudioPrompt}
+          onToggleAudio={soundPalette !== 'off' ? toggleAudio : undefined}
         />
       )}
 
       {/* Settle-in overlay — fades in heading first, then subtitle, then both fade before breathing starts */}
       {settling && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 pointer-events-none z-10">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 pointer-events-none z-10 transition-opacity duration-700" data-exhale-settle aria-live="polite">
           <p
-            className="text-white/70 text-2xl tracking-[0.3em] uppercase font-extralight"
-            style={{ opacity: settleOpacity, transition: 'opacity 0.7s ease', textShadow: '0 2px 16px rgba(0,0,0,0.8)' }}
+            className="exhale-settle-title text-still-white/78 text-2xl tracking-[0.3em] uppercase font-extralight"
+            style={{ textShadow: '0 2px 16px rgba(0,0,0,0.8)' }}
           >
             Settle in
           </p>
           <p
-            className="text-white/32 text-xs tracking-[0.22em] font-light"
-            style={{ opacity: settleSubOpacity, transition: 'opacity 0.7s ease', textShadow: '0 1px 8px rgba(0,0,0,0.6)' }}
+            className="exhale-settle-subtitle text-still-white/58 text-xs tracking-[0.22em] font-light"
+            style={{ textShadow: '0 1px 8px rgba(0,0,0,0.6)' }}
           >
-            breathe naturally
+            breathe normally
           </p>
+          {isFirstVisit && (
+            <p
+              className="exhale-settle-hint absolute bottom-16 text-still-white/52 text-[10px] tracking-[0.18em] font-light"
+              style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
+            >
+              the circle leads, just follow
+            </p>
+          )}
         </div>
       )}
 
@@ -284,7 +368,7 @@ function GameContent() {
       {!settling && (sessionState === 'running' || sessionState === 'paused') && (
         <button
           onClick={handleTogglePause}
-          className="absolute bottom-6 left-6 text-white/65 hover:text-white/90 text-xs tracking-[0.2em] uppercase font-light border border-white/18 hover:border-white/35 hover:bg-white/5 px-3 py-1.5 rounded-lg transition-all duration-300"
+          className="absolute bottom-6 left-6 min-h-11 min-w-20 text-still-white/72 hover:text-still-white/92 text-xs tracking-[0.2em] uppercase font-light border border-still-white/22 hover:border-still-white/38 hover:bg-still-white/5 px-4 py-2 rounded-lg transition-all duration-300"
           aria-label={sessionState === 'paused' ? 'Resume session' : 'Pause session'}
         >
           {sessionState === 'paused' ? 'Resume' : 'Pause'}
@@ -294,8 +378,8 @@ function GameContent() {
       {/* Exit button — bottom right */}
       {!settling && (
         <button
-          onClick={doExit}
-          className="absolute bottom-6 right-6 text-white/45 hover:text-white/75 text-xs tracking-[0.2em] uppercase font-light border border-white/18 hover:border-white/35 hover:bg-white/5 px-3 py-1.5 rounded-lg transition-all duration-300"
+          onClick={requestExit}
+          className="absolute bottom-6 right-6 min-h-11 min-w-20 text-still-white/62 hover:text-still-white/82 text-xs tracking-[0.2em] uppercase font-light border border-still-white/22 hover:border-still-white/38 hover:bg-still-white/5 px-4 py-2 rounded-lg transition-all duration-300"
           aria-label="Exit session"
         >
           ← Exit
@@ -310,13 +394,13 @@ function GameContent() {
         >
           <div className="flex flex-col items-center gap-2 pointer-events-none">
             <p
-              className="text-white/55 text-sm tracking-[0.4em] uppercase font-extralight"
+              className="text-still-white/64 text-sm tracking-[0.4em] uppercase font-extralight"
               style={{ textShadow: '0 1px 8px rgba(0,0,0,0.7)' }}
             >
               Paused
             </p>
             <p
-              className="text-white/38 text-xs tracking-[0.18em] font-light"
+              className="text-still-white/58 text-xs tracking-[0.18em] font-light"
               style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
             >
               tap · space to resume
@@ -325,22 +409,13 @@ function GameContent() {
         </div>
       )}
 
-      {/* Audio prompt — shown when autoplay is blocked */}
-      {showAudioPrompt && (
-        <p
-          className="absolute bottom-28 left-0 right-0 text-center text-white/40 text-xs tracking-[0.14em] font-light pointer-events-none"
-          style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
-        >
-          tap anywhere to enable audio
-        </p>
-      )}
 
       {/* Fullscreen toggle — top right (hidden on iOS Safari) */}
       {fullscreenSupported && !showExitGuard && !settling && (
         <button
           onClick={toggleFullscreen}
           aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-          className="absolute top-6 right-6 text-white/30 hover:text-white/65 transition-colors duration-300 p-1"
+          className="absolute top-6 right-6 min-h-11 min-w-11 flex items-center justify-center rounded-lg text-still-white/58 hover:text-still-white/82 hover:bg-still-white/5 transition-colors duration-300"
         >
           {isFullscreen ? (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -363,22 +438,29 @@ function GameContent() {
       {/* Exit guard overlay */}
       {showExitGuard && (
         <div
-          className="absolute inset-0 flex items-center justify-center bg-black/65 z-20"
+          className="absolute inset-0 flex items-center justify-center bg-forest-night/85 z-20"
           onClick={() => { setShowExitGuard(false); if (sessionState === 'paused') { start(); resumeAmbient(); } }}
         >
           <div
+            ref={exitGuardRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="exit-guard-title"
+            aria-describedby="exit-guard-description"
             className="flex flex-col items-center gap-8 px-10 text-center"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col gap-2">
               <p
-                className="text-white/88 text-xl font-extralight tracking-[0.25em] uppercase"
+                id="exit-guard-title"
+                className="text-still-white/90 text-xl font-extralight tracking-[0.25em] uppercase"
                 style={{ textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
               >
                 Leave this session?
               </p>
               <p
-                className="text-white/42 text-xs tracking-[0.1em] font-light"
+                id="exit-guard-description"
+                className="text-still-white/62 text-xs tracking-[0.1em] font-light"
                 style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
               >
                 Your progress is saved for 60 seconds.
@@ -386,14 +468,15 @@ function GameContent() {
             </div>
             <div className="flex flex-col gap-3 w-52">
               <button
+                ref={exitGuardResumeRef}
                 onClick={() => { setShowExitGuard(false); if (sessionState === 'paused') { start(); resumeAmbient(); } }}
-                className="w-full py-4 rounded-2xl border border-emerald-400/45 bg-emerald-400/10 text-emerald-200/90 text-sm tracking-[0.22em] uppercase font-light hover:bg-emerald-400/18 hover:border-emerald-400/65 transition-all duration-300"
+                className="w-full min-h-11 py-4 rounded-2xl border border-emerald-pulse/45 bg-emerald-pulse/10 text-emerald-100/95 text-sm tracking-[0.22em] uppercase font-light hover:bg-emerald-pulse/18 hover:border-emerald-pulse/65 transition-all duration-300"
               >
                 Resume
               </button>
               <button
                 onClick={() => { setShowExitGuard(false); doExit(); }}
-                className="w-full py-3 rounded-2xl text-white/38 text-sm tracking-[0.22em] uppercase font-light hover:text-white/65 transition-colors duration-300"
+                className="w-full min-h-11 py-3 rounded-2xl text-still-white/62 text-sm tracking-[0.22em] uppercase font-light hover:text-still-white/80 hover:bg-still-white/5 transition-colors duration-300"
               >
                 Exit
               </button>
@@ -401,7 +484,7 @@ function GameContent() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 }
 

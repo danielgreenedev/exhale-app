@@ -2,6 +2,8 @@
 
 import { useCallback } from 'react';
 import { SessionLength } from '@/lib/breathing';
+import { supabase } from '@/lib/supabase';
+import { useUserId } from '@/lib/auth';
 
 export interface SessionRecord {
   date: string;
@@ -22,7 +24,6 @@ export function readStats(): StoredStats {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { sessions: [] };
     const parsed = JSON.parse(raw) as StoredStats;
-    // Guard against stored data that lost its shape
     if (!Array.isArray(parsed?.sessions)) return { sessions: [] };
     return parsed;
   } catch {
@@ -81,11 +82,27 @@ export function computeStats(sessions: SessionRecord[]) {
 }
 
 export function useSessionStats() {
+  const userId = useUserId();
+
   const saveSession = useCallback((record: SessionRecord): boolean => {
     const stats = readStats();
     stats.sessions.push(record);
-    return writeStats(stats);
-  }, []);
+    const saved = writeStats(stats);
+
+    if (userId) {
+      supabase.from('breathing_sessions').insert({
+        user_id: userId,
+        date: record.date,
+        duration: record.duration,
+        cycles: record.cycles,
+        length: record.length,
+      }).then(({ error }) => {
+        if (error) console.error('[supabase] breathing_sessions insert failed:', error);
+      });
+    }
+
+    return saved;
+  }, [userId]);
 
   return { saveSession };
 }

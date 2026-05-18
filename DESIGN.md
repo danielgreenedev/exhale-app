@@ -122,6 +122,17 @@ This system explicitly rejects the language of productivity apps (progress bars 
 - Flat surfaces, no shadows — depth via glow and opacity, never elevation
 - Session controls in the thumb zone (bottom corners); the top screen belongs to passive status
 
+### Field Feedback Guardrails
+
+These guardrails come from direct browser feedback and should shape future impeccable audits:
+
+- The first visible game state must never be blank. On session start, show the centered "Settle in" prompt with "breathe normally", then transition into the live guide.
+- The session guide must visibly advance through Inhale, Hold, Exhale, and Rest. Phase text, timer, orb scale, background wash, HUD progress, audio cues, and canvas rings should read as one synchronized system.
+- The orb is the core interface. The canvas must render an orb, a soft phase-reactive background, and an outer off-white guide ring with phase-colored progress before any HUD detail is considered polished.
+- Phase transitions should feel continuous rather than reset. Blend phase color over about 1.1 seconds, crossfade labels, fade the outgoing arc as the new one begins, soften Rest into Inhale with a brief growth delay, and reduce instruction opacity after the first cycle.
+- Native interaction semantics matter more than custom cleverness. Duration and Circle Size controls should remain keyboard-accessible radio controls with generous label hit areas and unmistakable checked states.
+- Secondary navigation still needs precision. Ghost buttons such as Practice History should center their label optically and geometrically, even when they are intentionally quiet.
+
 ## 2. Colors: The Still Water Palette
 
 A near-monochrome ground with one living accent and four phase colors that breathe through the canvas during sessions.
@@ -201,13 +212,19 @@ The brand mark and the product itself. Three contexts:
 - **Home (large, 80px):** Emerald gradient (emerald-300 at 60% to emerald-600 at 40%), white highlight overlay (gradient from white at 20% to transparent), one outer ring (`inset -14px`, emerald border at 20% opacity with matching glow). Animated with `orbBreathe` keyframe (scale 1.0 → 1.14 → 1.0, 8s ease-in-out infinite) unless `prefers-reduced-motion` is set.
 - **Stats (medium, 56px):** Same construction as home orb at reduced size. Same outer ring. Same breathe animation.
 - **Complete (large, 96px):** Amber gradient (amber-300 at 75% to amber-600 at 50%), white highlight overlay, one outer ring (`inset -14px`, amber border at 20% opacity with amber glow). No breathe animation — the session is over.
-- **Session canvas:** Full canvas, rendered via `<canvas>`. Scales between 60–140px base radius (orb size preference S/M/L). Phase colors shift the entire orb and its multi-layer glow on every breath phase change.
+- **Session canvas:** Full canvas, rendered via `<canvas>`. Scales between 60–140px base radius (Circle Size preference S/M/L). Phase colors shift the entire orb and its multi-layer glow on every breath phase change.
 
 ### Progress Indicators
 
 - **Phase ring:** Drawn on canvas around the orb — arc from `-π/2` sweeping with phase progress. Phase color at 80% opacity.
 - **Session ring:** Outer ring, same origin — session progress at 32% opacity.
 - **HUD progress bar:** `w-48 h-[2px]` white/15 track, phase-colored fill at 70% opacity. Bottom-center of session screen (above the control buttons).
+
+### Sound Palettes
+
+Sound is optional and synthesized only. The home screen exposes five radio choices: Air, Warm, Low, Quiet, and Off. Air is the default and should stay closest to silence: filtered air, a low grounding tone, and a sparse open pad. Warm can add more body. Low shifts the bed darker and lower. Quiet removes almost all tonality. Off must always be visible and respected during phase cues.
+
+The palette control belongs with Circle Size below the primary Begin flow. The selected option uses the same quiet emerald state as other radio controls. A compact Listen button previews the selected palette, but never becomes a required step before Begin.
 
 ### Stats Rows
 

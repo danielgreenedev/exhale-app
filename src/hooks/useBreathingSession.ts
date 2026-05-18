@@ -35,11 +35,17 @@ export function useBreathingSession(sessionLength: SessionLength, initialElapsed
   const startTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const pausedAtRef = useRef<number>(initialElapsed);
+  // Continuous elapsed — updated every frame, read by canvas without triggering React renders
+  const elapsedRef = useRef(initialElapsed);
+  // Throttle React re-renders: only re-render when timer digit or phase boundary changes
+  const lastUpdateKeyRef = useRef(-1);
 
   const tick = useCallback(() => {
-    if (!startTimeRef.current) return;
+    if (startTimeRef.current === null) return;
     const now = performance.now();
     const elapsed = (now - startTimeRef.current) / 1000;
+
+    elapsedRef.current = elapsed;
 
     if (elapsed >= sessionDuration) {
       setElapsedTotal(sessionDuration);
@@ -47,7 +53,15 @@ export function useBreathingSession(sessionLength: SessionLength, initialElapsed
       return;
     }
 
-    setElapsedTotal(elapsed);
+    const elapsedInCycle = elapsed % CYCLE_DURATION;
+    const { config: phase, timeInPhase, phaseIndex: pi } = getPhaseAtTime(elapsedInCycle);
+    const tr = Math.ceil(phase.duration - timeInPhase);
+    const updateKey = pi * 100 + tr;
+    if (updateKey !== lastUpdateKeyRef.current) {
+      lastUpdateKeyRef.current = updateKey;
+      setElapsedTotal(elapsed);
+    }
+
     rafRef.current = requestAnimationFrame(tick);
   }, [sessionDuration]);
 
@@ -60,8 +74,9 @@ export function useBreathingSession(sessionLength: SessionLength, initialElapsed
   const pause = useCallback(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = null;
-    if (startTimeRef.current) {
+    if (startTimeRef.current !== null) {
       pausedAtRef.current = (performance.now() - startTimeRef.current) / 1000;
+      elapsedRef.current = pausedAtRef.current;
     }
     setSessionState('paused');
   }, []);
@@ -70,6 +85,7 @@ export function useBreathingSession(sessionLength: SessionLength, initialElapsed
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     startTimeRef.current = null;
     pausedAtRef.current = 0;
+    elapsedRef.current = 0;
     setElapsedTotal(0);
     setSessionState('idle');
   }, []);
@@ -98,6 +114,7 @@ export function useBreathingSession(sessionLength: SessionLength, initialElapsed
     totalCycles,
     timeRemaining,
     elapsedTotal,
+    elapsedRef,
     sessionDuration,
     start,
     pause,

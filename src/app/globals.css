@@ -11,6 +11,15 @@
     margin: 0;
     padding: 0;
   }
+
+  html {
+    scrollbar-gutter: stable;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgba(167, 243, 208, 0.86);
+    outline-offset: 4px;
+  }
 }
 
 @layer utilities {
@@ -25,10 +34,24 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+
     .animate-fade-in {
       animation: none;
       opacity: 1;
       transform: translateY(0);
+    }
+
+    .exhale-settle-title,
+    .exhale-settle-subtitle,
+    .exhale-settle-hint {
+      animation: none;
+      opacity: 1;
     }
   }
 }
@@ -36,6 +59,60 @@
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+.exhale-settle-title {
+  animation: exhaleSettleTitle 5.8s ease forwards;
+  opacity: 0;
+}
+
+.exhale-settle-subtitle {
+  animation: exhaleSettleSubtitle 5.8s ease forwards;
+  opacity: 0;
+}
+
+@keyframes exhaleSettleTitle {
+  0% { opacity: 0; }
+  16% { opacity: 1; }
+  78% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes exhaleSettleSubtitle {
+  0%, 24% { opacity: 0; }
+  42% { opacity: 1; }
+  78% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.exhale-settle-hint {
+  animation: exhaleSettleHint 5.8s ease forwards;
+  opacity: 0;
+}
+
+@keyframes exhaleSettleHint {
+  0%, 50%  { opacity: 0; }
+  65%      { opacity: 1; }
+  85%      { opacity: 1; }
+  100%     { opacity: 0; }
+}
+
+.exhale-phase-in {
+  animation: exhalePhaseIn 480ms ease-out both;
+}
+
+.exhale-phase-out {
+  animation: exhalePhaseOut 480ms ease-out both;
+}
+
+@keyframes exhalePhaseIn {
+  0% { opacity: 0; transform: translateY(3px); }
+  100% { opacity: var(--phase-opacity, 1); transform: translateY(0); }
+}
+
+@keyframes exhalePhaseOut {
+  0% { opacity: var(--phase-opacity, 1); transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-3px); }
 }
 
 @keyframes orbBreathe {

@@ -1,3 +1,5 @@
+import { PHASE_COLORS } from '@/lib/colors';
+
 export type BreathingPhase = 'inhale' | 'hold' | 'exhale' | 'rest';
 export type SessionLength = 'quick' | 'short' | 'medium' | 'long';
 
@@ -18,17 +20,17 @@ export const BREATHING_PATTERN: PhaseConfig[] = [
     label: 'Inhale',
     instruction: 'Breathe in slowly through your nose',
     targetOrbScale: 1.0,
-    color: 'hsl(198, 45%, 63%)',
-    glowColor: 'hsla(198, 45%, 63%, 0.28)',
+    color: PHASE_COLORS.inhale.color,
+    glowColor: PHASE_COLORS.inhale.glowColor,
   },
   {
     phase: 'hold',
     duration: 4,
     label: 'Hold',
-    instruction: 'Hold gently and comfortably',
+    instruction: 'Hold softly, without strain',
     targetOrbScale: 1.0,
-    color: 'hsl(40, 55%, 61%)',
-    glowColor: 'hsla(40, 55%, 61%, 0.28)',
+    color: PHASE_COLORS.hold.color,
+    glowColor: PHASE_COLORS.hold.glowColor,
   },
   {
     phase: 'exhale',
@@ -36,27 +38,27 @@ export const BREATHING_PATTERN: PhaseConfig[] = [
     label: 'Exhale',
     instruction: 'Breathe out slowly through your mouth',
     targetOrbScale: 0.45,
-    color: 'hsl(148, 35%, 53%)',
-    glowColor: 'hsla(148, 35%, 53%, 0.28)',
+    color: PHASE_COLORS.exhale.color,
+    glowColor: PHASE_COLORS.exhale.glowColor,
   },
   {
     phase: 'rest',
-    duration: 2,
+    duration: 4,
     label: 'Rest',
     instruction: 'Rest naturally before the next breath',
     targetOrbScale: 0.45,
-    color: 'hsl(348, 42%, 66%)',
-    glowColor: 'hsla(348, 42%, 66%, 0.28)',
+    color: PHASE_COLORS.rest.color,
+    glowColor: PHASE_COLORS.rest.glowColor,
   },
 ];
 
-export const CYCLE_DURATION = BREATHING_PATTERN.reduce((acc, p) => acc + p.duration, 0); // 16s
+export const CYCLE_DURATION = BREATHING_PATTERN.reduce((acc, p) => acc + p.duration, 0); // 18s
 
 export const SESSION_CYCLES: Record<SessionLength, number> = {
-  quick: 11,   // ~2m 56s
-  short: 20,   // ~5m 20s
-  medium: 26,  // ~6m 56s
-  long: 37,    // ~9m 52s
+  quick: 10,   // 3m
+  short: 17,   // ~5m 6s
+  medium: 23,  // ~6m 54s
+  long: 33,    // ~9m 54s
 };
 
 export function getPhaseAtTime(elapsedInCycle: number): { config: PhaseConfig; timeInPhase: number; phaseIndex: number } {

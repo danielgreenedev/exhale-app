@@ -1,210 +1,439 @@
 'use client';
 
-import { useRef, useCallback } from 'react';
-import { BreathingPhase } from '@/lib/breathing';
+import { useCallback, useEffect, useRef, type MutableRefObject } from 'react';
+import { BreathingPhase, BREATHING_PATTERN } from '@/lib/breathing';
+import { DEFAULT_SOUND_PALETTE, SoundPaletteId } from '@/lib/sound';
 
-export function useAudioEngine() {
+type ActiveSoundPaletteId = Exclude<SoundPaletteId, 'off'>;
+type NoteConfig = readonly [frequency: number, detune: number, weight: number];
+
+interface AmbientConfig {
+  masterVolume: number;
+  reverbGain: number;
+  reverbSeconds: number;
+  reverbDecay: number;
+  noiseGain: number;
+  noiseFilters: readonly { frequency: number; q: number }[];
+  sub?: { frequency: number; gain: number };
+  chordGain: number;
+  chordNotes: readonly NoteConfig[];
+  chordOscType?: OscillatorType;
+  cueGain: number;
+  cueLowpass: number;
+  cueSubGain: number;
+  breathMin: number;
+  breathMax: number;
+}
+
+const AMBIENT_PALETTES: Record<ActiveSoundPaletteId, AmbientConfig> = {
+  air: {
+    masterVolume: 0.15,
+    reverbGain: 0.22,
+    reverbSeconds: 1.7,
+    reverbDecay: 2.4,
+    noiseGain: 0.095,
+    noiseFilters: [
+      { frequency: 175, q: 0.7 },
+      { frequency: 320, q: 0.48 },
+    ],
+    sub: { frequency: 49, gain: 0.018 },
+    chordGain: 0.13,
+    chordNotes: [
+      [196.0, 0.0, 1.0],
+      [293.66, 0.08, 0.42],
+      [392.0, -0.05, 0.18],
+    ],
+    cueGain: 0.62,
+    cueLowpass: 1400,
+    cueSubGain: 0.014,
+    breathMin: 1600,
+    breathMax: 4200,
+  },
+  warm: {
+    masterVolume: 0.17,
+    reverbGain: 0.36,
+    reverbSeconds: 2.2,
+    reverbDecay: 2.0,
+    noiseGain: 0.055,
+    noiseFilters: [
+      { frequency: 150, q: 0.68 },
+      { frequency: 260, q: 0.44 },
+    ],
+    sub: { frequency: 55, gain: 0.028 },
+    chordGain: 0.22,
+    chordNotes: [
+      [220.0, 0.0, 1.0],
+      [277.18, -0.04, 0.52],
+      [329.63, 0.06, 0.38],
+      [440.0, -0.03, 0.18],
+    ],
+    chordOscType: 'sine',
+    cueGain: 0.68,
+    cueLowpass: 1500,
+    cueSubGain: 0.018,
+    breathMin: 1400,
+    breathMax: 3600,
+  },
+  low: {
+    masterVolume: 0.16,
+    reverbGain: 0.18,
+    reverbSeconds: 1.6,
+    reverbDecay: 2.7,
+    noiseGain: 0.05,
+    noiseFilters: [
+      { frequency: 105, q: 0.78 },
+      { frequency: 210, q: 0.5 },
+    ],
+    sub: { frequency: 44, gain: 0.034 },
+    chordGain: 0.14,
+    chordNotes: [
+      [110.0, 0.0, 0.8],
+      [146.83, -0.04, 0.44],
+      [220.0, 0.05, 0.26],
+    ],
+    cueGain: 0.5,
+    cueLowpass: 1050,
+    cueSubGain: 0.02,
+    breathMin: 1000,
+    breathMax: 2800,
+  },
+  quiet: {
+    masterVolume: 0.1,
+    reverbGain: 0.12,
+    reverbSeconds: 1.4,
+    reverbDecay: 2.6,
+    noiseGain: 0.038,
+    noiseFilters: [
+      { frequency: 150, q: 0.6 },
+      { frequency: 260, q: 0.38 },
+    ],
+    sub: { frequency: 49, gain: 0.008 },
+    chordGain: 0,
+    chordNotes: [],
+    cueGain: 0.28,
+    cueLowpass: 900,
+    cueSubGain: 0.006,
+    breathMin: 1200,
+    breathMax: 3000,
+  },
+};
+
+const CUE_MAP: Record<BreathingPhase, [number, number]> = {
+  inhale: [493.88, 739.99],
+  hold: [440.0, 659.25],
+  exhale: [392.0, 587.33],
+  rest: [329.63, 493.88],
+};
+
+function isActivePalette(id: SoundPaletteId): id is ActiveSoundPaletteId {
+  return id !== 'off';
+}
+
+function disconnectNode(node: AudioNode | null) {
+  try {
+    node?.disconnect();
+  } catch {
+    // Already disconnected.
+  }
+}
+
+export function useAudioEngine(soundPalette: SoundPaletteId = DEFAULT_SOUND_PALETTE) {
   const ctxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
   const reverbRef = useRef<ConvolverNode | null>(null);
   const reverbGainRef = useRef<GainNode | null>(null);
-  const ambientNodesRef = useRef<AudioNode[]>([]);
+  const breathFilterRef = useRef<BiquadFilterNode | null>(null);
+  const ambientSourcesRef = useRef<AudioScheduledSourceNode[]>([]);
   const enabledRef = useRef(false);
+  const paletteRef = useRef<SoundPaletteId>(soundPalette);
+  const stopTimeoutRef = useRef<number | null>(null);
+  const previewTimeoutRef = useRef<number | null>(null);
+  // Reverb buffer is expensive to generate (~150k iterations); cache per palette to skip on re-start
+  const reverbCacheRef = useRef<Map<string, AudioBuffer>>(new Map());
+
+  useEffect(() => {
+    paletteRef.current = soundPalette;
+  }, [soundPalette]);
+
+  const clearTimer = useCallback((timerRef: MutableRefObject<number | null>) => {
+    if (timerRef.current === null) return;
+    window.clearTimeout(timerRef.current);
+    timerRef.current = null;
+  }, []);
 
   const getCtx = useCallback(() => {
     if (!ctxRef.current) ctxRef.current = new AudioContext();
     return ctxRef.current;
   }, []);
 
-  const startAmbient = useCallback(() => {
-    const ctx = getCtx();
-    enabledRef.current = true;
+  const stopSources = useCallback(() => {
+    clearTimer(stopTimeoutRef);
 
-    ambientNodesRef.current.forEach((node) => {
-      try { (node as OscillatorNode | AudioBufferSourceNode).stop(); } catch { /* already stopped */ }
+    ambientSourcesRef.current.forEach((source) => {
+      try {
+        source.stop();
+      } catch {
+        // Already stopped.
+      }
+      disconnectNode(source);
     });
-    ambientNodesRef.current = [];
+    ambientSourcesRef.current = [];
+
+    disconnectNode(reverbRef.current);
+    disconnectNode(reverbGainRef.current);
+    disconnectNode(masterGainRef.current);
+    disconnectNode(breathFilterRef.current);
+    reverbRef.current = null;
+    reverbGainRef.current = null;
+    masterGainRef.current = null;
+    breathFilterRef.current = null;
+  }, [clearTimer]);
+
+  const startAmbient = useCallback(async (paletteOverride?: SoundPaletteId, fadeIn = 3.0) => {
+    const paletteId = paletteOverride ?? paletteRef.current;
+    clearTimer(previewTimeoutRef);
+
+    if (!isActivePalette(paletteId)) {
+      enabledRef.current = false;
+      stopSources();
+      return false;
+    }
+
+    const config = AMBIENT_PALETTES[paletteId];
+    const ctx = getCtx();
+    if (ctx.state === 'suspended') await ctx.resume();
+
+    enabledRef.current = true;
+    stopSources();
+
+    const now = ctx.currentTime;
+    const breathFilter = ctx.createBiquadFilter();
+    breathFilter.type = 'lowpass';
+    breathFilter.frequency.value = config.breathMin;
+    breathFilter.Q.value = 0.5;
+    breathFilter.connect(ctx.destination);
+    breathFilterRef.current = breathFilter;
 
     const master = ctx.createGain();
-    master.gain.setValueAtTime(0, ctx.currentTime);
-    master.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 3);
-    master.connect(ctx.destination);
+    master.gain.setValueAtTime(0, now);
+    master.gain.linearRampToValueAtTime(config.masterVolume, now + fadeIn);
+    master.connect(breathFilter);
     masterGainRef.current = master;
 
-    // Small-room reverb — synthetic decaying-noise impulse response
-    const revLen = Math.floor(ctx.sampleRate * 1.8);
-    const revBuf = ctx.createBuffer(2, revLen, ctx.sampleRate);
-    for (let ch = 0; ch < 2; ch++) {
-      const d = revBuf.getChannelData(ch);
-      for (let i = 0; i < revLen; i++) {
-        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / revLen, 2.2);
+    let revBuf = reverbCacheRef.current.get(paletteId);
+    if (!revBuf) {
+      const revLen = Math.floor(ctx.sampleRate * config.reverbSeconds);
+      revBuf = ctx.createBuffer(2, revLen, ctx.sampleRate);
+      for (let ch = 0; ch < 2; ch += 1) {
+        const data = revBuf.getChannelData(ch);
+        for (let i = 0; i < revLen; i += 1) {
+          data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / revLen, config.reverbDecay);
+        }
       }
+      reverbCacheRef.current.set(paletteId, revBuf);
     }
+
     const reverb = ctx.createConvolver();
     reverb.buffer = revBuf;
     reverbRef.current = reverb;
 
     const revGain = ctx.createGain();
-    revGain.gain.value = 0.30;
+    revGain.gain.value = config.reverbGain;
     reverb.connect(revGain);
     revGain.connect(master);
     reverbGainRef.current = revGain;
 
-    // Gentle breeze: band-pass filtered white noise
-    // Lower center frequencies (260→180, 420→300) for warmer, less airy character
     const bufSize = ctx.sampleRate * 4;
     const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+    const noiseData = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i += 1) noiseData[i] = Math.random() * 2 - 1;
 
     const noise = ctx.createBufferSource();
     noise.buffer = buf;
     noise.loop = true;
-    ambientNodesRef.current.push(noise);
-
-    const bp1 = ctx.createBiquadFilter();
-    bp1.type = 'bandpass';
-    bp1.frequency.value = 180;
-    bp1.Q.value = 0.7;
-
-    const bp2 = ctx.createBiquadFilter();
-    bp2.type = 'bandpass';
-    bp2.frequency.value = 300;
-    bp2.Q.value = 0.5;
+    ambientSourcesRef.current.push(noise);
 
     const noiseGain = ctx.createGain();
-    noiseGain.gain.value = 0.09;
-
-    noise.connect(bp1);
-    bp1.connect(noiseGain);
-    noise.connect(bp2);
-    bp2.connect(noiseGain);
+    noiseGain.gain.value = config.noiseGain;
+    config.noiseFilters.forEach(({ frequency, q }) => {
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = frequency;
+      filter.Q.value = q;
+      noise.connect(filter);
+      filter.connect(noiseGain);
+    });
     noiseGain.connect(master);
     noise.start();
 
-    // Sub-bass grounding: A1 (55Hz) sine — felt more than heard, adds body
-    const sub = ctx.createOscillator();
-    sub.type = 'sine';
-    sub.frequency.value = 55;
-    const subGain = ctx.createGain();
-    subGain.gain.value = 0.030;
-    sub.connect(subGain);
-    subGain.connect(master);
-    sub.start();
-    ambientNodesRef.current.push(sub);
+    if (config.sub) {
+      const sub = ctx.createOscillator();
+      sub.type = 'sine';
+      sub.frequency.value = config.sub.frequency;
+      const subGain = ctx.createGain();
+      subGain.gain.value = config.sub.gain;
+      sub.connect(subGain);
+      subGain.connect(master);
+      sub.start();
+      ambientSourcesRef.current.push(sub);
+    }
 
-    // G major chord: G3 + B3 + D4 + G4
-    // Adding the major third (B3) over the previous open-fifth voicing adds emotional warmth
-    const chordFreqs: [number, number, number][] = [
-      [196.00,  0.00,  1.00],  // G3 — root, full weight
-      [246.94, -0.06,  0.60],  // B3 — major third (new)
-      [293.66,  0.10,  0.40],  // D4 — fifth
-      [392.00, -0.07,  0.20],  // G4 — octave
-    ];
+    if (config.chordGain > 0 && config.chordNotes.length > 0) {
+      const chordGain = ctx.createGain();
+      chordGain.gain.value = config.chordGain;
+      chordGain.connect(master);
+      chordGain.connect(reverb);
 
-    const chordGain = ctx.createGain();
-    chordGain.gain.value = 0.20;
-    chordGain.connect(master);
-    chordGain.connect(reverb); // chord through reverb for spaciousness
+      config.chordNotes.forEach(([frequency, detune, weight]) => {
+        const osc = ctx.createOscillator();
+        osc.type = config.chordOscType ?? 'triangle';
+        osc.frequency.value = frequency + detune;
+        const gain = ctx.createGain();
+        gain.gain.value = weight;
+        osc.connect(gain);
+        gain.connect(chordGain);
+        osc.start();
+        ambientSourcesRef.current.push(osc);
+      });
+    }
 
-    chordFreqs.forEach(([freq, detune, weight]) => {
-      const osc = ctx.createOscillator();
-      osc.type = 'triangle';
-      osc.frequency.value = freq + detune;
-      const g = ctx.createGain();
-      g.gain.value = weight;
-      osc.connect(g);
-      g.connect(chordGain);
-      osc.start();
-      ambientNodesRef.current.push(osc);
-    });
-  }, [getCtx]);
+    return true;
+  }, [clearTimer, getCtx, stopSources]);
 
   const stopAmbient = useCallback((duration = 2.0) => {
     enabledRef.current = false;
-    if (masterGainRef.current && ctxRef.current) {
-      masterGainRef.current.gain.linearRampToValueAtTime(0, ctxRef.current.currentTime + duration);
+    clearTimer(previewTimeoutRef);
+
+    const ctx = ctxRef.current;
+    const master = masterGainRef.current;
+    if (!ctx || !master || duration <= 0) {
+      stopSources();
+      return;
     }
-  }, []);
+
+    clearTimer(stopTimeoutRef);
+    const now = ctx.currentTime;
+    master.gain.cancelScheduledValues(now);
+    master.gain.setValueAtTime(master.gain.value, now);
+    master.gain.linearRampToValueAtTime(0, now + duration);
+    stopTimeoutRef.current = window.setTimeout(stopSources, duration * 1000 + 120);
+  }, [clearTimer, stopSources]);
 
   const pauseAmbient = useCallback(() => {
     if (masterGainRef.current && ctxRef.current) {
-      masterGainRef.current.gain.linearRampToValueAtTime(0, ctxRef.current.currentTime + 0.5);
+      const now = ctxRef.current.currentTime;
+      masterGainRef.current.gain.cancelScheduledValues(now);
+      masterGainRef.current.gain.linearRampToValueAtTime(0, now + 0.5);
     }
   }, []);
 
   const resumeAmbient = useCallback(() => {
+    const paletteId = paletteRef.current;
+    if (!isActivePalette(paletteId)) return;
     if (masterGainRef.current && ctxRef.current) {
-      masterGainRef.current.gain.linearRampToValueAtTime(0.18, ctxRef.current.currentTime + 1.2);
+      const now = ctxRef.current.currentTime;
+      masterGainRef.current.gain.cancelScheduledValues(now);
+      masterGainRef.current.gain.linearRampToValueAtTime(AMBIENT_PALETTES[paletteId].masterVolume, now + 1.2);
     }
   }, []);
 
-  // Warm chime cue on each phase change
+  const previewPalette = useCallback(async (paletteOverride?: SoundPaletteId) => {
+    const started = await startAmbient(paletteOverride, 0.45);
+    if (!started) return false;
+
+    previewTimeoutRef.current = window.setTimeout(() => {
+      previewTimeoutRef.current = null;
+      stopAmbient(0.9);
+    }, 3200);
+
+    return true;
+  }, [startAmbient, stopAmbient]);
+
   const playCue = useCallback((phase: BreathingPhase) => {
-    if (!enabledRef.current) return;
+    const paletteId = paletteRef.current;
+    if (!enabledRef.current || !isActivePalette(paletteId)) return;
+
     const ctx = getCtx();
     const master = masterGainRef.current;
     const reverb = reverbRef.current;
     if (!master) return;
 
-    const cueMap: Record<BreathingPhase, [number, number]> = {
-      inhale: [523.25, 783.99],  // C5 + G5 — light, open
-      hold:   [440.00, 659.25],  // A4 + E5 — warm, stable
-      exhale: [392.00, 587.33],  // G4 + D5 — soft, settling
-      rest:   [329.63, 493.88],  // E4 + B4 — quiet, grounded
-    };
+    const config = AMBIENT_PALETTES[paletteId];
+    if (config.cueGain <= 0) return;
 
-    const [root, fifth] = cueMap[phase];
+    const breathFilter = breathFilterRef.current;
+    if (breathFilter) {
+      const phaseDuration = BREATHING_PATTERN.find(p => p.phase === phase)?.duration ?? 4;
+      const nowB = ctx.currentTime;
+      breathFilter.frequency.cancelScheduledValues(nowB);
+      if (phase === 'inhale') {
+        breathFilter.frequency.setValueAtTime(config.breathMin, nowB);
+        breathFilter.frequency.linearRampToValueAtTime(config.breathMax, nowB + phaseDuration);
+      } else if (phase === 'hold') {
+        breathFilter.frequency.setValueAtTime(config.breathMax, nowB);
+      } else if (phase === 'exhale') {
+        breathFilter.frequency.setValueAtTime(config.breathMax, nowB);
+        breathFilter.frequency.linearRampToValueAtTime(config.breathMin, nowB + phaseDuration);
+      } else {
+        breathFilter.frequency.setValueAtTime(config.breathMin, nowB);
+      }
+    }
+
+    const [root, fifth] = CUE_MAP[phase];
     const now = ctx.currentTime;
 
-    // Low-pass filter — remove harsh upper harmonics from triangle waves
-    const lp = ctx.createBiquadFilter();
-    lp.type = 'lowpass';
-    lp.frequency.value = 1600;
-    lp.Q.value = 0.5;
-    lp.connect(master);          // dry signal
-    if (reverb) lp.connect(reverb); // wet signal → reverb → revGain → master
+    const lowpass = ctx.createBiquadFilter();
+    lowpass.type = 'lowpass';
+    lowpass.frequency.value = config.cueLowpass;
+    lowpass.Q.value = 0.5;
+    lowpass.connect(master);
+    if (reverb) lowpass.connect(reverb);
 
-    // Sub-octave root — sine one octave below, adds warmth and body
     const subOsc = ctx.createOscillator();
     subOsc.type = 'sine';
     subOsc.frequency.value = root / 2;
     const subGain = ctx.createGain();
     subGain.gain.setValueAtTime(0, now);
-    subGain.gain.linearRampToValueAtTime(0.025, now + 0.50);
-    subGain.gain.exponentialRampToValueAtTime(0.001, now + 2.2);
+    subGain.gain.linearRampToValueAtTime(config.cueSubGain, now + 0.55);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 2.15);
     subOsc.connect(subGain);
-    subGain.connect(lp);
+    subGain.connect(lowpass);
     subOsc.start(now);
-    subOsc.stop(now + 2.3);
+    subOsc.stop(now + 2.25);
 
-    // Root note — slower attack (0.35s vs 0.18s) for a bloom rather than a ping
     const rootOsc = ctx.createOscillator();
     rootOsc.type = 'triangle';
     rootOsc.frequency.value = root;
     const rootGain = ctx.createGain();
     rootGain.gain.setValueAtTime(0, now);
-    rootGain.gain.linearRampToValueAtTime(0.082, now + 0.35);
-    rootGain.gain.setValueAtTime(0.055, now + 0.80);
-    rootGain.gain.exponentialRampToValueAtTime(0.001, now + 2.4);
+    rootGain.gain.linearRampToValueAtTime(0.07 * config.cueGain, now + 0.38);
+    rootGain.gain.setValueAtTime(0.044 * config.cueGain, now + 0.84);
+    rootGain.gain.exponentialRampToValueAtTime(0.001, now + 2.35);
     rootOsc.connect(rootGain);
-    rootGain.connect(lp);
+    rootGain.connect(lowpass);
     rootOsc.start(now);
-    rootOsc.stop(now + 2.5);
+    rootOsc.stop(now + 2.45);
 
-    // Fifth — softer, slightly delayed onset
     const fifthOsc = ctx.createOscillator();
     fifthOsc.type = 'triangle';
     fifthOsc.frequency.value = fifth;
     const fifthGain = ctx.createGain();
     fifthGain.gain.setValueAtTime(0, now);
-    fifthGain.gain.linearRampToValueAtTime(0.030, now + 0.45);
-    fifthGain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+    fifthGain.gain.linearRampToValueAtTime(0.024 * config.cueGain, now + 0.5);
+    fifthGain.gain.exponentialRampToValueAtTime(0.001, now + 1.95);
     fifthOsc.connect(fifthGain);
-    fifthGain.connect(lp);
+    fifthGain.connect(lowpass);
     fifthOsc.start(now);
-    fifthOsc.stop(now + 2.1);
+    fifthOsc.stop(now + 2.05);
   }, [getCtx]);
 
-  return { startAmbient, stopAmbient, pauseAmbient, resumeAmbient, playCue };
+  useEffect(() => {
+    return () => {
+      clearTimer(previewTimeoutRef);
+      stopSources();
+      void ctxRef.current?.close().catch(() => {});
+    };
+  }, [clearTimer, stopSources]);
+
+  return { startAmbient, stopAmbient, pauseAmbient, resumeAmbient, previewPalette, playCue };
 }
