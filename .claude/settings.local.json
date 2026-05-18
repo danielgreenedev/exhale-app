@@ -55,7 +55,12 @@
       "Bash(curl -s \"http://localhost:3000/icon1\" -o /tmp/favicons/large.png)",
       "Bash(curl -s \"http://localhost:3000/icon\" -o .tmp-icons/icon.png)",
       "Bash(curl -s \"http://localhost:3000/apple-icon\" -o .tmp-icons/apple.png)",
-      "Bash(curl -s \"http://localhost:3000/icon1\" -o .tmp-icons/large.png)"
+      "Bash(curl -s \"http://localhost:3000/icon1\" -o .tmp-icons/large.png)",
+      "Bash(curl -s -o /dev/null -w \"exhale.guide=%{http_code}\\\\n\" https://exhale.guide)",
+      "Bash(curl -s -o /dev/null -w \"game=%{http_code}\\\\n\" \"https://exhale.guide/game?length=quick\")",
+      "Bash(curl -s https://exhale.guide)",
+      "Bash(curl -s https://exhale.guide/_next/static/chunks/14c89owy6khb-.css)",
+      "Bash(grep -oE \"pb-[^,;{}\\\\\"]*\")"
     ]
   }
 }
