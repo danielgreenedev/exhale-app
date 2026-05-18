@@ -16,8 +16,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        setUserId(session.user.id);
-        return;
+        // Server-validate the JWT so a token for a deleted user can't silently
+        // poison every subsequent write with FK violations.
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (user && !error) {
+          setUserId(user.id);
+          return;
+        }
+        await supabase.auth.signOut();
       }
       const { data } = await supabase.auth.signInAnonymously();
       if (data.user) setUserId(data.user.id);
