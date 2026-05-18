@@ -6,6 +6,10 @@ Last updated: May 18, 2026
 
 Use this document to capture user critique, usability notes, and product observations without mixing private tester details into the core product docs.
 
+## Current Test Surface
+
+Use `https://exhale.guide` for the current beta round. Use a Vercel preview only when a future test needs changes that should not be visible on production yet.
+
 ## Privacy Rules
 
 - Keep feedback anonymous unless a user explicitly asks to be named.
@@ -13,6 +17,15 @@ Use this document to capture user critique, usability notes, and product observa
 - Summarize patterns in your own words instead of storing long raw quotes.
 - Separate observations from product decisions.
 - Move accepted work into `docs/TODO.md` when it becomes actionable.
+
+## Beta Test Prompt
+
+Send a short, open prompt so feedback stays practical:
+
+1. Try starting a breathing session without extra explanation.
+2. Notice anything that feels rushed, confusing, too quiet, too loud, or hard to read.
+3. Try Practice History if you have time.
+4. Send back what worked, what felt off, and anything you would change.
 
 ## Feedback Intake Template
 
@@ -82,7 +95,7 @@ Use this document to capture user critique, usability notes, and product observa
 
 - Does Practice History clearly explain what sync includes?
 - Is the privacy reassurance clear without using account-heavy language?
-- Does cross-device history feel reliable after sign-in?
+- Does cross-device history feel reliable after confirming an email code?
 
 ## Synthesis Format
 

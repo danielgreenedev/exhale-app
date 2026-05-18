@@ -1,6 +1,6 @@
 # Exhale
 
-Guided breathing app built with Next.js 15, React 19, TypeScript, Tailwind CSS v3.
+Guided breathing app built with Next.js 16, React 19, TypeScript, Tailwind CSS v3.
 
 ## Mission
 
@@ -30,6 +30,9 @@ The rest phase is intentionally long enough to allow a normal breath, yawn, or s
 - `src/hooks/useAudioEngine.ts` — Web Audio API synthesis (no external files)
 - `src/hooks/useSessionStats.ts` — localStorage session persistence
 - `src/lib/breathing.ts` — phase configs, session lengths, easing math
+- `src/lib/sound.ts` — sound palette labels and storage IDs
+- `src/lib/sessionSync.ts` — local/cloud session merge helpers
+- `src/lib/appEvents.ts` — Supabase event logging for email-synced users
 
 ## Design Principles
 
@@ -66,9 +69,19 @@ Do not reuse these keys for new features:
 |-----|---------|---------|
 | `exhale-stats` | localStorage | Session records array |
 | `exhale-orb-scale` | localStorage | Circle size preference (0.75 / 1.0 / 1.25) |
-| `exhale-sound-palette` | localStorage | Sound palette preference (air / warm / deep / still / off) |
+| `exhale-sound-palette` | localStorage | Sound palette preference (`air` / `warm` / `low` / `quiet` / `off`; labels are Air / Warm / Deep / Still / mute) |
 | `exhale-visited` | localStorage | First-visit flag (cleared = first visit) |
 | `exhale-resume` | sessionStorage | In-progress session state, 60s TTL |
+
+## Supabase Data
+
+Supabase is optional from the user's point of view and only appears through Practice History sync.
+
+| Table | Purpose |
+|-------|---------|
+| `breathing_sessions` | Cloud practice history |
+| `user_settings` | Timer length, Circle Size, and sound choice |
+| `app_events` | Lightweight counts for timer selection, session start, early exit, and completion |
 
 ## Key UX Decisions
 
@@ -78,6 +91,8 @@ These are intentional — don't undo them without understanding the rationale:
 - **Abstract orb** — chosen over thematic visuals (ocean, lantern, mandala). More universal, less culturally loaded, works for any user.
 - **8s settle-in before first breath** — gives the user a quiet transition from "reading the screen" to "being in the session."
 - **Session resume (60s window)** — exiting a session shows an exit guard; sessionStorage holds state for 60s so accidental exits don't lose progress.
+- **Resume directly below Begin** — when a resumable session exists, the continuation action sits next to the primary start action before View Sequence.
+- **Settings disclosure after 3 sessions** — Circle Size and Sound stay visible for early tuning, then collapse into Settings once the user has some familiarity.
 - **No phase instruction after cycle 2** — the HUD instruction fades; the orb has already taught the pattern by then.
 
 ## Accessibility Baseline (Already Built)

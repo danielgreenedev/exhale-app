@@ -73,6 +73,11 @@ These are decisions made and should not be revisited without strong cause:
 - Preview branch: GitHub `preview`, deployed by Vercel as a pre-production branch.
 - Public domain: `https://exhale.guide`.
 - Optional sync depends on Supabase email OTP codes. The Magic Link and Change Email Address templates should visibly include `{{ .Token }}` instead of link-only copy.
+- Supabase tables currently used: `breathing_sessions`, `user_settings`, and `app_events`.
+
+## Beta Handoff
+
+For the current beta round, use `https://exhale.guide`. Capture anonymized notes in `docs/USER_FEEDBACK.md`, then move accepted work into `docs/TODO.md`. Use a Vercel preview only when a future test needs changes that should not be visible on production yet.
 
 ## Accessibility & Inclusion
 

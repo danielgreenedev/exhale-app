@@ -190,6 +190,7 @@ Soft and inviting — generous rounded corners (16px / `rounded-2xl`), borders t
 
 - **Shape:** Generously curved (16px radius). Game controls use a tighter curve (8px / `rounded-lg`).
 - **Begin (Primary):** Solid Emerald Pulse fill with Forest Night text. It is the only filled action on the home screen, so the start path is unmistakable even when the user is stressed or in low light. On hover, the fill warms slightly to emerald-200. Tracks a 300ms ease-all transition.
+- **Resume (Contextual):** Appears only when a session can be resumed within the 60-second window. It sits directly below Begin and above View Sequence so continuation remains close to the primary action without competing with it.
 - **Ghost (Secondary):** White border at 15–18% opacity, no background fill, text at 38–45% white. On hover: background tints to white at 4%, border to 28–32%, text to 55–65%. Used for "Practice history", "← Back", "Back to Menu", secondary navigation.
 - **Session Picker Options:** Ghost by default; selected state uses an emerald border, a 10% emerald tint, and green-lit text so it reads as active without competing with the solid Begin button. Arrow key navigation via `role="radiogroup"`.
 - **Game Controls (Pause/Exit):** 8px radius, white border at 18%, transparent background. Compact padding (6px 12px). Positioned at the bottom corners of the session canvas for thumb-zone access. Do not use at the top of the screen.
@@ -222,6 +223,10 @@ The palette control belongs with Circle Size below the primary Begin flow. Sound
 ### Circle Size
 
 Circle Size uses compact S/M/L radio controls. The active size uses the same emerald border, faint tint, and green-lit label as Time and Sound selections, so all home-screen preferences share one checked-state language while Begin stays the only solid green control.
+
+### Settings Disclosure
+
+Circle Size and Sound remain visible for the first two completed sessions so new users can tune the experience. Starting at three completed sessions, both controls move into a quiet Settings disclosure with the same caret language as View Sequence. Practice History stays visible outside Settings because it is navigation, not a preference.
 
 ### Stats Rows
 

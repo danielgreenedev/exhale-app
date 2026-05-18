@@ -13,10 +13,11 @@ Exhale uses Vercel for hosting, Supabase for data, and GitHub as the deployment 
 1. Build and test locally.
 2. Commit the change on a working branch.
 3. Push to `preview`.
-4. Test the Vercel preview URL on desktop and mobile.
+4. Test the Vercel preview URL on desktop and mobile if preview access is open.
 5. For sync changes, test the full two-device email-code flow on the preview URL.
 6. Merge or cherry-pick the tested commit to `master`.
 7. Push `master` to deploy `https://exhale.guide`.
+8. Confirm the GitHub/Vercel deployment status is successful.
 
 ## Pre-Production Checklist
 
@@ -33,6 +34,8 @@ Exhale uses Vercel for hosting, Supabase for data, and GitHub as the deployment 
 
 In Vercel Project Settings, keep the Production environment branch tracking set to `master`. Non-production branches, including `preview`, should remain preview deployments.
 
+The preview branch may be protected by Vercel authentication. For external beta testing, either use production at `https://exhale.guide` or explicitly share an accessible preview/bypass link.
+
 The production custom domain is:
 
 `https://exhale.guide`
@@ -43,6 +46,7 @@ Supabase stores:
 
 - `breathing_sessions`: practice history.
 - `user_settings`: timer length, Circle Size, and sound choice.
+- `app_events`: timer selections, session starts, early exits, and completions for email-synced users.
 
 The Supabase email templates for sync should visibly include the 6-digit OTP token:
 
