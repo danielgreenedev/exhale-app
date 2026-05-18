@@ -52,6 +52,22 @@ export default function StatsPage() {
     }
   };
 
+  const handleResend = async () => {
+    if (!linkedEmail) return;
+    setSubmitting(true);
+    setLinkError('');
+    const { error } = await supabase.auth.updateUser({ email: linkedEmail });
+    setSubmitting(false);
+    if (error) setLinkError(error.message);
+  };
+
+  const handleReset = () => {
+    setLinkedEmail(null);
+    setLinkConfirmed(false);
+    setLinkError('');
+    setEmail('');
+  };
+
   const { totalSessions, totalMinutes, thisWeek, streak, totalDays } = computeStats(sessions);
   const hours = Math.floor(totalMinutes / 60);
   const mins = totalMinutes % 60;
@@ -206,9 +222,37 @@ export default function StatsPage() {
               Synced to {linkedEmail}. Sign in with the same email on any device to sync your practice there.
             </p>
           ) : linkedEmail ? (
-            <p className="text-still-white/58 text-sm font-light leading-relaxed">
-              Check {linkedEmail} for a confirmation link. Open it on any device to start syncing your practice there.
-            </p>
+            <div className="flex flex-col gap-3">
+              <p className="text-still-white/58 text-sm font-light leading-relaxed">
+                Check {linkedEmail} for a confirmation link. Open it on any device to start syncing your practice there.
+              </p>
+              <p className="text-still-white/48 text-xs font-light leading-relaxed">
+                On mobile, long-press the link and choose <span className="text-still-white/70">copy link address</span>, then paste it into your browser. Some mail apps quietly preview the link first, which can invalidate it.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={submitting}
+                  className="flex-1 min-h-11 py-2 rounded-2xl border border-still-white/18 text-still-white/68 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:text-still-white/85 hover:bg-still-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                >
+                  {submitting ? 'Sending…' : 'Send again'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  disabled={submitting}
+                  className="flex-1 min-h-11 py-2 rounded-2xl text-still-white/52 text-xs tracking-[0.18em] uppercase font-light hover:text-still-white/75 hover:bg-still-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors duration-300"
+                >
+                  Use another
+                </button>
+              </div>
+              {linkError && (
+                <p className="text-amber-100/72 text-xs font-light leading-relaxed text-center">
+                  {linkError}
+                </p>
+              )}
+            </div>
           ) : (
             <form onSubmit={handleLink} className="flex flex-col gap-2">
               <label htmlFor="link-email" className="sr-only">Email</label>

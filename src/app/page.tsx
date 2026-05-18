@@ -122,7 +122,8 @@ function HomeContent() {
         setHomeStat({ sessions: totalSessions, streak });
       }
     } catch { /* unavailable */ }
-  }, [urlLength]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Sync settings with Supabase: restore cloud settings on first load, push local on new users
   useEffect(() => {
@@ -154,6 +155,7 @@ function HomeContent() {
             });
         }
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   useEffect(() => {
