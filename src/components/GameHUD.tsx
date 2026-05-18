@@ -126,8 +126,8 @@ export default function GameHUD({
         </div>
       )}
 
-      {/* Bottom: session progress */}
-      <div className="pb-16 flex flex-col items-center gap-2">
+      {/* Bottom: session progress — lifted above the bottom control row + sound tooltip on small screens */}
+      <div className="pb-[calc(7rem+env(safe-area-inset-bottom))] flex flex-col items-center gap-2">
         <div
           className="w-48 h-[2px] bg-still-white/18 rounded-full overflow-hidden"
           role="progressbar"
