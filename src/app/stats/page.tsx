@@ -30,9 +30,14 @@ export default function StatsPage() {
     setSessions(readStats().sessions);
 
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user?.email) {
-        setLinkedEmail(data.user.email);
-        setLinkConfirmed(!!data.user.email_confirmed_at);
+      const user = data.user;
+      if (!user) return;
+      if (user.email && user.email_confirmed_at) {
+        setLinkedEmail(user.email);
+        setLinkConfirmed(true);
+      } else if (user.new_email) {
+        setLinkedEmail(user.new_email);
+        setLinkConfirmed(false);
       }
     });
   }, []);
