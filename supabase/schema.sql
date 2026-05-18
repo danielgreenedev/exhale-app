@@ -2,10 +2,11 @@
 
 -- ─── User settings ──────────────────────────────────────────────────────────
 create table if not exists user_settings (
-  user_id      uuid primary key references auth.users(id) on delete cascade,
-  orb_scale    float not null default 1.0,
-  sound_palette text not null default 'air',
-  updated_at   timestamptz not null default now()
+  user_id        uuid primary key references auth.users(id) on delete cascade,
+  orb_scale      float not null default 1.0,
+  sound_palette  text not null default 'air',
+  session_length text,
+  updated_at     timestamptz not null default now()
 );
 
 alter table user_settings enable row level security;

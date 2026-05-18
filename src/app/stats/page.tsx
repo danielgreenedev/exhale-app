@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { readStats, computeStats, storageAvailable, SessionRecord } from '@/hooks/useSessionStats';
 import { SURFACE_GLOWS } from '@/lib/colors';
+import { supabase } from '@/lib/supabase';
 
 function formatDate(dateStr: string): string {
   const today = new Date().toISOString().split('T')[0];
@@ -18,10 +19,38 @@ export default function StatsPage() {
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
   const [storageOk, setStorageOk] = useState(true);
 
+  const [email, setEmail] = useState('');
+  const [linkedEmail, setLinkedEmail] = useState<string | null>(null);
+  const [linkConfirmed, setLinkConfirmed] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [linkError, setLinkError] = useState('');
+
   useEffect(() => {
     setStorageOk(storageAvailable());
     setSessions(readStats().sessions);
+
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user?.email) {
+        setLinkedEmail(data.user.email);
+        setLinkConfirmed(!!data.user.email_confirmed_at);
+      }
+    });
   }, []);
+
+  const handleLink = async (e: FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setLinkError('');
+    const { error } = await supabase.auth.updateUser({ email });
+    setSubmitting(false);
+    if (error) {
+      setLinkError(error.message);
+    } else {
+      setLinkedEmail(email);
+      setLinkConfirmed(false);
+      setEmail('');
+    }
+  };
 
   const { totalSessions, totalMinutes, thisWeek, streak, totalDays } = computeStats(sessions);
   const hours = Math.floor(totalMinutes / 60);
@@ -167,6 +196,47 @@ export default function StatsPage() {
             </div>
           </>
         )}
+
+        <div className="flex flex-col gap-3 w-full pt-2 border-t border-still-white/10">
+          <p className="text-still-white/52 text-xs tracking-[0.15em] uppercase font-light">
+            Remember on other devices
+          </p>
+          {linkConfirmed && linkedEmail ? (
+            <p className="text-still-white/58 text-sm font-light leading-relaxed">
+              Synced to {linkedEmail}. Sign in with the same email on any device to sync your practice there.
+            </p>
+          ) : linkedEmail ? (
+            <p className="text-still-white/58 text-sm font-light leading-relaxed">
+              Check {linkedEmail} for a confirmation link. Open it on any device to start syncing your practice there.
+            </p>
+          ) : (
+            <form onSubmit={handleLink} className="flex flex-col gap-2">
+              <label htmlFor="link-email" className="sr-only">Email</label>
+              <input
+                id="link-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your email"
+                required
+                disabled={submitting}
+                className="w-full min-h-11 px-4 py-3 rounded-2xl bg-transparent border border-still-white/18 text-still-white/85 placeholder:text-still-white/40 text-sm tracking-[0.04em] font-light focus:border-still-white/35 focus:outline-none transition-colors duration-300 disabled:opacity-50"
+              />
+              <button
+                type="submit"
+                disabled={submitting || !email}
+                className="w-full min-h-11 py-3 rounded-2xl border border-emerald-pulse/35 bg-emerald-pulse/10 text-emerald-100/95 text-xs tracking-[0.2em] uppercase font-light hover:border-emerald-pulse/55 hover:bg-emerald-pulse/16 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+              >
+                {submitting ? 'Sending…' : 'Send link'}
+              </button>
+              {linkError && (
+                <p className="text-amber-100/72 text-xs font-light leading-relaxed text-center mt-1">
+                  {linkError}
+                </p>
+              )}
+            </form>
+          )}
+        </div>
 
         <Link
           href="/"

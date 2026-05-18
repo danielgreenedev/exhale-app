@@ -93,12 +93,28 @@ function HomeContent() {
     }
   };
 
+  const updateSessionLength = (length: SessionLength) => {
+    setSelectedLength(length);
+    try { localStorage.setItem('exhale-session-length', length); } catch { /* unavailable */ }
+    if (userId) {
+      supabase.from('user_settings')
+        .upsert({ user_id: userId, session_length: length, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+        .then(({ error }) => {
+          if (error) console.error('[supabase] user_settings upsert failed:', error);
+        });
+    }
+  };
+
   useEffect(() => {
     try {
       const v = parseFloat(localStorage.getItem('exhale-orb-scale') ?? '1') || 1;
       setOrbScaleState(v);
       const storedSound = localStorage.getItem(SOUND_STORAGE_KEY);
       if (isSoundPaletteId(storedSound)) setSoundPaletteState(storedSound);
+      const storedLength = localStorage.getItem('exhale-session-length');
+      if (isSessionLength(storedLength) && !isSessionLength(urlLength)) {
+        setSelectedLength(storedLength);
+      }
       if (!localStorage.getItem('exhale-visited')) setFirstVisit(true);
       const { sessions } = readStats();
       if (sessions.length > 0) {
@@ -106,27 +122,33 @@ function HomeContent() {
         setHomeStat({ sessions: totalSessions, streak });
       }
     } catch { /* unavailable */ }
-  }, []);
+  }, [urlLength]);
 
   // Sync settings with Supabase: restore cloud settings on first load, push local on new users
   useEffect(() => {
     if (!userId || settingsSyncedRef.current) return;
     settingsSyncedRef.current = true;
 
-    supabase.from('user_settings').select('orb_scale, sound_palette').eq('user_id', userId).maybeSingle()
+    supabase.from('user_settings').select('orb_scale, sound_palette, session_length').eq('user_id', userId).maybeSingle()
       .then(({ data }) => {
         if (data) {
           const scale = data.orb_scale as number;
           const sound = data.sound_palette as string;
+          const length = data.session_length as string | null;
           try { localStorage.setItem('exhale-orb-scale', String(scale)); } catch { /* unavailable */ }
           try { localStorage.setItem(SOUND_STORAGE_KEY, sound); } catch { /* unavailable */ }
           setOrbScaleState(scale);
           if (isSoundPaletteId(sound)) setSoundPaletteState(sound);
+          if (isSessionLength(length)) {
+            try { localStorage.setItem('exhale-session-length', length); } catch { /* unavailable */ }
+            if (!isSessionLength(urlLength)) setSelectedLength(length);
+          }
         } else {
           const localScale = parseFloat(localStorage.getItem('exhale-orb-scale') ?? '1') || 1;
           const localSound = localStorage.getItem(SOUND_STORAGE_KEY) ?? DEFAULT_SOUND_PALETTE;
+          const localLength = localStorage.getItem('exhale-session-length') ?? selectedLength;
           supabase.from('user_settings')
-            .upsert({ user_id: userId, orb_scale: localScale, sound_palette: localSound }, { onConflict: 'user_id' })
+            .upsert({ user_id: userId, orb_scale: localScale, sound_palette: localSound, session_length: localLength }, { onConflict: 'user_id' })
             .then(({ error }) => {
               if (error) console.error('[supabase] user_settings upsert failed:', error);
             });
@@ -256,7 +278,7 @@ function HomeContent() {
                   name="length"
                   value={opt.length}
                   checked={selectedLength === opt.length}
-                  onChange={() => setSelectedLength(opt.length)}
+                  onChange={() => updateSessionLength(opt.length)}
                   aria-label={`${opt.label}, ${opt.description}`}
                   className="sr-only"
                 />
