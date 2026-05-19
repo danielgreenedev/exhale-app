@@ -314,7 +314,7 @@ function HomeContent() {
         <button
           type="submit"
           aria-label="Begin breathing session"
-          className="w-full py-5 rounded-2xl bg-emerald-pulse border border-emerald-pulse text-forest-night text-[15px] tracking-[0.24em] uppercase font-light hover:bg-emerald-200 hover:border-emerald-200 active:scale-[0.98] transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-100/85"
+          className="w-full py-5 rounded-2xl bg-emerald-pulse border border-emerald-pulse text-forest-night text-sm tracking-[0.2em] uppercase font-semibold hover:bg-emerald-200 hover:border-emerald-200 active:scale-[0.98] transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-100/85"
         >
           Begin
         </button>
