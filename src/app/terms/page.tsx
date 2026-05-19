@@ -1,0 +1,134 @@
+import Link from 'next/link';
+import type { Metadata } from 'next';
+import { SURFACE_GLOWS } from '@/lib/colors';
+
+export const metadata: Metadata = {
+  title: 'Terms, Exhale',
+  description: 'Terms of use for Exhale, a free guided breathing tool.',
+};
+
+export default function TermsPage() {
+  return (
+    <main className="relative min-h-screen bg-forest-night flex justify-center px-6 py-16 text-still-white">
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: SURFACE_GLOWS.stats }}
+        aria-hidden="true"
+      />
+      <article className="relative z-10 flex flex-col gap-8 max-w-2xl w-full">
+        <header className="flex flex-col items-start gap-4">
+          <div className="relative" aria-hidden="true">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-300/60 to-emerald-600/40 shadow-[0_0_24px_rgba(110,231,183,0.18)]" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl font-extralight tracking-[0.3em] uppercase text-still-white/88">
+              Terms
+            </h1>
+            <p className="text-still-white/52 text-xs tracking-[0.15em] font-light">
+              Last updated May 19, 2026
+            </p>
+          </div>
+        </header>
+
+        <Section title="What Exhale is">
+          <p>
+            Exhale is a free, guided breathing tool. It teaches a paced 4-4-6-8 breathing
+            rhythm and lets people practice it without an account or any required setup.
+            By using Exhale at exhale.guide, you agree to these terms.
+          </p>
+        </Section>
+
+        <Section title="Not medical advice">
+          <p>
+            Exhale is not a medical device, mental health service, or substitute for
+            professional care. Nothing in the app diagnoses, treats, cures, or prevents
+            any condition. If you are experiencing a medical or mental health emergency,
+            contact your local emergency services or a qualified provider.
+          </p>
+          <p className="mt-3">
+            If you have a heart condition, a breathing condition, a history of fainting,
+            or any other reason that paced breathing or brief breath holding may not be
+            appropriate for you, please consult a qualified provider before using Exhale.
+          </p>
+        </Section>
+
+        <Section title="Use at your own discretion">
+          <p>
+            You use Exhale at your own discretion. Stop any time anything feels
+            uncomfortable. You are responsible for deciding whether the breathing rhythm
+            is appropriate for you.
+          </p>
+        </Section>
+
+        <Section title="Acceptable use">
+          <p>You agree not to:</p>
+          <ul className="list-disc pl-5 mt-3 space-y-1.5 marker:text-still-white/35">
+            <li>Use Exhale in a way that disrupts the service for other people.</li>
+            <li>
+              Attempt to break, probe for vulnerabilities in, or circumvent access
+              controls on the service.
+            </li>
+            <li>Use the service to harm others or to violate any law.</li>
+          </ul>
+        </Section>
+
+        <Section title="Intellectual property">
+          <p>
+            The Exhale name, design, code, and content belong to the project author.
+            Personal use of the app at exhale.guide is free. You may not redistribute,
+            sell, or repackage Exhale as your own product.
+          </p>
+        </Section>
+
+        <Section title="Service availability">
+          <p>
+            Exhale is offered on a best-effort basis with no uptime guarantee. The
+            service can change, pause, or end without notice.
+          </p>
+        </Section>
+
+        <Section title="No warranties">
+          <p>
+            Exhale is provided as is, without warranties of any kind, either express or
+            implied. To the maximum extent permitted by law, the author disclaims any
+            liability for indirect, incidental, special, consequential, or punitive
+            damages arising out of or relating to your use of Exhale.
+          </p>
+        </Section>
+
+        <Section title="Changes">
+          <p>
+            These terms may change as Exhale changes. The Last updated date above will
+            reflect the most recent revision. Continued use of the app after changes
+            means you accept the updated terms.
+          </p>
+        </Section>
+
+        <Section title="Contact">
+          <p>Questions about these terms: djgreene@gmail.com.</p>
+        </Section>
+
+        <Link
+          href="/"
+          className="mt-4 inline-flex items-center text-still-white/52 text-xs tracking-[0.2em] uppercase font-light hover:text-still-white/75 transition-colors duration-300"
+        >
+          &larr; Back to Exhale
+        </Link>
+      </article>
+    </main>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="flex flex-col gap-2">
+      <h2 className="text-still-white/52 text-xs tracking-[0.18em] uppercase font-light">
+        {title}
+      </h2>
+      <div className="text-still-white/72 text-sm font-light leading-relaxed">
+        {children}
+      </div>
+    </section>
+  );
+}
