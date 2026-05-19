@@ -1,5 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { useBreathingSession } from '@/hooks/useBreathingSession';
+import { RHYTHMS } from '@/lib/breathing';
 
 // jsdom's RAF schedules callbacks but never fires them synchronously.
 // Replace it, and performance.now, so tests can drive time explicitly.
@@ -174,5 +175,55 @@ describe('useBreathingSession - resume from initialElapsed', () => {
   it('elapsedRef matches initialElapsed before start', () => {
     const { result } = renderHook(() => useBreathingSession('short', 5));
     expect(result.current.elapsedRef.current).toBe(5);
+  });
+});
+
+describe('useBreathingSession - alternate rhythm', () => {
+  it('uses the gentle rhythm cycle duration and cycle count', () => {
+    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.gentle));
+    expect(result.current.cycleDuration).toBe(13);
+    expect(result.current.totalCycles).toBe(23);
+    expect(result.current.sessionDuration).toBe(13 * 23);
+    expect(result.current.rhythm.id).toBe('gentle');
+  });
+
+  it('uses the deep rhythm cycle duration and cycle count', () => {
+    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.deep));
+    expect(result.current.cycleDuration).toBe(26);
+    expect(result.current.totalCycles).toBe(12);
+    expect(result.current.rhythm.id).toBe('deep');
+  });
+
+  it('respects gentle rhythm phase boundaries during a running session', () => {
+    // Gentle is 3-2-4-4 = 13s cycle.
+    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.gentle));
+    act(() => { result.current.start(); });
+
+    advance(1000); // t=1s, inhale window 0-3
+    expect(result.current.currentPhase.phase).toBe('inhale');
+
+    advance(3000); // t=4s, hold window 3-5
+    expect(result.current.currentPhase.phase).toBe('hold');
+
+    advance(3000); // t=7s, exhale window 5-9
+    expect(result.current.currentPhase.phase).toBe('exhale');
+
+    advance(5000); // t=12s, rest window 9-13
+    expect(result.current.currentPhase.phase).toBe('rest');
+
+    advance(2000); // t=14s, wraps into cycle 2 inhale
+    expect(result.current.currentPhase.phase).toBe('inhale');
+    expect(result.current.cycleNumber).toBe(2);
+  });
+
+  it('locks the rhythm at first render even if the parent re-renders with a different rhythm', () => {
+    const { result, rerender } = renderHook(
+      ({ r }) => useBreathingSession('short', 0, r),
+      { initialProps: { r: RHYTHMS.gentle } }
+    );
+    expect(result.current.rhythm.id).toBe('gentle');
+    rerender({ r: RHYTHMS.deep });
+    expect(result.current.rhythm.id).toBe('gentle');
+    expect(result.current.cycleDuration).toBe(13);
   });
 });

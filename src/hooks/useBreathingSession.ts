@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  BREATHING_PATTERN,
-  CYCLE_DURATION,
-  SESSION_CYCLES,
+  DEFAULT_RHYTHM,
+  RHYTHMS,
+  Rhythm,
   SessionLength,
   PhaseConfig,
   getPhaseAtTime,
@@ -25,9 +25,24 @@ export interface BreathingSessionState {
   sessionDuration: number; // total session duration in seconds
 }
 
-export function useBreathingSession(sessionLength: SessionLength, initialElapsed = 0) {
-  const totalCycles = SESSION_CYCLES[sessionLength];
-  const sessionDuration = totalCycles * CYCLE_DURATION;
+/**
+ * Drives the active breathing session.
+ *
+ * Rhythm is captured at first render and held for the hook's lifetime; per product design
+ * users cannot change rhythm mid-session, so the RAF tick closure can safely close over a
+ * single stable rhythm without re-creating each parent render.
+ */
+export function useBreathingSession(
+  sessionLength: SessionLength,
+  initialElapsed = 0,
+  rhythm: Rhythm = RHYTHMS[DEFAULT_RHYTHM]
+) {
+  const rhythmRef = useRef(rhythm);
+  const activeRhythm = rhythmRef.current;
+
+  const totalCycles = activeRhythm.sessionCycles[sessionLength];
+  const cycleDuration = activeRhythm.cycleDuration;
+  const sessionDuration = totalCycles * cycleDuration;
 
   const [sessionState, setSessionState] = useState<SessionState>('idle');
   const [elapsedTotal, setElapsedTotal] = useState(initialElapsed);
@@ -53,8 +68,8 @@ export function useBreathingSession(sessionLength: SessionLength, initialElapsed
       return;
     }
 
-    const elapsedInCycle = elapsed % CYCLE_DURATION;
-    const { config: phase, timeInPhase, phaseIndex: pi } = getPhaseAtTime(elapsedInCycle);
+    const elapsedInCycle = elapsed % cycleDuration;
+    const { config: phase, timeInPhase, phaseIndex: pi } = getPhaseAtTime(elapsedInCycle, activeRhythm);
     const tr = Math.ceil(phase.duration - timeInPhase);
     const updateKey = pi * 100 + tr;
     if (updateKey !== lastUpdateKeyRef.current) {
@@ -63,7 +78,7 @@ export function useBreathingSession(sessionLength: SessionLength, initialElapsed
     }
 
     rafRef.current = requestAnimationFrame(tick);
-  }, [sessionDuration]);
+  }, [sessionDuration, cycleDuration, activeRhythm]);
 
   const start = useCallback(() => {
     startTimeRef.current = performance.now() - pausedAtRef.current * 1000;
@@ -97,9 +112,9 @@ export function useBreathingSession(sessionLength: SessionLength, initialElapsed
   }, []);
 
   // Derive phase state from elapsed time
-  const elapsedInCycle = elapsedTotal % CYCLE_DURATION;
-  const cycleNumber = Math.floor(elapsedTotal / CYCLE_DURATION) + 1;
-  const { config: currentPhase, timeInPhase, phaseIndex } = getPhaseAtTime(elapsedInCycle);
+  const elapsedInCycle = elapsedTotal % cycleDuration;
+  const cycleNumber = Math.floor(elapsedTotal / cycleDuration) + 1;
+  const { config: currentPhase, timeInPhase, phaseIndex } = getPhaseAtTime(elapsedInCycle, activeRhythm);
   const phaseProgress = timeInPhase / currentPhase.duration;
   const sessionProgress = elapsedTotal / sessionDuration;
   const timeRemaining = Math.ceil(currentPhase.duration - timeInPhase);
@@ -116,9 +131,11 @@ export function useBreathingSession(sessionLength: SessionLength, initialElapsed
     elapsedTotal,
     elapsedRef,
     sessionDuration,
+    rhythm: activeRhythm,
+    cycleDuration,
     start,
     pause,
     reset,
-    totalPhasesCompleted: BREATHING_PATTERN.length * (cycleNumber - 1) + phaseIndex,
+    totalPhasesCompleted: activeRhythm.pattern.length * (cycleNumber - 1) + phaseIndex,
   };
 }
