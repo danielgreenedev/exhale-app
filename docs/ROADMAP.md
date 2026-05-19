@@ -1,6 +1,6 @@
 # Exhale Roadmap
 
-Last updated: May 18, 2026
+Last updated: May 19, 2026
 
 Exhale is organized around learning gates, not feature batches. Each stage carries one question: do we have enough signal to invest in the next stage? Engineering effort follows validation.
 
@@ -12,6 +12,8 @@ Confirm the premise: does the right kind of person find this useful?
 
 - Done: first iPhone tester (May 2026); rhythm, sound, and mobile control feedback addressed.
 - Done: second unrelated tester reported it helpful.
+- Current: beta feedback mode is active with two beta testers, and the current production build has been posted on the project owner's Facebook page.
+- Note: Facebook link-preview scraping still has a 403/parser issue despite verified app-side Open Graph metadata. Treat it as non-blocking unless Facebook sharing becomes important to beta acquisition.
 - Recruit roughly 10 to 20 testers from the target audience (people who do not normally use self-care apps).
 - Watch Supabase `app_events` for completion rate, return rate, and drop-off phase.
 - Decide if real retention signal exists before investing more engineering.

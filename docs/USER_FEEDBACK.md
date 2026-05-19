@@ -13,6 +13,7 @@ Use `https://exhale.guide` for the current beta round. Use a Vercel preview only
 ## Privacy Rules
 
 - Keep feedback anonymous unless a user explicitly asks to be named.
+- Use anonymous tester IDs for follow-up tracking. Keep the private mapping from tester ID to real person outside git.
 - Do not include diagnoses, private health details, email addresses, account details, or identifying context.
 - Summarize patterns in your own words instead of storing long raw quotes.
 - Separate observations from product decisions.
@@ -31,6 +32,8 @@ Send a short, open prompt so feedback stays practical:
 
 ### Session
 
+- Tester ID:
+- Follow-up OK: Yes / No / Unknown
 - Date:
 - Environment: Local / Preview / Production
 - Device:
@@ -67,7 +70,30 @@ Send a short, open prompt so feedback stays practical:
 
 ## Recent Feedback Notes
 
-### 2026-05-19, New User, Slow-Breath Preference
+### 2026-05-19, T-2026-05-19-05, Breathing Capacity Constraint
+
+#### Session
+
+- Tester ID: T-2026-05-19-05
+- Follow-up OK: Unknown
+
+#### Friction
+
+- Tester found it difficult to follow the prompts without gasping because the rhythm did not fit their breathing capacity.
+- This is an accessibility and comfort signal, not just a preference signal. A single default rhythm may be too demanding for some bodies.
+
+#### Actionable Recommendations
+
+1. Continue collecting rhythm-fit feedback, but treat breathing-capacity mismatch as higher risk than aesthetic or preference feedback.
+2. When evaluating alternate rhythms, include an easier/gentler option with shorter holds, less demanding exhales, or a more permissive transition/rest structure.
+3. Consider adding tester follow-up language that asks whether the rhythm ever made them feel like they had to gasp, catch up, or strain.
+
+### 2026-05-19, T-2026-05-19-04, Slow-Breath Preference
+
+#### Session
+
+- Tester ID: T-2026-05-19-04
+- Follow-up OK: Unknown
 
 #### What Worked
 
@@ -83,7 +109,12 @@ Send a short, open prompt so feedback stays practical:
 1. Keep collecting rhythm-comfort feedback before changing the default 4-4-6-8 pattern.
 2. When evaluating alternate rhythm options, consider whether the need is a beginner-friendly softer rhythm, an experienced-user slower/deeper rhythm, or both.
 
-### 2026-05-19, New User
+### 2026-05-19, T-2026-05-19-03, Rest Preference
+
+#### Session
+
+- Tester ID: T-2026-05-19-03
+- Follow-up OK: Unknown
 
 #### What Worked
 
@@ -100,10 +131,12 @@ Send a short, open prompt so feedback stays practical:
 1. Treat this as a rhythm-structure signal, not an immediate feature request. Rest is intentional in the current 4-4-6-8 pattern, so more feedback is needed before adding a no-rest or alternate-rhythm option.
 2. Add a follow-up rhythm question during beta intake: "Did the Rest period help you reset, or did it feel like it interrupted the breathing rhythm?"
 
-### 2026-05-19, Casual User
+### 2026-05-19, T-2026-05-19-02, Casual User
 
 #### Session
 
+- Tester ID: T-2026-05-19-02
+- Follow-up OK: Unknown
 - Environment: Production
 - Session length: 5 minutes
 
@@ -122,7 +155,12 @@ Send a short, open prompt so feedback stays practical:
 1. Treat this as a second signal that pacing may feel fast for some casual users, but keep collecting feedback before changing the default rhythm.
 2. Continue asking rhythm-comfort questions during beta intake, especially whether the pace feels fast, pressuring, or hard to settle into.
 
-### 2026-05-19, Beta Tester (web)
+### 2026-05-19, T-2026-05-19-01, Beta Tester (web)
+
+#### Session
+
+- Tester ID: T-2026-05-19-01
+- Follow-up OK: Unknown
 
 #### What Worked
 
@@ -138,7 +176,12 @@ Send a short, open prompt so feedback stays practical:
 
 1. Raise the visibility of the progress bar's unfilled track so the full rail is unmistakable, with the colored fill reading as advancing along a visible line toward an obvious endpoint. The fill itself should remain the foreground signal; the track just needs to read as present, not as a guess.
 
-### 2026-05-18, Production iPhone Beta
+### 2026-05-18, T-2026-05-18-01, Production iPhone Beta
+
+#### Session
+
+- Tester ID: T-2026-05-18-01
+- Follow-up OK: Unknown
 
 #### What Worked
 

@@ -57,7 +57,7 @@ Current answer: Open.
 
 Context: One iPhone tester reported performance pressure and a possibly long Exhale; current plan is to revisit rhythm only if the pattern repeats.
 
-Current answer: Open. As of May 19, 2026, there are four rhythm-related signals: one iPhone tester reported performance pressure/possibly long Exhale, one casual user said the 5-minute session felt a little fast while still responding positively overall, one new user did not care for the Rest period and suggested an option to include or remove it, and one new user preferred a slower/deeper pattern with longer inhale, longer hold, and much longer exhale.
+Current answer: Open. As of May 19, 2026, there are five rhythm-related signals: one iPhone tester reported performance pressure/possibly long Exhale, one casual user said the 5-minute session felt a little fast while still responding positively overall, one new user did not care for the Rest period and suggested an option to include or remove it, one new user preferred a slower/deeper pattern with longer inhale, longer hold, and much longer exhale, and one new user found the rhythm difficult to follow without gasping because it did not fit their breathing capacity.
 
 Example threshold to decide later:
 
@@ -75,6 +75,47 @@ Additional nuance to watch:
 
 ```text
 If the rhythm did not fit you, did you want it gentler/easier, slower/deeper, or simply less interrupted by Rest?
+```
+
+```text
+Did the rhythm ever make you feel like you had to gasp, catch up, or strain?
+```
+
+### Should Exhale offer customizable breath rhythms?
+
+Context: Feedback is starting to show that rhythm fit varies. Some users report the current pace feels fast or pressuring, one user did not care for Rest, one user prefers a slower/deeper pattern with longer inhale, hold, and exhale, and one user found the prompts difficult to follow without gasping. Customization could help, but it risks adding decision friction before the first breath.
+
+Current answer: Open.
+
+Possible customization dimensions:
+
+- Timing: let users adjust seconds for Inhale, Hold, Exhale, and Rest.
+- Phases: allow patterns without Hold, without Rest, or with Rest only between cycles.
+- Space between phases: add a small transition buffer, softer cue, or grace period between prompts.
+- Presets: offer a few named rhythms instead of full manual controls, such as Default, Gentle, Deep, or No Rest.
+- Accessibility-oriented rhythm: offer a less demanding option with shorter or optional holds, less aggressive exhales, and more permission to breathe normally between phases.
+- Experience level: keep the current default for new users, with advanced rhythm controls hidden inside Session Setup.
+- Session goal: choose a rhythm based on intent, such as settle quickly, relax deeply, or practice familiar breathwork.
+- Adaptive pacing: start slower for the first cycle, then settle into the selected rhythm once the user understands the pattern.
+
+Key product tension:
+
+```text
+Customization may make Exhale fit more bodies, but too much choice can break the low-friction promise for people who do not use self-care apps.
+```
+
+Follow-up questions to ask testers:
+
+```text
+Would you rather choose from a few rhythm presets, or adjust the seconds yourself?
+```
+
+```text
+Would seeing rhythm settings before your first session make Exhale feel more helpful or more complicated?
+```
+
+```text
+If you could change one part of the rhythm, would it be Inhale, Hold, Exhale, Rest, or the transition between them?
 ```
 
 ### Should feedback intake include a return-intent question?
@@ -108,6 +149,25 @@ Current answer: Open.
 Context: Sync belongs only inside Practice History and must not make Exhale feel account-gated.
 
 Current answer: Open.
+
+### Would a fuller account system ever create enough value to justify the added friction?
+
+Context: Exhale currently uses anonymous Supabase identity by default and optional email-code sync only inside Practice History. `PRODUCT.md` and `DESIGN.md` both protect the anonymous-first promise: no required account, login, profile, onboarding gate, or sync prompt before breathing. Any fuller auth model, such as password login, OAuth, profiles, account settings, or persistent account management, would need a clear user benefit that optional email sync cannot provide.
+
+Current answer: Open, but not an implementation task during beta feedback collection.
+
+Possible reasons to revisit:
+
+- Testers explicitly ask for stronger account recovery or account management.
+- Cross-device sync feels unreliable or confusing with email-code sign-in alone.
+- Deletion, data export, privacy controls, or trust needs become hard to support without account settings.
+- A future therapist, group, or organizational use case requires managed identities.
+
+Default stance:
+
+```text
+Do not add fuller account auth unless beta feedback shows the value outweighs the extra friction.
+```
 
 ## Accessibility
 

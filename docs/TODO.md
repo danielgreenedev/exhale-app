@@ -59,6 +59,8 @@ Last updated: May 19, 2026
 
 - For the current beta round, testers will use the live production site at `https://exhale.guide`.
 - Vercel preview access can wait until a future test needs non-production changes.
+- As of May 19, 2026, Exhale is officially in beta feedback mode with two beta testers and the current production build posted on the project owner's Facebook page.
+- Facebook's Sharing Debugger still reports a 403/parser issue, but app-side OG metadata and image responses are verified; this is paused as a non-blocking Meta-side issue while cache/state settles.
 
 ## Completed iPhone Beta Feedback Follow-Up
 
@@ -101,7 +103,7 @@ Items are grouped loosely by roadmap stage. See `docs/ROADMAP.md` for the strate
 
 ### Stage 0, validation and tester signal
 
-Primary focus: collect feedback and usage data before starting the next design/build push.
+Primary focus: remain in beta feedback mode. Collect feedback and usage data before starting the next design/build push.
 
 1. Pending feedback/data collection: test cross-device sync on Device B and verify Practice History, timer length, Circle Size, and sound choice sync correctly through Supabase.
 
