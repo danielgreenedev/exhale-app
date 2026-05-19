@@ -354,9 +354,50 @@ Not on the list (and therefore safe to remove from any existing bypass): `104.21
 
 To refresh this list later, scrape the prefix table at `https://bgp.he.net/AS32934#_prefixes` and deduplicate the parent aggregates.
 
+## 2026-05-19 Final Status
+
+After exhausting fixable causes, the conclusion is that Meta's scraper has a parsing or cache problem specific to `exhale.guide` that is not fixable from our side.
+
+What was tested:
+
+- Force-scrape via Graph API (`POST ?id=https://exhale.guide/&scrape=true`), repeated several times.
+- Read-back via Graph API (`GET ?id=...&fields=og_object`), repeated against `/` and `/privacy`.
+- Both scrape and read with Bot Protection ON and with Bot Protection OFF, confirmed by user.
+- Trailing-slash mismatch theory ruled out: Next.js metadata API canonicalizes `openGraph.url` and strips the root slash regardless of what we configure.
+
+What Meta consistently returns for the canonical URL:
+
+```json
+{
+  "og_object": {
+    "title": "exhale.guide",
+    "type": "website",
+    "updated_time": "<fresh timestamp per scrape>"
+  }
+}
+```
+
+`title: "exhale.guide"` is the hostname fallback Facebook uses when its parser cannot extract `og:title`. The same response for `/privacy` (a separately scraped URL with its own fresh `og_object` id) rules out per-URL cache poisoning. There is also no description and no image returned, regardless of how many times we force-scrape.
+
+What we verified from outside Meta:
+
+- 14 well-formed `og:` and `twitter:` meta tags are present in the rendered HTML for `/` and `/privacy`, including correct title, description, and image URL.
+- Meta tags sit between byte 1500 and byte 2800, well inside `<head>`, before `</head>` at byte 2855.
+- OpenGraph.xyz independently scraped `https://exhale.guide` and rendered the full Exhale title, description, and og-image image correctly. Their only feedback was SEO suggestions, not parsing failures.
+
+Conclusion: this is a Meta-side bug. Their scraper successfully fetches the document but fails to extract `og:*` and `twitter:*` tags that other crawlers parse without trouble.
+
+Path forward:
+
+- Do not invest more engineering on this; Facebook previews are not on the critical path for the beta audience.
+- Optionally re-check in 48 to 72 hours; stuck `og_object` cache entries sometimes clear on their own.
+- A Facebook bug report can be filed via the Sharing Debugger's "Report a Bug" link if Facebook sharing later becomes important.
+- Direct sharing via iMessage, LinkedIn, Twitter, Discord, Slack, and email all preview correctly today; only Facebook is affected.
+
 ## References
 
 - Facebook Sharing Debugger: https://developers.facebook.com/tools/debug/
 - Vercel Firewall docs: https://vercel.com/docs/vercel-firewall
 - Vercel System Bypass Rules: https://vercel.com/docs/vercel-firewall/vercel-waf/system-bypass-rules
 - Hurricane Electric BGP toolkit (Meta AS): https://bgp.he.net/AS32934#_prefixes
+- OpenGraph.xyz (independent OG validator): https://www.opengraph.xyz/
