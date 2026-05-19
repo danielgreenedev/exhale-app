@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 19, 2026 (Facebook reply intake; Rest label resolved; Flow rhythm parked; Facebook preview resolved)
+Last updated: May 19, 2026 (Facebook reply intake; Rest label resolved; Flow rhythm sketched; Facebook preview resolved)
 
 ## Completed Rhythm Changes
 
@@ -166,7 +166,7 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 These can wait until after Stage 0 feedback signal is in.
 
-6a. Sketch a Hold-less "Flow" rhythm candidate driven by the Rest/Hold-friction signal (T-2026-05-19-03, -05, -06, -07). Working shape: 4-0-6-2 or 4-0-6-0 — Inhale, no Hold, Exhale, brief or zero Relax. Design blockers to think through before any code: `getPhaseAtTime` in `src/lib/breathing.ts` and the `BreathingOrb` animation currently assume every phase has duration greater than zero, so a 0-second phase needs explicit handling (either skip the index or treat as an instantaneous transition). Cycle recalibration math also needs to tolerate shorter total cycles without recommending impractically high cycle counts for the long session length. Goal of the sketch is a design proposal in `docs/OPEN_QUESTIONS.md`, not a shipped preset; ship only if the Rest/Hold-frictioned testers prefer it.
+6a. Flow rhythm design sketch landed 2026-05-19 in `docs/OPEN_QUESTIONS.md` under "Should Rest and Hold be partly or completely optional?" Tradeoff matrix of four candidate shapes (4-0-6-2, 4-0-6-0, 4-0-5-3, 3-0-5-2), recommendation of 4-0-6-2 as the primary candidate, full code implications (only `getNextPhase` needs a one-line change to skip 0-duration phases; `getPhaseAtTime` and `getOrbScale` already handle them correctly), and a validation gate are all written down. Next concrete step is implementation behind the validation gate: run the sketch past at least two of T-2026-05-19-03, -05, -06, -07 in a Vercel preview, and ship as an optional fourth preset only if at least one prefers Flow over their current choice.
 
 6b. Park: do rhythms need to support progressive ramping (each rep longer than the last) rather than only steady patterns? Single-user signal from T-2026-05-19-07. Do not act yet; revisit if a second tester independently asks for escalation or if competitive-framing usage shows up in `app_events`. If raised again, write it up as a full open question in `docs/OPEN_QUESTIONS.md` before any scoping.
 

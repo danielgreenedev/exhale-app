@@ -69,7 +69,7 @@ These shift the entire canvas (orb, glow, rings, particles) during a session:
 - Inhale: `hsl(198, 45%, 63%)` — blue
 - Hold: `hsl(40, 55%, 61%)` — orange
 - Exhale: `hsl(148, 35%, 53%)` — green
-- Rest: `hsl(348, 42%, 66%)` — pink
+- Relax: `hsl(348, 42%, 66%)` — pink (phase enum `rest`)
 
 Amber (`hsl(38, 92%, 65%)` approx) appears only on the session complete screen — it signals closure, not phase.
 
