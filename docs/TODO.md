@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 19, 2026 (Facebook reply intake; Rest label resolved; Flow rhythm parked)
+Last updated: May 19, 2026 (Facebook reply intake; Rest label resolved; Flow rhythm parked; Facebook preview resolved)
 
 ## Completed Rhythm Changes
 
@@ -172,7 +172,7 @@ These can wait until after Stage 0 feedback signal is in.
 
 7. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Run `/impeccable shape Garden skin` before building.
 
-8. Confirm Facebook's Sharing Debugger renders the preview after their scrape cache clears. App side is verified working; the remaining loose end is Meta-side cache only. Resume playbook lives in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md`. When the Garden skin lands, consider an updated OG image that shows both aesthetics.
+8. Resolved 2026-05-19: the Facebook preview now renders correctly on shared posts; the Sharing Debugger issue cleared once Meta's cache aged out, matching the working hypothesis. Playbook preserved in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md` for future reference. When the Garden skin lands, consider an updated OG image that shows both aesthetics — that is the only related thread still on the radar.
 
 9. Not a priority for now: add a UI affordance linking the main pages to `/privacy` and `/terms`. Likely a small footer link from home, game complete, and stats in keeping with the quiet aesthetic, but a more prominent button could also fit. The pages exist and are reachable; they are not surfaced from any other screen yet.
 

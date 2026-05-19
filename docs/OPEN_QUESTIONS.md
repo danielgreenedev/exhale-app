@@ -1,6 +1,6 @@
 # Exhale Open Questions
 
-Last updated: May 19, 2026 (Rest/Hold promoted; OAuth-vs-OTP question added)
+Last updated: May 19, 2026 (Rest/Hold promoted; OAuth-vs-OTP added; Facebook preview answered)
 
 Use this as a living parking lot for product, validation, trust, accessibility, and strategy questions that are not ready to become implementation tasks. As questions are answered, add the answer, date, evidence, and any resulting TODO/doc updates.
 
@@ -300,19 +300,21 @@ Possible purposes:
 
 ### Is Facebook preview worth more attention?
 
-Context: App-side Open Graph is verified. Facebook appears to have a Meta-side parser/cache issue for `exhale.guide`; other crawlers parse correctly.
-
-Current answer: Open, but currently not blocking.
-
-Default stance:
-
-```text
-Treat as Meta-side bug unless Facebook sharing becomes important to beta acquisition.
-```
+Answered 2026-05-19. See Answered Questions below.
 
 ## Answered Questions
 
 Move answered questions here with date, answer, evidence, and follow-up.
+
+### Is Facebook preview worth more attention?
+
+Answer: No further work needed. The Facebook Sharing Debugger 403 / preview-rendering issue cleared on its own once Meta's cache aged out from the original `exhale.guide` scrape. The current live build renders correctly when shared on Facebook. The working hypothesis (Meta-side parser/cache state, not an Exhale-side issue) held up — no app-side change was the fix, time was. App-side Open Graph metadata, the static `/og-image.png`, the `robots.txt` allowances for Meta/Facebook crawlers, and the Vercel firewall bypass rules for observed Meta IP ranges all stay in place as belt-and-braces protection against a recurrence.
+
+Date answered: 2026-05-19
+
+Evidence: Project owner confirmed the live Facebook share renders the intended preview after testing the latest production build. `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md` has been updated to "Resolved" with the full playbook preserved for future reference.
+
+Follow-up: None active. Revisit the playbook only if a future domain change, OG image swap, or skin update triggers similar cache symptoms.
 
 ### How many similar reports are enough to act on rhythm comfort?
 

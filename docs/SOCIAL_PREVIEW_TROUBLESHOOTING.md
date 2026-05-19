@@ -1,14 +1,14 @@
 # Social Preview Troubleshooting
 
-Last updated: May 19, 2026
+Last updated: May 19, 2026 (issue resolved)
 
 This note documents the Facebook/Open Graph preview troubleshooting done for `https://exhale.guide`.
 
 ## Current Status
 
-Paused. After app-side Open Graph, robots, image serving, Vercel firewall, Meta IP, Graph API, and third-party parser checks, the working conclusion is that the remaining Facebook Sharing Debugger failure is on Meta/Facebook's side, likely parser state or cached `og_object` behavior specific to `exhale.guide`.
+Resolved 2026-05-19. The Facebook preview now renders correctly for `exhale.guide` on shared posts. The Sharing Debugger 403 / parser issue cleared on its own once Meta's cache aged out; no further app-side or infrastructure change was needed beyond the work captured below. The earlier working conclusion (Meta-side parser/cache state, not an Exhale-side issue) held up.
 
-Do not spend more engineering time on this during beta feedback intake. Re-check in 48 to 72 hours, then resume only if Facebook sharing becomes important to beta acquisition.
+Keep this document as a reference playbook in case a future domain change, OG image swap, or Garden-skin update triggers similar cache symptoms. The Vercel firewall bypass rules and `robots.txt` allowances should not be reverted; they cost nothing to keep and prevent regressions if Meta cycles its crawler IPs again.
 
 ## Goal
 
