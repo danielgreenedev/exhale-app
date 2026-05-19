@@ -4,11 +4,15 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
-  BREATHING_PATTERN,
   DEFAULT_ORB_SCALE,
+  DEFAULT_RHYTHM,
   DEFAULT_SESSION_LENGTH,
+  RHYTHMS,
+  RHYTHM_STORAGE_KEY,
+  RhythmId,
   SessionLength,
   SESSION_CYCLES,
+  isRhythmId,
 } from '@/lib/breathing';
 import { useAudioEngine } from '@/hooks/useAudioEngine';
 import {
@@ -96,9 +100,12 @@ function DisclosureCaret({ open }: { open: boolean }) {
 function HomeContent() {
   const searchParams = useSearchParams();
   const urlLength = searchParams.get('length');
+  const urlRhythm = searchParams.get('rhythm');
   const initialLength: SessionLength = isSessionLength(urlLength) ? urlLength : DEFAULT_SESSION_LENGTH;
+  const initialRhythm: RhythmId = isRhythmId(urlRhythm) ? urlRhythm : DEFAULT_RHYTHM;
 
   const [selectedLength, setSelectedLength] = useState<SessionLength>(initialLength);
+  const [selectedRhythm, setSelectedRhythm] = useState<RhythmId>(initialRhythm);
   const [homeStat, setHomeStat] = useState<{ sessions: number } | null>(null);
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
   const [orbScale, setOrbScaleState] = useState<number>(DEFAULT_ORB_SCALE);
@@ -106,6 +113,8 @@ function HomeContent() {
   const [firstVisit, setFirstVisit] = useState(false);
   const [showSessionSetup, setShowSessionSetup] = useState(false);
   const [previewingSound, setPreviewingSound] = useState<SoundPaletteId | null>(null);
+
+  const activeRhythm = RHYTHMS[selectedRhythm];
   const settingsSyncedRef = useRef(false);
   const previewStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { previewPalette, stopAmbient } = useAudioEngine(soundPalette);
@@ -168,6 +177,13 @@ function HomeContent() {
     }
   };
 
+  const updateRhythm = (id: RhythmId) => {
+    setSelectedRhythm(id);
+    try { localStorage.setItem(RHYTHM_STORAGE_KEY, id); } catch { /* unavailable */ }
+    // Supabase round-trip for rhythm is added in step 8 of the rhythm refactor
+    // (settingsSync + user_settings column).
+  };
+
   useEffect(() => {
     try {
       const settings = readLocalPracticeSettings(initialLength);
@@ -175,6 +191,10 @@ function HomeContent() {
       setSoundPaletteState(settings.soundPalette);
       if (!isSessionLength(urlLength)) {
         setSelectedLength(settings.sessionLength);
+      }
+      if (!isRhythmId(urlRhythm)) {
+        const storedRhythm = localStorage.getItem(RHYTHM_STORAGE_KEY);
+        if (isRhythmId(storedRhythm)) setSelectedRhythm(storedRhythm);
       }
       if (!localStorage.getItem('exhale-visited')) setFirstVisit(true);
       const { sessions } = readStats();
@@ -353,7 +373,49 @@ function HomeContent() {
             aria-label="Session setup"
             className="w-full border-y border-still-white/10 py-1 flex flex-col gap-3"
           >
-            {BREATHING_PATTERN.map((phase) => (
+            <div className="flex flex-col gap-2 w-full px-1" role="radiogroup" aria-labelledby="rhythm-label">
+              <span id="rhythm-label" className="text-still-white/62 text-xs tracking-[0.14em] uppercase font-light">
+                Rhythm
+              </span>
+              <div className="grid grid-cols-3 gap-1.5">
+                {(Object.values(RHYTHMS)).map((r) => {
+                  const active = selectedRhythm === r.id;
+                  const sig = r.pattern.map((p) => p.duration).join('-');
+                  return (
+                    <label
+                      key={r.id}
+                      title={r.description}
+                      className={`
+                        min-h-11 flex flex-col items-center justify-center gap-0.5 rounded-lg border px-1 cursor-pointer transition-all duration-300
+                        ${active
+                          ? SELECTED_SETTING_CLASS
+                          : 'border-still-white/16 text-still-white/58 hover:border-still-white/30 hover:text-still-white/78'}
+                        has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-3 has-[:focus-visible]:outline-emerald-200/80
+                      `}
+                    >
+                      <input
+                        type="radio"
+                        name="rhythm"
+                        value={r.id}
+                        form="session-form"
+                        checked={active}
+                        aria-label={`${r.label} rhythm, ${sig}`}
+                        onChange={() => updateRhythm(r.id)}
+                        className="sr-only"
+                      />
+                      <span className="text-[10px] tracking-[0.12em] uppercase font-light leading-none">
+                        {r.label}
+                      </span>
+                      <span className={`text-[9px] tabular-nums tracking-[0.04em] font-light leading-none ${active ? 'text-emerald-100/80' : 'text-still-white/45'}`}>
+                        {sig}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            {activeRhythm.pattern.map((phase) => (
               <div
                 key={phase.phase}
                 className="grid grid-cols-[auto_1fr_auto] items-center gap-3 py-2.5 border-b border-still-white/8 last:border-b-0"

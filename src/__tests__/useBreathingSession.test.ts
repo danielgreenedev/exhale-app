@@ -188,10 +188,10 @@ describe('useBreathingSession - alternate rhythm', () => {
   });
 
   it('uses the deep rhythm cycle duration and cycle count', () => {
-    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.deep));
+    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.slow));
     expect(result.current.cycleDuration).toBe(26);
     expect(result.current.totalCycles).toBe(12);
-    expect(result.current.rhythm.id).toBe('deep');
+    expect(result.current.rhythm.id).toBe('slow');
   });
 
   it('respects gentle rhythm phase boundaries during a running session', () => {
@@ -222,7 +222,7 @@ describe('useBreathingSession - alternate rhythm', () => {
       { initialProps: { r: RHYTHMS.gentle } }
     );
     expect(result.current.rhythm.id).toBe('gentle');
-    rerender({ r: RHYTHMS.deep });
+    rerender({ r: RHYTHMS.slow });
     expect(result.current.rhythm.id).toBe('gentle');
     expect(result.current.cycleDuration).toBe(13);
   });

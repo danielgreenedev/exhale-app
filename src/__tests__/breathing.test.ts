@@ -105,8 +105,8 @@ describe('getPhaseAtTime', () => {
 });
 
 describe('RHYTHMS registry', () => {
-  it('exposes standard, gentle, and deep rhythms', () => {
-    expect(Object.keys(RHYTHMS).sort()).toEqual(['deep', 'gentle', 'standard']);
+  it('exposes standard, gentle, and slow rhythms', () => {
+    expect(Object.keys(RHYTHMS).sort()).toEqual(['gentle', 'slow', 'standard']);
   });
 
   it('standard rhythm matches the previous BREATHING_PATTERN constant', () => {
@@ -116,7 +116,7 @@ describe('RHYTHMS registry', () => {
   });
 
   it('each rhythm has four phases in the canonical order with positive durations', () => {
-    (['standard', 'gentle', 'deep'] as const).forEach((id) => {
+    (['standard', 'gentle', 'slow'] as const).forEach((id) => {
       const phases = RHYTHMS[id].pattern.map((p) => p.phase);
       expect(phases).toEqual(['inhale', 'hold', 'exhale', 'rest']);
       RHYTHMS[id].pattern.forEach((p) => expect(p.duration).toBeGreaterThan(0));
@@ -124,7 +124,7 @@ describe('RHYTHMS registry', () => {
   });
 
   it('each rhythm reports its true cycle duration', () => {
-    (['standard', 'gentle', 'deep'] as const).forEach((id) => {
+    (['standard', 'gentle', 'slow'] as const).forEach((id) => {
       const summed = RHYTHMS[id].pattern.reduce((acc, p) => acc + p.duration, 0);
       expect(RHYTHMS[id].cycleDuration).toBe(summed);
     });
@@ -132,7 +132,7 @@ describe('RHYTHMS registry', () => {
 
   it('session-cycle counts keep each label within one cycle of its target duration', () => {
     const targetsSec = { quick: 180, short: 300, medium: 420, long: 600 } as const;
-    (['standard', 'gentle', 'deep'] as const).forEach((id) => {
+    (['standard', 'gentle', 'slow'] as const).forEach((id) => {
       const rhythm = RHYTHMS[id];
       (['quick', 'short', 'medium', 'long'] as const).forEach((len) => {
         const actual = rhythm.sessionCycles[len] * rhythm.cycleDuration;
@@ -147,7 +147,7 @@ describe('isRhythmId', () => {
   it('accepts the three known rhythms', () => {
     expect(isRhythmId('standard')).toBe(true);
     expect(isRhythmId('gentle')).toBe(true);
-    expect(isRhythmId('deep')).toBe(true);
+    expect(isRhythmId('slow')).toBe(true);
   });
 
   it('rejects unknown strings and non-strings', () => {
@@ -162,7 +162,7 @@ describe('isRhythmId', () => {
 describe('getRhythm', () => {
   it('returns the requested rhythm when given a valid id', () => {
     expect(getRhythm('gentle').id).toBe('gentle');
-    expect(getRhythm('deep').id).toBe('deep');
+    expect(getRhythm('slow').id).toBe('slow');
   });
 
   it('falls back to the default rhythm for unknown or empty input', () => {
@@ -187,7 +187,7 @@ describe('getPhaseAtTime with a non-default rhythm', () => {
 
   it('uses deep pattern boundaries when passed the deep rhythm', () => {
     // Deep is 6-6-10-4 = 26s cycle.
-    const deep = RHYTHMS.deep;
+    const deep = RHYTHMS.slow;
     expect(getPhaseAtTime(0, deep).config.phase).toBe('inhale');
     expect(getPhaseAtTime(5.99, deep).config.phase).toBe('inhale');
     expect(getPhaseAtTime(6, deep).config.phase).toBe('hold');

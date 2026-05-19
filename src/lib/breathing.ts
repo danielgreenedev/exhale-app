@@ -2,7 +2,7 @@ import { PHASE_COLORS } from '@/lib/colors';
 
 export type BreathingPhase = 'inhale' | 'hold' | 'exhale' | 'rest';
 export type SessionLength = 'quick' | 'short' | 'medium' | 'long';
-export type RhythmId = 'standard' | 'gentle' | 'deep';
+export type RhythmId = 'standard' | 'gentle' | 'slow';
 
 export const DEFAULT_SESSION_LENGTH: SessionLength = 'quick';
 export const DEFAULT_ORB_SCALE = 1;
@@ -124,16 +124,16 @@ export const RHYTHMS: Record<RhythmId, Rhythm> = {
     'Shorter cycle with a lighter hold and a more permissive exhale. Good for new users or anyone who feels rushed by the standard pace.',
     [3, 2, 4, 4]
   ),
-  deep: buildRhythm(
-    'deep',
-    'Deep',
-    'Longer inhale, longer hold, and a much longer exhale. Good for experienced breathwork users.',
+  slow: buildRhythm(
+    'slow',
+    'Slow',
+    'Longer inhale, longer hold, and a much longer exhale. Good for experienced breathwork users. Slow rather than Deep to avoid colliding with the Deep sound texture label.',
     [6, 6, 10, 4]
   ),
 };
 
 export function isRhythmId(value: unknown): value is RhythmId {
-  return value === 'standard' || value === 'gentle' || value === 'deep';
+  return value === 'standard' || value === 'gentle' || value === 'slow';
 }
 
 export function getRhythm(id: RhythmId | string | null | undefined): Rhythm {
