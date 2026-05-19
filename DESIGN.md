@@ -155,19 +155,19 @@ These shift the entire canvas (orb, glow, progress rings, particles) with each b
 **Display/Body Font:** Inter (weights 100, 200, 300 only)
 **No secondary typeface.** Inter's extralight and light weights carry every role.
 
-**Character:** A single humanist sans used at its most weightless. The type feels etched rather than printed — wide tracking, uppercase labels, near-invisible on the dark ground. Heavy weights are reserved for one purpose: the phase label during an active session, where semibold at 600 signals authority amid stillness.
+**Character:** A single humanist sans used at its most weightless. The type feels etched rather than printed — wide tracking, uppercase labels, near-invisible on the dark ground. Heavy weights are reserved for two purposes: the phase label during an active session, where semibold at 600 signals authority amid stillness, and the Begin button label, where semibold earns its place by holding legibility for the primary action against a saturated emerald fill.
 
 ### Hierarchy
 
 - **Display** (extralight 200, 2.25rem, tracking 0.25em, uppercase): The "Exhale" wordmark on the home screen. One instance per app.
 - **Headline** (extralight 200, 1.875rem, tracking 0.3em, uppercase): Screen titles — "Practice", "Complete". Airy and formal.
-- **Title** (semibold 600, 1.875rem, tracking 0.3em, uppercase): The active phase label during a session — "Inhale", "Hold", "Exhale", "Rest". The only heavy weight in the system. Its weight is earned: it is the only instruction the user needs.
+- **Title** (semibold 600, 1.875rem, tracking 0.3em, uppercase): The active phase label during a session — "Inhale", "Hold", "Exhale", "Rest". Together with the Begin button label, one of only two semibold uses in the system. Its weight is earned: it is the only instruction the user needs.
 - **Body** (light 300, 0.875rem, tracking 0.12em): Taglines, descriptions, session complete quotes. Sentence case. 45–60% white.
-- **Label** (light 300, 0.75rem, tracking 0.18–0.28em, uppercase): Button text, metadata, stat labels. The tracking widens with the importance of the label — Begin sits at 0.28em, secondary actions at 0.18em.
+- **Label** (light 300, 0.75rem, tracking 0.18–0.28em, uppercase): Most button text, metadata, and stat labels. Secondary actions sit at 0.18em. The Begin button is the one sanctioned exception, using semibold 600 at tracking 0.20em for legibility against the emerald fill; see Begin (Primary) below.
 - **Timer** (thin 100, 3.75rem, tabular-nums): The countdown during a session. Uses `font-variant-numeric: tabular-nums` to prevent layout shift as numbers change.
 
 ### Named Rules
-**The Weight Ceiling Rule.** Only one element in the entire system uses semibold (600): the active phase label. Every other element uses 100, 200, or 300. Adding bold text anywhere else breaks the hierarchy. `font-normal` (400) is also prohibited — it sits in no-man's-land between the permitted weights.
+**The Weight Ceiling Rule.** Two elements in the entire system use semibold (600): the active phase label and the Begin button label. Every other element uses 100, 200, or 300. Adding bold text anywhere else breaks the hierarchy. `font-normal` (400) is also prohibited — it sits in no-man's-land between the permitted weights. The Begin exception exists because the primary action pairs Forest Night text with an Emerald Pulse fill, which is a lower-contrast pairing than any other text in the system (everything else sits on the dark ground). No other surface pairs text with a saturated brand color, so the exception does not generalize.
 
 **The Uppercase Contract.** Uppercase is for labels and controls only — things the user acts on or reads quickly. Copy (taglines, instructions, quotes) is always sentence case. Never all-caps a full sentence of human-facing copy.
 
@@ -189,7 +189,7 @@ Dialog overlays (exit guard) use `background: rgba(0,0,0,0.65)` — a neutral da
 Soft and inviting — generous rounded corners (16px / `rounded-2xl`), borders that barely register, tinted backgrounds that confirm selection without demanding it. Low stakes, approachable for a user who has never tapped a wellness app before.
 
 - **Shape:** Generously curved (16px radius). Game controls use a tighter curve (8px / `rounded-lg`).
-- **Begin (Primary):** Solid Emerald Pulse fill with Forest Night text. It is the only filled action on the home screen, so the start path is unmistakable even when the user is stressed or in low light. On hover, the fill warms slightly to emerald-200. Tracks a 300ms ease-all transition.
+- **Begin (Primary):** Solid Emerald Pulse fill with Forest Night text in semibold 600 at text-sm and tracking 0.20em. It is the only filled action on the home screen, so the start path is unmistakable even when the user is stressed or in low light. Semibold is a sanctioned exception to the Weight Ceiling Rule: the Forest Night on Emerald Pulse pairing has lower contrast than any other text in the system, and the primary call to action has to read clearly under any lighting condition. On hover, the fill warms slightly to emerald-200. Tracks a 300ms ease-all transition.
 - **Resume (Contextual):** Appears only when a session can be resumed within the 60-second window. It sits directly below Begin and above Session Setup so continuation remains close to the primary action without competing with it.
 - **Ghost (Secondary):** White border at 15–18% opacity, no background fill, text at 38–45% white. On hover: background tints to white at 4%, border to 28–32%, text to 55–65%. Used for "Practice history", "← Back", "Back to Menu", secondary navigation.
 - **Session Picker Options:** Ghost by default; selected state uses an emerald border, a 10% emerald tint, and green-lit text so it reads as active without competing with the solid Begin button. New users default to Quick / 3 min. Arrow key navigation via `role="radiogroup"`.
@@ -246,7 +246,7 @@ Sync belongs only on the Practice screen, below the reflective history content. 
 - **Do** use opacity as the primary tool for hierarchy — `white/90` to `white/18` covers every level from primary action to structural chrome.
 - **Do** apply wide tracking (`0.18em` minimum) to all uppercase labels. Tight tracking on uppercase looks cramped at these weights.
 - **Do** use amber (`#fbbf24`) exclusively on the session complete screen. It is earned by finishing a session — nowhere else.
-- **Do** keep all button text at `font-light` (300) or lighter, uppercase, with tracking `≥0.18em`. The "Begin" button uses `0.28em`.
+- **Do** keep all button text at `font-light` (300) or lighter, uppercase, with tracking `≥0.18em`. The Begin button is the one sanctioned exception, using semibold 600 at tracking 0.20em (see Begin (Primary)).
 - **Do** respect `prefers-reduced-motion`: skip the orb breathe animation and canvas particle system entirely when the OS requests it.
 - **Do** surface stats and practice history as optional, secondary navigation. Never on the critical path to breathing.
 - **Do** keep sync optional, quiet, and confined to Practice History. It is for carrying history across devices, not for onboarding.
@@ -254,7 +254,7 @@ Sync belongs only on the Practice screen, below the reflective history content. 
 - **Do** give every orb mark (home, stats, complete) its outer ring at `inset -14px`, colored to match the orb's accent (emerald for home/stats, amber for complete).
 
 ### Don't:
-- **Don't** use `font-bold`, `font-extrabold`, `font-normal`, or any weight other than 100, 200, 300, or 600. The weight ceiling is semibold (600), used only on the active phase label.
+- **Don't** use `font-bold`, `font-extrabold`, `font-normal`, or any weight other than 100, 200, 300, or 600. The weight ceiling is semibold (600), used only on the active phase label and the Begin button. See the Weight Ceiling Rule for why Begin is the sanctioned exception.
 - **Don't** add shadows for structural elevation. No `box-shadow` on cards, panels, modals, or buttons. The orb glow is the only permitted exception.
 - **Don't** use glassmorphism: no `backdrop-filter: blur()` on UI chrome. The canvas has depth; the UI does not.
 - **Don't** use gradient text (`background-clip: text`). Phase colors on the orb are earned; gradient text on labels is decoration.
