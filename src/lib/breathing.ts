@@ -167,9 +167,3 @@ export function getOrbScale(phase: PhaseConfig, progress: number, prevScale: num
   return target;
 }
 
-// Back-compat aliases for the default rhythm. Existing consumers (useBreathingSession,
-// BreathingOrb, GameHUD, useAudioEngine, game/page.tsx) still read these. Remove once those
-// consumers have been migrated to read from a selected rhythm explicitly.
-export const BREATHING_PATTERN: PhaseConfig[] = RHYTHMS[DEFAULT_RHYTHM].pattern;
-export const CYCLE_DURATION: number = RHYTHMS[DEFAULT_RHYTHM].cycleDuration;
-export const SESSION_CYCLES: Record<SessionLength, number> = RHYTHMS[DEFAULT_RHYTHM].sessionCycles;

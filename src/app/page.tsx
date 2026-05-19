@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -9,9 +9,9 @@ import {
   DEFAULT_SESSION_LENGTH,
   RHYTHMS,
   RHYTHM_STORAGE_KEY,
+  Rhythm,
   RhythmId,
   SessionLength,
-  SESSION_CYCLES,
   isRhythmId,
 } from '@/lib/breathing';
 import { useAudioEngine } from '@/hooks/useAudioEngine';
@@ -42,12 +42,25 @@ function formatDuration(totalSeconds: number): string {
   return s === 0 ? `${m}m` : `${m}m ${s}s`;
 }
 
-const SESSION_OPTIONS: { length: SessionLength; label: string; ariaLabel: string; description: string }[] = [
-  { length: 'quick',  label: '3 min',  ariaLabel: '3 minutes',  description: `${SESSION_CYCLES.quick} breaths` },
-  { length: 'short',  label: '5 min',  ariaLabel: '5 minutes',  description: `${SESSION_CYCLES.short} breaths` },
-  { length: 'medium', label: '7 min',  ariaLabel: '7 minutes',  description: `${SESSION_CYCLES.medium} breaths` },
-  { length: 'long',   label: '10 min', ariaLabel: '10 minutes', description: `${SESSION_CYCLES.long} breaths` },
-];
+interface SessionOption {
+  length: SessionLength;
+  label: string;
+  ariaLabel: string;
+  description: string;
+}
+
+// Breath counts depend on the active rhythm — Gentle's 13s cycles pack more
+// breaths into 3 minutes than Standard's 22s cycles do. The home screen builds
+// SESSION_OPTIONS fresh whenever the selected rhythm changes so each label
+// shows the count the user will actually breathe.
+function buildSessionOptions(rhythm: Rhythm): SessionOption[] {
+  return [
+    { length: 'quick',  label: '3 min',  ariaLabel: '3 minutes',  description: `${rhythm.sessionCycles.quick} breaths` },
+    { length: 'short',  label: '5 min',  ariaLabel: '5 minutes',  description: `${rhythm.sessionCycles.short} breaths` },
+    { length: 'medium', label: '7 min',  ariaLabel: '7 minutes',  description: `${rhythm.sessionCycles.medium} breaths` },
+    { length: 'long',   label: '10 min', ariaLabel: '10 minutes', description: `${rhythm.sessionCycles.long} breaths` },
+  ];
+}
 
 const SOUND_TEXTURE_PALETTES = SOUND_PALETTES.filter((palette) => palette.id !== 'off');
 const SOUND_OFF_PALETTE = SOUND_PALETTES.find((palette) => palette.id === 'off');
@@ -115,6 +128,7 @@ function HomeContent() {
   const [previewingSound, setPreviewingSound] = useState<SoundPaletteId | null>(null);
 
   const activeRhythm = RHYTHMS[selectedRhythm];
+  const sessionOptions = useMemo(() => buildSessionOptions(activeRhythm), [activeRhythm]);
   const settingsSyncedRef = useRef(false);
   const previewStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { previewPalette, stopAmbient } = useAudioEngine(soundPalette);
@@ -303,7 +317,7 @@ function HomeContent() {
           onSubmit={dismissFirstVisit}
         >
           <fieldset className="grid grid-cols-2 gap-2 w-full sm:grid-cols-4" aria-label="Session length">
-            {SESSION_OPTIONS.map((opt) => {
+            {sessionOptions.map((opt) => {
               const active = selectedLength === opt.length;
               return (
                 <label

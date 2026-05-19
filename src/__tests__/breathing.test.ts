@@ -1,27 +1,13 @@
 import {
-  BREATHING_PATTERN,
-  CYCLE_DURATION,
   DEFAULT_RHYTHM,
   getPhaseAtTime,
   getRhythm,
   easeInOutCubic,
   isRhythmId,
   RHYTHMS,
-  SESSION_CYCLES,
 } from '@/lib/breathing';
 
-describe('BREATHING_PATTERN', () => {
-  it('has four phases in the correct order', () => {
-    const phases = BREATHING_PATTERN.map((p) => p.phase);
-    expect(phases).toEqual(['inhale', 'hold', 'exhale', 'rest']);
-  });
-
-  it('totals to CYCLE_DURATION', () => {
-    const total = BREATHING_PATTERN.reduce((acc, p) => acc + p.duration, 0);
-    expect(total).toBe(CYCLE_DURATION);
-    expect(CYCLE_DURATION).toBe(22);
-  });
-});
+const STANDARD_CYCLE_DURATION = RHYTHMS.standard.cycleDuration;
 
 describe('getPhaseAtTime', () => {
   it('returns inhale at t=0', () => {
@@ -88,7 +74,7 @@ describe('getPhaseAtTime', () => {
   });
 
   it('timeInPhase never exceeds phase duration', () => {
-    for (let t = 0; t < CYCLE_DURATION; t += 0.1) {
+    for (let t = 0; t < STANDARD_CYCLE_DURATION; t += 0.1) {
       const { config, timeInPhase } = getPhaseAtTime(t);
       expect(timeInPhase).toBeGreaterThanOrEqual(0);
       expect(timeInPhase).toBeLessThanOrEqual(config.duration);
@@ -97,7 +83,7 @@ describe('getPhaseAtTime', () => {
 
   it('covers all phases as t sweeps through a full cycle', () => {
     const seen = new Set<string>();
-    for (let t = 0; t < CYCLE_DURATION; t += 0.5) {
+    for (let t = 0; t < STANDARD_CYCLE_DURATION; t += 0.5) {
       seen.add(getPhaseAtTime(t).config.phase);
     }
     expect(seen).toEqual(new Set(['inhale', 'hold', 'exhale', 'rest']));
@@ -109,10 +95,12 @@ describe('RHYTHMS registry', () => {
     expect(Object.keys(RHYTHMS).sort()).toEqual(['gentle', 'slow', 'standard']);
   });
 
-  it('standard rhythm matches the previous BREATHING_PATTERN constant', () => {
-    expect(RHYTHMS.standard.pattern).toEqual(BREATHING_PATTERN);
-    expect(RHYTHMS.standard.cycleDuration).toBe(CYCLE_DURATION);
-    expect(RHYTHMS.standard.sessionCycles).toEqual(SESSION_CYCLES);
+  it('standard rhythm preserves the canonical 4-4-6-8 timing', () => {
+    const phases = RHYTHMS.standard.pattern.map((p) => p.phase);
+    expect(phases).toEqual(['inhale', 'hold', 'exhale', 'rest']);
+    expect(RHYTHMS.standard.pattern.map((p) => p.duration)).toEqual([4, 4, 6, 8]);
+    expect(RHYTHMS.standard.cycleDuration).toBe(22);
+    expect(RHYTHMS.standard.sessionCycles).toEqual({ quick: 8, short: 14, medium: 19, long: 27 });
   });
 
   it('each rhythm has four phases in the canonical order with positive durations', () => {
