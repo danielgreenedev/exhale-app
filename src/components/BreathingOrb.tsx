@@ -1,7 +1,14 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { PhaseConfig, easeInOutCubic, getPhaseAtTime, CYCLE_DURATION } from '@/lib/breathing';
+import {
+  DEFAULT_RHYTHM,
+  PhaseConfig,
+  RHYTHMS,
+  Rhythm,
+  easeInOutCubic,
+  getPhaseAtTime,
+} from '@/lib/breathing';
 import { APP_COLORS, CANVAS_COLORS } from '@/lib/colors';
 
 interface Particle {
@@ -19,6 +26,7 @@ interface Props {
   elapsedRef: { current: number };
   sessionDuration: number;
   orbScale?: number;
+  rhythm?: Rhythm;
 }
 
 const PARTICLE_COUNT = 38;
@@ -43,7 +51,13 @@ function lerpHSL(a: [number, number, number], b: [number, number, number], t: nu
   ];
 }
 
-export default function BreathingOrb({ currentPhase, elapsedRef, sessionDuration, orbScale = 1 }: Props) {
+export default function BreathingOrb({
+  currentPhase,
+  elapsedRef,
+  sessionDuration,
+  orbScale = 1,
+  rhythm = RHYTHMS[DEFAULT_RHYTHM],
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const rafRef = useRef<number>(0);
@@ -51,6 +65,11 @@ export default function BreathingOrb({ currentPhase, elapsedRef, sessionDuration
 
   // orbScaleRef: updated each render, read inside the draw loop
   const orbScaleRef = useRef(orbScale);
+
+  // Rhythm is captured at first render and never updated; cycleDuration and pattern
+  // boundaries cannot change mid-session, and reading from a ref inside the draw loop
+  // keeps the RAF closure stable across parent re-renders.
+  const rhythmRef = useRef(rhythm);
 
   // Color transition state
   const prevColorRef = useRef<[number, number, number]>(parseHSL(currentPhase.color));
@@ -119,7 +138,8 @@ export default function BreathingOrb({ currentPhase, elapsedRef, sessionDuration
       // Compute phase data directly from the continuously-updated elapsed ref —
       // bypasses React re-renders so orb animation stays smooth at 60fps
       const elapsed = elapsedRef.current;
-      const { config: phase, timeInPhase } = getPhaseAtTime(elapsed % CYCLE_DURATION);
+      const activeRhythm = rhythmRef.current;
+      const { config: phase, timeInPhase } = getPhaseAtTime(elapsed % activeRhythm.cycleDuration, activeRhythm);
       const pp = timeInPhase / phase.duration;
       const sp = Math.min(1, elapsed / sessionDuration);
 
