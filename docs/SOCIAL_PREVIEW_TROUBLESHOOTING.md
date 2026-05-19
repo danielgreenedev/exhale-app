@@ -1,15 +1,21 @@
 # Social Preview Troubleshooting
 
-Last updated: May 18, 2026
+Last updated: May 19, 2026
 
 This note documents the Facebook/Open Graph preview troubleshooting done for `https://exhale.guide`.
+
+## Current Status
+
+Paused. After app-side Open Graph, robots, image serving, Vercel firewall, Meta IP, Graph API, and third-party parser checks, the working conclusion is that the remaining Facebook Sharing Debugger failure is on Meta/Facebook's side, likely parser state or cached `og_object` behavior specific to `exhale.guide`.
+
+Do not spend more engineering time on this during beta feedback intake. Re-check in 48 to 72 hours, then resume only if Facebook sharing becomes important to beta acquisition.
 
 ## Goal
 
 Show a rich Facebook/social preview for Exhale with:
 
-- Title: `Exhale, Guided Breathing`
-- Description: `Guided breathing for a calmer mind.`
+- Title: `Exhale, a Quiet Guided Breathing Tool for Calmer Moments`
+- Description: `A quiet, free breathing tool with gentle pacing, optional rhythms, and soft sound for stressful moments. No account required.`
 - Image: `https://exhale.guide/og-image.png`
 
 ## App-Side Changes Made
@@ -30,8 +36,8 @@ Show a rich Facebook/social preview for Exhale with:
 The expected rendered tags are:
 
 ```html
-<meta property="og:title" content="Exhale, Guided Breathing"/>
-<meta property="og:description" content="Guided breathing for a calmer mind."/>
+<meta property="og:title" content="Exhale, a Quiet Guided Breathing Tool for Calmer Moments"/>
+<meta property="og:description" content="A quiet, free breathing tool with gentle pacing, optional rhythms, and soft sound for stressful moments. No account required."/>
 <meta property="og:image" content="https://exhale.guide/og-image.png"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://exhale.guide/og-image.png"/>
@@ -51,7 +57,7 @@ Live URL:
 https://exhale.guide/og-image.png
 ```
 
-The image is a 1200x630 PNG using Exhale's Still Water design language.
+The image is a 1200x630 PNG using Exhale's Still Water design language. It includes a subtle ghost-style `Begin` cue instead of a feature list or hard-selling call to action.
 
 The original `src/app/opengraph-image.tsx` route was removed because Next's file-based metadata route auto-injected `/opengraph-image?...` as `og:image`, overriding the manually configured static image URL.
 
@@ -114,9 +120,11 @@ The document returned no data.
 
 This warning appears to be generic. In this case, `robots.txt` was present and explicitly allowed Facebook crawlers.
 
-## Recommended Resolution
+## Earlier Recommended Resolution
 
-The cleanest fix is **Vercel's Verified Bots allowlist**, not a per-IP bypass list. Verified Bots uses reverse-DNS verification on each crawler request, so it keeps working as Facebook adds new IP ranges and avoids the whack-a-mole pattern that ended this round of troubleshooting.
+Earlier in troubleshooting, before the final Meta-side conclusion, the cleanest infrastructure fix appeared to be **Vercel's Verified Bots allowlist**, not a per-IP bypass list. Verified Bots uses reverse-DNS verification on each crawler request, so it keeps working as Facebook adds new IP ranges and avoids the whack-a-mole pattern that ended this round of troubleshooting.
+
+This is no longer the active next step unless Vercel begins showing new Facebook/Meta denials again.
 
 Steps:
 
