@@ -57,13 +57,25 @@ Current answer: Open.
 
 Context: One iPhone tester reported performance pressure and a possibly long Exhale; current plan is to revisit rhythm only if the pattern repeats.
 
-Current answer: Open.
+Current answer: Open. As of May 19, 2026, there are four rhythm-related signals: one iPhone tester reported performance pressure/possibly long Exhale, one casual user said the 5-minute session felt a little fast while still responding positively overall, one new user did not care for the Rest period and suggested an option to include or remove it, and one new user preferred a slower/deeper pattern with longer inhale, longer hold, and much longer exhale.
 
 Example threshold to decide later:
 
 - One report: note only.
 - Two or three similar reports: investigate.
 - Repeated reports plus drop-off data: test an alternative.
+
+Related follow-up question to ask testers:
+
+```text
+Did the Rest period help you reset, or did it feel like it interrupted the breathing rhythm?
+```
+
+Additional nuance to watch:
+
+```text
+If the rhythm did not fit you, did you want it gentler/easier, slower/deeper, or simply less interrupted by Rest?
+```
 
 ### Should feedback intake include a return-intent question?
 

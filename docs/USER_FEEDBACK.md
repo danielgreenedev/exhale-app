@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 18, 2026
+Last updated: May 19, 2026
 
 ## Purpose
 
@@ -66,6 +66,61 @@ Send a short, open prompt so feedback stays practical:
 1. 
 
 ## Recent Feedback Notes
+
+### 2026-05-19, New User, Slow-Breath Preference
+
+#### What Worked
+
+- Overall response was positive; tester called the app cool and impressive.
+
+#### Friction
+
+- Tester prefers a slower-paced breathing pattern with a longer deep inhale, longer hold, and much longer exhale.
+- This is not the same as the "too fast" or "remove Rest" feedback; it points toward users with an existing preference for deeper, slower breathwork rhythms.
+
+#### Actionable Recommendations
+
+1. Keep collecting rhythm-comfort feedback before changing the default 4-4-6-8 pattern.
+2. When evaluating alternate rhythm options, consider whether the need is a beginner-friendly softer rhythm, an experienced-user slower/deeper rhythm, or both.
+
+### 2026-05-19, New User
+
+#### What Worked
+
+- Overall response was positive; tester liked the experience.
+- Sound choices were specifically praised.
+
+#### Friction
+
+- Tester did not care for the Rest period.
+- Tester suggested an option to include or remove Rest.
+
+#### Actionable Recommendations
+
+1. Treat this as a rhythm-structure signal, not an immediate feature request. Rest is intentional in the current 4-4-6-8 pattern, so more feedback is needed before adding a no-rest or alternate-rhythm option.
+2. Add a follow-up rhythm question during beta intake: "Did the Rest period help you reset, or did it feel like it interrupted the breathing rhythm?"
+
+### 2026-05-19, Casual User
+
+#### Session
+
+- Environment: Production
+- Session length: 5 minutes
+
+#### What Worked
+
+- Overall response was strongly positive; tester said they loved it and completed the 5-minute session.
+- Tester expressed intent to revisit the app when they had more time to navigate it calmly.
+
+#### Friction
+
+- Tester agreed the pacing felt a little fast.
+- Context may have affected experience: tester was getting ready to leave, so navigation and rhythm comfort may have been evaluated under time pressure.
+
+#### Actionable Recommendations
+
+1. Treat this as a second signal that pacing may feel fast for some casual users, but keep collecting feedback before changing the default rhythm.
+2. Continue asking rhythm-comfort questions during beta intake, especially whether the pace feels fast, pressuring, or hard to settle into.
 
 ### 2026-05-19, Beta Tester (web)
 
