@@ -171,6 +171,8 @@ These shift the entire canvas (orb, glow, progress rings, particles) with each b
 
 **The Uppercase Contract.** Uppercase is for labels and controls only — things the user acts on or reads quickly. Copy (taglines, instructions, quotes) is always sentence case. Never all-caps a full sentence of human-facing copy.
 
+**The Text Opacity Floor.** Content text (body copy, metadata, sub-labels, anything a user actually reads) uses Still White at 55% opacity or higher. Calculated contrast over forest-night clears WCAG AA 4.5:1 at 55%; below that the ratio drops fast (3.7:1 at 42%, 3.1:1 at 38%, 1.8:1 at 28%). Lower opacities are reserved for structural and decorative chrome only: borders (18-30%), list markers (35%), placeholders (40%, WCAG-exempt), disabled-state labels (28%, WCAG-exempt). The opacity hierarchy stays — 90% / 70% / 60% / 55% — it just doesn't extend into content text below 55%.
+
 ## 4. Elevation
 
 This system is flat by design. There are no `box-shadow` values used for structural elevation. Depth is conveyed through two mechanisms only: **opacity** (foreground elements are brighter; background elements fade) and **glow** (the orb and its rings emit a radial light that separates them from the canvas without casting a shadow).
@@ -213,6 +215,20 @@ The core rhythm is 4-4-6-8: Inhale 4 seconds, Hold 4 seconds, Exhale 6 seconds, 
 - **Phase ring:** Drawn on canvas around the orb — arc from `-π/2` sweeping with phase progress. Phase color at 80% opacity.
 - **Session ring:** Outer ring, same origin — session progress fill at 42% opacity over a 12% track. This is the sole session-level progress indicator; the redundant HUD progress bar was removed after a beta tester reported the floating colored segment more confusing than informative.
 
+### Rhythm
+
+The breathing pattern itself is selectable inside Session Setup as the first row, above the static phase sequence preview so that picking a rhythm updates the preview live. Three options:
+
+- **Standard** (`Balanced`) — 4-4-6-8, 22s cycle. Default for first-time users.
+- **Gentle** (`Easier`) — 3-2-4-4, 13s cycle. Shorter cycle with a lighter hold; for capacity-constrained users and anyone who feels rushed by Standard.
+- **Full** (`Longer`) — 6-6-10-4, 26s cycle. Longer inhale, hold, and exhale; for experienced breathwork users.
+
+Each tile shows the rhythm name (uppercase 10px tracking-0.12em) above a one-word relative descriptor (sentence-case 10px tracking-0.08em) — `Balanced`, `Easier`, `Longer`. The technical phase signature (`4-4-6-8`) lives in the title attribute and aria-label for breathwork-aware users and screen readers, but is not visible by default; that disambiguates rhythm tiles from breathwork-savvy notation that intimidates the skeptical primary user.
+
+Rhythm uses the same quiet emerald selected-state language as Time, Circle Size, and Sound. Default is `Standard`. The choice persists through `exhale-rhythm` in localStorage and `user_settings.rhythm` in Supabase. Rhythm cannot change mid-session; the picker is read once at session start and the resulting pattern drives the orb timing, audio cue ramps, and HUD time-remaining calculation. Switching rhythm requires returning to the home screen and starting a new session.
+
+The Full label was chosen over Deep to avoid colliding with the Deep sound texture in the same Session Setup pane.
+
 ### Sound Palettes
 
 Sound is optional and synthesized only. The home screen exposes four texture choices: Air, Warm, Deep, and Still. Air is the default and should stay closest to silence: filtered air, a low grounding tone, and a sparse open pad. Warm can add more body. Deep shifts the bed darker and lower. Still removes almost all tonality but remains audible as a very quiet breath tone. Off is separated as a mute icon beside the section label so users do not read it as another sound texture.
@@ -225,7 +241,7 @@ Circle Size uses compact S/M/L radio controls. New users default to M. The activ
 
 ### Session Setup Disclosure
 
-Session Setup is the single push-down disclosure below Begin and Resume. It contains the static 4-step sequence first, a faint divider, then Circle Size and Sound. It is collapsed by default for everyone, with no completed-session rule. Practice History stays visible outside Session Setup because it is navigation, not a preference.
+Session Setup is the single push-down disclosure below Begin and Resume. It contains the Rhythm picker first (3 options, sub-labeled with one-word descriptors), then the static 4-step phase sequence preview that updates live based on the active rhythm, a faint divider, then Circle Size and Sound. It is collapsed by default for everyone, with no completed-session rule. Practice History stays outside Session Setup because it is navigation, not a preference, and is shown only after at least one completed session so first-visit users see exactly one decision (length) and one action (Begin).
 
 ### Stats Rows
 
@@ -233,7 +249,9 @@ Flat list — no cards, no side borders. Each row: `border-b border-white/6`, `p
 
 ### Optional Sync
 
-Sync belongs only on the Practice screen, below the reflective history content. It is an optional recovery and continuity affordance, not an account system. It syncs practice history, timer length, Circle Size, and sound choice. The flow is quiet and linear: email field, Send code, 6-digit code field, Confirm. The privacy reassurance is: "Only these sync: practice history, timer length, circle size, and sound choice." User-facing sync copy should not use account, profile, or login language. Do not use magic-link copy, resend loops, avatars, account settings, or anything that makes breathing feel gated.
+Sync belongs only on the Practice screen, below the reflective history content. It is an optional recovery and continuity affordance, not an account system. It syncs practice history, timer length, Circle Size, sound choice, and rhythm. The flow is quiet and linear: email field, Send code, 6-digit code field, Confirm. The privacy reassurance is: "Only these sync: practice history, timer length, circle size, sound choice, and rhythm." User-facing sync copy should not use account, profile, or login language. Do not use magic-link copy, resend loops, avatars, account settings, or anything that makes breathing feel gated.
+
+Cloud writes for settings are debounced (~400ms trailing) so rapid clicks through Circle Size or Sound options collapse into a single Supabase upsert. localStorage writes stay immediate so the local UI reflects the choice without waiting on a round trip.
 
 ### Milestone Badges
 

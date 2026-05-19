@@ -97,54 +97,73 @@ Last updated: May 19, 2026
 - `/terms` now covers no medical advice, use at your own discretion, acceptable use, intellectual property, service availability, no warranties, and contact.
 - Both pages are reachable directly and have quiet Exhale-styled layouts; they still need to be surfaced from the main app UI.
 
+## Completed Promoted Priority (2026-05-19)
+
+Alternate rhythm options shipped end to end:
+
+- `RHYTHMS` registry in `src/lib/breathing.ts` with three rhythms: Standard 4-4-6-8 (default), Gentle 3-2-4-4, Full 6-6-10-4. Per-rhythm session-cycle recalibration keeps the 3/5/7/10 minute labels honest.
+- Rhythm threaded through `useBreathingSession`, `BreathingOrb`, `GameHUD`, `useAudioEngine`, and `game/page.tsx` via a locked-at-first-render `rhythmRef` pattern.
+- Session Setup rhythm picker with one-word relative descriptors (Balanced / Easier / Longer); technical phase signature kept in title/aria-label but not visible by default, to avoid intimidating the skeptical primary user.
+- localStorage key `exhale-rhythm` plus Supabase `user_settings.rhythm` column (migration 002), with isRhythmId guard on parse.
+- Back-compat aliases (`BREATHING_PATTERN`, `CYCLE_DURATION`, `SESSION_CYCLES`) removed; all consumers read rhythm-aware data.
+- 11 new tests cover the registry shape, cycle recalibration accuracy, getPhaseAtTime boundary behavior with non-default rhythms, and the rhythm-lock invariant.
+
+Two tester-follow-up tasks land here as Stage 0 work below.
+
+## Completed Critique-Driven Polish (2026-05-19)
+
+`/impeccable critique` scored the home page 36/40; three P3 items addressed:
+
+- Renamed the third rhythm `slow` to `full` (label, id, type) and added a per-rhythm one-word `summary` field used as the visible tile sub-label. Technical signature moves to title and aria-label.
+- Practice History link now hidden on the home page until at least one completed session exists, so first-visit users see exactly one decision (length) and one action (Begin).
+- Tile sub-label styling unified with the time-button sub-label (text-[10px] tracking-[0.08em]).
+- Data migration 003 rewrites any cloud `rhythm = 'slow'` values to `'full'`.
+
+## Completed Audit-Driven Polish (2026-05-19)
+
+`/impeccable audit` scored the codebase 19/20; one P1 and three P3 items addressed:
+
+- **P1 contrast bumps**: SessionComplete quote attribution (38% to 55%) and stats sync explanatory copy (42-48% to 55%). Calculated contrast now clears WCAG AA 4.5:1 on body content. Marker, placeholder, and disabled-state opacities remain unchanged (decorative or exempt). DESIGN.md gained the Text Opacity Floor named rule.
+- **P3 debounced cloud writes**: 400ms trailing debounce in `queueSettingsSave` batches rapid Circle Size / Sound / Rhythm / Time clicks into a single Supabase upsert. Local writes stay immediate. Pending changes flushed on userId rotation or unmount.
+- **P3 particle count scaling**: `BreathingOrb` uses 22 particles on viewports below 600px wide instead of 38, as a defensive perf measure for older mobile GPUs.
+- **P3 iOS PWA tip**: `Stats` page detects iOS Safari and shows a one-line Add-to-Home-Screen prompt when the app is not yet in standalone mode, compensating for the missing Fullscreen API on iOS.
+
 ## Remaining To-Do
 
 Items are grouped loosely by roadmap stage. See `docs/ROADMAP.md` for the strategic context.
 
-### Promoted Priority, Alternate Rhythm Options
-
-Pulled forward from Stage 1 on 2026-05-19. Five of six recent beta testers reported rhythm-fit concerns, including one (T-2026-05-19-05) who could not follow the rhythm without gasping (capacity, not preference). The default 4-4-6-8 stays; this work adds selectable alternates so the rhythm conversation stops dominating other product feedback. Runs in parallel with Stage 0 feedback collection.
-
-1. Design at least two alternate rhythm options. Starting points:
-   - A gentler option with shorter total cycle, lighter holds, and a more permissive exhale, for capacity-constrained users (signal: T-2026-05-19-05).
-   - A slower-deeper option with longer inhale, longer hold, and much longer exhale, for users with existing breathwork preference (signal: T-2026-05-19-04).
-2. Refactor `BREATHING_PATTERN` in `src/lib/breathing.ts` to support multiple named patterns instead of a single constant. Each pattern needs its own phase durations and cycle-count recalibration so the 3, 5, 7, 10 minute labels remain accurate.
-3. Add a rhythm selector inside Session Setup, alongside Circle Size and Sound, using the same quiet emerald selected-state language. Default remains 4-4-6-8.
-4. Persist rhythm choice in Supabase `user_settings` alongside `session_length`, `orb_scale`, and `sound_palette`. Update `settingsSync` to round-trip the new column.
-5. Follow up with the original five testers once the alternates ship; ask whether one of the new options fits better and capture answers in `docs/USER_FEEDBACK.md`.
-
 ### Stage 0, validation and tester signal
 
-Primary focus: remain in beta feedback mode. Collect feedback and usage data while the Promoted Priority work above proceeds in parallel.
+Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
-6. Pending feedback/data collection: test cross-device sync on Device B and verify Practice History, timer length, Circle Size, and sound choice sync correctly through Supabase.
+1. Pending feedback/data collection: test cross-device sync on Device B and verify Practice History, timer length, Circle Size, sound choice, and rhythm sync correctly through Supabase.
 
-7. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check: "Can you start breathing without thinking?", "Did matching the prompts feel pressuring?", "Did Exhale feel too long?", "Did any sound behavior surprise you?", and "Did Settle In feel optional enough?"
+2. Pending follow-up with the original five rhythm-concern testers (T-2026-05-18-01 and T-2026-05-19-02 through -05). Ask whether Gentle or Full fits better than Standard did. Capture answers in `docs/USER_FEEDBACK.md`.
 
-8. Pending feedback/data collection: recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
+3. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check: "Can you start breathing without thinking?", "Did matching the prompts feel pressuring?", "Did Exhale feel too long?", "Did any sound behavior surprise you?", and "Did Settle In feel optional enough?"
 
-9. Pending feedback/data collection: after a meaningful sample of synced sessions, review Supabase `app_events` counts (timer selections, session starts, Settle In exits, early exits, completions). Watch completion rate, return rate, and drop-off phase.
+4. Pending feedback/data collection: recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
+
+5. Pending feedback/data collection: after a meaningful sample of synced sessions, review Supabase `app_events` counts (timer selections, session starts, Settle In exits, early exits, completions). Watch completion rate, return rate, and drop-off phase.
 
 ### Stage 1, ship-quality polish
 
-These can wait until after the Promoted Priority and Stage 0 work are complete.
+These can wait until after Stage 0 feedback signal is in.
 
-10. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Run `/impeccable shape Garden skin` before building.
+6. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Run `/impeccable shape Garden skin` before building.
 
-11. Confirm Facebook's Sharing Debugger renders the preview after their scrape cache clears. App side is verified working; the remaining loose end is Meta-side cache only. Resume playbook lives in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md`. When the Garden skin lands, consider an updated OG image that shows both aesthetics.
+7. Confirm Facebook's Sharing Debugger renders the preview after their scrape cache clears. App side is verified working; the remaining loose end is Meta-side cache only. Resume playbook lives in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md`. When the Garden skin lands, consider an updated OG image that shows both aesthetics.
 
-12. Not a priority for now: add a UI affordance linking the main pages to `/privacy` and `/terms`. Likely a small footer link from home, game complete, and stats in keeping with the quiet aesthetic, but a more prominent button could also fit. The pages exist and are reachable; they are not surfaced from any other screen yet.
-
-13. Wait until after feedback intake: color contrast audit on text at low opacity (white/28 to 38 against forest-night). May fall below WCAG 2.1 AA. Run `/impeccable audit` before considering Stage 2.
+8. Not a priority for now: add a UI affordance linking the main pages to `/privacy` and `/terms`. Likely a small footer link from home, game complete, and stats in keeping with the quiet aesthetic, but a more prominent button could also fit. The pages exist and are reachable; they are not surfaced from any other screen yet.
 
 ### Stage 2, distribution
 
-Stage 2 comes after the validation and ship-quality polish work above.
+Stage 2 comes after the Stage 0 and Stage 1 work above.
 
-14. Package Exhale as an Android Trusted Web Activity and submit to the Play Store. Land this after the Garden skin, feedback-driven changes, and discoverability work.
+9. Package Exhale as an Android Trusted Web Activity and submit to the Play Store. Land this after the Garden skin, feedback-driven changes, and discoverability work.
 
-15. Add a quiet PWA "Add to Home Screen" affordance for iOS. No native shell; iOS Store deployment is deferred (see ROADMAP).
+10. iOS PWA "Add to Home Screen" affordance already exists as a quiet tip on `/stats` (2026-05-19); revisit when wider beta begins to decide if it needs a more prominent surfacing.
 
 ## Recommended Next Move
 
-Begin the Promoted Priority work (alternate rhythm options) in parallel with continued beta feedback collection. Defer the Garden skin, policy-page surfacing, contrast audit, and distribution work until the Promoted Priority and Stage 0 work are complete.
+Continue beta feedback collection. The natural next concrete step is following up with the five rhythm-concern testers (item 2 above) to validate whether Gentle or Full materially helps. Defer the Garden skin, contrast audit re-check, and distribution work until that signal is in.

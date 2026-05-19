@@ -20,13 +20,22 @@ Confirm the premise: does the right kind of person find this useful?
 
 Gate: roughly ten testers, mostly target-audience, with at least one signal of return use.
 
-## Promoted Priority, Alternate Rhythm Options
+## Promoted Priority, Alternate Rhythm Options (complete 2026-05-19)
 
-Pulled forward from Stage 1 on 2026-05-19 after consistent tester signal.
+Pulled forward from Stage 1 after five of six recent beta testers reported rhythm-fit concerns (see `docs/USER_FEEDBACK.md`). T-2026-05-19-05 specifically could not follow the rhythm without gasping, which was treated as a comfort and capacity signal, not preference.
 
-Five of the six recent beta testers reported rhythm-fit concerns (see `docs/USER_FEEDBACK.md`). The reports span a range — pacing felt fast, Exhale too long, Rest unwelcome, slower-deeper preferred — but converge on one root cause: a single fixed 4-4-6-8 rhythm does not fit every body. Tester T-2026-05-19-05 specifically could not follow the rhythm without gasping, which is a comfort and capacity signal, not a preference signal.
+Shipped:
 
-This is no longer Stage 1 polish. It is a near-term comfort and accessibility priority that should ship before the larger Garden skin work, so the rhythm conversation stops being the loudest piece of feedback against an otherwise positive product. The default 4-4-6-8 stays; the work is adding selectable alternates surfaced inside Session Setup, persisted alongside Circle Size and Sound through `user_settings`.
+- Three selectable rhythms surfaced inside Session Setup, with one-word descriptors:
+  - **Standard** (Balanced) — 4-4-6-8, 22s cycle. Default for first-time users.
+  - **Gentle** (Easier) — 3-2-4-4, 13s cycle. Capacity-constrained users.
+  - **Full** (Longer) — 6-6-10-4, 26s cycle. Experienced breathwork users.
+- Per-rhythm cycle counts recalibrated so all four minute labels stay close to their targets.
+- Rhythm threads through `useBreathingSession`, `BreathingOrb`, `GameHUD`, `useAudioEngine`, and `game/page.tsx` via a Rhythm object captured at first render.
+- Local persistence through `exhale-rhythm` localStorage key; cloud round-trip through `user_settings.rhythm` (Supabase migration 002 + 003 applied).
+- Picking a rhythm updates the live phase sequence preview directly underneath the picker.
+
+The next signal worth gathering: circle back to the original five testers and ask whether one of Gentle or Full fits better than Standard did. That tester follow-up is captured as TODO item.
 
 ## Stage 1, Ship-quality polish
 

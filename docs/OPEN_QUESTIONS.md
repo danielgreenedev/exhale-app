@@ -73,9 +73,9 @@ Did the rhythm ever make you feel like you had to gasp, catch up, or strain?
 
 ### Should Exhale offer customizable breath rhythms?
 
-Context: Feedback is starting to show that rhythm fit varies. Some users report the current pace feels fast or pressuring, one user did not care for Rest, one user prefers a slower/deeper pattern with longer inhale, hold, and exhale, and one user found the prompts difficult to follow without gasping. Customization could help, but it risks adding decision friction before the first breath.
+Answered 2026-05-19 with a partial yes: three curated presets, not free customization. See Answered Questions below for the full record.
 
-Current answer: Open.
+Remaining open: whether to expose free per-phase customization on top of presets. Defer until the three presets have at least one beta round of usage data; if presets cover the rhythm-fit complaints we have, free customization is decision-cost the skeptical primary user does not need.
 
 Possible customization dimensions:
 
@@ -240,6 +240,16 @@ Date answered: 2026-05-19
 Evidence: `docs/USER_FEEDBACK.md` entries T-2026-05-18-01 (performance pressure, possibly long Exhale), T-2026-05-19-02 (pacing felt fast), T-2026-05-19-03 (did not care for Rest), T-2026-05-19-04 (prefers slower-deeper), T-2026-05-19-05 (gasping; capacity mismatch).
 
 Follow-up: Promoted Priority added to `docs/ROADMAP.md` and `docs/TODO.md` to design and ship selectable alternate rhythms while continuing beta feedback collection in parallel.
+
+### Should Exhale offer customizable breath rhythms?
+
+Answer: Curated presets, not free customization. Three rhythms are now available inside Session Setup: Standard (4-4-6-8, default), Gentle (3-2-4-4, capacity-constrained users), and Full (6-6-10-4, experienced breathwork users). Each persists through `exhale-rhythm` localStorage and `user_settings.rhythm` cloud column. Free per-phase customization is intentionally not exposed; the presets handle the rhythm-fit complaints captured so far without forcing the skeptical primary user to make a multi-axis decision before pressing Begin.
+
+Date answered: 2026-05-19
+
+Evidence: Promoted Priority work shipped end to end (`docs/ROADMAP.md`, `docs/TODO.md` Completed Promoted Priority section). Original rhythm-fit signals from `docs/USER_FEEDBACK.md` entries T-2026-05-18-01 through T-2026-05-19-05.
+
+Follow-up: Beta-test the three presets with the original five rhythm-concern testers (TODO Stage 0 item 2). If complaints persist beyond what the presets cover, revisit free customization. Otherwise treat free customization as deliberately deferred.
 
 ### Template
 

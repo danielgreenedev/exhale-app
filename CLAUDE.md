@@ -14,24 +14,34 @@ This means: no sign-up, no accounts, no onboarding gates, no streaks that guilt,
 
 ## Core Mechanic
 
-4-4-6-8 breathing pattern (inhale 4s, hold 4s, exhale 6s, rest 8s = 22s/cycle). Fully guided, with no user input needed during a session. Session lengths: quick (~3m), short (~5m), medium (~7m), long (~10m).
+Selectable breathing rhythm exposed inside Session Setup on the home screen. Three options, default Standard:
 
-The rest phase is intentionally long enough to allow a normal breath, yawn, or soft reset before the next inhale.
+- **Standard** — 4-4-6-8 (22s cycle). Default for first-time users.
+- **Gentle** — 3-2-4-4 (13s cycle). Shorter cycle with a lighter hold; for capacity-constrained users.
+- **Full** — 6-6-10-4 (26s cycle). Longer inhale, hold, and exhale; for experienced breathwork users.
+
+Fully guided, with no user input needed during a session. Session lengths: quick (~3m), short (~5m), medium (~7m), long (~10m). Cycle counts are recalibrated per rhythm so each minute label stays close to its target across all three patterns.
+
+The rest phase in Standard is intentionally long enough to allow a normal breath, yawn, or soft reset before the next inhale. Gentle and Full reshape that balance for their respective audiences.
 
 ## Stack
 
 - `src/app/page.tsx` — home/menu screen
 - `src/app/game/page.tsx` — active session screen
 - `src/app/stats/page.tsx` — practice history screen
-- `src/components/BreathingOrb.tsx` — canvas orb, particles, progress rings
-- `src/components/GameHUD.tsx` — in-session HUD overlay
+- `src/app/privacy/page.tsx`, `src/app/terms/page.tsx` — quiet policy pages (not linked from main UI yet)
+- `src/components/BreathingOrb.tsx` — canvas orb, particles, progress rings; rhythm-aware
+- `src/components/GameHUD.tsx` — in-session HUD overlay; rhythm-aware
 - `src/components/SessionComplete.tsx` — end-of-session screen
-- `src/hooks/useBreathingSession.ts` — RAF-based session state machine
-- `src/hooks/useAudioEngine.ts` — Web Audio API synthesis (no external files)
-- `src/hooks/useSessionStats.ts` — localStorage session persistence
-- `src/lib/breathing.ts` — phase configs, session lengths, easing math
+- `src/hooks/useBreathingSession.ts` — RAF-based session state machine; accepts rhythm
+- `src/hooks/useAudioEngine.ts` — Web Audio API synthesis (no external files); rhythm-aware breath filter ramp
+- `src/hooks/useSessionStats.ts` — localStorage + Supabase session persistence
+- `src/lib/breathing.ts` — RHYTHMS registry, phase configs, session lengths, easing math
 - `src/lib/sound.ts` — sound palette labels and storage IDs
-- `src/lib/sessionSync.ts` — local/cloud session merge helpers
+- `src/lib/auth.tsx` — anonymous-first auth with optional email upgrade
+- `src/lib/supabase.ts` — browser Supabase client singleton
+- `src/lib/settingsSync.ts` — local/cloud round-trip for orb scale, sound, session length, rhythm
+- `src/lib/sessionSync.ts` — local/cloud session merge helpers (dedup-aware)
 - `src/lib/appEvents.ts` — Supabase event logging for email-synced users
 
 ## Design Principles
@@ -70,6 +80,8 @@ Do not reuse these keys for new features:
 | `exhale-stats` | localStorage | Session records array |
 | `exhale-orb-scale` | localStorage | Circle size preference (0.75 / 1.0 / 1.25) |
 | `exhale-sound-palette` | localStorage | Sound palette preference (`air` / `warm` / `low` / `quiet` / `off`; labels are Air / Warm / Deep / Still / mute) |
+| `exhale-session-length` | localStorage | Last picked session length (`quick` / `short` / `medium` / `long`) |
+| `exhale-rhythm` | localStorage | Last picked breathing rhythm (`standard` / `gentle` / `full`) |
 | `exhale-visited` | localStorage | First-visit flag (cleared = first visit) |
 | `exhale-resume` | sessionStorage | In-progress session state, 60s TTL |
 
@@ -80,8 +92,9 @@ Supabase is optional from the user's point of view and only appears through Prac
 | Table | Purpose |
 |-------|---------|
 | `breathing_sessions` | Cloud practice history |
-| `user_settings` | Timer length, Circle Size, and sound choice |
+| `user_settings` | Timer length, Circle Size, sound choice, and rhythm |
 | `app_events` | Lightweight counts for timer selection, session start, early exit, and completion |
+| `quotes` | Rotating inspirational quotes for the session complete screen (read-only via RLS) |
 
 ## Key UX Decisions
 
@@ -89,6 +102,7 @@ These are intentional — don't undo them without understanding the rationale:
 
 - **No user input during a session** — fully guided, not hold-to-breathe. Reduces intimidation for first-timers who don't know when to inhale.
 - **Abstract orb** — chosen over thematic visuals (ocean, lantern, mandala). More universal, less culturally loaded, works for any user.
+- **Selectable rhythm (Standard / Gentle / Full)** — added after five of six recent beta testers reported rhythm-fit concerns across a range of capacities and preferences. Default stays Standard 4-4-6-8; alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
 - **8s settle-in before first breath** — gives the user a quiet transition from "reading the screen" to "being in the session."
 - **New-user defaults** — Quick / 3 min and medium Circle Size are the first-run defaults so the first session feels short and visually balanced.
 - **Session resume (60s window)** — exiting a session shows an exit guard; sessionStorage holds state for 60s so accidental exits don't lose progress.
