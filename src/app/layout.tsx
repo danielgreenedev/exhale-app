@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Exhale, Guided Breathing',
     description: 'Guided breathing for a calmer mind.',
-    url: 'https://exhale.guide',
+    url: 'https://exhale.guide/',
     siteName: 'Exhale',
     images: [
       {
