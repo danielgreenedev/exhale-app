@@ -103,12 +103,15 @@ function GameContent() {
     cycleNumber,
     totalCycles,
     timeRemaining,
+    nextPhase,
+    phaseLeadProgress,
     elapsedTotal,
     elapsedRef,
     sessionDuration,
     start,
     pause,
     reset,
+    totalPhasesCompleted,
   } = useBreathingSession(lengthParam, initialElapsed, rhythm);
 
   const { saveSession } = useSessionStats();
@@ -130,7 +133,7 @@ function GameContent() {
     }
   }, [soundParam]);
 
-  const { startAmbient, stopAmbient, pauseAmbient, resumeAmbient, playCue } = useAudioEngine(soundPalette, rhythm);
+  const { startAmbient, stopAmbient, pauseAmbient, resumeAmbient, playCue, playAnticipationCue } = useAudioEngine(soundPalette, rhythm);
 
   const [audioActive, setAudioActive] = useState(false);
   const [showAudioPrompt, setShowAudioPrompt] = useState(false);
@@ -143,6 +146,7 @@ function GameContent() {
   const [showSilentModeHint, setShowSilentModeHint] = useState(false);
 
   const prevPhaseIndexRef = useRef(-1);
+  const anticipationCueRef = useRef(-1);
   const audioStartedRef = useRef(false);
   const sessionSavedRef = useRef(false);
   const sessionStartedEventRef = useRef(false);
@@ -281,8 +285,18 @@ function GameContent() {
     if (phaseIndex !== prevPhaseIndexRef.current && sessionState === 'running') {
       playCue(rhythm.pattern[phaseIndex].phase);
       prevPhaseIndexRef.current = phaseIndex;
+      anticipationCueRef.current = -1;
     }
   }, [phaseIndex, sessionState, playCue, rhythm]);
+
+  // Soft pre-cue in the last beat before the next phase so the transition is less sudden.
+  useEffect(() => {
+    if (sessionState !== 'running' || phaseLeadProgress <= 0) return;
+    if (anticipationCueRef.current === totalPhasesCompleted) return;
+
+    playAnticipationCue(nextPhase.phase);
+    anticipationCueRef.current = totalPhasesCompleted;
+  }, [sessionState, phaseLeadProgress, totalPhasesCompleted, nextPhase, playAnticipationCue]);
 
   // Record a start only once the guided rhythm begins, not during the settle-in screen.
   useEffect(() => {

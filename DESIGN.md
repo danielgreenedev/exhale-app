@@ -138,7 +138,7 @@ These shift the entire canvas (orb, glow, progress rings, particles) with each b
 - **Coastal Haze** (`#76b2cb`) — Inhale. A muted steel blue. Opening, expanding, the color of breathing in.
 - **Amber Warmth** (`#d2ae65`) — Hold. Warm amber-gold. Sustained, interior, candlelit.
 - **Forest Floor** (`#5db184`) — Exhale. Sage green. Releasing, settling, returning.
-- **Quiet Blush** (`#cd8492`) — Rest. Dusty rose-pink. Soft, restorative, the color of stillness.
+- **Quiet Blush** (`#cd8492`) — Relax phase (phase enum `rest`). Dusty rose-pink. Soft, restorative, the color of permission to breathe naturally between guided inhales.
 
 ### Neutral
 - **Forest Night** (`#090c0a`): The ground. Near-black with the faintest green tint — not pure void, but the darkness before a forest dawn. Every screen.
@@ -161,7 +161,7 @@ These shift the entire canvas (orb, glow, progress rings, particles) with each b
 
 - **Display** (extralight 200, 2.25rem, tracking 0.25em, uppercase): The "Exhale" wordmark on the home screen. One instance per app.
 - **Headline** (extralight 200, 1.875rem, tracking 0.3em, uppercase): Screen titles — "Practice", "Complete". Airy and formal.
-- **Title** (semibold 600, 1.875rem, tracking 0.3em, uppercase): The active phase label during a session — "Inhale", "Hold", "Exhale", "Rest". Together with the Begin button label, one of only two semibold uses in the system. Its weight is earned: it is the only instruction the user needs.
+- **Title** (semibold 600, 1.875rem, tracking 0.3em, uppercase): The active phase label during a session — "Inhale", "Hold", "Exhale", "Relax". Together with the Begin button label, one of only two semibold uses in the system. Its weight is earned: it is the only instruction the user needs.
 - **Body** (light 300, 0.875rem, tracking 0.12em): Taglines, descriptions, session complete quotes. Sentence case. 45–60% white.
 - **Label** (light 300, 0.75rem, tracking 0.18–0.28em, uppercase): Most button text, metadata, and stat labels. Secondary actions sit at 0.18em. The Begin button is the one sanctioned exception, using semibold 600 at tracking 0.20em for legibility against the emerald fill; see Begin (Primary) below.
 - **Timer** (thin 100, 3.75rem, tabular-nums): The countdown during a session. Uses `font-variant-numeric: tabular-nums` to prevent layout shift as numbers change.
@@ -208,12 +208,22 @@ The brand mark and the product itself. Three contexts:
 
 ### Breathing Rhythm
 
-The core rhythm is 4-4-6-8: Inhale 4 seconds, Hold 4 seconds, Exhale 6 seconds, Rest 8 seconds. Rest is intentionally long enough to allow a normal catch-up breath, a yawn, or a soft reset before the next inhale. The pre-session Settle In state lasts 8 seconds and is skipped when resuming a session.
+The Standard rhythm is 4-4-6-8: Inhale 4 seconds, Hold 4 seconds, Exhale 6 seconds, Relax 8 seconds (phase enum `rest`). Relax is intentionally long enough to allow a normal catch-up breath, a yawn, or a soft reset before the next guided inhale; "Relax" labels the phase rather than "Rest" because the body wants to inhale during this window, not hold still. The pre-session Settle In state lasts 8 seconds and is skipped when resuming a session. Gentle and Full presets reshape the per-phase durations; see the Rhythm component spec.
+
+### Anticipatory Phase Cue
+
+In the final `PHASE_LOOKAHEAD_SECONDS` (currently 0.8s) before each phase change, the guide ring around the orb crossfades to the incoming phase color and a quiet pre-cue tone plays when sound is on. The intent is to give the brain a beat to register the upcoming transition without changing the actual phase timing. No textual HUD cue is shown; an earlier `Next [phase]` text experiment competed with the central phase label and the countdown for attention and was removed. Hook returns `nextPhase`, `phaseLeadProgress` (0-1), and `timeUntilPhaseEnd` so other consumers can opt in to anticipation without re-deriving them.
 
 ### Progress Indicators
 
 - **Phase ring:** Drawn on canvas around the orb — arc from `-π/2` sweeping with phase progress. Phase color at 80% opacity.
 - **Session ring:** Outer ring, same origin — session progress fill at 42% opacity over a 12% track. This is the sole session-level progress indicator; the redundant HUD progress bar was removed after a beta tester reported the floating colored segment more confusing than informative.
+
+### Phase Transitions
+
+During the last 0.8 seconds of a phase, the guide ring begins to show the next phase color as a faint incoming arc. This is an anticipatory cue, not a new phase; it gives the user's eye a beat to understand that a transition is coming.
+
+Phase changes should feel like a handoff rather than a switch. The HUD keeps the current phase label active, then reveals a small `Next [phase]` cue in the final beat before the boundary. Sound uses a quiet pre-cue before the regular phase marker. Visual color transitions are deliberately softened; the boundary can be sensed before the orb changes state, especially for users who need a moment to process the new instruction.
 
 ### Rhythm
 

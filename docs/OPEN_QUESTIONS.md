@@ -1,6 +1,6 @@
 # Exhale Open Questions
 
-Last updated: May 19, 2026
+Last updated: May 19, 2026 (Rest/Hold question promoted to active)
 
 Use this as a living parking lot for product, validation, trust, accessibility, and strategy questions that are not ready to become implementation tasks. As questions are answered, add the answer, date, evidence, and any resulting TODO/doc updates.
 
@@ -77,6 +77,52 @@ Answered 2026-05-19 with a partial yes: three curated presets, not free customiz
 
 Remaining open: whether to expose free per-phase customization on top of presets. Defer until the three presets have at least one beta round of usage data; if presets cover the rhythm-fit complaints we have, free customization is decision-cost the skeptical primary user does not need.
 
+### Do users need anticipatory phase cues or softer phase transitions?
+
+Context: Beta feedback suggested phase changes can feel abrupt and that the brain takes a beat to register an exact-boundary transition (label, sound, and motion all changing at the same instant). Five candidate interventions surfaced in critique:
+
+1. Rename or reframe Rest so it does not imply stillness
+2. Add a quiet pre-cue 500-800ms before each phase change
+3. Let the label and audio lead the orb motion slightly
+4. Soften phase boundaries with a deeper crossfade
+5. Treat Rest as natural breathing space rather than an empty hold
+
+Current answer: partially answered. Implementing 2026-05-19:
+
+- `PHASE_LOOKAHEAD_SECONDS = 0.8` constant added in `src/lib/breathing.ts`
+- `useBreathingSession` exposes `nextPhase`, `phaseLeadProgress`, and `timeUntilPhaseEnd` so consumers can render lead state
+- `BreathingOrb` guide ring picks up the next-phase color during the lead window
+- `useAudioEngine` schedules a quiet pre-cue before each phase change
+- `GameHUD` initially showed a `Next [phase]` text cue but it competed for attention with the central phase label and countdown. Removed 2026-05-19; the audio pre-cue and ring color lead carry the anticipation signal on their own. `nextPhase` and `phaseLeadProgress` stay on the hook return so the orb and audio engine still consume them.
+
+Still open from the original five:
+
+- (1) and (5) are not yet acted on. Rest may still imply stillness when the body wants to inhale, and that is a separate concern from the timing of the boundary itself. See "Should Rest and Hold be partly or completely optional?" below and the brainstorm on renaming.
+- Whether the current crossfade is deep enough or needs further softening once Rest is reframed.
+
+Follow-up: watch beta feedback for whether anyone still reports boundary anxiety after the lead window is live. If not, treat this as covered.
+
+### Should Rest and Hold be partly or completely optional?
+
+Context: Originally raised by T-2026-05-19-03 (did not care for Rest, suggested an option to include or remove it) and T-2026-05-19-05 (capacity mismatch; gasping). Gentle already trims Hold to 2s and Rest to 4s, but that may not be far enough.
+
+2026-05-19 update: Two unsolicited replies on the Facebook pacing question both flagged Hold and Rest. T-2026-05-19-06 called Hold "the hardest part" and described an asymmetric exhale-to-inhale ratio as friction. T-2026-05-19-07 said the rests felt awkward even after the duration extension and label change to Relax. That is now four distinct testers flagging Rest, plus two flagging Hold — convergent enough to promote this from deferred to active.
+
+Possible directions:
+
+- Add a fourth rhythm preset with Hold=0 or Rest=0 (or both) instead of exposing free-phase customization. Working candidate: a "Flow" rhythm with no Hold, e.g. 4-0-6-2 or 4-0-6-0. Tracked as a Stage 1 sketch task in `docs/TODO.md`.
+- Reframe Rest's identity further beyond the Relax/Breathe rename if the awkwardness signal continues.
+- Allow per-phase duration overrides inside Session Setup (closer to free customization; reintroduces decision friction).
+
+Current answer: Active, not deferred. Next move is to sketch the Flow (no-Hold) candidate rather than add free customization. Decision blocker now is design feasibility (0-duration phase handling in `getPhaseAtTime` and orb animation) and one round of testing the sketch with the Rest/Hold-frictioned testers, not more feedback intake.
+
+Constraints to note for implementation:
+
+- `getPhaseAtTime` and the orb animation currently assume each phase has duration greater than zero; 0-duration phases need handling
+- The 4-phase architecture is wired through `BREATHING_PATTERN.length`-style assumptions; a rhythm with fewer phases would need a more thorough refactor than current rhythm-id swap
+
+Related: see Rest renaming brainstorm in the working-tree handoff notes; even with the same phase structure, label and instruction copy can do a lot of work.
+
 Possible customization dimensions:
 
 - Timing: let users adjust seconds for Inhale, Hold, Exhale, and Rest.
@@ -106,6 +152,26 @@ Would seeing rhythm settings before your first session make Exhale feel more hel
 
 ```text
 If you could change one part of the rhythm, would it be Inhale, Hold, Exhale, Rest, or the transition between them?
+```
+
+### Do users need anticipatory phase cues or softer phase transitions?
+
+Context: New feedback suggests that even when the selected rhythm is acceptable, the moment of transition can still be cognitively hard to follow. Users may need a small perceptual lead before the app changes from Inhale to Hold, Hold to Exhale, Exhale to Rest, or Rest to Inhale.
+
+Current answer: Partially acted on as a beta experiment. Exhale now gives the next phase a final-beat lead through a small `Next [phase]` HUD cue, a quiet pre-cue sound, and a faint incoming-color guide ring. The underlying rhythm timings are unchanged.
+
+Follow-up questions to ask testers:
+
+```text
+Did the Next cue, color lead, or soft pre-cue make the phase changes easier to follow?
+```
+
+```text
+Did the transition cues feel helpful, or did they add too much information?
+```
+
+```text
+Was any specific phase change still hard to follow, such as Exhale to Rest or Rest to Inhale?
 ```
 
 ### Should feedback intake include a return-intent question?

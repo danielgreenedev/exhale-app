@@ -148,6 +148,23 @@ describe('useBreathingSession - phase progression', () => {
     expect(result.current.timeRemaining).toBeLessThanOrEqual(4);
     expect(result.current.timeRemaining).toBeGreaterThan(0);
   });
+
+  it('exposes the next phase before the current phase changes', () => {
+    const { result } = renderHook(() => useBreathingSession('short'));
+    act(() => { result.current.start(); });
+    advance(3500);
+    expect(result.current.currentPhase.phase).toBe('inhale');
+    expect(result.current.nextPhase.phase).toBe('hold');
+    expect(result.current.phaseLeadProgress).toBeGreaterThan(0);
+  });
+
+  it('keeps phase lead inactive outside the final transition beat', () => {
+    const { result } = renderHook(() => useBreathingSession('short'));
+    act(() => { result.current.start(); });
+    advance(1000);
+    expect(result.current.currentPhase.phase).toBe('inhale');
+    expect(result.current.phaseLeadProgress).toBe(0);
+  });
 });
 
 describe('useBreathingSession - session completion', () => {

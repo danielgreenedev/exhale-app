@@ -22,7 +22,9 @@ Selectable breathing rhythm exposed inside Session Setup on the home screen. Thr
 
 Fully guided, with no user input needed during a session. Session lengths: quick (~3m), short (~5m), medium (~7m), long (~10m). Cycle counts are recalibrated per rhythm so each minute label stays close to its target across all three patterns.
 
-The rest phase in Standard is intentionally long enough to allow a normal breath, yawn, or soft reset before the next inhale. Gentle and Full reshape that balance for their respective audiences.
+The fourth phase is labeled `Relax` (not `Rest`) and its instruction is the single word `Breathe`. The phase exists to let the body do what it naturally wants after exhale, which is to take an inhale on its own time; "Rest" implied stillness in a way that did not match that intent. The phase enum stays `rest` as the internal discriminator. In Standard the phase is long enough for a full normal breath; Gentle and Full reshape that balance for their respective audiences.
+
+Phase transitions have anticipatory support because beta feedback showed that exact boundary changes can take a beat to process. In the final 0.8s before each phase change, the guide ring around the orb picks up the next phase's color and a quiet pre-cue tone plays when sound is on. The lead window is set by `PHASE_LOOKAHEAD_SECONDS` in `src/lib/breathing.ts`. No textual HUD cue is shown; an earlier attempt at a `Next [phase]` label competed with the central phase label and countdown for attention, so it was removed.
 
 ## Stack
 
@@ -103,6 +105,8 @@ These are intentional — don't undo them without understanding the rationale:
 - **No user input during a session** — fully guided, not hold-to-breathe. Reduces intimidation for first-timers who don't know when to inhale.
 - **Abstract orb** — chosen over thematic visuals (ocean, lantern, mandala). More universal, less culturally loaded, works for any user.
 - **Selectable rhythm (Standard / Gentle / Full)** — added after five of six recent beta testers reported rhythm-fit concerns across a range of capacities and preferences. Default stays Standard 4-4-6-8; alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
+- **Fourth phase reframed as `Relax` with instruction `Breathe`** — "Rest" implied stillness when the body actually wants to inhale after exhale. `Relax` keeps imperative-verb parity with Inhale / Hold / Exhale and reads as permission. The instruction collapses to a single word because the label does the framing.
+- **Anticipatory cue in the final 0.8s of each phase** — guide-ring picks up the next-phase color and audio plays a quiet pre-cue. No HUD text cue (removed because it competed with the central phase label and countdown).
 - **8s settle-in before first breath** — gives the user a quiet transition from "reading the screen" to "being in the session."
 - **New-user defaults** — Quick / 3 min and medium Circle Size are the first-run defaults so the first session feels short and visually balanced.
 - **Session resume (60s window)** — exiting a session shows an exit guard; sessionStorage holds state for 60s so accidental exits don't lose progress.

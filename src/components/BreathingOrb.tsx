@@ -3,11 +3,13 @@
 import { useEffect, useRef } from 'react';
 import {
   DEFAULT_RHYTHM,
+  PHASE_LOOKAHEAD_SECONDS,
   PhaseConfig,
   RHYTHMS,
   Rhythm,
   easeInOutCubic,
   getPhaseAtTime,
+  getNextPhase,
 } from '@/lib/breathing';
 import { APP_COLORS, CANVAS_COLORS } from '@/lib/colors';
 
@@ -34,8 +36,8 @@ const PARTICLE_COUNT_SMALL = 22;
 const SMALL_VIEWPORT_BREAKPOINT = 600;
 const ORB_MIN_RADIUS = 60;
 const ORB_MAX_RADIUS = 140;
-const COLOR_TRANSITION_MS = 1100;
-const ARC_FADE_MS = 700;
+const COLOR_TRANSITION_MS = 1450;
+const ARC_FADE_MS = 950;
 const FLASH_MS = 350;
 const INHALE_TURNAROUND_DELAY_SECONDS = 0.25;
 
@@ -146,7 +148,14 @@ export default function BreathingOrb({
       // bypasses React re-renders so orb animation stays smooth at 60fps
       const elapsed = elapsedRef.current;
       const activeRhythm = rhythmRef.current;
-      const { config: phase, timeInPhase } = getPhaseAtTime(elapsed % activeRhythm.cycleDuration, activeRhythm);
+      const { config: phase, timeInPhase, phaseIndex } = getPhaseAtTime(elapsed % activeRhythm.cycleDuration, activeRhythm);
+      const nextPhase = getNextPhase(phaseIndex, activeRhythm);
+      const timeUntilPhaseEnd = phase.duration - timeInPhase;
+      const phaseLeadProgress = Math.max(
+        0,
+        Math.min(1, (PHASE_LOOKAHEAD_SECONDS - timeUntilPhaseEnd) / PHASE_LOOKAHEAD_SECONDS)
+      );
+      const nextColor = parseHSL(nextPhase.color);
       const pp = timeInPhase / phase.duration;
       const sp = Math.min(1, elapsed / sessionDuration);
 
@@ -192,6 +201,7 @@ export default function BreathingOrb({
         targetColorRef.current,
         easeInOutCubic(colorTRef.current)
       );
+      const leadEase = easeInOutCubic(phaseLeadProgress);
 
       // Subtle phase-reactive background wash — ties the space to the orb color
       const phaseBg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.5);
@@ -268,7 +278,7 @@ export default function BreathingOrb({
           const easedT = 1 - Math.pow(1 - ft, 3);
           const [fh, fs, fl] = targetColorRef.current;
           const flashRingR = orbRadius * (1.05 + easedT * 1.6);
-          const flashOpacity = (1 - ft) * 0.38;
+          const flashOpacity = (1 - ft) * 0.24;
           ctx.strokeStyle = `hsla(${fh}, ${fs}%, ${Math.min(fl + 22, 95)}%, ${flashOpacity})`;
           ctx.lineWidth = Math.max(0.5, 2.2 * (1 - ft * 0.5));
           ctx.lineCap = 'round';
@@ -353,6 +363,27 @@ export default function BreathingOrb({
         ctx.beginPath();
         ctx.arc(cx, cy, guideR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * outgoingArcRef.current.progress);
         ctx.stroke();
+      }
+
+      if (phaseLeadProgress > 0) {
+        const [nh, ns, nl] = nextColor;
+        const currentAngle = -Math.PI / 2 + Math.PI * 2 * pp;
+        const nextOpacity = 0.12 + 0.44 * leadEase;
+        ctx.strokeStyle = `hsla(${nh}, ${ns}%, ${Math.min(nl + 10, 94)}%, ${nextOpacity})`;
+        ctx.lineWidth = 3.75;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.arc(cx, cy, guideR, currentAngle, Math.PI * 1.5);
+        ctx.stroke();
+
+        const guideHalo = ctx.createRadialGradient(cx, cy, guideR - 8, cx, cy, guideR + 22);
+        guideHalo.addColorStop(0, 'transparent');
+        guideHalo.addColorStop(0.58, `hsla(${nh}, ${ns}%, ${nl}%, ${0.045 * leadEase})`);
+        guideHalo.addColorStop(1, 'transparent');
+        ctx.fillStyle = guideHalo;
+        ctx.beginPath();
+        ctx.arc(cx, cy, guideR + 22, 0, Math.PI * 2);
+        ctx.fill();
       }
 
       // Particles (skipped when prefers-reduced-motion)

@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 19, 2026
+Last updated: May 19, 2026 (Facebook reply intake)
 
 ## Purpose
 
@@ -40,6 +40,7 @@ Send a short, open prompt so feedback stays practical:
 - Browser:
 - Route tested:
 - Session length:
+- Rhythm:
 - Sound choice:
 - Circle Size:
 
@@ -69,6 +70,74 @@ Send a short, open prompt so feedback stays practical:
 1. 
 
 ## Recent Feedback Notes
+
+### 2026-05-19, T-2026-05-19-07, Facebook Reply, Rest Awkward + Progressive Interest
+
+#### Session
+
+- Tester ID: T-2026-05-19-07
+- Follow-up OK: Unknown
+- Source: Public Facebook post reply to project owner's pacing question
+
+#### Friction
+
+- Verbatim reply to the prompt "If the rhythm did not fit you, did you want it gentler/easier, slower/deeper for each section, or the transitions between phases, or simply less interrupted by Rest?":
+
+```text
+The rests were a little awkward.
+The competitive nature in me likes the idea of the breath, hold, and exhale increasing in duration by the last rep.
+```
+
+- "Rests awkward" is now the third Rest/Relax complaint logged. Earlier reframing from 2s to 4s to 8s and the Rest to Relax label change have not eliminated the awkwardness signal for this user.
+- Progressive escalation (each rep longer than the last) is a non-isochronous rhythm shape that no current preset offers. First request of this kind.
+
+#### Actionable Recommendations
+
+1. Reinforces "Should Rest and Hold be partly or completely optional?" — Rest itself, not its duration or label, is the issue for some users.
+2. New product question parked: should rhythms support a guided ramp/escalation instead of only steady patterns? Single-user signal; do not act yet.
+
+### 2026-05-19, T-2026-05-19-06, Facebook Reply, Hold And Exhale-Inhale Ratio
+
+#### Session
+
+- Tester ID: T-2026-05-19-06
+- Follow-up OK: Unknown
+- Source: Public Facebook post reply to project owner's pacing question
+
+#### Friction
+
+- Verbatim reply to the prompt "If the rhythm did not fit you, did you want it gentler/easier, slower/deeper for each section, or the transitions between phases, or simply less interrupted by Rest?":
+
+```text
+I think the hardest part for me was the hold and the slower exhale then a short inhale
+```
+
+- Two distinct frictions in one sentence: Hold is the hardest phase, and the Exhale-to-next-Inhale ratio reads as abrupt ("slower exhale then a short inhale"). The 6s exhale to 4s inhale asymmetry in Standard is intentional (parasympathetic), but lands as imbalance for this user.
+- Gentle (3-2-4-4) would not flatten this asymmetry; Full (6-6-10-4) would make it more pronounced.
+
+#### Actionable Recommendations
+
+1. Reinforces "Should Rest and Hold be partly or completely optional?" — Hold as well as Rest is a friction phase for some users, matching T-2026-05-19-05's gasping signal.
+2. Consider whether any preset should have a more symmetric exhale-to-inhale ratio, or whether ratio comfort is a separate axis from rhythm-fit.
+
+### 2026-05-19, Internal Beta Observation, Phase Transition Friction
+
+#### Session
+
+- Tester ID: Internal
+- Follow-up OK: Yes
+
+#### Friction
+
+- Multiple users have mentioned not liking or being interrupted by the Rest phase.
+- Project owner observed that after Exhale changes to Rest, the instinctive response is to start breathing in.
+- Across Standard, Gentle, and Full, phase transitions can still feel cognitively abrupt; it takes a beat to catch up to the shift even with existing cues.
+
+#### Actionable Recommendations
+
+1. Treat this as a phase-boundary comprehension issue, not only a rhythm-duration issue.
+2. Try anticipatory cues first: next-phase label, pre-cue sound, and softer incoming visual color before the boundary.
+3. Keep collecting whether Rest itself is disliked, or whether the Exhale-to-Rest and Rest-to-Inhale handoff needs clearer framing.
 
 ### 2026-05-19, T-2026-05-19-05, Breathing Capacity Constraint
 

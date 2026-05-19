@@ -438,6 +438,41 @@ export function useAudioEngine(
     fifthOsc.stop(now + 2.05);
   }, [getCtx]);
 
+  const playAnticipationCue = useCallback((phase: BreathingPhase) => {
+    const paletteId = paletteRef.current;
+    if (!enabledRef.current || !isActivePalette(paletteId)) return;
+
+    const ctx = getCtx();
+    const master = masterGainRef.current;
+    if (!master) return;
+
+    const config = AMBIENT_PALETTES[paletteId];
+    if (config.cueGain <= 0) return;
+
+    const [root] = CUE_MAP[phase];
+    const now = ctx.currentTime;
+
+    const lowpass = ctx.createBiquadFilter();
+    lowpass.type = 'lowpass';
+    lowpass.frequency.value = Math.min(config.cueLowpass, 950);
+    lowpass.Q.value = 0.45;
+    lowpass.connect(master);
+
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = root;
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.018 * config.cueGain, now + 0.12);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.62);
+
+    osc.connect(gain);
+    gain.connect(lowpass);
+    osc.start(now);
+    osc.stop(now + 0.7);
+  }, [getCtx]);
+
   useEffect(() => {
     return () => {
       clearTimer(previewTimeoutRef);
@@ -446,5 +481,5 @@ export function useAudioEngine(
     };
   }, [clearTimer, stopSources]);
 
-  return { startAmbient, stopAmbient, pauseAmbient, resumeAmbient, previewPalette, playCue };
+  return { startAmbient, stopAmbient, pauseAmbient, resumeAmbient, previewPalette, playCue, playAnticipationCue };
 }

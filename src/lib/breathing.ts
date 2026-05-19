@@ -8,6 +8,7 @@ export const DEFAULT_SESSION_LENGTH: SessionLength = 'quick';
 export const DEFAULT_ORB_SCALE = 1;
 export const DEFAULT_RHYTHM: RhythmId = 'standard';
 export const RHYTHM_STORAGE_KEY = 'exhale-rhythm';
+export const PHASE_LOOKAHEAD_SECONDS = 0.8;
 
 export interface PhaseConfig {
   phase: BreathingPhase;
@@ -60,9 +61,15 @@ const BASE_PHASES: Omit<PhaseConfig, 'duration'>[] = [
     glowColor: PHASE_COLORS.exhale.glowColor,
   },
   {
+    // The phase enum stays 'rest' as the canonical discriminator across rhythm presets.
+    // User-facing label and instruction were reframed on 2026-05-19: "Rest" implied
+    // stillness when the body wants to inhale, and beta feedback flagged the verbiage
+    // gap. "Relax" is the only imperative-verb candidate that gives the four labels
+    // grammatical parity (Inhale / Hold / Exhale / Relax); the instruction collapses
+    // to a single word because the label already does the framing work.
     phase: 'rest',
-    label: 'Rest',
-    instruction: 'Rest naturally, then return when ready',
+    label: 'Relax',
+    instruction: 'Breathe',
     targetOrbScale: 0.45,
     color: PHASE_COLORS.rest.color,
     glowColor: PHASE_COLORS.rest.glowColor,
@@ -163,6 +170,10 @@ export function getPhaseAtTime(
   return { config: last, timeInPhase: last.duration, phaseIndex: rhythm.pattern.length - 1 };
 }
 
+export function getNextPhase(phaseIndex: number, rhythm: Rhythm = RHYTHMS[DEFAULT_RHYTHM]): PhaseConfig {
+  return rhythm.pattern[(phaseIndex + 1) % rhythm.pattern.length];
+}
+
 export function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
@@ -173,4 +184,3 @@ export function getOrbScale(phase: PhaseConfig, progress: number, prevScale: num
   if (phase.phase === 'exhale') return prevScale + (target - prevScale) * easeInOutCubic(progress);
   return target;
 }
-

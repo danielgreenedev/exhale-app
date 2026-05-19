@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 19, 2026
+Last updated: May 19, 2026 (Facebook reply intake; Rest label resolved; Flow rhythm parked)
 
 ## Completed Rhythm Changes
 
@@ -128,6 +128,16 @@ Two tester-follow-up tasks land here as Stage 0 work below.
 - **P3 particle count scaling**: `BreathingOrb` uses 22 particles on viewports below 600px wide instead of 38, as a defensive perf measure for older mobile GPUs.
 - **P3 iOS PWA tip**: `Stats` page detects iOS Safari and shows a one-line Add-to-Home-Screen prompt when the app is not yet in standalone mode, compensating for the missing Fullscreen API on iOS.
 
+## Completed Phase Transition Support (2026-05-19)
+
+Early beta feedback showed that presets alone may not solve phase-boundary friction: users can understand the rhythm but still need a beat to process the shift between Inhale, Hold, Exhale, and Rest.
+
+- Added a final-beat phase lookahead (`PHASE_LOOKAHEAD_SECONDS = 0.8`) that exposes the next phase before the current phase ends.
+- Added a quiet `Next [phase]` HUD cue so the label leads the motion without replacing the current instruction early.
+- Added a subtle anticipatory sound cue before the regular phase marker.
+- Softened canvas phase boundaries with a longer color crossfade and a faint incoming-color guide ring.
+- Kept the underlying rhythm timings unchanged; this is a comprehension/handoff improvement, not a new rhythm.
+
 ## Remaining To-Do
 
 Items are grouped loosely by roadmap stage. See `docs/ROADMAP.md` for the strategic context.
@@ -140,29 +150,39 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 2. Pending follow-up with the original five rhythm-concern testers (T-2026-05-18-01 and T-2026-05-19-02 through -05). Ask whether Gentle or Full fits better than Standard did. Capture answers in `docs/USER_FEEDBACK.md`.
 
+2a. Resolved 2026-05-19: the Rest phase is now labeled `Relax` with the single-word instruction `Breathe`. The phase enum stays `rest` as the internal discriminator. `Relax` preserves imperative-verb parity with Inhale/Hold/Exhale and reads as permission rather than instruction; the one-word instruction stops the copy from competing with the phase label for attention. See `CLAUDE.md` Core Mechanic and `src/lib/breathing.ts` for the canonical statement.
+
+2b. Resolved 2026-05-19: the `Next [phase]` HUD text cue was removed because it competed with the central phase label and countdown. Audio pre-cue and ring-color lead remain.
+
 3. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check: "Can you start breathing without thinking?", "Did matching the prompts feel pressuring?", "Did Exhale feel too long?", "Did any sound behavior surprise you?", and "Did Settle In feel optional enough?"
 
-4. Pending feedback/data collection: recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
+4. Pending feedback/data collection: validate whether the new anticipatory transition cues help users keep up with phase shifts. Ask: "Did the Next cue, color lead, or soft pre-cue make the phase changes easier to follow, or did they add noise?"
 
-5. Pending feedback/data collection: after a meaningful sample of synced sessions, review Supabase `app_events` counts (timer selections, session starts, Settle In exits, early exits, completions). Watch completion rate, return rate, and drop-off phase.
+5. Pending feedback/data collection: recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
+
+6. Pending feedback/data collection: after a meaningful sample of synced sessions, review Supabase `app_events` counts (timer selections, session starts, Settle In exits, early exits, completions). Watch completion rate, return rate, and drop-off phase.
 
 ### Stage 1, ship-quality polish
 
 These can wait until after Stage 0 feedback signal is in.
 
-6. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Run `/impeccable shape Garden skin` before building.
+6a. Sketch a Hold-less "Flow" rhythm candidate driven by the Rest/Hold-friction signal (T-2026-05-19-03, -05, -06, -07). Working shape: 4-0-6-2 or 4-0-6-0 — Inhale, no Hold, Exhale, brief or zero Relax. Design blockers to think through before any code: `getPhaseAtTime` in `src/lib/breathing.ts` and the `BreathingOrb` animation currently assume every phase has duration greater than zero, so a 0-second phase needs explicit handling (either skip the index or treat as an instantaneous transition). Cycle recalibration math also needs to tolerate shorter total cycles without recommending impractically high cycle counts for the long session length. Goal of the sketch is a design proposal in `docs/OPEN_QUESTIONS.md`, not a shipped preset; ship only if the Rest/Hold-frictioned testers prefer it.
 
-7. Confirm Facebook's Sharing Debugger renders the preview after their scrape cache clears. App side is verified working; the remaining loose end is Meta-side cache only. Resume playbook lives in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md`. When the Garden skin lands, consider an updated OG image that shows both aesthetics.
+6b. Park: do rhythms need to support progressive ramping (each rep longer than the last) rather than only steady patterns? Single-user signal from T-2026-05-19-07. Do not act yet; revisit if a second tester independently asks for escalation or if competitive-framing usage shows up in `app_events`. If raised again, write it up as a full open question in `docs/OPEN_QUESTIONS.md` before any scoping.
 
-8. Not a priority for now: add a UI affordance linking the main pages to `/privacy` and `/terms`. Likely a small footer link from home, game complete, and stats in keeping with the quiet aesthetic, but a more prominent button could also fit. The pages exist and are reachable; they are not surfaced from any other screen yet.
+7. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Run `/impeccable shape Garden skin` before building.
+
+8. Confirm Facebook's Sharing Debugger renders the preview after their scrape cache clears. App side is verified working; the remaining loose end is Meta-side cache only. Resume playbook lives in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md`. When the Garden skin lands, consider an updated OG image that shows both aesthetics.
+
+9. Not a priority for now: add a UI affordance linking the main pages to `/privacy` and `/terms`. Likely a small footer link from home, game complete, and stats in keeping with the quiet aesthetic, but a more prominent button could also fit. The pages exist and are reachable; they are not surfaced from any other screen yet.
 
 ### Stage 2, distribution
 
 Stage 2 comes after the Stage 0 and Stage 1 work above.
 
-9. Package Exhale as an Android Trusted Web Activity and submit to the Play Store. Land this after the Garden skin, feedback-driven changes, and discoverability work.
+10. Package Exhale as an Android Trusted Web Activity and submit to the Play Store. Land this after the Garden skin, feedback-driven changes, and discoverability work.
 
-10. iOS PWA "Add to Home Screen" affordance already exists as a quiet tip on `/stats` (2026-05-19); revisit when wider beta begins to decide if it needs a more prominent surfacing.
+11. iOS PWA "Add to Home Screen" affordance already exists as a quiet tip on `/stats` (2026-05-19); revisit when wider beta begins to decide if it needs a more prominent surfacing.
 
 ## Recommended Next Move
 

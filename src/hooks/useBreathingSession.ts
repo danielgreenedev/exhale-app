@@ -3,11 +3,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   DEFAULT_RHYTHM,
+  PHASE_LOOKAHEAD_SECONDS,
   RHYTHMS,
   Rhythm,
   SessionLength,
   PhaseConfig,
   getPhaseAtTime,
+  getNextPhase,
 } from '@/lib/breathing';
 
 export type SessionState = 'idle' | 'intro' | 'running' | 'paused' | 'complete';
@@ -21,6 +23,9 @@ export interface BreathingSessionState {
   cycleNumber: number;
   totalCycles: number;
   timeRemaining: number;   // seconds remaining in phase
+  timeUntilPhaseEnd: number; // exact seconds remaining in phase
+  nextPhase: PhaseConfig;
+  phaseLeadProgress: number; // 0-1 final-beat anticipation for next phase
   elapsedTotal: number;    // total elapsed seconds
   sessionDuration: number; // total session duration in seconds
 }
@@ -71,7 +76,12 @@ export function useBreathingSession(
     const elapsedInCycle = elapsed % cycleDuration;
     const { config: phase, timeInPhase, phaseIndex: pi } = getPhaseAtTime(elapsedInCycle, activeRhythm);
     const tr = Math.ceil(phase.duration - timeInPhase);
-    const updateKey = pi * 100 + tr;
+    const timeUntilPhaseEnd = phase.duration - timeInPhase;
+    const leadProgress = Math.max(
+      0,
+      Math.min(1, (PHASE_LOOKAHEAD_SECONDS - timeUntilPhaseEnd) / PHASE_LOOKAHEAD_SECONDS)
+    );
+    const updateKey = pi * 1000 + tr * 10 + Math.floor(leadProgress * 4);
     if (updateKey !== lastUpdateKeyRef.current) {
       lastUpdateKeyRef.current = updateKey;
       setElapsedTotal(elapsed);
@@ -117,7 +127,13 @@ export function useBreathingSession(
   const { config: currentPhase, timeInPhase, phaseIndex } = getPhaseAtTime(elapsedInCycle, activeRhythm);
   const phaseProgress = timeInPhase / currentPhase.duration;
   const sessionProgress = elapsedTotal / sessionDuration;
-  const timeRemaining = Math.ceil(currentPhase.duration - timeInPhase);
+  const timeUntilPhaseEnd = currentPhase.duration - timeInPhase;
+  const timeRemaining = Math.ceil(timeUntilPhaseEnd);
+  const nextPhase = getNextPhase(phaseIndex, activeRhythm);
+  const phaseLeadProgress = Math.max(
+    0,
+    Math.min(1, (PHASE_LOOKAHEAD_SECONDS - timeUntilPhaseEnd) / PHASE_LOOKAHEAD_SECONDS)
+  );
 
   return {
     sessionState,
@@ -128,6 +144,9 @@ export function useBreathingSession(
     cycleNumber: Math.min(cycleNumber, totalCycles),
     totalCycles,
     timeRemaining,
+    timeUntilPhaseEnd,
+    nextPhase,
+    phaseLeadProgress,
     elapsedTotal,
     elapsedRef,
     sessionDuration,

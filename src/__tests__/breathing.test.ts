@@ -1,5 +1,6 @@
 import {
   DEFAULT_RHYTHM,
+  getNextPhase,
   getPhaseAtTime,
   getRhythm,
   easeInOutCubic,
@@ -158,6 +159,18 @@ describe('getRhythm', () => {
     expect(getRhythm(null).id).toBe(DEFAULT_RHYTHM);
     expect(getRhythm(undefined).id).toBe(DEFAULT_RHYTHM);
     expect(getRhythm('').id).toBe(DEFAULT_RHYTHM);
+  });
+});
+
+describe('getNextPhase', () => {
+  it('returns the next phase in canonical order', () => {
+    expect(getNextPhase(0).phase).toBe('hold');
+    expect(getNextPhase(1).phase).toBe('exhale');
+    expect(getNextPhase(2).phase).toBe('rest');
+  });
+
+  it('wraps from rest back to inhale', () => {
+    expect(getNextPhase(3).phase).toBe('inhale');
   });
 });
 
