@@ -115,7 +115,7 @@ Items are grouped loosely by roadmap stage. See `docs/ROADMAP.md` for the strate
 
 9. Write a `/terms` page covering no medical advice, limitation of liability, intellectual property, and a soft age suggestion.
 
-10. Add footer links from main pages to `/privacy` and `/terms`.
+10. Add a UI affordance linking the main pages to `/privacy` and `/terms`. Likely a small footer link from home, game complete, and stats in keeping with the quiet aesthetic, but a more prominent button could also fit. The pages exist and are reachable; they are not surfaced from any other screen yet.
 
 11. Color contrast audit on text at low opacity (white/28 to 38 against forest-night). May fall below WCAG 2.1 AA. Run `/impeccable audit` before considering Stage 2.
 
