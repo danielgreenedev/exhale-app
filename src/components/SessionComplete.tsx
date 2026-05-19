@@ -70,7 +70,7 @@ export default function SessionComplete({ totalCycles, sessionDuration, storageN
             &ldquo;{quote.text}&rdquo;
           </p>
           {quote.attribution && (
-            <p className="text-still-white/38 text-xs tracking-[0.1em] font-light">
+            <p className="text-still-white/55 text-xs tracking-[0.1em] font-light">
               &mdash; {quote.attribution}
             </p>
           )}

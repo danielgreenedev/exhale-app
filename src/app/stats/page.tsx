@@ -116,6 +116,19 @@ export default function StatsPage() {
   const [syncedEmail, setSyncedEmail] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [showIosInstallTip, setShowIosInstallTip] = useState(false);
+
+  // iOS Safari has no Fullscreen API, so the in-session toggle is hidden on iPhone.
+  // Surface a quiet one-time tip on Stats so iOS users know they can get the same
+  // immersive feel via Add to Home Screen. Hidden once the app is running in
+  // standalone mode (already installed).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const ua = navigator.userAgent.toLowerCase();
+    const isIOS = /iphone|ipad|ipod/.test(ua);
+    const isStandalone = (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    if (isIOS && !isStandalone) setShowIosInstallTip(true);
+  }, []);
 
   useEffect(() => {
     setStorageOk(storageAvailable());
@@ -412,7 +425,7 @@ export default function StatsPage() {
 
           {!ready ? (
             <div className="flex flex-col gap-2">
-              <p className="text-still-white/48 text-xs font-light leading-relaxed -mt-1">
+              <p className="text-still-white/55 text-xs font-light leading-relaxed -mt-1">
                 Checking sync on this device.
               </p>
             </div>
@@ -421,7 +434,7 @@ export default function StatsPage() {
               <p className="text-still-white/58 text-sm font-light leading-relaxed">
                 Signed in as {syncedEmail}. Use this email on another device to bring your practice there.
               </p>
-              <p className="text-still-white/42 text-xs font-light leading-relaxed">
+              <p className="text-still-white/55 text-xs font-light leading-relaxed">
                 {SYNC_SCOPE_COPY}
               </p>
               <button
@@ -443,7 +456,7 @@ export default function StatsPage() {
               <p className="text-still-white/58 text-sm font-light leading-relaxed">
                 We sent a 6-digit code to {syncedEmail}. Open the email and enter the code below.
               </p>
-              <p className="text-still-white/42 text-xs font-light leading-relaxed -mt-1">
+              <p className="text-still-white/55 text-xs font-light leading-relaxed -mt-1">
                 {SYNC_SCOPE_COPY}
               </p>
               <label htmlFor="otp-code" className="sr-only">6-digit code</label>
@@ -477,10 +490,10 @@ export default function StatsPage() {
             </div>
           ) : (
             <form onSubmit={handleSendCode} className="flex flex-col gap-2">
-              <p className="text-still-white/48 text-xs font-light leading-relaxed -mt-1">
+              <p className="text-still-white/55 text-xs font-light leading-relaxed -mt-1">
                 Sign in with email and a 6-digit code. Use the same email on another device to keep your practice in sync.
               </p>
-              <p className="text-still-white/42 text-xs font-light leading-relaxed">
+              <p className="text-still-white/55 text-xs font-light leading-relaxed">
                 {SYNC_SCOPE_COPY}
               </p>
               <label htmlFor="sync-email" className="sr-only">Email</label>
@@ -510,6 +523,12 @@ export default function StatsPage() {
             </form>
           )}
         </div>
+
+        {showIosInstallTip && (
+          <p className="text-still-white/55 text-xs font-light leading-relaxed text-center px-2 -mb-1">
+            Add Exhale to your Home Screen for full-screen practice. Tap the Share icon in Safari, then Add to Home Screen.
+          </p>
+        )}
 
         <Link
           href="/"

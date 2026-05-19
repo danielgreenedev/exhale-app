@@ -30,6 +30,8 @@ interface Props {
 }
 
 const PARTICLE_COUNT = 38;
+const PARTICLE_COUNT_SMALL = 22;
+const SMALL_VIEWPORT_BREAKPOINT = 600;
 const ORB_MIN_RADIUS = 60;
 const ORB_MAX_RADIUS = 140;
 const COLOR_TRANSITION_MS = 1100;
@@ -98,10 +100,15 @@ export default function BreathingOrb({
     orbScaleRef.current = orbScale;
   });
 
-  // Init particles
+  // Init particles. Scale the count down on small viewports as a defensive perf
+  // measure for older mobile GPUs; reduced-motion users skip particles entirely
+  // in the draw loop so this only affects motion-enabled small screens.
   useEffect(() => {
-    particlesRef.current = Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
-      angle: (i / PARTICLE_COUNT) * Math.PI * 2 + Math.random() * 0.3,
+    const count = typeof window !== 'undefined' && window.innerWidth < SMALL_VIEWPORT_BREAKPOINT
+      ? PARTICLE_COUNT_SMALL
+      : PARTICLE_COUNT;
+    particlesRef.current = Array.from({ length: count }, (_, i) => ({
+      angle: (i / count) * Math.PI * 2 + Math.random() * 0.3,
       radius: 160 + Math.random() * 120,
       baseRadius: 160 + Math.random() * 120,
       size: 1.5 + Math.random() * 2.5,

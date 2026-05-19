@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
+import { useCallback, useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -25,6 +25,7 @@ import { SURFACE_GLOWS } from '@/lib/colors';
 import { useUserId } from '@/lib/auth';
 import { logAppEvent } from '@/lib/appEvents';
 import {
+  PracticeSettings,
   isSessionLengthValue,
   readLocalPracticeSettings,
   saveUserSettings,
@@ -131,18 +132,49 @@ function HomeContent() {
   const sessionOptions = useMemo(() => buildSessionOptions(activeRhythm), [activeRhythm]);
   const settingsSyncedRef = useRef(false);
   const previewStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const settingsSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingSettingsRef = useRef<Partial<PracticeSettings>>({});
   const { previewPalette, stopAmbient } = useAudioEngine(soundPalette);
   const userId = useUserId();
+
+  // Trailing debounce on cloud writes. Rapid clicks through Circle Size, Sound, etc.
+  // batch into one upsert ~400ms after the last change. localStorage writes stay
+  // immediate; only the network round-trip is debounced.
+  const queueSettingsSave = useCallback((settings: Partial<PracticeSettings>) => {
+    if (!userId) return;
+    pendingSettingsRef.current = { ...pendingSettingsRef.current, ...settings };
+    if (settingsSaveTimerRef.current) clearTimeout(settingsSaveTimerRef.current);
+    settingsSaveTimerRef.current = setTimeout(() => {
+      settingsSaveTimerRef.current = null;
+      const pending = pendingSettingsRef.current;
+      pendingSettingsRef.current = {};
+      if (Object.keys(pending).length === 0) return;
+      saveUserSettings(userId, pending).then(({ error }) => {
+        if (error) console.error('[supabase] user_settings upsert failed:', error);
+      });
+    }, 400);
+  }, [userId]);
+
+  // Flush any pending changes if userId rotates (anon -> permanent) or on unmount.
+  // Fire-and-forget; we don't block the cleanup on the request.
+  useEffect(() => {
+    return () => {
+      if (settingsSaveTimerRef.current) {
+        clearTimeout(settingsSaveTimerRef.current);
+        settingsSaveTimerRef.current = null;
+      }
+      if (userId && Object.keys(pendingSettingsRef.current).length > 0) {
+        const pending = pendingSettingsRef.current;
+        pendingSettingsRef.current = {};
+        saveUserSettings(userId, pending).catch(() => {});
+      }
+    };
+  }, [userId]);
 
   const updateOrbScale = (scale: number) => {
     setOrbScaleState(scale);
     try { writeLocalPracticeSettings({ orbScale: scale }); } catch { /* unavailable */ }
-    if (userId) {
-      saveUserSettings(userId, { orbScale: scale })
-        .then(({ error }) => {
-          if (error) console.error('[supabase] user_settings upsert failed:', error);
-        });
-    }
+    queueSettingsSave({ orbScale: scale });
   };
 
   const updateSoundPalette = (palette: SoundPaletteId) => {
@@ -171,35 +203,20 @@ function HomeContent() {
         stopAmbient(0.2);
       });
     }
-    if (userId) {
-      saveUserSettings(userId, { soundPalette: palette })
-        .then(({ error }) => {
-          if (error) console.error('[supabase] user_settings upsert failed:', error);
-        });
-    }
+    queueSettingsSave({ soundPalette: palette });
   };
 
   const updateSessionLength = (length: SessionLength) => {
     setSelectedLength(length);
     try { writeLocalPracticeSettings({ sessionLength: length }); } catch { /* unavailable */ }
     logAppEvent(userId, 'timer_selected', { length });
-    if (userId) {
-      saveUserSettings(userId, { sessionLength: length })
-        .then(({ error }) => {
-          if (error) console.error('[supabase] user_settings upsert failed:', error);
-        });
-    }
+    queueSettingsSave({ sessionLength: length });
   };
 
   const updateRhythm = (id: RhythmId) => {
     setSelectedRhythm(id);
     try { writeLocalPracticeSettings({ rhythm: id }); } catch { /* unavailable */ }
-    if (userId) {
-      saveUserSettings(userId, { rhythm: id })
-        .then(({ error }) => {
-          if (error) console.error('[supabase] user_settings upsert failed:', error);
-        });
-    }
+    queueSettingsSave({ rhythm: id });
   };
 
   useEffect(() => {
