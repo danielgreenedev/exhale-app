@@ -79,6 +79,16 @@ Last updated: May 18, 2026
 - The sound control has a 44px mobile tap target, a clearer on/off icon state, and safe-area-aware bottom placement for iPhone.
 - After sound is turned on during a session, a short hint appears: "still quiet? check silent mode".
 
+## Completed Discoverability Pass
+
+- Open Graph and Twitter card metadata added to `src/app/layout.tsx`, with `metadataBase: https://exhale.guide` so relative asset URLs resolve correctly.
+- Static 1200x630 social preview image at `public/og-image.png` using the Still Water aesthetic (orb with rings, wordmark, "4 4 6 8 RHYTHM" callout).
+- The earlier dynamic `src/app/opengraph-image.tsx` route was removed because Next's file-based metadata route auto-injected `/opengraph-image?...` as `og:image`, overriding the configured static URL.
+- `public/robots.txt` explicitly allows Meta and Facebook crawlers, Twitterbot, LinkedInBot, Slackbot, and general traffic.
+- Vercel firewall: custom Facebook crawler bypass rule plus system bypass rules for observed Meta IP ranges (104.210.140.0/24, 173.252.82.0/24, 173.252.87.0/24, 57.141.18.0/24, 69.63.184.0/24).
+- Verified live: 200 responses for `/`, `/robots.txt`, and `/og-image.png`; correct OG meta tags in rendered HTML; Facebook crawler user-agent receives 200 from outside Meta.
+- Troubleshooting walkthrough kept in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md` for future resume.
+
 ## Remaining To-Do
 
 Items are grouped loosely by roadmap stage. See `docs/ROADMAP.md` for the strategic context.
@@ -99,7 +109,7 @@ Items are grouped loosely by roadmap stage. See `docs/ROADMAP.md` for the strate
 
 6. Design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Run `/impeccable shape Garden skin` before building.
 
-7. Discoverability pass: add Open Graph meta tags, design a social card image (probably both orbs against their grounds), write a meta description and friendly page title. Consider a small landing treatment for the home page.
+7. Confirm Facebook's Sharing Debugger renders the preview after their scrape cache clears. App side is verified working; the remaining loose end is Meta-side cache only. Resume playbook lives in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md`. When the Garden skin lands, consider an updated OG image that shows both aesthetics.
 
 8. Write a `/privacy` page covering anonymous user creation, optional email sync, `app_events` behavioral logging, how to delete or sign out, and the absence of advertising or third-party tracking.
 
