@@ -101,40 +101,50 @@ Last updated: May 19, 2026
 
 Items are grouped loosely by roadmap stage. See `docs/ROADMAP.md` for the strategic context.
 
+### Promoted Priority, Alternate Rhythm Options
+
+Pulled forward from Stage 1 on 2026-05-19. Five of six recent beta testers reported rhythm-fit concerns, including one (T-2026-05-19-05) who could not follow the rhythm without gasping (capacity, not preference). The default 4-4-6-8 stays; this work adds selectable alternates so the rhythm conversation stops dominating other product feedback. Runs in parallel with Stage 0 feedback collection.
+
+1. Design at least two alternate rhythm options. Starting points:
+   - A gentler option with shorter total cycle, lighter holds, and a more permissive exhale, for capacity-constrained users (signal: T-2026-05-19-05).
+   - A slower-deeper option with longer inhale, longer hold, and much longer exhale, for users with existing breathwork preference (signal: T-2026-05-19-04).
+2. Refactor `BREATHING_PATTERN` in `src/lib/breathing.ts` to support multiple named patterns instead of a single constant. Each pattern needs its own phase durations and cycle-count recalibration so the 3, 5, 7, 10 minute labels remain accurate.
+3. Add a rhythm selector inside Session Setup, alongside Circle Size and Sound, using the same quiet emerald selected-state language. Default remains 4-4-6-8.
+4. Persist rhythm choice in Supabase `user_settings` alongside `session_length`, `orb_scale`, and `sound_palette`. Update `settingsSync` to round-trip the new column.
+5. Follow up with the original five testers once the alternates ship; ask whether one of the new options fits better and capture answers in `docs/USER_FEEDBACK.md`.
+
 ### Stage 0, validation and tester signal
 
-Primary focus: remain in beta feedback mode. Collect feedback and usage data before starting the next design/build push.
+Primary focus: remain in beta feedback mode. Collect feedback and usage data while the Promoted Priority work above proceeds in parallel.
 
-1. Pending feedback/data collection: test cross-device sync on Device B and verify Practice History, timer length, Circle Size, and sound choice sync correctly through Supabase.
+6. Pending feedback/data collection: test cross-device sync on Device B and verify Practice History, timer length, Circle Size, and sound choice sync correctly through Supabase.
 
-2. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check: "Can you start breathing without thinking?", "Did matching the prompts feel pressuring?", "Did Exhale feel too long?", "Did any sound behavior surprise you?", and "Did Settle In feel optional enough?"
+7. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check: "Can you start breathing without thinking?", "Did matching the prompts feel pressuring?", "Did Exhale feel too long?", "Did any sound behavior surprise you?", and "Did Settle In feel optional enough?"
 
-3. Pending feedback/data collection: recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
+8. Pending feedback/data collection: recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
 
-4. Pending feedback/data collection: after a meaningful sample of synced sessions, review Supabase `app_events` counts (timer selections, session starts, Settle In exits, early exits, completions). Watch completion rate, return rate, and drop-off phase.
-
-5. Revisit only if feedback raises it: if more testers report breath-timing pressure or a too-long Exhale, test a softer rhythm option such as 4-4-5-8 or a relaxed mode before changing the default 4-4-6-8 pattern.
+9. Pending feedback/data collection: after a meaningful sample of synced sessions, review Supabase `app_events` counts (timer selections, session starts, Settle In exits, early exits, completions). Watch completion rate, return rate, and drop-off phase.
 
 ### Stage 1, ship-quality polish
 
-These can wait until after feedback is collected, synthesized, and any needed Stage 0 changes are made.
+These can wait until after the Promoted Priority and Stage 0 work are complete.
 
-6. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Run `/impeccable shape Garden skin` before building.
+10. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Run `/impeccable shape Garden skin` before building.
 
-7. Confirm Facebook's Sharing Debugger renders the preview after their scrape cache clears. App side is verified working; the remaining loose end is Meta-side cache only. Resume playbook lives in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md`. When the Garden skin lands, consider an updated OG image that shows both aesthetics.
+11. Confirm Facebook's Sharing Debugger renders the preview after their scrape cache clears. App side is verified working; the remaining loose end is Meta-side cache only. Resume playbook lives in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md`. When the Garden skin lands, consider an updated OG image that shows both aesthetics.
 
-8. Not a priority for now: add a UI affordance linking the main pages to `/privacy` and `/terms`. Likely a small footer link from home, game complete, and stats in keeping with the quiet aesthetic, but a more prominent button could also fit. The pages exist and are reachable; they are not surfaced from any other screen yet.
+12. Not a priority for now: add a UI affordance linking the main pages to `/privacy` and `/terms`. Likely a small footer link from home, game complete, and stats in keeping with the quiet aesthetic, but a more prominent button could also fit. The pages exist and are reachable; they are not surfaced from any other screen yet.
 
-9. Wait until after feedback intake: color contrast audit on text at low opacity (white/28 to 38 against forest-night). May fall below WCAG 2.1 AA. Run `/impeccable audit` before considering Stage 2.
+13. Wait until after feedback intake: color contrast audit on text at low opacity (white/28 to 38 against forest-night). May fall below WCAG 2.1 AA. Run `/impeccable audit` before considering Stage 2.
 
 ### Stage 2, distribution
 
 Stage 2 comes after the validation and ship-quality polish work above.
 
-10. Package Exhale as an Android Trusted Web Activity and submit to the Play Store. Land this after the Garden skin, feedback-driven changes, and discoverability work.
+14. Package Exhale as an Android Trusted Web Activity and submit to the Play Store. Land this after the Garden skin, feedback-driven changes, and discoverability work.
 
-11. Add a quiet PWA "Add to Home Screen" affordance for iOS. No native shell; iOS Store deployment is deferred (see ROADMAP).
+15. Add a quiet PWA "Add to Home Screen" affordance for iOS. No native shell; iOS Store deployment is deferred (see ROADMAP).
 
 ## Recommended Next Move
 
-Collect beta feedback and sync/event data first. Defer the Garden skin, policy-page surfacing, contrast audit, and distribution work until feedback has been intaken and any needed Stage 0 changes are made.
+Begin the Promoted Priority work (alternate rhythm options) in parallel with continued beta feedback collection. Defer the Garden skin, policy-page surfacing, contrast audit, and distribution work until the Promoted Priority and Stage 0 work are complete.

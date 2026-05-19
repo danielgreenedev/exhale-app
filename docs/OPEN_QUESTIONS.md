@@ -55,23 +55,13 @@ Current answer: Open.
 
 ### How many similar reports are enough to act?
 
-Context: One iPhone tester reported performance pressure and a possibly long Exhale; current plan is to revisit rhythm only if the pattern repeats.
+Answered 2026-05-19. See Answered Questions below.
 
-Current answer: Open. As of May 19, 2026, there are five rhythm-related signals: one iPhone tester reported performance pressure/possibly long Exhale, one casual user said the 5-minute session felt a little fast while still responding positively overall, one new user did not care for the Rest period and suggested an option to include or remove it, one new user preferred a slower/deeper pattern with longer inhale, longer hold, and much longer exhale, and one new user found the rhythm difficult to follow without gasping because it did not fit their breathing capacity.
-
-Example threshold to decide later:
-
-- One report: note only.
-- Two or three similar reports: investigate.
-- Repeated reports plus drop-off data: test an alternative.
-
-Related follow-up question to ask testers:
+Tester follow-up prompts to keep using during the alternate-rhythm beta round:
 
 ```text
 Did the Rest period help you reset, or did it feel like it interrupted the breathing rhythm?
 ```
-
-Additional nuance to watch:
 
 ```text
 If the rhythm did not fit you, did you want it gentler/easier, slower/deeper, or simply less interrupted by Rest?
@@ -240,6 +230,16 @@ Treat as Meta-side bug unless Facebook sharing becomes important to beta acquisi
 ## Answered Questions
 
 Move answered questions here with date, answer, evidence, and follow-up.
+
+### How many similar reports are enough to act on rhythm comfort?
+
+Answer: The threshold is reached when reports converge on the rhythm itself (not isolated preference variants) and at least one report describes a safety- or capacity-level concern, not just a preference. Five of six recent beta testers reported rhythm-fit concerns, and T-2026-05-19-05 specifically could not follow the rhythm without gasping, which is a capacity mismatch rather than a taste signal. That tipped the decision from "investigate further" to "act now."
+
+Date answered: 2026-05-19
+
+Evidence: `docs/USER_FEEDBACK.md` entries T-2026-05-18-01 (performance pressure, possibly long Exhale), T-2026-05-19-02 (pacing felt fast), T-2026-05-19-03 (did not care for Rest), T-2026-05-19-04 (prefers slower-deeper), T-2026-05-19-05 (gasping; capacity mismatch).
+
+Follow-up: Promoted Priority added to `docs/ROADMAP.md` and `docs/TODO.md` to design and ship selectable alternate rhythms while continuing beta feedback collection in parallel.
 
 ### Template
 

@@ -20,6 +20,14 @@ Confirm the premise: does the right kind of person find this useful?
 
 Gate: roughly ten testers, mostly target-audience, with at least one signal of return use.
 
+## Promoted Priority, Alternate Rhythm Options
+
+Pulled forward from Stage 1 on 2026-05-19 after consistent tester signal.
+
+Five of the six recent beta testers reported rhythm-fit concerns (see `docs/USER_FEEDBACK.md`). The reports span a range — pacing felt fast, Exhale too long, Rest unwelcome, slower-deeper preferred — but converge on one root cause: a single fixed 4-4-6-8 rhythm does not fit every body. Tester T-2026-05-19-05 specifically could not follow the rhythm without gasping, which is a comfort and capacity signal, not a preference signal.
+
+This is no longer Stage 1 polish. It is a near-term comfort and accessibility priority that should ship before the larger Garden skin work, so the rhythm conversation stops being the loudest piece of feedback against an otherwise positive product. The default 4-4-6-8 stays; the work is adding selectable alternates surfaced inside Session Setup, persisted alongside Circle Size and Sound through `user_settings`.
+
 ## Stage 1, Ship-quality polish
 
 Make Exhale feel like a "v1 you would link publicly."
