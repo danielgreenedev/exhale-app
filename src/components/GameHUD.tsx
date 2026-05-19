@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { PhaseConfig, CYCLE_DURATION } from '@/lib/breathing';
+import { DEFAULT_RHYTHM, PhaseConfig, RHYTHMS, Rhythm } from '@/lib/breathing';
 
 interface Props {
   currentPhase: PhaseConfig;
@@ -9,6 +9,7 @@ interface Props {
   cycleNumber: number;
   totalCycles: number;
   centerHidden?: boolean;
+  rhythm?: Rhythm;
 }
 
 export default function GameHUD({
@@ -17,8 +18,9 @@ export default function GameHUD({
   cycleNumber,
   totalCycles,
   centerHidden = false,
+  rhythm = RHYTHMS[DEFAULT_RHYTHM],
 }: Props) {
-  const minutesLeft = Math.ceil(((totalCycles - cycleNumber + 1) * CYCLE_DURATION) / 60);
+  const minutesLeft = Math.ceil(((totalCycles - cycleNumber + 1) * rhythm.cycleDuration) / 60);
   const settled = cycleNumber >= 2;
   const [previousPhase, setPreviousPhase] = useState<PhaseConfig | null>(null);
   const lastPhaseRef = useRef(currentPhase);
