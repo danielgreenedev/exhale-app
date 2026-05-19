@@ -67,6 +67,22 @@ Send a short, open prompt so feedback stays practical:
 
 ## Recent Feedback Notes
 
+### 2026-05-19, Beta Tester (web)
+
+#### What Worked
+
+- The session-complete quotes continue to land well across repeated use; rotating variety appreciated.
+- The softened Hold copy reads naturally and was specifically called out as a positive, validating the earlier strain-language revision.
+- Overall impression remains positive ("everything else looks great").
+
+#### Friction
+
+- The bottom session progress bar is hard to read. The unfilled portion of the track is too faint over the dark ground, so the colored fill appears to be a free-floating segment with no visible endpoint. Users can reverse-engineer what it is, but report a brief "what is this doing?" feeling that creates uncertainty rather than confidence. Once understood, the desire is still to see the endpoint clearly.
+
+#### Actionable Recommendations
+
+1. Raise the visibility of the progress bar's unfilled track so the full rail is unmistakable, with the colored fill reading as advancing along a visible line toward an obvious endpoint. The fill itself should remain the foreground signal; the track just needs to read as present, not as a guess.
+
 ### 2026-05-18, Production iPhone Beta
 
 #### What Worked
