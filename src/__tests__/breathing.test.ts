@@ -1,8 +1,13 @@
 import {
   BREATHING_PATTERN,
   CYCLE_DURATION,
+  DEFAULT_RHYTHM,
   getPhaseAtTime,
+  getRhythm,
   easeInOutCubic,
+  isRhythmId,
+  RHYTHMS,
+  SESSION_CYCLES,
 } from '@/lib/breathing';
 
 describe('BREATHING_PATTERN', () => {
@@ -96,6 +101,99 @@ describe('getPhaseAtTime', () => {
       seen.add(getPhaseAtTime(t).config.phase);
     }
     expect(seen).toEqual(new Set(['inhale', 'hold', 'exhale', 'rest']));
+  });
+});
+
+describe('RHYTHMS registry', () => {
+  it('exposes standard, gentle, and deep rhythms', () => {
+    expect(Object.keys(RHYTHMS).sort()).toEqual(['deep', 'gentle', 'standard']);
+  });
+
+  it('standard rhythm matches the previous BREATHING_PATTERN constant', () => {
+    expect(RHYTHMS.standard.pattern).toEqual(BREATHING_PATTERN);
+    expect(RHYTHMS.standard.cycleDuration).toBe(CYCLE_DURATION);
+    expect(RHYTHMS.standard.sessionCycles).toEqual(SESSION_CYCLES);
+  });
+
+  it('each rhythm has four phases in the canonical order with positive durations', () => {
+    (['standard', 'gentle', 'deep'] as const).forEach((id) => {
+      const phases = RHYTHMS[id].pattern.map((p) => p.phase);
+      expect(phases).toEqual(['inhale', 'hold', 'exhale', 'rest']);
+      RHYTHMS[id].pattern.forEach((p) => expect(p.duration).toBeGreaterThan(0));
+    });
+  });
+
+  it('each rhythm reports its true cycle duration', () => {
+    (['standard', 'gentle', 'deep'] as const).forEach((id) => {
+      const summed = RHYTHMS[id].pattern.reduce((acc, p) => acc + p.duration, 0);
+      expect(RHYTHMS[id].cycleDuration).toBe(summed);
+    });
+  });
+
+  it('session-cycle counts keep each label within one cycle of its target duration', () => {
+    const targetsSec = { quick: 180, short: 300, medium: 420, long: 600 } as const;
+    (['standard', 'gentle', 'deep'] as const).forEach((id) => {
+      const rhythm = RHYTHMS[id];
+      (['quick', 'short', 'medium', 'long'] as const).forEach((len) => {
+        const actual = rhythm.sessionCycles[len] * rhythm.cycleDuration;
+        // Within half a cycle either side of the target — guarantees the minute label stays honest.
+        expect(Math.abs(actual - targetsSec[len])).toBeLessThanOrEqual(rhythm.cycleDuration / 2);
+      });
+    });
+  });
+});
+
+describe('isRhythmId', () => {
+  it('accepts the three known rhythms', () => {
+    expect(isRhythmId('standard')).toBe(true);
+    expect(isRhythmId('gentle')).toBe(true);
+    expect(isRhythmId('deep')).toBe(true);
+  });
+
+  it('rejects unknown strings and non-strings', () => {
+    expect(isRhythmId('classic')).toBe(false);
+    expect(isRhythmId('')).toBe(false);
+    expect(isRhythmId(null)).toBe(false);
+    expect(isRhythmId(undefined)).toBe(false);
+    expect(isRhythmId(42)).toBe(false);
+  });
+});
+
+describe('getRhythm', () => {
+  it('returns the requested rhythm when given a valid id', () => {
+    expect(getRhythm('gentle').id).toBe('gentle');
+    expect(getRhythm('deep').id).toBe('deep');
+  });
+
+  it('falls back to the default rhythm for unknown or empty input', () => {
+    expect(getRhythm('classic').id).toBe(DEFAULT_RHYTHM);
+    expect(getRhythm(null).id).toBe(DEFAULT_RHYTHM);
+    expect(getRhythm(undefined).id).toBe(DEFAULT_RHYTHM);
+    expect(getRhythm('').id).toBe(DEFAULT_RHYTHM);
+  });
+});
+
+describe('getPhaseAtTime with a non-default rhythm', () => {
+  it('uses gentle pattern boundaries when passed the gentle rhythm', () => {
+    // Gentle is 3-2-4-4 = 13s cycle.
+    const gentle = RHYTHMS.gentle;
+    expect(getPhaseAtTime(0, gentle).config.phase).toBe('inhale');
+    expect(getPhaseAtTime(2.99, gentle).config.phase).toBe('inhale');
+    expect(getPhaseAtTime(3, gentle).config.phase).toBe('hold');
+    expect(getPhaseAtTime(5, gentle).config.phase).toBe('exhale');
+    expect(getPhaseAtTime(9, gentle).config.phase).toBe('rest');
+    expect(getPhaseAtTime(12.99, gentle).config.phase).toBe('rest');
+  });
+
+  it('uses deep pattern boundaries when passed the deep rhythm', () => {
+    // Deep is 6-6-10-4 = 26s cycle.
+    const deep = RHYTHMS.deep;
+    expect(getPhaseAtTime(0, deep).config.phase).toBe('inhale');
+    expect(getPhaseAtTime(5.99, deep).config.phase).toBe('inhale');
+    expect(getPhaseAtTime(6, deep).config.phase).toBe('hold');
+    expect(getPhaseAtTime(12, deep).config.phase).toBe('exhale');
+    expect(getPhaseAtTime(22, deep).config.phase).toBe('rest');
+    expect(getPhaseAtTime(25.99, deep).config.phase).toBe('rest');
   });
 });
 
