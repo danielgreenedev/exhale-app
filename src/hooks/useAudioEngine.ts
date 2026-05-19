@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, type MutableRefObject } from 'react';
-import { BreathingPhase, BREATHING_PATTERN } from '@/lib/breathing';
+import { BreathingPhase, DEFAULT_RHYTHM, RHYTHMS, Rhythm } from '@/lib/breathing';
 import { DEFAULT_SOUND_PALETTE, SoundPaletteId } from '@/lib/sound';
 
 type ActiveSoundPaletteId = Exclude<SoundPaletteId, 'off'>;
@@ -140,7 +140,15 @@ function disconnectNode(node: AudioNode | null) {
   }
 }
 
-export function useAudioEngine(soundPalette: SoundPaletteId = DEFAULT_SOUND_PALETTE) {
+export function useAudioEngine(
+  soundPalette: SoundPaletteId = DEFAULT_SOUND_PALETTE,
+  rhythm: Rhythm = RHYTHMS[DEFAULT_RHYTHM]
+) {
+  // Rhythm is captured at first render and held for the hook lifetime, mirroring the
+  // pattern in useBreathingSession and BreathingOrb. The breath-filter ramp timing in
+  // playCue reads phase durations from this locked rhythm, so a parent re-render with a
+  // fresh rhythm reference does not desynchronize cues already mid-ramp.
+  const rhythmRef = useRef(rhythm);
   const ctxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
   const reverbRef = useRef<ConvolverNode | null>(null);
@@ -366,7 +374,7 @@ export function useAudioEngine(soundPalette: SoundPaletteId = DEFAULT_SOUND_PALE
 
     const breathFilter = breathFilterRef.current;
     if (breathFilter) {
-      const phaseDuration = BREATHING_PATTERN.find(p => p.phase === phase)?.duration ?? 4;
+      const phaseDuration = rhythmRef.current.pattern.find(p => p.phase === phase)?.duration ?? 4;
       const nowB = ctx.currentTime;
       breathFilter.frequency.cancelScheduledValues(nowB);
       if (phase === 'inhale') {
