@@ -84,17 +84,35 @@ Send a short, open prompt so feedback stays practical:
 - Verbatim reply to the prompt "If the rhythm did not fit you, did you want it gentler/easier, slower/deeper for each section, or the transitions between phases, or simply less interrupted by Rest?":
 
 ```text
+I liked the hold and slow exhale.
 The rests were a little awkward.
 The competitive nature in me likes the idea of the breath, hold, and exhale increasing in duration by the last rep.
 ```
 
-- "Rests awkward" is now the third Rest/Relax complaint logged. Earlier reframing from 2s to 4s to 8s and the Rest to Relax label change have not eliminated the awkwardness signal for this user.
+- This tester liked Hold and slow Exhale, so do not group them with Hold-friction testers. Their friction is specifically the Rest/Relax moment plus interest in progressive/ramping rhythm.
+- "Rests awkward" is another Rest/Relax complaint logged. Follow-up should check whether the Relax/Breathe reframe helps, since the original public wording still used Rest.
 - Progressive escalation (each rep longer than the last) is a non-isochronous rhythm shape that no current preset offers. First request of this kind.
+
+#### Follow-Up, Same Tester Thread / Secondary User Signal
+
+- Source: New public Facebook post follow-up from the same tester, reporting a teenager's reaction.
+
+```text
+My teenager likes the simplicity of the layout and interface.
+Likes all the ways you can customize it.
+Wonders about adding the ability to change colors.
+But really positive
+```
+
+- Positive secondary-user signal: the simple layout and interface are landing.
+- Customization is noticed positively here, not as friction.
+- Color customization is a theme/personalization signal. Treat it as related to skins, accessibility, and phase-color comfort rather than a request to add freeform color controls immediately.
 
 #### Actionable Recommendations
 
-1. Reinforces "Should Rest and Hold be partly or completely optional?" — Rest itself, not its duration or label, is the issue for some users.
+1. Reinforces "Should Rest and Hold be partly or completely optional?" - Rest/Relax itself, not only its duration, is the issue for some users.
 2. New product question parked: should rhythms support a guided ramp/escalation instead of only steady patterns? Single-user signal; do not act yet.
+3. Park a color/theme customization question: ask whether "change colors" means orb/phase colors, background/skin, or accessibility/contrast preference.
 
 ### 2026-05-19, T-2026-05-19-06, Facebook Reply, Hold And Exhale-Inhale Ratio
 
@@ -129,15 +147,15 @@ I think the hardest part for me was the hold and the slower exhale then a short 
 
 #### Friction
 
-- Multiple users have mentioned not liking or being interrupted by the Rest phase.
-- Project owner observed that after Exhale changes to Rest, the instinctive response is to start breathing in.
+- Multiple users have mentioned not liking or being interrupted by the Rest/Relax phase.
+- Project owner observed that after Exhale changes to Rest/Relax, the instinctive response is to start breathing in.
 - Across Standard, Gentle, and Full, phase transitions can still feel cognitively abrupt; it takes a beat to catch up to the shift even with existing cues.
 
 #### Actionable Recommendations
 
 1. Treat this as a phase-boundary comprehension issue, not only a rhythm-duration issue.
-2. Try anticipatory cues first: next-phase label, pre-cue sound, and softer incoming visual color before the boundary.
-3. Keep collecting whether Rest itself is disliked, or whether the Exhale-to-Rest and Rest-to-Inhale handoff needs clearer framing.
+2. Keep evaluating the live anticipatory cues: pre-cue sound and softer incoming visual color before the boundary. The experimental next-phase text label was removed because it competed with the main instruction.
+3. Keep collecting whether Rest/Relax itself is disliked, or whether the Exhale-to-Relax and Relax-to-Inhale handoff needs clearer framing.
 
 ### 2026-05-19, T-2026-05-19-05, Breathing Capacity Constraint
 

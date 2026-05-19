@@ -5,7 +5,7 @@ Last updated: May 19, 2026 (Facebook reply intake; Rest label resolved; Flow rhy
 ## Completed Rhythm Changes
 
 - Settle In now lasts 8 seconds before the first guided inhale.
-- The core rhythm is now 4-4-6-8, with an 8-second Rest phase.
+- The core rhythm is now 4-4-6-8, with an 8-second Relax phase (internal phase enum `rest`).
 - Session breath counts were recalibrated so the 3, 5, 7, and 10 minute labels stay accurate.
 
 ## Completed UI Polish
@@ -130,12 +130,13 @@ Two tester-follow-up tasks land here as Stage 0 work below.
 
 ## Completed Phase Transition Support (2026-05-19)
 
-Early beta feedback showed that presets alone may not solve phase-boundary friction: users can understand the rhythm but still need a beat to process the shift between Inhale, Hold, Exhale, and Rest.
+Early beta feedback showed that presets alone may not solve phase-boundary friction: users can understand the rhythm but still need a beat to process the shift between Inhale, Hold, Exhale, and Relax.
 
 - Added a final-beat phase lookahead (`PHASE_LOOKAHEAD_SECONDS = 0.8`) that exposes the next phase before the current phase ends.
-- Added a quiet `Next [phase]` HUD cue so the label leads the motion without replacing the current instruction early.
+- Removed the experimental `Next [phase]` HUD cue after it competed with the central phase label and countdown.
 - Added a subtle anticipatory sound cue before the regular phase marker.
 - Softened canvas phase boundaries with a longer color crossfade and a faint incoming-color guide ring.
+- Kept anticipation in the audio pre-cue and ring-color lead; no textual HUD transition cue is shown.
 - Kept the underlying rhythm timings unchanged; this is a comprehension/handoff improvement, not a new rhythm.
 
 ## Remaining To-Do
@@ -156,7 +157,7 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 3. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check: "Can you start breathing without thinking?", "Did matching the prompts feel pressuring?", "Did Exhale feel too long?", "Did any sound behavior surprise you?", and "Did Settle In feel optional enough?"
 
-4. Pending feedback/data collection: validate whether the new anticipatory transition cues help users keep up with phase shifts. Ask: "Did the Next cue, color lead, or soft pre-cue make the phase changes easier to follow, or did they add noise?"
+4. Pending feedback/data collection: validate whether the new anticipatory transition cues help users keep up with phase shifts. Ask: "Did the color lead or soft pre-cue make the phase changes easier to follow, or did they add noise?"
 
 5. Pending feedback/data collection: recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
 
@@ -170,7 +171,7 @@ These can wait until after Stage 0 feedback signal is in.
 
 6b. Park: do rhythms need to support progressive ramping (each rep longer than the last) rather than only steady patterns? Single-user signal from T-2026-05-19-07. Do not act yet; revisit if a second tester independently asks for escalation or if competitive-framing usage shows up in `app_events`. If raised again, write it up as a full open question in `docs/OPEN_QUESTIONS.md` before any scoping.
 
-7. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Run `/impeccable shape Garden skin` before building.
+7. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Secondary-user feedback asked about changing colors; evaluate that through a theme/skin system before considering freeform color controls. Run `/impeccable shape Garden skin` before building.
 
 8. Resolved 2026-05-19: the Facebook preview now renders correctly on shared posts; the Sharing Debugger issue cleared once Meta's cache aged out, matching the working hypothesis. Playbook preserved in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md` for future reference. When the Garden skin lands, consider an updated OG image that shows both aesthetics — that is the only related thread still on the radar.
 

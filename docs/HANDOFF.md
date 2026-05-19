@@ -30,7 +30,7 @@ Today's commits, oldest to newest:
 
 ## What's Mid-Flight (For You to Pick Up)
 
-1. **Flow rhythm implementation.** Full design proposal lives in `docs/OPEN_QUESTIONS.md` under "Should Rest and Hold be partly or completely optional?" → sub-section "Flow rhythm design sketch (2026-05-19)". Primary candidate is **4-0-6-2** (Inhale 4s, no Hold, Exhale 6s, brief Relax 2s). Real code change is small: one-line fix to `getNextPhase` in `src/lib/breathing.ts` to skip 0-duration phases; `getPhaseAtTime` and `getOrbScale` already handle them correctly. New Supabase migration 004 to extend `user_settings.rhythm` enum. Implementation is **gated behind a tester validation step** — run the sketch past at least two of T-2026-05-19-03, -05, -06, -07 in a preview build before merging; ship as a fourth preset only if at least one prefers Flow over their current choice.
+1. **Flow rhythm implementation.** Full design proposal lives in `docs/OPEN_QUESTIONS.md` under "Should Rest and Hold be partly or completely optional?" -> sub-section "Flow rhythm design sketch (2026-05-19)". Primary candidate is **4-0-6-2** (Inhale 4s, no Hold, Exhale 6s, brief Relax 2s). Real code change is small: one-line fix to `getNextPhase` in `src/lib/breathing.ts` to skip 0-duration phases; `getPhaseAtTime` and `getOrbScale` already handle them correctly. Add `'flow'` to the client-side `RhythmId`, `isRhythmId`, settings parser, and tests. Supabase stores `user_settings.rhythm` as plain text with no enum/check constraint, so no database migration is required unless a constraint is intentionally added later. Implementation is **gated behind a tester validation step** - run the sketch past at least two of T-2026-05-19-03, -05, -06, -07 in a preview build before merging; ship as a fourth preset only if at least one prefers Flow over their current choice.
 
 2. **Visual smoke test of the anticipation cue across all three rhythms.** Code is live; needs browser confirmation. The 0.8s lead is a different fraction of each phase: Standard Exhale 13%, Gentle Hold 40% (jitter risk), Full Exhale 8% (imperceptibility risk). If Gentle feels jittery on Hold, scale `PHASE_LOOKAHEAD_SECONDS` proportional to phase duration, e.g. `Math.min(0.8, phase.duration * 0.25)`. Lightweight follow-up if smoke test flags it.
 
@@ -51,7 +51,7 @@ Today's commits, oldest to newest:
 Two new tester entries in `docs/USER_FEEDBACK.md` from public Facebook replies to the project owner's pacing question (verbatim quoted, anonymized as T-2026-05-19-06 and T-2026-05-19-07):
 
 - **T-2026-05-19-06**: "I think the hardest part for me was the hold and the slower exhale then a short inhale." Two frictions in one sentence — Hold and the asymmetric exhale-to-inhale ratio.
-- **T-2026-05-19-07**: "The rests were a little awkward. The competitive nature in me likes the idea of the breath, hold, and exhale increasing in duration by the last rep." Rest still flagged as awkward after the Relax rename; progressive-escalation interest.
+- **T-2026-05-19-07**: "I liked the hold and slow exhale. The rests were a little awkward. The competitive nature in me likes the idea of the breath, hold, and exhale increasing in duration by the last rep." Likes Hold/slow Exhale, flags Rest/Relax awkwardness, and shows progressive-escalation interest. Same tester later reported a teenager liked the simple UI and customization, and wondered about changing colors; color/theme customization is now parked as an open question.
 
 ## Do Not Revert / Preserve
 

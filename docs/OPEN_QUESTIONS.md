@@ -60,11 +60,11 @@ Answered 2026-05-19. See Answered Questions below.
 Tester follow-up prompts to keep using during the alternate-rhythm beta round:
 
 ```text
-Did the Rest period help you reset, or did it feel like it interrupted the breathing rhythm?
+Did the Relax/Rest period help you reset, or did it feel like it interrupted the breathing rhythm?
 ```
 
 ```text
-If the rhythm did not fit you, did you want it gentler/easier, slower/deeper, or simply less interrupted by Rest?
+If the rhythm did not fit you, did you want it gentler/easier, slower/deeper, or simply less interrupted by Relax/Rest?
 ```
 
 ```text
@@ -97,16 +97,28 @@ Current answer: partially answered. Implementing 2026-05-19:
 
 Still open from the original five:
 
-- (1) and (5) are not yet acted on. Rest may still imply stillness when the body wants to inhale, and that is a separate concern from the timing of the boundary itself. See "Should Rest and Hold be partly or completely optional?" below and the brainstorm on renaming.
-- Whether the current crossfade is deep enough or needs further softening once Rest is reframed.
+- (1) and (5) have a first attempt: the user-facing phase is now `Relax` with instruction `Breathe`, while the internal enum remains `rest`. Follow-up should test whether that reframe is enough or whether the phase itself still feels awkward.
+- Whether the current crossfade is deep enough or needs further softening now that Rest has been reframed.
 
-Follow-up: watch beta feedback for whether anyone still reports boundary anxiety after the lead window is live. If not, treat this as covered.
+Follow-up: watch beta feedback for whether anyone still reports boundary anxiety after the lead window is live. If not, treat this as covered. Ask specifically:
+
+```text
+Did the color lead or soft pre-cue make the phase changes easier to follow?
+```
+
+```text
+Did the transition cues feel helpful, or did they add too much information?
+```
+
+```text
+Was any specific phase change still hard to follow, such as Exhale to Relax or Relax to Inhale?
+```
 
 ### Should Rest and Hold be partly or completely optional?
 
 Context: Originally raised by T-2026-05-19-03 (did not care for Rest, suggested an option to include or remove it) and T-2026-05-19-05 (capacity mismatch; gasping). Gentle already trims Hold to 2s and Rest to 4s, but that may not be far enough.
 
-2026-05-19 update: Two unsolicited replies on the Facebook pacing question both flagged Hold and Rest. T-2026-05-19-06 called Hold "the hardest part" and described an asymmetric exhale-to-inhale ratio as friction. T-2026-05-19-07 said the rests felt awkward even after the duration extension and label change to Relax. That is now four distinct testers flagging Rest, plus two flagging Hold — convergent enough to promote this from deferred to active.
+2026-05-19 update: Two unsolicited replies on the Facebook pacing question flagged Hold and/or Rest. T-2026-05-19-06 called Hold "the hardest part" and described an asymmetric exhale-to-inhale ratio as friction. T-2026-05-19-07 liked Hold and slow Exhale, but said the rests felt awkward. That is now four distinct testers flagging Rest/Relax, plus two flagging Hold - convergent enough to promote this from deferred to active.
 
 Possible directions:
 
@@ -143,7 +155,7 @@ Code implications (for Codex; no implementation in this sketch):
 3. `getOrbScale` is correct as-is. 0-duration phases never become the active phase, so they never have a scale computed. `prevScale` carries continuity across them (Exhale ends at 0.45, next Inhale begins from 0.45).
 4. `useAudioEngine.playAnticipationCue` and `BreathingOrb`'s guide-ring lead both consume `nextPhase` from `useBreathingSession`. If `getNextPhase` is fixed to skip zero-duration phases, these inherit correct behavior automatically — no further change.
 5. Session Setup tile needs a new entry. Suggested label `Flow`; summary `Open` or `Lighter` (single word per `Rhythm.summary` contract); description "Inhale and exhale with no hold and a brief pause. For users who find the Hold or longer Rest distracting."
-6. `RhythmId` union, `isRhythmId` guard, and Supabase `user_settings.rhythm` constraint all need `'flow'` added. New migration 004 to extend the rhythm enum check. Existing parsers fall back to `DEFAULT_RHYTHM` on unknown values, so older clients hitting a flow-row stay safe.
+6. `RhythmId` union, `isRhythmId` guard, settings parser, and tests all need `'flow'` added. Supabase currently stores `user_settings.rhythm` as plain text with no enum/check constraint, so no database migration is required unless we intentionally add a constraint later. Existing parsers fall back to `DEFAULT_RHYTHM` on unknown values, so older clients hitting a flow-row stay safe.
 7. Tests in `src/__tests__/breathing.test.ts` to cover: Flow registry shape, `getNextPhase` zero-skip behavior, `getPhaseAtTime` boundaries across a Flow cycle, and cycle recalibration counts.
 
 What this does NOT do:
@@ -166,8 +178,8 @@ Open subquestions parked for after the sketch lands:
 
 Constraints to note for implementation:
 
-- `getPhaseAtTime` and the orb animation currently assume each phase has duration greater than zero; 0-duration phases need handling
-- The 4-phase architecture is wired through `BREATHING_PATTERN.length`-style assumptions; a rhythm with fewer phases would need a more thorough refactor than current rhythm-id swap
+- Keep Flow as a 4-phase rhythm with zero-duration phases rather than removing phases from the registry; a truly variable phase count would be a larger refactor.
+- `getNextPhase` must skip zero-duration phases so anticipation does not point at an invisible phase.
 
 Related: see Rest renaming brainstorm in the working-tree handoff notes; even with the same phase structure, label and instruction copy can do a lot of work.
 
@@ -200,26 +212,6 @@ Would seeing rhythm settings before your first session make Exhale feel more hel
 
 ```text
 If you could change one part of the rhythm, would it be Inhale, Hold, Exhale, Rest, or the transition between them?
-```
-
-### Do users need anticipatory phase cues or softer phase transitions?
-
-Context: New feedback suggests that even when the selected rhythm is acceptable, the moment of transition can still be cognitively hard to follow. Users may need a small perceptual lead before the app changes from Inhale to Hold, Hold to Exhale, Exhale to Rest, or Rest to Inhale.
-
-Current answer: Partially acted on as a beta experiment. Exhale now gives the next phase a final-beat lead through a small `Next [phase]` HUD cue, a quiet pre-cue sound, and a faint incoming-color guide ring. The underlying rhythm timings are unchanged.
-
-Follow-up questions to ask testers:
-
-```text
-Did the Next cue, color lead, or soft pre-cue make the phase changes easier to follow?
-```
-
-```text
-Did the transition cues feel helpful, or did they add too much information?
-```
-
-```text
-Was any specific phase change still hard to follow, such as Exhale to Rest or Rest to Inhale?
 ```
 
 ### Should feedback intake include a return-intent question?
@@ -345,6 +337,22 @@ Possible purposes:
 - Shareability.
 - Future theme-pack monetization.
 - Aesthetic breadth for public launch.
+
+### Should Exhale support color or theme customization beyond Garden?
+
+Context: T-2026-05-19-07's follow-up reported that a teenager liked the simplicity of the layout and interface, liked the existing customization, and wondered about changing colors.
+
+Current answer: Open, not Stage 0. Treat this as a theme/personalization signal, not an immediate request for freeform color controls. Freeform colors could break the calm design language, phase-color meaning, contrast guarantees, and the "one accent per skin" rule. A safer first step is a curated skin/theme path such as Garden.
+
+Follow-up questions to ask:
+
+```text
+When you say change colors, do you mean the orb/phase colors, the background style, or a comfort/contrast setting?
+```
+
+```text
+Would a few curated themes feel better than choosing every color yourself?
+```
 
 ### Is Facebook preview worth more attention?
 

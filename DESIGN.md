@@ -223,7 +223,7 @@ In the final `PHASE_LOOKAHEAD_SECONDS` (currently 0.8s) before each phase change
 
 During the last 0.8 seconds of a phase, the guide ring begins to show the next phase color as a faint incoming arc. This is an anticipatory cue, not a new phase; it gives the user's eye a beat to understand that a transition is coming.
 
-Phase changes should feel like a handoff rather than a switch. The HUD keeps the current phase label active, then reveals a small `Next [phase]` cue in the final beat before the boundary. Sound uses a quiet pre-cue before the regular phase marker. Visual color transitions are deliberately softened; the boundary can be sensed before the orb changes state, especially for users who need a moment to process the new instruction.
+Phase changes should feel like a handoff rather than a switch. The HUD keeps the current phase label active; anticipation is carried by the guide-ring color lead and quiet pre-cue sound. Visual color transitions are deliberately softened; the boundary can be sensed before the orb changes state, especially for users who need a moment to process the new instruction.
 
 ### Rhythm
 
