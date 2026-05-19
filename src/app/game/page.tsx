@@ -449,7 +449,6 @@ function GameContent() {
           timeRemaining={timeRemaining}
           cycleNumber={cycleNumber}
           totalCycles={totalCycles}
-          sessionProgress={sessionProgress}
           centerHidden={sessionState === 'paused'}
         />
       )}

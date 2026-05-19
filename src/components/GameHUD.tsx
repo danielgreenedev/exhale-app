@@ -8,7 +8,6 @@ interface Props {
   timeRemaining: number;
   cycleNumber: number;
   totalCycles: number;
-  sessionProgress: number;
   centerHidden?: boolean;
 }
 
@@ -17,7 +16,6 @@ export default function GameHUD({
   timeRemaining,
   cycleNumber,
   totalCycles,
-  sessionProgress,
   centerHidden = false,
 }: Props) {
   const minutesLeft = Math.ceil(((totalCycles - cycleNumber + 1) * CYCLE_DURATION) / 60);
@@ -126,34 +124,17 @@ export default function GameHUD({
         </div>
       )}
 
-      {/* Bottom: session progress — lifted above the bottom control row + sound tooltip on small screens */}
-      <div className="pb-[calc(7rem+env(safe-area-inset-bottom))] flex flex-col items-center gap-2">
-        <div
-          className="w-48 h-[2px] bg-still-white/18 rounded-full overflow-hidden"
-          role="progressbar"
-          aria-valuenow={Math.round(sessionProgress * 100)}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label="Session progress"
-        >
-          <div
-            className="h-full w-full origin-left rounded-full transition-transform duration-300"
-            style={{
-              transform: `scaleX(${sessionProgress})`,
-              backgroundColor: currentPhase.color,
-              opacity: 0.7,
-            }}
-          />
-        </div>
+      {/* Bottom: quiet time-remaining hint + desktop keyboard hint — session progress now lives on the canvas session ring */}
+      <div className="pb-[calc(7rem+env(safe-area-inset-bottom))] flex flex-col items-center gap-1.5">
         {!settled && (
           <p
-            className="text-still-white/62 text-xs tracking-[0.15em] uppercase font-light mt-1"
+            className="text-still-white/62 text-xs tracking-[0.15em] uppercase font-light"
             style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
           >
             ~{minutesLeft} min remaining
           </p>
         )}
-        <p className="hidden sm:block text-still-white/55 text-xs tracking-[0.1em] font-light mt-1" aria-hidden="true">
+        <p className="hidden sm:block text-still-white/55 text-xs tracking-[0.1em] font-light" aria-hidden="true">
           space · pause &nbsp;·&nbsp; esc · exit
         </p>
       </div>

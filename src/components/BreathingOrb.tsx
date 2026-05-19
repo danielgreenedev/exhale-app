@@ -283,16 +283,16 @@ export default function BreathingOrb({ currentPhase, elapsedRef, sessionDuration
         ctx.stroke();
       }
 
-      // Session progress ring
+      // Session progress ring — now the only session-level progress indicator after the HUD bar was removed
       const sessR = ringR + 14;
-      ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${bl}%, 0.07)`;
+      ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${bl}%, 0.12)`;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(cx, cy, sessR, 0, Math.PI * 2);
       ctx.stroke();
 
       if (sp > 0) {
-        ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${bl}%, 0.32)`;
+        ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${bl}%, 0.42)`;
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(cx, cy, sessR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * sp);

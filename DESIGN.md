@@ -211,8 +211,7 @@ The core rhythm is 4-4-6-8: Inhale 4 seconds, Hold 4 seconds, Exhale 6 seconds, 
 ### Progress Indicators
 
 - **Phase ring:** Drawn on canvas around the orb — arc from `-π/2` sweeping with phase progress. Phase color at 80% opacity.
-- **Session ring:** Outer ring, same origin — session progress at 32% opacity.
-- **HUD progress bar:** `w-48 h-[2px]` white/15 track, phase-colored fill at 70% opacity. Bottom-center of session screen (above the control buttons).
+- **Session ring:** Outer ring, same origin — session progress fill at 42% opacity over a 12% track. This is the sole session-level progress indicator; the redundant HUD progress bar was removed after a beta tester reported the floating colored segment more confusing than informative.
 
 ### Sound Palettes
 
