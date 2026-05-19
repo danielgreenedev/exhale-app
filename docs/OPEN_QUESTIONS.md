@@ -1,6 +1,6 @@
 # Exhale Open Questions
 
-Last updated: May 19, 2026 (Rest/Hold question promoted to active)
+Last updated: May 19, 2026 (Rest/Hold promoted; OAuth-vs-OTP question added)
 
 Use this as a living parking lot for product, validation, trust, accessibility, and strategy questions that are not ready to become implementation tasks. As questions are answered, add the answer, date, evidence, and any resulting TODO/doc updates.
 
@@ -205,6 +205,23 @@ Current answer: Open.
 Context: Sync belongs only inside Practice History and must not make Exhale feel account-gated.
 
 Current answer: Open.
+
+### Could OAuth (Google / Apple Sign-In) be lower-friction than email OTP for Practice History sync?
+
+Context: Practice History sync currently uses email-code OTP. That requires the user to leave Exhale, open their email app, find the code, switch back, and paste it. OAuth providers offer a one-tap consent flow when the device is already signed into Google or Apple. For users who have already decided to sync (inside Practice History), OAuth is plausibly a strict friction reduction over OTP. This is a different question from "should Exhale have a fuller account system" below: the framing is friction-reduction within the existing optional sync gate, not adding a new account surface to the app.
+
+Current answer: Open. Lean is to add Google Sign-In as a second option inside Practice History alongside OTP rather than replacing OTP, pilot with the current beta tester group, and add Apple Sign-In later if iPhone testers reach for it. Anonymous-first stays the default; the home screen does not change.
+
+Tradeoffs worth naming before building:
+
+- A "Sign in with Google" button reads as more account-gated than a text email field even when both gate the same Supabase identity. This sits slightly against the anonymous-first brand signal, even if the button only appears inside Practice History.
+- OAuth introduces Google (and eventually Apple) as third-party dependencies for synced users. Non-synced users are unaffected.
+- Apple Sign-In adds review/policy overhead and a separate provider config. Defensible to defer until a tester actually asks for it.
+- Implementation cost is low: Supabase supports both providers natively, and the current `linkEmailToAnonymousUser` flow already converts anonymous identities; OAuth would follow the same conversion path.
+
+Decision blocker: tester preference. Before committing, run the dual-option Practice History past a few testers and watch which path they reach for. If OTP completion rate is the bottleneck on cross-device usage, OAuth should narrow that gap.
+
+Related: the existing "fuller account system" question below addresses a different concern (account management surface area, not friction reduction within an existing optional gate).
 
 ### Would a fuller account system ever create enough value to justify the added friction?
 
