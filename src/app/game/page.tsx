@@ -8,7 +8,16 @@ import SessionComplete from '@/components/SessionComplete';
 import { useBreathingSession } from '@/hooks/useBreathingSession';
 import { useAudioEngine } from '@/hooks/useAudioEngine';
 import { useSessionStats } from '@/hooks/useSessionStats';
-import { DEFAULT_ORB_SCALE, DEFAULT_SESSION_LENGTH, SessionLength, BREATHING_PATTERN } from '@/lib/breathing';
+import {
+  DEFAULT_ORB_SCALE,
+  DEFAULT_RHYTHM,
+  DEFAULT_SESSION_LENGTH,
+  RHYTHMS,
+  RHYTHM_STORAGE_KEY,
+  SessionLength,
+  getRhythm,
+  isRhythmId,
+} from '@/lib/breathing';
 import { useUserId } from '@/lib/auth';
 import { logAppEvent } from '@/lib/appEvents';
 import {
@@ -72,6 +81,19 @@ function GameContent() {
   const isFirstVisit = searchParams.get('first') === '1';
   const orbParam = parseFloat(searchParams.get('orb') ?? '');
   const soundParam = searchParams.get('sound');
+  const rhythmParam = searchParams.get('rhythm');
+
+  // URL param wins so a deep-linked /game?rhythm=gentle starts in that rhythm.
+  // Otherwise read whatever was last saved on this device. Falls back to standard.
+  const rhythm = useMemo(() => {
+    if (isRhythmId(rhythmParam)) return RHYTHMS[rhythmParam];
+    try {
+      const stored = localStorage.getItem(RHYTHM_STORAGE_KEY);
+      return getRhythm(stored);
+    } catch {
+      return RHYTHMS[DEFAULT_RHYTHM];
+    }
+  }, [rhythmParam]);
 
   const {
     sessionState,
@@ -87,7 +109,7 @@ function GameContent() {
     start,
     pause,
     reset,
-  } = useBreathingSession(lengthParam, initialElapsed);
+  } = useBreathingSession(lengthParam, initialElapsed, rhythm);
 
   const { saveSession } = useSessionStats();
   const userId = useUserId();
@@ -108,7 +130,7 @@ function GameContent() {
     }
   }, [soundParam]);
 
-  const { startAmbient, stopAmbient, pauseAmbient, resumeAmbient, playCue } = useAudioEngine(soundPalette);
+  const { startAmbient, stopAmbient, pauseAmbient, resumeAmbient, playCue } = useAudioEngine(soundPalette, rhythm);
 
   const [audioActive, setAudioActive] = useState(false);
   const [showAudioPrompt, setShowAudioPrompt] = useState(false);
@@ -257,10 +279,10 @@ function GameContent() {
   // Play phase cue when phase changes
   useEffect(() => {
     if (phaseIndex !== prevPhaseIndexRef.current && sessionState === 'running') {
-      playCue(BREATHING_PATTERN[phaseIndex].phase);
+      playCue(rhythm.pattern[phaseIndex].phase);
       prevPhaseIndexRef.current = phaseIndex;
     }
-  }, [phaseIndex, sessionState, playCue]);
+  }, [phaseIndex, sessionState, playCue, rhythm]);
 
   // Record a start only once the guided rhythm begins, not during the settle-in screen.
   useEffect(() => {
@@ -439,6 +461,7 @@ function GameContent() {
           elapsedRef={elapsedRef}
           sessionDuration={sessionDuration}
           orbScale={orbScale}
+          rhythm={rhythm}
         />
       </div>
 
@@ -450,6 +473,7 @@ function GameContent() {
           cycleNumber={cycleNumber}
           totalCycles={totalCycles}
           centerHidden={sessionState === 'paused'}
+          rhythm={rhythm}
         />
       )}
 

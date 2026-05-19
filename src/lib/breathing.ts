@@ -7,6 +7,7 @@ export type RhythmId = 'standard' | 'gentle' | 'deep';
 export const DEFAULT_SESSION_LENGTH: SessionLength = 'quick';
 export const DEFAULT_ORB_SCALE = 1;
 export const DEFAULT_RHYTHM: RhythmId = 'standard';
+export const RHYTHM_STORAGE_KEY = 'exhale-rhythm';
 
 export interface PhaseConfig {
   phase: BreathingPhase;
