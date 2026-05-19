@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 18, 2026
+Last updated: May 19, 2026
 
 ## Completed Rhythm Changes
 
@@ -89,42 +89,50 @@ Last updated: May 18, 2026
 - Verified live: 200 responses for `/`, `/robots.txt`, and `/og-image.png`; correct OG meta tags in rendered HTML; Facebook crawler user-agent receives 200 from outside Meta.
 - Troubleshooting walkthrough kept in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md` for future resume.
 
+## Completed Policy Pages
+
+- `/privacy` now covers anonymous browser identity, local storage, optional email sync, Supabase storage, lightweight `app_events`, deletion, and the absence of advertising or third-party tracking.
+- `/terms` now covers no medical advice, use at your own discretion, acceptable use, intellectual property, service availability, no warranties, and contact.
+- Both pages are reachable directly and have quiet Exhale-styled layouts; they still need to be surfaced from the main app UI.
+
 ## Remaining To-Do
 
 Items are grouped loosely by roadmap stage. See `docs/ROADMAP.md` for the strategic context.
 
 ### Stage 0, validation and tester signal
 
-1. Test cross-device sync on Device B and verify Practice History, timer length, Circle Size, and sound choice sync correctly through Supabase.
+Primary focus: collect feedback and usage data before starting the next design/build push.
 
-2. Run one more first-use clarity and rhythm comfort check: "Can you start breathing without thinking?", "Did matching the prompts feel pressuring?", "Did Exhale feel too long?", "Did any sound behavior surprise you?", and "Did Settle In feel optional enough?"
+1. Pending feedback/data collection: test cross-device sync on Device B and verify Practice History, timer length, Circle Size, and sound choice sync correctly through Supabase.
 
-3. Recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
+2. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check: "Can you start breathing without thinking?", "Did matching the prompts feel pressuring?", "Did Exhale feel too long?", "Did any sound behavior surprise you?", and "Did Settle In feel optional enough?"
 
-4. After a meaningful sample of synced sessions, review Supabase `app_events` counts (timer selections, session starts, Settle In exits, early exits, completions). Watch completion rate, return rate, and drop-off phase.
+3. Pending feedback/data collection: recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
 
-5. If more testers report breath-timing pressure or a too-long Exhale, test a softer rhythm option such as 4-4-5-8 or a relaxed mode before changing the default 4-4-6-8 pattern.
+4. Pending feedback/data collection: after a meaningful sample of synced sessions, review Supabase `app_events` counts (timer selections, session starts, Settle In exits, early exits, completions). Watch completion rate, return rate, and drop-off phase.
+
+5. Revisit only if feedback raises it: if more testers report breath-timing pressure or a too-long Exhale, test a softer rhythm option such as 4-4-5-8 or a relaxed mode before changing the default 4-4-6-8 pattern.
 
 ### Stage 1, ship-quality polish
 
-6. Design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Run `/impeccable shape Garden skin` before building.
+These can wait until after feedback is collected, synthesized, and any needed Stage 0 changes are made.
+
+6. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Run `/impeccable shape Garden skin` before building.
 
 7. Confirm Facebook's Sharing Debugger renders the preview after their scrape cache clears. App side is verified working; the remaining loose end is Meta-side cache only. Resume playbook lives in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md`. When the Garden skin lands, consider an updated OG image that shows both aesthetics.
 
-8. Write a `/privacy` page covering anonymous user creation, optional email sync, `app_events` behavioral logging, how to delete or sign out, and the absence of advertising or third-party tracking.
+8. Not a priority for now: add a UI affordance linking the main pages to `/privacy` and `/terms`. Likely a small footer link from home, game complete, and stats in keeping with the quiet aesthetic, but a more prominent button could also fit. The pages exist and are reachable; they are not surfaced from any other screen yet.
 
-9. Write a `/terms` page covering no medical advice, limitation of liability, intellectual property, and a soft age suggestion.
-
-10. Add a UI affordance linking the main pages to `/privacy` and `/terms`. Likely a small footer link from home, game complete, and stats in keeping with the quiet aesthetic, but a more prominent button could also fit. The pages exist and are reachable; they are not surfaced from any other screen yet.
-
-11. Color contrast audit on text at low opacity (white/28 to 38 against forest-night). May fall below WCAG 2.1 AA. Run `/impeccable audit` before considering Stage 2.
+9. Wait until after feedback intake: color contrast audit on text at low opacity (white/28 to 38 against forest-night). May fall below WCAG 2.1 AA. Run `/impeccable audit` before considering Stage 2.
 
 ### Stage 2, distribution
 
-12. Package Exhale as an Android Trusted Web Activity and submit to the Play Store. Land this after the Garden skin and discoverability work.
+Stage 2 comes after the validation and ship-quality polish work above.
 
-13. Add a quiet PWA "Add to Home Screen" affordance for iOS. No native shell; iOS Store deployment is deferred (see ROADMAP).
+10. Package Exhale as an Android Trusted Web Activity and submit to the Play Store. Land this after the Garden skin, feedback-driven changes, and discoverability work.
+
+11. Add a quiet PWA "Add to Home Screen" affordance for iOS. No native shell; iOS Store deployment is deferred (see ROADMAP).
 
 ## Recommended Next Move
 
-Recruit a small beta group while starting the Garden skin design work. Beta signal informs Stage 2 timing; the skin work is independent and can run in parallel.
+Collect beta feedback and sync/event data first. Defer the Garden skin, policy-page surfacing, contrast audit, and distribution work until feedback has been intaken and any needed Stage 0 changes are made.
