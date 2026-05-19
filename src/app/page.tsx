@@ -402,7 +402,7 @@ function HomeContent() {
                   return (
                     <label
                       key={r.id}
-                      title={r.description}
+                      title={`${r.description} Pattern: ${sig}.`}
                       className={`
                         min-h-11 flex flex-col items-center justify-center gap-0.5 rounded-lg border px-1 cursor-pointer transition-all duration-300
                         ${active
@@ -417,15 +417,15 @@ function HomeContent() {
                         value={r.id}
                         form="session-form"
                         checked={active}
-                        aria-label={`${r.label} rhythm, ${sig}`}
+                        aria-label={`${r.label} rhythm. ${r.summary}. Pattern ${sig}.`}
                         onChange={() => updateRhythm(r.id)}
                         className="sr-only"
                       />
                       <span className="text-[10px] tracking-[0.12em] uppercase font-light leading-none">
                         {r.label}
                       </span>
-                      <span className={`text-[9px] tabular-nums tracking-[0.04em] font-light leading-none ${active ? 'text-emerald-100/80' : 'text-still-white/45'}`}>
-                        {sig}
+                      <span className={`text-[10px] tracking-[0.08em] font-light leading-none ${active ? 'text-emerald-100/85' : 'text-still-white/55'}`}>
+                        {r.summary}
                       </span>
                     </label>
                   );
@@ -575,20 +575,20 @@ function HomeContent() {
           </section>
         )}
 
-        <div className="flex flex-col gap-3 w-full pt-3 border-t border-still-white/10">
-          <Link
-            href="/stats"
-            className="w-full min-h-14 py-3 rounded-2xl border border-still-white/20 text-still-white/60 hover:border-still-white/34 hover:text-still-white/78 hover:bg-still-white/5 active:scale-[0.98] transition-all duration-300 flex flex-col items-center justify-center gap-0.5 text-center"
-            aria-label={homeStat ? `View practice history, ${homeStat.sessions} session${homeStat.sessions !== 1 ? 's' : ''}` : 'View practice history'}
-          >
-            <span className="text-xs tracking-[0.18em] uppercase font-light">Practice history</span>
-            {homeStat && (
+        {homeStat && (
+          <div className="flex flex-col gap-3 w-full pt-3 border-t border-still-white/10">
+            <Link
+              href="/stats"
+              className="w-full min-h-14 py-3 rounded-2xl border border-still-white/20 text-still-white/60 hover:border-still-white/34 hover:text-still-white/78 hover:bg-still-white/5 active:scale-[0.98] transition-all duration-300 flex flex-col items-center justify-center gap-0.5 text-center"
+              aria-label={`View practice history, ${homeStat.sessions} session${homeStat.sessions !== 1 ? 's' : ''}`}
+            >
+              <span className="text-xs tracking-[0.18em] uppercase font-light">Practice history</span>
               <span className="text-[10px] leading-none tracking-[0.12em] font-light text-still-white/50 normal-case">
                 {homeStat.sessions} session{homeStat.sessions !== 1 ? 's' : ''}
               </span>
-            )}
-          </Link>
-        </div>
+            </Link>
+          </div>
+        )}
 
       </div>
     </main>

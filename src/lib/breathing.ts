@@ -2,7 +2,7 @@ import { PHASE_COLORS } from '@/lib/colors';
 
 export type BreathingPhase = 'inhale' | 'hold' | 'exhale' | 'rest';
 export type SessionLength = 'quick' | 'short' | 'medium' | 'long';
-export type RhythmId = 'standard' | 'gentle' | 'slow';
+export type RhythmId = 'standard' | 'gentle' | 'full';
 
 export const DEFAULT_SESSION_LENGTH: SessionLength = 'quick';
 export const DEFAULT_ORB_SCALE = 1;
@@ -21,8 +21,10 @@ export interface PhaseConfig {
 
 export interface Rhythm {
   id: RhythmId;
-  label: string;
-  description: string;
+  label: string;        // Short name shown on the rhythm tile (e.g., "Standard").
+  summary: string;      // One-word relative descriptor under the label (e.g., "Balanced"),
+                        // used in place of the phase-duration signature for accessibility.
+  description: string;  // Full sentence used as the tile's title (tooltip).
   pattern: PhaseConfig[];
   cycleDuration: number;
   sessionCycles: Record<SessionLength, number>;
@@ -96,6 +98,7 @@ function recalibrateCycles(cycleDuration: number): Record<SessionLength, number>
 function buildRhythm(
   id: RhythmId,
   label: string,
+  summary: string,
   description: string,
   durations: [number, number, number, number]
 ): Rhythm {
@@ -104,6 +107,7 @@ function buildRhythm(
   return {
     id,
     label,
+    summary,
     description,
     pattern,
     cycleDuration,
@@ -115,25 +119,28 @@ export const RHYTHMS: Record<RhythmId, Rhythm> = {
   standard: buildRhythm(
     'standard',
     'Standard',
+    'Balanced',
     'Balanced 4-4-6-8 pattern. The default for first-time users.',
     [4, 4, 6, 8]
   ),
   gentle: buildRhythm(
     'gentle',
     'Gentle',
+    'Easier',
     'Shorter cycle with a lighter hold and a more permissive exhale. Good for new users or anyone who feels rushed by the standard pace.',
     [3, 2, 4, 4]
   ),
-  slow: buildRhythm(
-    'slow',
-    'Slow',
-    'Longer inhale, longer hold, and a much longer exhale. Good for experienced breathwork users. Slow rather than Deep to avoid colliding with the Deep sound texture label.',
+  full: buildRhythm(
+    'full',
+    'Full',
+    'Longer',
+    'Longer inhale, longer hold, and a much longer exhale. Good for experienced breathwork users. Named Full rather than Deep to avoid collision with the Deep sound texture label.',
     [6, 6, 10, 4]
   ),
 };
 
 export function isRhythmId(value: unknown): value is RhythmId {
-  return value === 'standard' || value === 'gentle' || value === 'slow';
+  return value === 'standard' || value === 'gentle' || value === 'full';
 }
 
 export function getRhythm(id: RhythmId | string | null | undefined): Rhythm {
