@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     siteName: 'Exhale',
     images: [
       {
-        url: '/opengraph-image',
+        url: '/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Exhale, guided breathing for a calmer mind',
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Exhale, Guided Breathing',
     description: 'Guided breathing for a calmer mind.',
-    images: ['/opengraph-image'],
+    images: ['/og-image.png'],
   },
 };
 
