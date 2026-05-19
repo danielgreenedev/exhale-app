@@ -114,6 +114,18 @@ The document returned no data.
 
 This warning appears to be generic. In this case, `robots.txt` was present and explicitly allowed Facebook crawlers.
 
+## Recommended Resolution
+
+The cleanest fix is **Vercel's Verified Bots allowlist**, not a per-IP bypass list. Verified Bots uses reverse-DNS verification on each crawler request, so it keeps working as Facebook adds new IP ranges and avoids the whack-a-mole pattern that ended this round of troubleshooting.
+
+Steps:
+
+1. Vercel project, Settings, Firewall, Bot Protection.
+2. Look for "Verified Bots" and set Facebook/Meta crawlers to Allow, or set global mode to "Block all bots except verified".
+3. Remove the existing `104.210.140.0/24` system bypass; that range is Microsoft Azure, not Meta. The IPs observed during earlier troubleshooting were either spoofed user agents from Azure-hosted scanners or unrelated traffic.
+
+Use the per-prefix bypass list below only if Verified Bots is unavailable on your plan tier.
+
 ## Vercel Findings
 
 In Vercel Firewall live/overview screens:
@@ -285,8 +297,66 @@ Status: 200
 Content-Type: image/png
 ```
 
+## Canonical Meta Crawler Prefixes (AS32934)
+
+Source: BGP routes announced by AS32934 (Meta Platforms) via Hurricane Electric's BGP toolkit. Last refreshed May 18, 2026.
+
+These 44 aggregate IPv4 prefixes cover Meta's full announced footprint, including Facebook, Instagram, WhatsApp, Messenger, and Workplace infrastructure. They replace the smaller ad-hoc list captured in "Vercel Rules Tried" above.
+
+```text
+31.13.24.0/21
+31.13.64.0/18
+45.64.40.0/22
+57.141.0.0/24
+57.141.1.0/24
+57.141.2.0/24
+57.141.3.0/24
+57.141.4.0/24
+57.141.5.0/24
+57.141.6.0/24
+57.141.7.0/24
+57.141.8.0/24
+57.141.9.0/24
+57.141.10.0/24
+57.141.11.0/24
+57.141.12.0/24
+57.141.13.0/24
+57.141.14.0/24
+57.141.15.0/24
+57.141.16.0/24
+57.141.17.0/24
+57.141.18.0/24
+57.141.19.0/24
+57.141.20.0/24
+57.141.21.0/24
+57.144.0.0/14
+66.220.144.0/20
+69.63.176.0/20
+69.171.224.0/19
+74.119.76.0/22
+102.132.96.0/20
+103.4.96.0/22
+129.134.0.0/17
+157.240.0.0/17
+157.240.192.0/18
+163.70.128.0/17
+163.77.132.0/23
+163.77.136.0/23
+173.252.64.0/19
+173.252.96.0/19
+179.60.192.0/22
+185.60.216.0/22
+185.89.216.0/22
+204.15.20.0/22
+```
+
+Not on the list (and therefore safe to remove from any existing bypass): `104.210.140.0/24` is Microsoft Azure, not Meta.
+
+To refresh this list later, scrape the prefix table at `https://bgp.he.net/AS32934#_prefixes` and deduplicate the parent aggregates.
+
 ## References
 
 - Facebook Sharing Debugger: https://developers.facebook.com/tools/debug/
 - Vercel Firewall docs: https://vercel.com/docs/vercel-firewall
 - Vercel System Bypass Rules: https://vercel.com/docs/vercel-firewall/vercel-waf/system-bypass-rules
+- Hurricane Electric BGP toolkit (Meta AS): https://bgp.he.net/AS32934#_prefixes
