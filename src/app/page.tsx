@@ -179,22 +179,25 @@ function HomeContent() {
 
   const updateRhythm = (id: RhythmId) => {
     setSelectedRhythm(id);
-    try { localStorage.setItem(RHYTHM_STORAGE_KEY, id); } catch { /* unavailable */ }
-    // Supabase round-trip for rhythm is added in step 8 of the rhythm refactor
-    // (settingsSync + user_settings column).
+    try { writeLocalPracticeSettings({ rhythm: id }); } catch { /* unavailable */ }
+    if (userId) {
+      saveUserSettings(userId, { rhythm: id })
+        .then(({ error }) => {
+          if (error) console.error('[supabase] user_settings upsert failed:', error);
+        });
+    }
   };
 
   useEffect(() => {
     try {
-      const settings = readLocalPracticeSettings(initialLength);
+      const settings = readLocalPracticeSettings(initialLength, initialRhythm);
       setOrbScaleState(settings.orbScale);
       setSoundPaletteState(settings.soundPalette);
       if (!isSessionLength(urlLength)) {
         setSelectedLength(settings.sessionLength);
       }
       if (!isRhythmId(urlRhythm)) {
-        const storedRhythm = localStorage.getItem(RHYTHM_STORAGE_KEY);
-        if (isRhythmId(storedRhythm)) setSelectedRhythm(storedRhythm);
+        setSelectedRhythm(settings.rhythm);
       }
       if (!localStorage.getItem('exhale-visited')) setFirstVisit(true);
       const { sessions } = readStats();
@@ -211,11 +214,12 @@ function HomeContent() {
     if (!userId || settingsSyncedRef.current) return;
     settingsSyncedRef.current = true;
 
-    syncUserSettings(userId, selectedLength)
+    syncUserSettings(userId, selectedLength, selectedRhythm)
       .then(({ settings, error }) => {
         setOrbScaleState(settings.orbScale);
         setSoundPaletteState(settings.soundPalette);
         if (!isSessionLength(urlLength)) setSelectedLength(settings.sessionLength);
+        if (!isRhythmId(urlRhythm)) setSelectedRhythm(settings.rhythm);
         if (error) {
           console.error('[supabase] user_settings sync failed:', error);
         }

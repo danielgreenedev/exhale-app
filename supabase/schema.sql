@@ -6,6 +6,7 @@ create table if not exists user_settings (
   orb_scale      float not null default 1.0,
   sound_palette  text not null default 'air',
   session_length text,
+  rhythm         text,
   updated_at     timestamptz not null default now()
 );
 

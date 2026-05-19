@@ -2,8 +2,12 @@
 
 import {
   DEFAULT_ORB_SCALE,
+  DEFAULT_RHYTHM,
   DEFAULT_SESSION_LENGTH,
+  RHYTHM_STORAGE_KEY,
+  RhythmId,
   SessionLength,
+  isRhythmId,
 } from '@/lib/breathing';
 import {
   DEFAULT_SOUND_PALETTE,
@@ -22,24 +26,30 @@ export interface PracticeSettings {
   orbScale: number;
   soundPalette: SoundPaletteId;
   sessionLength: SessionLength;
+  rhythm: RhythmId;
 }
 
 interface CloudSettingsRow {
   orb_scale: number | null;
   sound_palette: string | null;
   session_length: string | null;
+  rhythm: string | null;
 }
 
 export function isSessionLengthValue(value: unknown): value is SessionLength {
   return SESSION_LENGTHS.includes(value as SessionLength);
 }
 
-export function readLocalPracticeSettings(fallbackLength: SessionLength = DEFAULT_SESSION_LENGTH): PracticeSettings {
+export function readLocalPracticeSettings(
+  fallbackLength: SessionLength = DEFAULT_SESSION_LENGTH,
+  fallbackRhythm: RhythmId = DEFAULT_RHYTHM
+): PracticeSettings {
   if (typeof window === 'undefined') {
     return {
       orbScale: DEFAULT_ORB_SCALE,
       soundPalette: DEFAULT_SOUND_PALETTE,
       sessionLength: fallbackLength,
+      rhythm: fallbackRhythm,
     };
   }
 
@@ -48,11 +58,13 @@ export function readLocalPracticeSettings(fallbackLength: SessionLength = DEFAUL
     DEFAULT_ORB_SCALE;
   const storedSound = localStorage.getItem(SOUND_STORAGE_KEY);
   const storedLength = localStorage.getItem(SESSION_LENGTH_STORAGE_KEY);
+  const storedRhythm = localStorage.getItem(RHYTHM_STORAGE_KEY);
 
   return {
     orbScale,
     soundPalette: isSoundPaletteId(storedSound) ? storedSound : DEFAULT_SOUND_PALETTE,
     sessionLength: isSessionLengthValue(storedLength) ? storedLength : fallbackLength,
+    rhythm: isRhythmId(storedRhythm) ? storedRhythm : fallbackRhythm,
   };
 }
 
@@ -68,6 +80,9 @@ export function writeLocalPracticeSettings(settings: Partial<PracticeSettings>) 
   if (settings.sessionLength && isSessionLengthValue(settings.sessionLength)) {
     localStorage.setItem(SESSION_LENGTH_STORAGE_KEY, settings.sessionLength);
   }
+  if (settings.rhythm && isRhythmId(settings.rhythm)) {
+    localStorage.setItem(RHYTHM_STORAGE_KEY, settings.rhythm);
+  }
 }
 
 function normalizeCloudSettings(row: CloudSettingsRow): PracticeSettings {
@@ -75,6 +90,7 @@ function normalizeCloudSettings(row: CloudSettingsRow): PracticeSettings {
     orbScale: typeof row.orb_scale === 'number' ? row.orb_scale : DEFAULT_ORB_SCALE,
     soundPalette: isSoundPaletteId(row.sound_palette) ? row.sound_palette : DEFAULT_SOUND_PALETTE,
     sessionLength: isSessionLengthValue(row.session_length) ? row.session_length : DEFAULT_SESSION_LENGTH,
+    rhythm: isRhythmId(row.rhythm) ? row.rhythm : DEFAULT_RHYTHM,
   };
 }
 
@@ -84,6 +100,7 @@ export async function saveUserSettings(userId: string, settings: Partial<Practic
     orb_scale?: number;
     sound_palette?: SoundPaletteId;
     session_length?: SessionLength;
+    rhythm?: RhythmId;
     updated_at: string;
   } = {
     user_id: userId,
@@ -93,15 +110,20 @@ export async function saveUserSettings(userId: string, settings: Partial<Practic
   if (typeof settings.orbScale === 'number') payload.orb_scale = settings.orbScale;
   if (settings.soundPalette) payload.sound_palette = settings.soundPalette;
   if (settings.sessionLength) payload.session_length = settings.sessionLength;
+  if (settings.rhythm) payload.rhythm = settings.rhythm;
 
   return supabase.from('user_settings').upsert(payload, { onConflict: 'user_id' });
 }
 
-export async function syncUserSettings(userId: string, fallbackLength: SessionLength = DEFAULT_SESSION_LENGTH) {
-  const localSettings = readLocalPracticeSettings(fallbackLength);
+export async function syncUserSettings(
+  userId: string,
+  fallbackLength: SessionLength = DEFAULT_SESSION_LENGTH,
+  fallbackRhythm: RhythmId = DEFAULT_RHYTHM
+) {
+  const localSettings = readLocalPracticeSettings(fallbackLength, fallbackRhythm);
   const { data, error } = await supabase
     .from('user_settings')
-    .select('orb_scale, sound_palette, session_length')
+    .select('orb_scale, sound_palette, session_length, rhythm')
     .eq('user_id', userId)
     .maybeSingle();
 
