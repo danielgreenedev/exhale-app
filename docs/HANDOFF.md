@@ -1,23 +1,23 @@
 # Codex Handoff
 
-Last updated: 2026-05-20 (OAuth smoke-test follow-up)
+Last updated: 2026-05-20 (OAuth complete)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
 ## Branch State
 
 - Branch: `master`.
-- Current working tree contains OAuth smoke-test follow-up changes and the Practice page top-spacing fix.
+- Current working tree contains documentation updates marking OAuth Backup & Sync complete.
 - Verification passed on May 20, 2026: `npm.cmd run lint`, `npm.cmd test -- --runInBand`, and `npm.cmd run build`.
 - `next-env.d.ts` may be rewritten by `next build`; restore it to the checked-in dev routes import before committing if it changes.
 
 ## Current Batch Summary
 
-- **Google Backup & Sync smoke-tested.** Localhost and production Google OAuth redirects now work after enabling Supabase manual linking and redirect allow-list entries.
+- **Google Backup & Sync complete.** Localhost and production Google OAuth redirects now work after enabling Supabase manual linking and redirect allow-list entries. Firefox production restore through `Continue with Google` succeeded after Google was linked to the existing email-code user.
 - **Anonymous-first preserved.** Home and session flow remain ungated. Google sync uses normal Google sign-in from idle/anonymous states, because fresh browsers hold anonymous Supabase sessions by default. Existing email-code synced users use `Link Google`, which calls Supabase `linkIdentity()`.
 - **Email-code users can link Google.** Existing email-code synced users can now see `Link Google` in the synced Backup & Sync state when Supabase does not report a Google identity yet.
 - **Synced history feeds Home.** Practice History writes the reconciled cloud/local session list back to local storage so the Home screen Practice History counter can reflect synced sessions after Practice has loaded.
-- **Provider setup mostly complete.** Supabase now shows the expected Google identity on the final synced user. Remaining OAuth validation is cross-device restore of history and preferences through Google sign-in.
+- **Provider setup complete.** Supabase shows Email and Google enabled on the same final synced user, and production Firefox restored synced Practice History through Google sign-in.
 - **Policy pages updated.** `/privacy` and `/terms` now describe optional email/Google Backup & Sync, exact synced data, third-party provider involvement, deletion path, and the promise that sign-in is never required to breathe.
 - **Deployment docs updated.** `docs/DEPLOYMENT.md` now includes the Google OAuth setup checklist and cross-device sync acceptance checks.
 - **Feedback mode continues.** The project is still collecting beta signal on rhythm fit, Flow pause friction, transition cues, and Session Setup clarity.
@@ -36,10 +36,10 @@ This document is overwritten on each handoff. The previous handoff's content doe
 - **Background-tab audio fix.** `useAudioEngine.scheduleAmbientStop` schedules the ambient fade-out against the Web Audio clock, and `game/page.tsx` schedules that stop at the guided-session deadline.
 - **Local visual QA quieter.** `AuthProvider` skips Supabase anonymous auth on `localhost` / `127.0.0.1` in development unless `localStorage.setItem('exhale-enable-local-supabase', '1')` is set.
 
-## OAuth Setup Remaining
+## OAuth Setup Status
 
-1. Deploy and re-test the second-browser/device restore path: open `https://exhale.guide/stats`, use Google from an idle/anonymous browser, and confirm practice history plus timer length, Circle Size, sound choice, and rhythm restore.
-2. Keep an eye on the existing-email OAuth conflict path: if users hit it, the app should guide them to sign in with email first, then link Google from Backup & Sync.
+- Complete as of 2026-05-20.
+- Keep an eye on the existing-email OAuth conflict path during beta: if users hit it, the app should guide them to sign in with email first, then link Google from Backup & Sync.
 
 ## Feedback Mode
 
@@ -71,4 +71,4 @@ Current brand-new-user prompts live in `docs/USER_FEEDBACK.md`; key themes still
 
 ## Recommended Next Step
 
-Finish the Google identity attachment check, then do a real cross-device Backup & Sync restore before considering the OAuth item done.
+Continue beta feedback collection. OAuth Backup & Sync is complete unless new tester evidence exposes an edge case.

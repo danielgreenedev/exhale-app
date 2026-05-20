@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 20, 2026 (OAuth and Settling In follow-up)
+Last updated: May 20, 2026 (OAuth complete and beta feedback follow-up)
 
 ## Completed Rhythm Changes
 
@@ -212,19 +212,19 @@ Items are grouped loosely by roadmap stage. See `docs/ROADMAP.md` for the strate
 
 Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
-1. Pending feedback/data collection: test cross-device sync on Device B and verify Practice History, timer length, Circle Size, sound choice, and rhythm sync correctly through Supabase.
+1. Resolved 2026-05-20: production Google OAuth restore worked in Firefox after linking Google to the existing email-code user. Practice History restored via `Continue with Google`, and Supabase showed Email and Google enabled on the same user. Continue normal beta observation, but the OAuth implementation project is complete.
 
-1a. Active promoted work: add optional OAuth-backed Backup & Sync inside Practice History.
+1a. Completed promoted work: optional OAuth-backed Backup & Sync inside Practice History.
 
 - Scope: add Google OAuth as a sibling option to the existing email-code sync, using Supabase Auth provider support rather than custom OAuth handling.
 - Keep anonymous local use as the default. No sign-in prompt on Home, no auth before breathing, no blocking gate before Practice History can be viewed locally.
-- App-side status: initial Google button, OAuth return-error handling, email-code-to-Google linking, privacy copy, terms copy, and deployment setup notes are implemented. Localhost and production Google OAuth have been smoke-tested.
+- App-side status: initial Google button, OAuth return-error handling, email-code-to-Google linking, privacy copy, terms copy, and deployment setup notes are implemented. Localhost and production Google OAuth have been smoke-tested, including a Firefox production restore after deployment.
 - Preserve and merge existing local/anonymous practice history when a user starts Google sync, matching the current Backup & Sync preservation goal. Implementation uses normal Google sign-in from idle/anonymous states and reserves Supabase `linkIdentity()` for the synced email-code `Link Google` state. Practice History now writes the reconciled cloud/local session list back to local storage so the Home counter can reflect synced history after Practice has loaded it.
 - Copy direction: frame this as "Backup & Sync" or "Save across devices." It is a persistence affordance, not an account system.
 - Portfolio rationale: demonstrates a privacy-first auth architecture suitable for a resume/GitHub project while respecting the app's anonymity promise.
 - Future path: Apple Sign-In can follow later if iPhone testers or privacy-sensitive users ask for it; do not take on Apple Developer/account overhead as the first provider.
 - Guardrails: no profile screen, avatars, passwords, account settings, premium gate, or auth-first onboarding as part of this task.
-- Acceptance requirement before calling this done: test second-device restoration of practice history, timer length, Circle Size, sound choice, and rhythm, then confirm the same user has the expected Google identity attached in Supabase. Keep email-code sync available unless follow-up testing shows it is redundant.
+- Acceptance completed: the same Supabase user shows Email and Google providers enabled, and a fresh Firefox production session restored practice history through Google sign-in. Keep email-code sync available unless follow-up testing shows it is redundant.
 
 2. Pending follow-up with rhythm-concern testers: ask the original five (T-2026-05-18-01 and T-2026-05-19-02 through -05) whether Soft or Full fits better than Steady did, and ask the four Rest/Hold-frictioned testers (T-2026-05-19-03, -05, -06, -07) whether Flow fits better than their current choice. Use the Flow follow-up questions in `docs/USER_FEEDBACK.md` so the tiny-pause question is asked consistently. Capture answers in `docs/USER_FEEDBACK.md`. Flow shipped on 2026-05-20 without the original pre-merge validation gate; this follow-up is the post-launch validation. First Flow follow-up from T-2026-05-19-08 says no-Hold helps but the 2-second pause feels too fast and interruptive; the same tester explicitly said they would take out the pause.
 

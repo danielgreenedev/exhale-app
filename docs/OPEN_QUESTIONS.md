@@ -293,7 +293,7 @@ Current answer: Open.
 
 Context: Practice History sync currently uses email-code OTP. That requires the user to leave Exhale, open their email app, find the code, switch back, and paste it. OAuth providers offer a one-tap consent flow when the device is already signed into Google or Apple. For users who have already decided to sync (inside Practice History), OAuth is plausibly a strict friction reduction over OTP. This is a different question from "should Exhale have a fuller account system" below: the framing is friction-reduction within the existing optional sync gate, not adding a new account surface to the app.
 
-Current answer: **Promoted to active Stage 0 work on 2026-05-20.** Add Google OAuth as an optional Backup & Sync path inside Practice History alongside the existing email-code flow. Anonymous-first stays the default; the home screen does not change; breathing never requires sign-in. App-side wiring, Supabase/Google provider setup, manual linking, local smoke testing, and production redirect smoke testing are in place. Before calling this done, confirm Google attaches to the intended synced user and run a second-browser/device restore test for history and preferences. Apple Sign-In remains a later candidate because it is privacy-aligned but adds Apple Developer/provider overhead.
+Current answer: **Resolved and completed in Stage 0 on 2026-05-20.** Google OAuth is now an optional Backup & Sync path inside Practice History alongside the existing email-code flow. Anonymous-first stays the default; the home screen does not change; breathing never requires sign-in. App-side wiring, Supabase/Google provider setup, manual linking, local smoke testing, production redirect smoke testing, email-code-to-Google linking, and Firefox production restore testing are complete. Supabase shows Email and Google attached to the same user, and a fresh Firefox production session restored synced Practice History through `Continue with Google`. Apple Sign-In remains a later candidate because it is privacy-aligned but adds Apple Developer/provider overhead.
 
 Why this moved up:
 
@@ -309,7 +309,7 @@ Tradeoffs worth naming before building:
 - Apple Sign-In adds review/policy overhead and a separate provider config. Defensible to defer until a tester actually asks for it.
 - Implementation cost is low: Supabase supports both providers natively, and the current anonymous-to-email sync flow already converts anonymous identities; OAuth follows the same identity-linking stance when possible.
 
-Implementation stance:
+Implementation stance shipped:
 
 - Use Supabase Auth provider support, not manual OAuth handshakes.
 - Use normal Google sign-in from idle/anonymous states, because fresh browsers receive anonymous Supabase sessions by default. Use `linkIdentity()` only from the synced email-code `Link Google` state when the provider is not attached yet.
@@ -325,7 +325,7 @@ Related: the existing "fuller account system" question below addresses a differe
 
 Context: Exhale currently uses anonymous Supabase identity by default and optional email-code sync only inside Practice History. `PRODUCT.md` and `DESIGN.md` both protect the anonymous-first promise: no required account, login, profile, onboarding gate, or sync prompt before breathing. Any fuller auth model, such as password login, OAuth, profiles, account settings, or persistent account management, would need a clear user benefit that optional email sync cannot provide.
 
-Current answer: Still no fuller account system. Optional Google OAuth for Practice History Backup & Sync has been promoted to active work, but that does not authorize profiles, account settings, passwords, avatars, required login, or auth-first onboarding.
+Current answer: Still no fuller account system. Optional Google OAuth for Practice History Backup & Sync has shipped, but that does not authorize profiles, account settings, passwords, avatars, required login, or auth-first onboarding.
 
 Possible reasons to revisit:
 

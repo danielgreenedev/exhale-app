@@ -16,12 +16,12 @@ Confirm the premise: does the right kind of person find this useful?
 - Note: Facebook link-preview scraping still has a 403/parser issue despite verified app-side Open Graph metadata. Treat it as non-blocking unless Facebook sharing becomes important to beta acquisition.
 - Recruit roughly 10 to 20 testers from the target audience (people who do not normally use self-care apps).
 - Watch Supabase `app_events` for completion rate, return rate, and drop-off phase.
-- Current build-quality investment: add optional OAuth-backed Backup & Sync inside Practice History while preserving anonymous local use as the default.
+- Current build-quality investment: optional OAuth-backed Backup & Sync is complete; continue validating beta feedback and retention signal.
 - Decide if real retention signal exists before investing more engineering.
 
 Gate: roughly ten testers, mostly target-audience, with at least one signal of return use.
 
-## Promoted Priority, Optional OAuth Backup & Sync (active 2026-05-20)
+## Promoted Priority, Optional OAuth Backup & Sync (complete 2026-05-20)
 
 Pulled into the current phase for two reasons: product reliability and portfolio polish.
 
@@ -48,12 +48,12 @@ Risks to guard:
 
 Success shape:
 
-- Practice History offers email-code sync and Google OAuth as quiet sibling options.
-- Existing anonymous/local data is preserved and merged when a user links a provider.
-- Privacy copy states what syncs and makes clear that breathing remains usable without any sign-in.
-- `/privacy` and `/terms` explain optional OAuth provider involvement and the anonymous-first philosophy in plain language.
-- Implementation uses Supabase Auth provider support rather than custom OAuth handshakes. App-side wiring uses normal Google sign-in from idle/anonymous states, and reserves `linkIdentity()` for the synced email-code `Link Google` state. Existing email-code users can link Google from the synced Backup & Sync state when Google is not attached yet.
-- Remaining rollout work is live validation: test cross-device restoration of history and preferences after confirming the final synced user shows the expected Google identity in Supabase.
+- Complete: Practice History offers email-code sync and Google OAuth as quiet sibling options.
+- Complete: existing anonymous/local data is preserved and merged when a user starts Backup & Sync.
+- Complete: privacy copy states what syncs and makes clear that breathing remains usable without any sign-in.
+- Complete: `/privacy` and `/terms` explain optional OAuth provider involvement and the anonymous-first philosophy in plain language.
+- Complete: implementation uses Supabase Auth provider support rather than custom OAuth handshakes. App-side wiring uses normal Google sign-in from idle/anonymous states, and reserves `linkIdentity()` for the synced email-code `Link Google` state. Existing email-code users can link Google from the synced Backup & Sync state when Google is not attached yet.
+- Validation complete: Supabase shows Email and Google attached to the same user, and Firefox on production restored synced practice history through `Continue with Google`.
 
 ## Promoted Priority, Alternate Rhythm Options (complete 2026-05-19)
 
