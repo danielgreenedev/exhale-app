@@ -306,6 +306,27 @@ describe('useBreathingSession - proportional anticipation cue cap', () => {
     expect(result.current.phaseLeadProgress).toBeGreaterThan(0);
   });
 
+  // Regression guard for the imperceptibility-risk phase. Full Exhale is 10s — at 8% of phase,
+  // the 0.8s lead is already the narrowest readable window. If anyone tightens the formula
+  // (e.g., caps long phases too), the cue here would shrink further and become invisible.
+  // Full is 6-6-10-4, so Exhale runs t=12..22. At t=21.5s (0.5s before end), with the 0.8s
+  // lookahead intact, leadProgress should be (0.8 - 0.5) / 0.8 = 0.375.
+  it('Full Exhale (10s phase) keeps the full 0.8s lead — imperceptibility regression guard', () => {
+    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.full));
+    act(() => { result.current.start(); });
+    advance(21500);
+    expect(result.current.currentPhase.phase).toBe('exhale');
+    expect(result.current.phaseLeadProgress).toBeCloseTo(0.375, 2);
+  });
+
+  it('Full Exhale lead is inactive at t=21.0s (1.0s before end, outside the 0.8s window)', () => {
+    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.full));
+    act(() => { result.current.start(); });
+    advance(21000);
+    expect(result.current.currentPhase.phase).toBe('exhale');
+    expect(result.current.phaseLeadProgress).toBe(0);
+  });
+
   // Flow's Hold has zero duration. During Inhale (t=0..4), the anticipation cue's nextPhase
   // must target Exhale (not Hold), so the user sees the right incoming color and hears the
   // right pre-cue tone.
