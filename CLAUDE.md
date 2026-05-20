@@ -96,7 +96,7 @@ Do not reuse these keys for new features:
 
 ## Supabase Data
 
-Supabase is optional from the user's point of view and only appears through Practice History Backup & Sync. The active direction is email-code sync plus optional Google OAuth via Supabase Auth, while preserving anonymous local use as the default. Google Backup & Sync should use `linkIdentity()` when a Supabase session already exists so anonymous cloud rows can remain attached to the same user id; fall back to `signInWithOAuth()` only when there is no current session.
+Supabase is optional from the user's point of view and only appears through Practice History Backup & Sync. The active direction is email-code sync plus optional Google OAuth via Supabase Auth, while preserving anonymous local use as the default. Google Backup & Sync should use `signInWithOAuth()` from idle/anonymous states, because new browsers get anonymous Supabase sessions by default. Use `linkIdentity()` only from a real synced email-code user state, where the UI shows `Link Google`.
 
 | Table | Purpose |
 |-------|---------|

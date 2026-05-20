@@ -312,7 +312,7 @@ Tradeoffs worth naming before building:
 Implementation stance:
 
 - Use Supabase Auth provider support, not manual OAuth handshakes.
-- Prefer `linkIdentity()` when a Supabase session already exists so existing cloud rows can remain under the same user id; fall back to `signInWithOAuth()` only when there is no current session. Existing email-code synced users should link Google from the synced Backup & Sync state if the provider is not attached yet.
+- Use normal Google sign-in from idle/anonymous states, because fresh browsers receive anonymous Supabase sessions by default. Use `linkIdentity()` only from the synced email-code `Link Google` state when the provider is not attached yet.
 - Add Google first, then evaluate Apple later.
 - Treat OAuth as "Backup & Sync" or "Save across devices," not as a profile/account feature.
 - Preserve and merge existing local/anonymous data when a provider is linked.

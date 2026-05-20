@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 20, 2026 (graphic designer Full feedback logged)
+Last updated: May 20, 2026 (tester prompt refresh after OAuth and Settling In polish)
 
 ## Purpose
 
@@ -9,6 +9,11 @@ Use this document to capture user critique, usability notes, and product observa
 ## Current Test Surface
 
 Use `https://exhale.guide` for the current beta round. Use a Vercel preview only when a future test needs changes that should not be visible on production yet.
+
+## Current QA Notes
+
+- First-run defaults should remain 3 minutes / Medium circle / Steady pace / Air background sound.
+- If Firefox on Windows 11 appears to enter a session with sound off, verify whether Session Setup actually selected `Off` or whether Web Audio simply has not started yet. The former is a settings persistence bug; the latter is expected browser autoplay behavior if it resolves after a tap.
 
 ## Privacy Rules
 
@@ -24,31 +29,57 @@ Use `https://exhale.guide` for the current beta round. Use a Vercel preview only
 Send a short, open prompt so feedback stays practical:
 
 1. Try starting a breathing session without extra explanation.
-2. Notice anything that feels rushed, confusing, too quiet, too loud, or hard to read.
-3. Try Practice History if you have time.
-4. Send back what worked, what felt off, and anything you would change.
+2. Notice anything that feels rushed, confusing, too quiet, too loud, hard to read, or hard to follow.
+3. If you have time, open Session Setup and Practice History.
+4. Send back what worked, what felt off, and anything you would change first.
 
 ## Brand-New User Follow-Up Questions
 
-Use these when asking someone to try Exhale for the first time:
+Use these when asking someone to try Exhale for the first time. Ask them to start with the default 3-minute session before trying Session Setup.
 
 - Could you start breathing without thinking too much?
-- Did the pace ever feel rushed, pressuring, or make you gasp/catch up?
-- Did Relax help, or did it interrupt the rhythm?
+- Did Settling In feel helpful before the first breath, or did it feel like a delay?
+- Did the pace feel rushed, pressuring, or make you gasp/catch up?
+- Did Relax help you reset, or did it interrupt the rhythm?
 - Did the phase changes feel easy to follow, or did they lag your brain a bit?
-- If you opened Session Setup, did the options feel natural? Did the button names and explanations make sense?
+- Were the words, contrast, and sounds easy enough to notice without feeling distracting?
 - Would you use this again when stressed, tired, or needing to settle?
 - What would you change first?
 
+## Session Setup Follow-Up Questions
+
+Use these if the tester opens Session Setup, or if they mention wanting a different pace, sound, or visual feel.
+
+- Did the Session Setup options feel natural, or did they feel like too much?
+- Did the pace names and short explanations make sense?
+- Was it clear that Sound means background sound?
+- Would you change pace, circle size, or background sound before starting a future session?
+
 ## Flow Follow-Up Questions
 
-Use these after someone tries the Flow pace:
+Use these after someone mentions Hold, Relax, rushed transitions, interruption, or wanting a smoother inhale/exhale rhythm, then tries the Flow pace:
 
 - Did Flow feel smoother than the other pace you tried?
 - Did removing Hold help?
 - Did the tiny pause after Exhale help you reset, or would Flow feel better as inhale/exhale only with no pause at all?
 - Did the pause, cue, or circle movement ever feel rushed, pushy, or interruptive?
 - Would you choose Flow again, or would you pick a different pace?
+
+## Transition Cue Diagnostic
+
+Use this only if someone says phase changes felt weird, hard to follow, pushy, or visually noisy but cannot easily explain why:
+
+- Did the color lead or soft pre-cue make the phase changes easier to follow, or did they add noise?
+
+## Practice History And Sync Testing
+
+Use these when a tester is willing to do functionality testing after at least one breathing session:
+
+- After one session, open Practice History. Did the session count and history look right?
+- Try Backup & Sync with Google or email code, whichever feels comfortable.
+- Check the same synced history on phone and computer, or in a second browser.
+- Did practice history, timer length, circle size, background sound, and pace carry over correctly?
+- If anything breaks, send a screenshot or copy any visible console error text from Chrome DevTools.
 
 ## Feedback Intake Template
 

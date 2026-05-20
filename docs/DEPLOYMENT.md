@@ -57,7 +57,7 @@ In Supabase:
 
 - Enable the Google provider in Auth Providers.
 - Add the Google client ID and client secret from Google Cloud.
-- Enable manual identity linking so `linkIdentity()` can convert an anonymous Exhale user into a Google-backed synced user without losing existing rows.
+- Enable manual identity linking so an existing email-code synced user can attach Google from the `Link Google` state.
 - Add redirect URLs for each environment that will test OAuth:
   - `https://exhale.guide/stats`
   - `http://localhost:3000/stats`
@@ -87,9 +87,9 @@ Then reload `http://localhost:3000`.
 If an email-code synced user tries Google with the same email before Google is
 attached, Supabase can return "A user with this email address has already been
 registered." Sign in with the email-code identity first, then use the synced
-Backup & Sync state to `Link Google`. That calls `linkIdentity()` against the
-existing synced user instead of trying to attach Google to a fresh anonymous
-session.
+Backup & Sync state to `Link Google`. From idle or anonymous browsers, the app
+should use normal Google sign-in; `linkIdentity()` is reserved for the synced
+email-code state.
 
 The Supabase email templates for sync should visibly include the 6-digit OTP token:
 

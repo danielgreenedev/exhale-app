@@ -140,7 +140,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         options: { redirectTo },
       };
 
-      const { data, error } = session?.user
+      const shouldLinkExistingUser = Boolean(session?.user && !userIsAnonymous(session.user));
+
+      const { data, error } = shouldLinkExistingUser
         ? await supabase.auth.linkIdentity(credentials)
         : await supabase.auth.signInWithOAuth(credentials);
 

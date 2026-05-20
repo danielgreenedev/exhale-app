@@ -71,8 +71,8 @@ function friendlyOAuthError(message?: string): string {
   if (text.includes('provider') || text.includes('not enabled')) {
     return 'Google sync is not ready yet. Check the Supabase Google provider setup.';
   }
-  if (text.includes('already') && text.includes('linked')) {
-    return 'That Google account is already linked. Try signing out here, then continue with Google again.';
+  if ((text.includes('already') && text.includes('linked')) || text.includes('identity_already')) {
+    return 'That Google account is already linked. Click Continue with Google to sign in with it.';
   }
   return friendlySyncError(message);
 }

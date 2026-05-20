@@ -52,8 +52,8 @@ Success shape:
 - Existing anonymous/local data is preserved and merged when a user links a provider.
 - Privacy copy states what syncs and makes clear that breathing remains usable without any sign-in.
 - `/privacy` and `/terms` explain optional OAuth provider involvement and the anonymous-first philosophy in plain language.
-- Implementation uses Supabase Auth provider support rather than custom OAuth handshakes. App-side wiring starts with `linkIdentity()` when a Supabase session exists, preserving existing cloud rows under the same user id where Supabase allows it. Existing email-code users can link Google from the synced Backup & Sync state when Google is not attached yet.
-- Remaining rollout work is live validation: confirm the final synced user shows the expected Google identity in Supabase, then test cross-device restoration of history and preferences.
+- Implementation uses Supabase Auth provider support rather than custom OAuth handshakes. App-side wiring uses normal Google sign-in from idle/anonymous states, and reserves `linkIdentity()` for the synced email-code `Link Google` state. Existing email-code users can link Google from the synced Backup & Sync state when Google is not attached yet.
+- Remaining rollout work is live validation: test cross-device restoration of history and preferences after confirming the final synced user shows the expected Google identity in Supabase.
 
 ## Promoted Priority, Alternate Rhythm Options (complete 2026-05-19)
 

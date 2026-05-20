@@ -14,10 +14,10 @@ This document is overwritten on each handoff. The previous handoff's content doe
 ## Current Batch Summary
 
 - **Google Backup & Sync smoke-tested.** Localhost and production Google OAuth redirects now work after enabling Supabase manual linking and redirect allow-list entries.
-- **Anonymous-first preserved.** Home and session flow remain ungated. Google sync uses Supabase `linkIdentity()` first when a Supabase session already exists, so anonymous cloud rows can remain under the same user id where Supabase allows it.
+- **Anonymous-first preserved.** Home and session flow remain ungated. Google sync uses normal Google sign-in from idle/anonymous states, because fresh browsers hold anonymous Supabase sessions by default. Existing email-code synced users use `Link Google`, which calls Supabase `linkIdentity()`.
 - **Email-code users can link Google.** Existing email-code synced users can now see `Link Google` in the synced Backup & Sync state when Supabase does not report a Google identity yet.
 - **Synced history feeds Home.** Practice History writes the reconciled cloud/local session list back to local storage so the Home screen Practice History counter can reflect synced sessions after Practice has loaded.
-- **Provider setup mostly complete.** Remaining OAuth validation is cross-device restore plus confirming the expected Google identity appears on the final synced user in Supabase.
+- **Provider setup mostly complete.** Supabase now shows the expected Google identity on the final synced user. Remaining OAuth validation is cross-device restore of history and preferences through Google sign-in.
 - **Policy pages updated.** `/privacy` and `/terms` now describe optional email/Google Backup & Sync, exact synced data, third-party provider involvement, deletion path, and the promise that sign-in is never required to breathe.
 - **Deployment docs updated.** `docs/DEPLOYMENT.md` now includes the Google OAuth setup checklist and cross-device sync acceptance checks.
 - **Feedback mode continues.** The project is still collecting beta signal on rhythm fit, Flow pause friction, transition cues, and Session Setup clarity.
@@ -38,9 +38,8 @@ This document is overwritten on each handoff. The previous handoff's content doe
 
 ## OAuth Setup Remaining
 
-1. Re-test `Link Google` while signed in as the existing email-code user, then confirm Supabase shows a Google identity on that user.
-2. Confirm a second browser/device restores practice history, timer length, Circle Size, sound choice, and rhythm.
-3. Keep an eye on the existing-email OAuth conflict path: if users hit it, the app should guide them to sign in with email first, then link Google from Backup & Sync.
+1. Deploy and re-test the second-browser/device restore path: open `https://exhale.guide/stats`, use Google from an idle/anonymous browser, and confirm practice history plus timer length, Circle Size, sound choice, and rhythm restore.
+2. Keep an eye on the existing-email OAuth conflict path: if users hit it, the app should guide them to sign in with email first, then link Google from Backup & Sync.
 
 ## Feedback Mode
 
