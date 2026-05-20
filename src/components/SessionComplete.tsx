@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { PolicyFooter } from '@/components/PolicyFooter';
 
 interface Quote {
   text: string;
@@ -96,6 +97,8 @@ export default function SessionComplete({ totalCycles, sessionDuration, storageN
             Back to Menu
           </button>
         </div>
+
+        <PolicyFooter />
       </div>
     </main>
   );

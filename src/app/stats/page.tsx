@@ -8,6 +8,7 @@ import { mergeSyncedSessions, missingLocalSessions } from '@/lib/sessionSync';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
 import { syncUserSettings } from '@/lib/settingsSync';
+import { PolicyFooter } from '@/components/PolicyFooter';
 
 function formatDate(dateStr: string): string {
   const today = new Date().toISOString().split('T')[0];
@@ -537,6 +538,8 @@ export default function StatsPage() {
         >
           ← Back
         </Link>
+
+        <PolicyFooter />
       </div>
     </main>
   );

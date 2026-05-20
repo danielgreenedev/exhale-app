@@ -20,6 +20,7 @@ import {
   SOUND_PALETTES,
   SoundPaletteId,
 } from '@/lib/sound';
+import { PolicyFooter } from '@/components/PolicyFooter';
 import { readStats, computeStats } from '@/hooks/useSessionStats';
 import { SURFACE_GLOWS } from '@/lib/colors';
 import { useUserId } from '@/lib/auth';
@@ -606,6 +607,8 @@ function HomeContent() {
             </Link>
           </div>
         )}
+
+        <PolicyFooter />
 
       </div>
     </main>
