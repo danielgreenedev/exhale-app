@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 19, 2026 (Facebook reply intake)
+Last updated: May 19, 2026 (Facebook reply intake; graphic-designer HUD feedback)
 
 ## Purpose
 
@@ -70,6 +70,51 @@ Send a short, open prompt so feedback stays practical:
 1. 
 
 ## Recent Feedback Notes
+
+### 2026-05-19, T-2026-05-19-08, Graphic Designer Professional Eye, In-Session HUD Coherence
+
+#### Session
+
+- Tester ID: T-2026-05-19-08
+- Follow-up OK: Unknown
+- Source: Project owner's graphic designer friend; in-session screenshot annotated and shared
+- Signal class: **Professional design eye, not target-audience tester.** Weight this differently in synthesis — it answers design-coherence questions, not "will this user return" or "does the rhythm fit me."
+- Screenshot reference: `C:\Users\User\OneDrive\Documents\Exhale files\middle_line.jpg`. Yellow circle marks the three concentric rings around the orb; arrow points to the innermost ring as the noise element.
+
+#### Friction
+
+Verbatim feedback, four items:
+
+```text
+I feel like the count down track is competing and unhelpful on the exhale and the inhale.
+
+I think the timer track is helpful on the hold and on the rest.
+
+The gentle-easier track (or the 3min track) is way too fast. To main flash changes with the visuals.
+
+The line in the middle of the time tracker is too much noise. (I see the idea and it's cool but to busy and unnecessary.)
+```
+
+#### Decoded
+
+- **Countdown text** (`src/components/GameHUD.tsx:113-124`, `role="timer"`) competes with the orb's scale animation on Inhale and Exhale, where the orb itself is already showing phase progress. On Hold and Relax the orb is static, so the countdown is the only "how long" indicator and stays useful. Today's code fades the countdown uniformly to 58% opacity after cycle 2; the designer wants the fade to be phase-conditional, not cycle-conditional.
+- **"Way too fast / main flash changes"** parses as too many phase-transition flashes. The phase-transition ring flash (`src/components/BreathingOrb.tsx:272-287`) fires at full amplitude on every phase boundary. Gentle has a boundary every 2 to 4 seconds (13s cycle with 4 phases), so a Quick (3 min) Gentle session sees roughly 56 full-amplitude flashes. On the 2-second Gentle Hold the flash reads as strobe.
+- **"Interior line of the three"** = the innermost of three concentric rings drawn in the canvas, which is the Phase progress ring (`src/components/BreathingOrb.tsx:295-322`, `ringR = maxR + 24`). The sweeping arc duplicates phase-progress signal already carried by the orb scale on Inhale and Exhale, and by the countdown number on Hold and Relax. Three rings around the orb (phase progress, session progress, outer guide) is one more than the eye can hold without effort.
+
+The four observations cohere as one underlying signal: phase progress is shown three different ways at once (orb scale, countdown text, phase ring arc), plus the flash. The cleanup wants each indicator to live only where it is load-bearing.
+
+#### Actionable Recommendations
+
+1. Drop the innermost phase progress ring entirely. It is the third indicator of the same signal the orb scale and countdown number already carry; removing it does not lose information.
+2. Make the countdown phase-aware: visible on Hold and Relax (only indicator that conveys "how long"), hidden or strongly de-emphasized on Inhale and Exhale (orb scale is the natural indicator).
+3. Damp the phase-transition flash on short phases. Scale flash opacity by phase duration so a 2-second Gentle Hold does not strobe. The same proportional pattern raised for the anticipation lead window (`PHASE_LOOKAHEAD_SECONDS`) would apply.
+4. Land all three as one coordinated design-coherence pass. They share intent and shipping any one alone leaves the canvas mid-edit.
+
+#### Open Questions
+
+1. Should the phase progress ring be removed outright, or kept at very low opacity on Hold and Relax only? Default: remove outright, since the countdown number already carries Hold/Relax.
+2. Should flash dampening be a single proportional formula or rhythm-specific? Default: proportional, matches the same "scale by phase duration" pattern raised for the anticipation lead window.
+3. Should "hidden on Inhale/Exhale" be a full hide (opacity 0) or a deeper fade (opacity 0.15)? Tester this in browser; if the user can still glance at it as a sanity check without being distracted by it, the deeper fade is the safer landing.
 
 ### 2026-05-19, T-2026-05-19-07, Facebook Reply, Rest Awkward + Progressive Interest
 

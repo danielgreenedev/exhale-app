@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 19, 2026 (Facebook reply intake; Rest label resolved; Flow rhythm sketched; Facebook preview resolved)
+Last updated: May 19, 2026 (Facebook reply intake; Rest label resolved; Flow rhythm sketched; Facebook preview resolved; graphic-designer HUD coherence pass added)
 
 ## Completed Rhythm Changes
 
@@ -170,6 +170,14 @@ These can wait until after Stage 0 feedback signal is in.
 6a. Flow rhythm design sketch landed 2026-05-19 in `docs/OPEN_QUESTIONS.md` under "Should Rest and Hold be partly or completely optional?" Tradeoff matrix of four candidate shapes (4-0-6-2, 4-0-6-0, 4-0-5-3, 3-0-5-2), recommendation of 4-0-6-2 as the primary candidate, full code implications (only `getNextPhase` needs a one-line change to skip 0-duration phases; `getPhaseAtTime` and `getOrbScale` already handle them correctly), and a validation gate are all written down. Next concrete step is implementation behind the validation gate: run the sketch past at least two of T-2026-05-19-03, -05, -06, -07 in a Vercel preview, and ship as an optional fourth preset only if at least one prefers Flow over their current choice.
 
 6b. Park: do rhythms need to support progressive ramping (each rep longer than the last) rather than only steady patterns? Single-user signal from T-2026-05-19-07. Do not act yet; revisit if a second tester independently asks for escalation or if competitive-framing usage shows up in `app_events`. If raised again, write it up as a full open question in `docs/OPEN_QUESTIONS.md` before any scoping.
+
+6c. Visual-coherence pass on the in-session HUD, driven by T-2026-05-19-08 (graphic designer, professional-eye signal — see `docs/USER_FEEDBACK.md`). Three coordinated changes that share the underlying intent of "stop showing the same signal three different ways" and should land together as one pass rather than three independent changes:
+
+- Drop the innermost phase progress ring in `src/components/BreathingOrb.tsx:295-322` (`ringR = maxR + 24`). The sweeping arc duplicates phase-progress signal already carried by the orb scale on Inhale/Exhale and by the countdown number on Hold/Relax. Two rings remain (session progress at `sessR`, outer guide at `guideR`).
+- Make the countdown text (`src/components/GameHUD.tsx:113-124`, `role="timer"`) phase-aware. Today's uniform 58% opacity after cycle 2 fades all phases equally; the designer wants Inhale/Exhale to fade deeper (or hide entirely) since the orb scale is the natural indicator there, while Hold/Relax stays visible since the orb is static and the countdown is the only "how long" signal.
+- Damp the phase-transition flash (`src/components/BreathingOrb.tsx:272-287`) by phase duration so Gentle's 2-second Hold does not strobe at full amplitude. Suggested formula: scale flash opacity by `Math.min(1, phase.duration / 4)` or similar; matches the proportional pattern raised for the anticipation lead window discussion.
+
+Implementation notes: this is design territory and the proof is on screen, not in the test suite. Smoke-test all three rhythms in browser before merging, and confirm that no phase loses its "how long" signal entirely (Hold/Relax must still feel paced, just without the phase-ring sweep). Keep `aria-label` on the countdown unconditional so screen readers can still announce time remaining; only the visual opacity changes by phase.
 
 7. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Secondary-user feedback asked about changing colors; evaluate that through a theme/skin system before considering freeform color controls. Run `/impeccable shape Garden skin` before building.
 
