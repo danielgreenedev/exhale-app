@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 20, 2026 (OAuth Backup & Sync implementation started)
+Last updated: May 20, 2026 (pre-commit audit follow-up)
 
 ## Completed Rhythm Changes
 
@@ -22,6 +22,28 @@ Last updated: May 20, 2026 (OAuth Backup & Sync implementation started)
 - Audio now shows an explicit Off option instead of an icon-only mute control.
 - `View timing` now reads as a secondary button with a disclosure caret instead of plain text.
 - When available, Resume now appears directly below Begin and before Session Setup.
+
+## Completed Marketing/Accessibility Mobile Polish
+
+- Marketing/UX first-pass feedback from T-2026-05-20-09 was logged in `docs/USER_FEEDBACK.md`.
+- Graphic designer Full-rhythm and visual soft-cue feedback from T-2026-05-19-08 was logged in `docs/USER_FEEDBACK.md`.
+- Home mobile spacing tightened: reduced top padding, reduced mobile home orb/logo footprint by roughly 10%, and compacted the first screen enough to improve iPhone first-viewport fit while preserving large tap targets.
+- Home secondary text and controls gained modest contrast increases for older users and low-vision users.
+- In-session phase label/instruction stack was compacted, with stronger contrast and text shadow on the instruction line.
+- Settle In now uses the same strong phase-label treatment as the active session labels so the intro state feels consistent and legible.
+- Center-orb timing hierarchy was reinforced: the orb rim is slightly stronger, while the outer guide/progress line and incoming soft cue are lower contrast and less neon so users are less likely to chase the pre-cue.
+- First-pass sound trust was hardened: Web Audio no longer reports active if the context remains suspended, and iPhone-class browsers get a timely silent-mode hint after Settle In when sound is active.
+- Remaining validation: test sound perception on a real iPhone in normal mode and silent mode, across Safari and the browser used by the tester if possible. Include app-switching away from Safari and back, because tester feedback suggests that may affect perceived sound.
+- Open question added: whether Full needs clearer state-specific framing after a resting-heart-rate tester found the 10-second exhale difficult but potentially useful during panic/stress.
+
+## Completed Pre-Commit Impeccable Audit Follow-Up
+
+- Ran `/impeccable audit` against `http://127.0.0.1:3000/`; the local run required the system Chrome executable because Puppeteer's cached browser was unavailable.
+- Removed neon/cyan-coded static orb treatments: home, stats, policy, terms, complete, and app icons now use muted radial fills and low-opacity outline rings instead of colored glow box-shadows.
+- Replaced pure-black canvas/shadow values with tinted forest-night values (`rgba(15,23,18,...)`) and lightened Forest Night from `#090c0a` to `#0f1712` so dark overlays and shadows stay inside the Still Water palette.
+- Reduced sentence/body copy tracking where it was previously 0.10-0.12em, keeping wider tracking reserved for uppercase labels and controls.
+- Updated `DESIGN.md` and `CLAUDE.md` so future agents preserve the no-static-glow and no-pure-black rules.
+- Audit rerun cleared the neon/static-glow and wide-body-tracking findings. One residual pure-black scanner warning remains, but source search and computed visible styles now show the app background, body, and main surface using tinted Forest Night rather than pure black.
 
 ## Completed From Sync And Measurement Follow-Up
 
@@ -213,6 +235,8 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 3. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check. Current brand-new-user prompts: "Could you start breathing without thinking too much?", "Did the pace ever feel rushed, pressuring, or make you gasp/catch up?", "Did Relax help, or did it interrupt the rhythm?", "Did the phase changes feel easy to follow, or did they lag your brain a bit?", "If you opened Session Setup, did the options feel natural? Did the button names and explanations make sense?", "Would you use this again when stressed, tired, or needing to settle?", and "What would you change first?" First latest-build signal from T-2026-05-19-08 on default Quick / Steady is positive: no gasp/catch-up/strain, default Relax did not interrupt, and the session felt useful.
 
 4. Pending feedback/data collection: validate whether the new anticipatory transition cues help users keep up with phase shifts. Ask: "Did the color lead or soft pre-cue make the phase changes easier to follow, or did they add noise?" First latest-build signal from T-2026-05-19-08 is positive on default Quick / Steady: color leads and soft pre-cues were liked and felt natural. Keep testing because the same tester still found Flow's short pause/cue pushy.
+
+4a. Pending feedback/data collection: validate whether the softened outer guide line now reads as support rather than a timing object to chase. First Full follow-up from T-2026-05-19-08 said the center circle timing was relaxing, but the line could feel like being already behind because it begins before the orb changes. The current implementation lowers guide-line contrast/chroma and strengthens the orb rim; ask the next design-eye tester whether the orb clearly feels primary.
 
 5. Pending feedback/data collection: recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
 

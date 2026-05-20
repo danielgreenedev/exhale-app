@@ -13,7 +13,7 @@ export default function Icon() {
           justifyContent: 'center',
           width: '100%',
           height: '100%',
-          background: '#090c0a',
+          background: '#0f1712',
         }}
       >
         <div
@@ -22,9 +22,8 @@ export default function Icon() {
             height: 24,
             borderRadius: '50%',
             background:
-              'linear-gradient(135deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0) 55%), ' +
-              'linear-gradient(135deg, rgba(110,231,183,0.95), rgba(6,95,70,0.85))',
-            boxShadow: '0 0 10px rgba(52,211,153,0.55)',
+              'linear-gradient(135deg, rgba(245,245,242,0.22) 0%, rgba(245,245,242,0) 55%), ' +
+              'radial-gradient(circle at 36% 30%, rgba(202,224,211,0.78) 0%, rgba(94,158,118,0.68) 48%, rgba(31,82,52,0.84) 100%)',
           }}
         />
       </div>

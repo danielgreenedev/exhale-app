@@ -215,6 +215,11 @@ export function useAudioEngine(
     const config = AMBIENT_PALETTES[paletteId];
     const ctx = getCtx();
     if (ctx.state === 'suspended') await ctx.resume();
+    if (ctx.state !== 'running') {
+      enabledRef.current = false;
+      stopSources();
+      return false;
+    }
 
     enabledRef.current = true;
     stopSources();

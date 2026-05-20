@@ -263,8 +263,8 @@ export default function BreathingOrb({
       ctx.fill();
 
       // Rim highlight
-      ctx.strokeStyle = `hsla(${bh}, ${Math.min(bs + 25, 100)}%, ${Math.min(bl + 30, 98)}%, 0.35)`;
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = `hsla(${bh}, ${Math.min(bs + 25, 100)}%, ${Math.min(bl + 30, 98)}%, 0.5)`;
+      ctx.lineWidth = 1.75;
       ctx.beginPath();
       ctx.arc(cx, cy, orbRadius, 0, Math.PI * 2);
       ctx.stroke();
@@ -320,19 +320,20 @@ export default function BreathingOrb({
       ctx.stroke();
 
       const guideIncomingOpacity = outgoingArcRef.current
-        ? 0.5 + 0.4 * easeInOutCubic(outgoingArcTRef.current)
-        : 0.9;
-      ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${Math.min(bl + 8, 92)}%, ${guideIncomingOpacity})`;
-      ctx.lineWidth = 3.25;
+        ? 0.28 + 0.26 * easeInOutCubic(outgoingArcTRef.current)
+        : 0.54;
+      const guideSaturation = Math.max(18, Math.round(bs * 0.68));
+      ctx.strokeStyle = `hsla(${bh}, ${guideSaturation}%, ${Math.min(bl + 2, 88)}%, ${guideIncomingOpacity})`;
+      ctx.lineWidth = 2.75;
       ctx.beginPath();
       ctx.arc(cx, cy, guideR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * pp);
       ctx.stroke();
 
       if (outgoingArcRef.current) {
         const [oh, os, ol] = outgoingArcRef.current.color;
-        const oldOpacity = 0.52 * (1 - easeInOutCubic(outgoingArcTRef.current));
-        ctx.strokeStyle = `hsla(${oh}, ${os}%, ${Math.min(ol + 8, 92)}%, ${oldOpacity})`;
-        ctx.lineWidth = 2.75;
+        const oldOpacity = 0.34 * (1 - easeInOutCubic(outgoingArcTRef.current));
+        ctx.strokeStyle = `hsla(${oh}, ${Math.max(18, Math.round(os * 0.68))}%, ${Math.min(ol + 2, 88)}%, ${oldOpacity})`;
+        ctx.lineWidth = 2.25;
         ctx.beginPath();
         ctx.arc(cx, cy, guideR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * outgoingArcRef.current.progress);
         ctx.stroke();
@@ -341,9 +342,9 @@ export default function BreathingOrb({
       if (phaseLeadProgress > 0) {
         const [nh, ns, nl] = nextColor;
         const currentAngle = -Math.PI / 2 + Math.PI * 2 * pp;
-        const nextOpacity = 0.12 + 0.44 * leadEase;
-        ctx.strokeStyle = `hsla(${nh}, ${ns}%, ${Math.min(nl + 10, 94)}%, ${nextOpacity})`;
-        ctx.lineWidth = 3.75;
+        const nextOpacity = 0.08 + 0.26 * leadEase;
+        ctx.strokeStyle = `hsla(${nh}, ${Math.max(18, Math.round(ns * 0.64))}%, ${Math.min(nl + 2, 88)}%, ${nextOpacity})`;
+        ctx.lineWidth = 3.1;
         ctx.lineCap = 'round';
         ctx.beginPath();
         ctx.arc(cx, cy, guideR, currentAngle, Math.PI * 1.5);
@@ -351,7 +352,7 @@ export default function BreathingOrb({
 
         const guideHalo = ctx.createRadialGradient(cx, cy, guideR - 8, cx, cy, guideR + 22);
         guideHalo.addColorStop(0, 'transparent');
-        guideHalo.addColorStop(0.58, `hsla(${nh}, ${ns}%, ${nl}%, ${0.045 * leadEase})`);
+        guideHalo.addColorStop(0.58, `hsla(${nh}, ${Math.max(18, Math.round(ns * 0.64))}%, ${nl}%, ${0.024 * leadEase})`);
         guideHalo.addColorStop(1, 'transparent');
         ctx.fillStyle = guideHalo;
         ctx.beginPath();

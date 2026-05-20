@@ -304,19 +304,30 @@ function HomeContent() {
         style={{ background: SURFACE_GLOWS.home }}
       />
 
-      <div className="relative z-10 flex w-full max-w-[18rem] flex-col items-center gap-5 py-12 sm:max-w-sm">
+      <div className="relative z-10 flex w-full max-w-[18rem] flex-col items-center gap-4 py-8 sm:max-w-sm sm:py-12">
 
         {/* Logo orb */}
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-32 flex items-center justify-center" aria-hidden="true">
+        <div className="flex flex-col items-center gap-3.5">
+          <div className="h-28 sm:h-32 flex items-center justify-center" aria-hidden="true">
             <div
               className="transition-transform duration-500 ease-out"
               style={{ transform: `scale(${orbScale})` }}
             >
-              <div className="relative h-20 w-20 orb-breathe">
-                <div className="w-full h-full rounded-full bg-gradient-to-br from-emerald-300/60 to-emerald-600/40 shadow-[0_0_48px_rgba(110,231,183,0.22)]" />
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent" />
-                <div className="absolute inset-[-14px] rounded-full border border-emerald-400/20 shadow-[0_0_18px_rgba(110,231,183,0.12)]" />
+              <div className="relative h-[4.5rem] w-[4.5rem] sm:h-20 sm:w-20 orb-breathe">
+                <div
+                  className="h-full w-full rounded-full"
+                  style={{
+                    background: 'radial-gradient(circle at 36% 30%, rgba(202,224,211,0.68) 0%, rgba(94,158,118,0.60) 46%, rgba(31,82,52,0.64) 100%)',
+                  }}
+                />
+                <div
+                  className="absolute inset-0 rounded-full"
+                  style={{ background: 'linear-gradient(135deg, rgba(245,245,242,0.14) 0%, rgba(245,245,242,0) 56%)' }}
+                />
+                <div
+                  className="absolute inset-[-12px] rounded-full border sm:inset-[-14px]"
+                  style={{ borderColor: 'rgba(93,177,132,0.20)' }}
+                />
               </div>
             </div>
           </div>
@@ -325,7 +336,7 @@ function HomeContent() {
             <h1 className="text-4xl sm:text-5xl font-extralight tracking-[0.25em] sm:tracking-[0.38em] uppercase text-still-white/90">
               Exhale
             </h1>
-            <p className="text-still-white/62 text-sm tracking-[0.12em] font-light text-center">
+            <p className="text-still-white/72 text-sm tracking-[0.04em] font-light text-center">
               Guided breathing for a calmer mind
             </p>
           </div>
@@ -346,10 +357,10 @@ function HomeContent() {
                 <label
                   key={opt.length}
                   className={`
-                    min-h-16 rounded-2xl border transition-all duration-300 flex items-center justify-center text-center cursor-pointer
+                    min-h-14 sm:min-h-16 rounded-2xl border transition-all duration-300 flex items-center justify-center text-center cursor-pointer
                     ${active
                       ? SELECTED_SETTING_CLASS
-                      : 'border-still-white/22 text-still-white/74 hover:border-still-white/38 hover:bg-still-white/5 hover:text-still-white/88'}
+                      : 'border-still-white/26 text-still-white/80 hover:border-still-white/40 hover:bg-still-white/5 hover:text-still-white/92'}
                     has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-emerald-200/80
                   `}
                 >
@@ -362,7 +373,7 @@ function HomeContent() {
                     aria-label={opt.ariaLabel}
                     className="sr-only"
                   />
-                  <span className="text-[1.05rem] leading-none font-extralight tracking-[0.04em]">{opt.label}</span>
+                  <span className="text-[1.08rem] leading-none font-extralight tracking-[0.04em]">{opt.label}</span>
                 </label>
               );
             })}
@@ -374,7 +385,7 @@ function HomeContent() {
         <button
           type="submit"
           aria-label="Begin breathing session"
-          className="w-full py-5 rounded-2xl bg-emerald-pulse border border-emerald-pulse text-forest-night text-sm tracking-[0.2em] uppercase font-semibold hover:bg-emerald-200 hover:border-emerald-200 active:scale-[0.98] transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-100/85"
+          className="w-full py-4 sm:py-5 rounded-2xl bg-emerald-pulse border border-emerald-pulse text-forest-night text-sm tracking-[0.2em] uppercase font-semibold hover:bg-emerald-200 hover:border-emerald-200 active:scale-[0.98] transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-100/85"
         >
           Begin
         </button>
@@ -385,12 +396,12 @@ function HomeContent() {
           <Link
             href={`/game?length=${resumeData.length}&resume=${resumeData.elapsed.toFixed(1)}`}
             aria-label={`Resume ${resumeData.length} session, ${formatDuration(Math.floor(resumeData.elapsed))} in`}
-            className="w-full py-4 px-6 rounded-2xl border border-still-white/18 text-still-white/60 hover:border-still-white/30 hover:text-still-white/78 transition-all duration-300 -mt-2 flex flex-col items-center gap-0.5"
+            className="w-full py-3.5 px-6 rounded-2xl border border-still-white/22 text-still-white/68 hover:border-still-white/34 hover:text-still-white/84 transition-all duration-300 -mt-1 flex flex-col items-center gap-0.5"
           >
             <span className="text-sm tracking-[0.18em] uppercase font-light">
               ↩ Resume {resumeData.length}
             </span>
-            <span className="text-xs tracking-[0.1em] font-light text-still-white/58 normal-case">
+            <span className="text-xs tracking-[0.04em] font-light text-still-white/64 normal-case">
               {formatDuration(Math.floor(resumeData.elapsed))} in · from your last session
             </span>
           </Link>
@@ -401,7 +412,7 @@ function HomeContent() {
           onClick={() => setShowSessionSetup((show) => !show)}
           aria-expanded={showSessionSetup}
           aria-controls="session-setup"
-          className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 text-still-white/60 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:text-still-white/78 hover:bg-still-white/5 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 text-center"
+          className="w-full min-h-11 py-3 rounded-2xl border border-still-white/22 text-still-white/68 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/34 hover:text-still-white/84 hover:bg-still-white/5 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 text-center"
         >
           <span>Session setup</span>
           <DisclosureCaret open={showSessionSetup} />
@@ -495,7 +506,7 @@ function HomeContent() {
                       </div>
                       <p
                         id="rhythm-description"
-                        className="min-h-[2.75rem] border-t border-still-white/10 px-3 py-2 text-xs leading-relaxed tracking-[0.06em] text-still-white/70"
+                        className="min-h-[2.75rem] border-t border-still-white/10 px-3 py-2 text-xs leading-relaxed tracking-[0.04em] text-still-white/70"
                       >
                         <span className="uppercase tracking-[0.14em] text-still-white/78">{describedRhythm.label}</span>
                         <span className="px-1.5 text-still-white/32">/</span>
@@ -528,7 +539,6 @@ function HomeContent() {
                               className="h-2.5 w-2.5 rounded-full shrink-0"
                               style={{
                                 backgroundColor: phase.color,
-                                boxShadow: mutedPhase ? 'none' : `0 0 16px ${phase.glowColor}`,
                               }}
                               aria-hidden="true"
                             />
@@ -536,7 +546,7 @@ function HomeContent() {
                               <p className="text-still-white/82 text-[11px] leading-tight tracking-[0.22em] uppercase font-light">
                                 {phase.label}
                               </p>
-                              <p className="text-still-white/58 text-[11px] tracking-[0.06em] font-light leading-snug normal-case">
+                              <p className="text-still-white/58 text-[11px] tracking-[0.04em] font-light leading-snug normal-case">
                                 {phase.instruction}
                               </p>
                             </div>
@@ -682,7 +692,7 @@ function HomeContent() {
               aria-label={`View practice history, ${homeStat.sessions} session${homeStat.sessions !== 1 ? 's' : ''}`}
             >
               <span className="text-xs tracking-[0.18em] uppercase font-light">Practice history</span>
-              <span className="text-[10px] leading-none tracking-[0.12em] font-light text-still-white/50 normal-case">
+              <span className="text-[10px] leading-none tracking-[0.04em] font-light text-still-white/50 normal-case">
                 {homeStat.sessions} session{homeStat.sessions !== 1 ? 's' : ''}
               </span>
             </Link>

@@ -340,15 +340,26 @@ export default function StatsPage() {
       <div className="relative z-10 flex w-full max-w-[18rem] flex-col items-center gap-10 sm:max-w-sm">
         <div className="flex flex-col items-center gap-5">
           <div className="relative orb-breathe" aria-hidden="true">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-300/60 to-emerald-600/40 shadow-[0_0_36px_rgba(110,231,183,0.20)]" />
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent" />
-            <div className="absolute inset-[-10px] rounded-full border border-emerald-400/20 shadow-[0_0_14px_rgba(110,231,183,0.10)]" />
+            <div
+              className="h-14 w-14 rounded-full"
+              style={{
+                background: 'radial-gradient(circle at 36% 30%, rgba(202,224,211,0.66) 0%, rgba(94,158,118,0.58) 48%, rgba(31,82,52,0.64) 100%)',
+              }}
+            />
+            <div
+              className="absolute inset-0 rounded-full"
+              style={{ background: 'linear-gradient(135deg, rgba(245,245,242,0.14) 0%, rgba(245,245,242,0) 56%)' }}
+            />
+            <div
+              className="absolute inset-[-10px] rounded-full border"
+              style={{ borderColor: 'rgba(93,177,132,0.20)' }}
+            />
           </div>
           <div className="flex flex-col items-center gap-2">
             <h1 className="text-3xl font-extralight tracking-[0.3em] uppercase text-still-white/88">
               Practice
             </h1>
-            <p className="text-still-white/55 text-xs tracking-[0.15em] font-light">Your breathing history</p>
+            <p className="text-still-white/55 text-xs tracking-[0.04em] font-light">Your breathing history</p>
           </div>
         </div>
 
@@ -401,8 +412,8 @@ export default function StatsPage() {
                       <div
                         className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300"
                         style={{
-                          background: earned ? 'rgba(52,211,153,0.12)' : 'rgba(255,255,255,0.03)',
-                          border: earned ? '1px solid rgba(52,211,153,0.30)' : '1px solid rgba(255,255,255,0.07)',
+                          background: earned ? 'rgba(52,211,153,0.12)' : 'rgba(245,245,242,0.03)',
+                          border: earned ? '1px solid rgba(52,211,153,0.30)' : '1px solid rgba(245,245,242,0.07)',
                         }}
                         aria-hidden="true"
                       >
@@ -412,7 +423,7 @@ export default function StatsPage() {
                             height="18"
                             viewBox="0 0 20 20"
                             fill="none"
-                            stroke="rgba(110,231,183,0.85)"
+                            stroke="rgba(93,177,132,0.88)"
                             strokeWidth="2.2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -426,7 +437,7 @@ export default function StatsPage() {
                             height="16"
                             viewBox="0 0 20 20"
                             fill="currentColor"
-                            style={{ color: 'rgba(255,255,255,0.12)' }}
+                            style={{ color: 'rgba(245,245,242,0.12)' }}
                             aria-hidden="true"
                           >
                             <rect x="8.5" y="2" width="3" height="16" rx="1.5" />
@@ -437,7 +448,7 @@ export default function StatsPage() {
                       <span
                         aria-hidden="true"
                         className="text-xs tracking-widest font-light"
-                        style={{ color: earned ? 'rgba(110,231,183,0.78)' : 'rgba(245,245,242,0.62)' }}
+                        style={{ color: earned ? 'rgba(93,177,132,0.82)' : 'rgba(245,245,242,0.62)' }}
                       >
                         {milestone}
                       </span>

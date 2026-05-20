@@ -2,7 +2,7 @@
 name: Exhale
 description: Guided breathing for a calmer mind
 colors:
-  forest-night: "#090c0a"
+  forest-night: "#0f1712"
   emerald-pulse: "#34d399"
   sylvan-glow: "#224f34"
   coastal-haze: "#76b2cb"
@@ -35,7 +35,7 @@ typography:
     fontSize: "0.875rem"
     fontWeight: 300
     lineHeight: 1.6
-    letterSpacing: "0.12em"
+    letterSpacing: "0.04em"
   label:
     fontFamily: "Inter, system-ui, sans-serif"
     fontSize: "0.75rem"
@@ -61,12 +61,12 @@ spacing:
 components:
   button-begin:
     backgroundColor: "#34d399"
-    textColor: "#090c0a"
+    textColor: "#0f1712"
     rounded: "{rounded.card}"
     padding: "20px 24px"
   button-begin-hover:
     backgroundColor: "#a7f3d0"
-    textColor: "#090c0a"
+    textColor: "#0f1712"
     rounded: "{rounded.card}"
     padding: "20px 24px"
   button-ghost:
@@ -75,7 +75,7 @@ components:
     rounded: "{rounded.card}"
     padding: "12px 24px"
   button-ghost-hover:
-    backgroundColor: "rgba(255,255,255,0.04)"
+    backgroundColor: "rgba(245,245,242,0.04)"
     textColor: "rgba(245,245,242,0.65)"
     rounded: "{rounded.card}"
     padding: "12px 24px"
@@ -95,7 +95,7 @@ components:
     rounded: "{rounded.control}"
     padding: "6px 12px"
   button-game-control-hover:
-    backgroundColor: "rgba(255,255,255,0.05)"
+    backgroundColor: "rgba(245,245,242,0.05)"
     textColor: "rgba(245,245,242,0.90)"
     rounded: "{rounded.control}"
     padding: "6px 12px"
@@ -141,14 +141,14 @@ These shift the entire canvas (orb, glow, progress rings, particles) with each b
 - **Quiet Blush** (`#cd8492`) — Relax phase (phase enum `rest`). Dusty rose-pink. Soft, restorative, the color of permission to breathe naturally between guided inhales.
 
 ### Neutral
-- **Forest Night** (`#090c0a`): The ground. Near-black with the faintest green tint — not pure void, but the darkness before a forest dawn. Every screen.
+- **Forest Night** (`#0f1712`): The ground. Near-black with a visible green tint — not pure void, but the darkness before a forest dawn. Every screen.
 - **Sylvan Glow** (`#224f34`): The warm radial backdrop on home and stats. Used only as a low-opacity radial gradient (15–20%), never as a solid surface.
 - **Still White** (`#f5f5f2`): Text and borders, always at reduced opacity. 90% for primary text, 60% for secondary, 38–45% for tertiary, 18–28% for structural chrome. Never full white — the slight warmth keeps the screen from feeling clinical.
 
 ### Named Rules
 **The Amber Exception Rule.** Amber (`#fbbf24`) appears on one screen, for one purpose: session closure. If you are tempted to use amber anywhere else, the answer is no.
 
-**The One Accent Rule.** Emerald is the only accent. Phase colors belong to the canvas, not the UI. Do not use phase colors for buttons, labels, borders, or overlays outside of the session canvas. The exit guard backdrop is `#000` at 65% opacity — not emerald.
+**The One Accent Rule.** Emerald is the only accent. Phase colors belong to the canvas, not the UI. Do not use phase colors for buttons, labels, borders, or overlays outside of the session canvas. The exit guard backdrop is a forest-night scrim, not emerald.
 
 ## 3. Typography
 
@@ -161,13 +161,13 @@ These shift the entire canvas (orb, glow, progress rings, particles) with each b
 
 - **Display** (extralight 200, 2.25rem, tracking 0.25em, uppercase): The "Exhale" wordmark on the home screen. One instance per app.
 - **Headline** (extralight 200, 1.875rem, tracking 0.3em, uppercase): Screen titles — "Practice", "Complete". Airy and formal.
-- **Title** (semibold 600, 1.875rem, tracking 0.3em, uppercase): The active phase label during a session — "Inhale", "Hold", "Exhale", "Relax". Together with the Begin button label, one of only two semibold uses in the system. Its weight is earned: it is the only instruction the user needs.
-- **Body** (light 300, 0.875rem, tracking 0.12em): Taglines, descriptions, session complete quotes. Sentence case. 45–60% white.
+- **Title** (semibold 600, 1.875rem, tracking 0.3em, uppercase): The active phase label during a session — "Inhale", "Hold", "Exhale", "Relax". Settle In may use the same treatment because it functions as the pre-session state label. Together with the Begin button label, these are the only semibold uses in the system. Their weight is earned: they are the only instructions the user needs.
+- **Body** (light 300, 0.875rem, tracking 0.04em): Taglines, descriptions, session complete quotes. Sentence case. 55–72% white. Body copy uses only subtle tracking; wide spacing is reserved for uppercase labels and controls.
 - **Label** (light 300, 0.75rem, tracking 0.18–0.28em, uppercase): Most button text, metadata, and stat labels. Secondary actions sit at 0.18em. The Begin button is the one sanctioned exception, using semibold 600 at tracking 0.20em for legibility against the emerald fill; see Begin (Primary) below.
 - **Timer** (thin 100, 3.75rem, tabular-nums): The countdown during a session. Uses `font-variant-numeric: tabular-nums` to prevent layout shift as numbers change.
 
 ### Named Rules
-**The Weight Ceiling Rule.** Two elements in the entire system use semibold (600): the active phase label and the Begin button label. Every other element uses 100, 200, or 300. Adding bold text anywhere else breaks the hierarchy. `font-normal` (400) is also prohibited — it sits in no-man's-land between the permitted weights. The Begin exception exists because the primary action pairs Forest Night text with an Emerald Pulse fill, which is a lower-contrast pairing than any other text in the system (everything else sits on the dark ground). No other surface pairs text with a saturated brand color, so the exception does not generalize.
+**The Weight Ceiling Rule.** Semibold (600) is reserved for the active phase label, the Settle In pre-session label, and the Begin button label. Every other element uses 100, 200, or 300. Adding bold text anywhere else breaks the hierarchy. `font-normal` (400) is also prohibited — it sits in no-man's-land between the permitted weights. The Begin exception exists because the primary action pairs Forest Night text with an Emerald Pulse fill, which is a lower-contrast pairing than any other text in the system (everything else sits on the dark ground). No other surface pairs text with a saturated brand color, so the exception does not generalize.
 
 **The Uppercase Contract.** Uppercase is for labels and controls only — things the user acts on or reads quickly. Copy (taglines, instructions, quotes) is always sentence case. Never all-caps a full sentence of human-facing copy.
 
@@ -175,14 +175,14 @@ These shift the entire canvas (orb, glow, progress rings, particles) with each b
 
 ## 4. Elevation
 
-This system is flat by design. There are no `box-shadow` values used for structural elevation. Depth is conveyed through two mechanisms only: **opacity** (foreground elements are brighter; background elements fade) and **glow** (the orb and its rings emit a radial light that separates them from the canvas without casting a shadow).
+This system is flat by design. There are no `box-shadow` values used for structural elevation. Depth is conveyed through two mechanisms only: **opacity** (foreground elements are brighter; background elements fade) and **intrinsic light** (the orb's radial fill and canvas light, not UI elevation).
 
-The orb's glow (`box-shadow: 0 0 48px rgba(110,231,183,0.22)`) is the sole exception — and it is decorative, not structural. It does not imply that the orb "floats" above the surface; it implies that the orb is alive. The complete-screen amber orb carries an equivalent amber glow (`0 0 60px rgba(251,191,36,0.30)`) — the only moment a second glow color is permitted.
+The static orb marks use a muted radial fill, a Still White highlight, and a low-opacity outline. They do not use colored `box-shadow`; this keeps the brand mark from reading as neon/cyan-on-dark while preserving the quiet living-orb signal. The active session canvas may still render phase light inside the canvas because that light is the breathing object itself, not UI chrome.
 
-Dialog overlays (exit guard) use `background: rgba(0,0,0,0.65)` — a neutral dark scrim, not a colored tint.
+Dialog overlays (exit guard) use a tinted forest-night scrim such as `rgba(15,23,18,0.85)` — neutral to the app, not pure black and not a colored accent.
 
 ### Named Rules
-**The No Shadow Rule.** No UI element uses `box-shadow` for structural depth. If you reach for a drop shadow to separate a card, panel, or modal from the background, rethink the structure instead. The orb glow is the only permitted glow, and it belongs to the canvas.
+**The No Shadow Rule.** No UI element uses `box-shadow` for structural depth. If you reach for a drop shadow to separate a card, panel, or modal from the background, rethink the structure instead. Static orb marks also avoid colored box-shadow; the session canvas is the only place phase light should feel luminous.
 
 ## 5. Components
 
@@ -201,9 +201,9 @@ Soft and inviting — generous rounded corners (16px / `rounded-2xl`), borders t
 
 The brand mark and the product itself. Three contexts:
 
-- **Home (large, 80px):** Emerald gradient (emerald-300 at 60% to emerald-600 at 40%), white highlight overlay (gradient from white at 20% to transparent), one outer ring (`inset -14px`, emerald border at 20% opacity with matching glow). Animated with `orbBreathe` keyframe (scale 1.0 → 1.14 → 1.0, 8s ease-in-out infinite) unless `prefers-reduced-motion` is set.
-- **Stats (medium, 56px):** Same construction as home orb at reduced size. Same outer ring. Same breathe animation.
-- **Complete (large, 96px):** Amber gradient (amber-300 at 75% to amber-600 at 50%), white highlight overlay, one outer ring (`inset -14px`, amber border at 20% opacity with amber glow). No breathe animation — the session is over.
+- **Home (large, 72px mobile / 80px desktop):** Muted emerald radial fill, Still White highlight at roughly 14% opacity, one outer ring (`inset -12px` mobile / `inset -14px` desktop, forest-emerald border at 20% opacity). No colored box-shadow. Animated with `orbBreathe` keyframe (scale 1.0 → 1.14 → 1.0, 8s ease-in-out infinite) unless `prefers-reduced-motion` is set.
+- **Stats (medium, 56px):** Same muted construction as home orb at reduced size. Same outer ring. Same breathe animation.
+- **Complete (large, 96px):** Muted amber radial fill, Still White highlight at roughly 15% opacity, one outer ring (`inset -14px`, amber border at 22% opacity). No colored box-shadow and no breathe animation — the session is over.
 - **Session canvas:** Full canvas, rendered via `<canvas>`. Scales between 60–140px base radius (Circle Size preference S/M/L). Phase colors shift the entire orb and its multi-layer glow on every breath phase change.
 
 ### Breathing Rhythm
@@ -217,13 +217,17 @@ In the final lead window before each phase change, the guide ring around the orb
 ### Progress Indicators
 
 - **Session ring:** Drawn on canvas around the orb, with session progress fill at 42% opacity over a 12% track. This is the sole session-level progress indicator; the redundant HUD progress bar was removed after a beta tester reported the floating colored segment more confusing than informative.
-- **Guide ring:** The outer breath rail shows current phase progress and the incoming phase color lead. The earlier separate inner phase-progress ring was removed after graphic-designer feedback because it duplicated the orb scale and countdown signals.
+- **Guide ring:** The outer breath rail shows current phase progress and the incoming phase color lead, but it must stay lower contrast than the center orb. It is a pickup note, not the timing object to chase. Current and incoming arcs use reduced opacity/chroma so the orb remains the primary breathing anchor. The earlier separate inner phase-progress ring was removed after graphic-designer feedback because it duplicated the orb scale and countdown signals.
 
 ### Phase Transitions
 
-During the last lead window of a phase (0.8s on long phases, capped to 25% of phase duration on short phases — see Anticipatory Phase Cue above), the guide ring begins to show the next phase color as a faint incoming arc. This is an anticipatory cue, not a new phase; it gives the user's eye a beat to understand that a transition is coming.
+During the last lead window of a phase (0.8s on long phases, capped to 25% of phase duration on short phases — see Anticipatory Phase Cue above), the guide ring begins to show the next phase color as a faint incoming arc. This is an anticipatory cue, not a new phase; it gives the user's eye a beat to understand that a transition is coming. It should be visibly softer than the center orb so anxious users do not feel behind before the orb itself changes.
 
 Phase changes should feel like a handoff rather than a switch. The HUD keeps the current phase label active; anticipation is carried by the guide-ring color lead and quiet pre-cue sound. Visual color transitions are deliberately softened; the boundary can be sensed before the orb changes state, especially for users who need a moment to process the new instruction.
+
+### Session HUD Legibility
+
+The active phase label and Settle In label use semibold 600 with a dark text shadow because they sit directly on the canvas orb and must read on bright phase colors. The instruction line below the phase label is compact and higher contrast than decorative UI text; it also uses a dark text shadow. This is a legibility exception to the otherwise flat, no-shadow UI rule: the shadow belongs to text over moving canvas light, not to structural elevation.
 
 ### Rhythm
 
@@ -286,14 +290,14 @@ Cloud writes for settings are debounced (~400ms trailing) so rapid clicks throug
 - **Do** surface stats and practice history as optional, secondary navigation. Never on the critical path to breathing.
 - **Do** keep Backup & Sync optional, quiet, and confined to Practice History. It is for carrying history across devices, not for onboarding.
 - **Do** place session controls (Pause, Exit) in the bottom corners of the session screen — the thumb zone on all phone sizes.
-- **Do** give every orb mark (home, stats, complete) its outer ring at `inset -14px`, colored to match the orb's accent (emerald for home/stats, amber for complete).
+- **Do** give every orb mark (home, stats, complete) its outer ring at `inset -12px` to `inset -14px`, colored to match the orb's accent at low opacity (emerald for home/stats, amber for complete).
 
 ### Don't:
 - **Don't** use `font-bold`, `font-extrabold`, `font-normal`, or any weight other than 100, 200, 300, or 600. The weight ceiling is semibold (600), used only on the active phase label and the Begin button. See the Weight Ceiling Rule for why Begin is the sanctioned exception.
-- **Don't** add shadows for structural elevation. No `box-shadow` on cards, panels, modals, or buttons. The orb glow is the only permitted exception.
+- **Don't** add shadows for structural elevation. No `box-shadow` on cards, panels, modals, buttons, or static orb marks. Luminous depth belongs inside the session canvas only.
 - **Don't** use glassmorphism: no `backdrop-filter: blur()` on UI chrome. The canvas has depth; the UI does not.
 - **Don't** use gradient text (`background-clip: text`). Phase colors on the orb are earned; gradient text on labels is decoration.
-- **Don't** use a colored overlay for dialog/guard backdrops. The exit guard background is `rgba(0,0,0,0.65)` — neutral black, not emerald or any phase color.
+- **Don't** use a colored overlay for dialog/guard backdrops. The exit guard background is a tinted forest-night scrim, not emerald, a phase color, or pure black.
 - **Don't** add a second accent color. Emerald and amber are the full palette. Phase colors belong to the canvas only.
 - **Don't** use `italic` anywhere in the interface. There is no italic role in this system. Emphasis is conveyed via opacity, not decoration.
 - **Don't** design like Headspace or Calm — no onboarding carousels, no premium gate framing, no illustrated brand characters, no teacher voices.

@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'forest-night': '#090c0a',
+        'forest-night': '#0f1712',
         'emerald-pulse': '#34d399',
         'sylvan-glow': '#224f34',
         'coastal-haze': '#76b2cb',

@@ -4,7 +4,7 @@ export const SURFACE_GLOWS = {
 } as const;
 
 export const APP_COLORS = {
-  forestNight: '#090c0a',
+  forestNight: '#0f1712',
   emeraldPulse: '#34d399',
   stillWhite: '#f5f5f2',
 } as const;
@@ -30,7 +30,7 @@ export const PHASE_COLORS = {
 
 export const CANVAS_COLORS = {
   forestGlow: 'hsla(145, 40%, 22%, 0.18)',
-  transparent: 'rgba(0,0,0,0)',
-  edgeVignette: 'rgba(0,0,0,0.32)',
+  transparent: 'rgba(15,23,18,0)',
+  edgeVignette: 'rgba(15,23,18,0.32)',
   guideRing: '245, 245, 242',
 } as const;

@@ -1,6 +1,6 @@
 # Exhale Open Questions
 
-Last updated: May 20, 2026 (OAuth Backup & Sync promoted)
+Last updated: May 20, 2026 (Full rhythm and visual cue feedback)
 
 Use this as a living parking lot for product, validation, trust, accessibility, and strategy questions that are not ready to become implementation tasks. As questions are answered, add the answer, date, evidence, and any resulting TODO/doc updates.
 
@@ -119,10 +119,13 @@ Current answer: partially answered. Implementing 2026-05-19:
 
 2026-05-20 signal: T-2026-05-19-08 liked the color leads and soft pre-cues on the default Quick / Steady path. They specifically said the sequencing felt natural, did not add strain, and did not interrupt the rhythm. This is a positive cue-system signal for the default path, separate from the same tester's Flow-specific complaint that the short 2-second Relax/pause felt rushed.
 
+2026-05-20 second signal from the same tester: on Quick / Full / Small / Warm, the tester found the center circle relaxing when used as the timing object, but the outer guide line felt like a "pickup note" that could make them feel already behind because it begins before the center circle changes. Product response: keep the center orb as the primary timing anchor, lower the contrast/chroma of the guide line and incoming cue, and strengthen the orb rim slightly. This reframes the open question from "do we need cues?" to "are the cues quiet enough to support without becoming something to chase?"
+
 Still open from the original five:
 
 - (1) and (5) have a first attempt: the user-facing phase is now `Relax` with instruction `Breathe`, while the internal enum remains `rest`. Follow-up should test whether that reframe is enough or whether the phase itself still feels awkward.
 - Whether the current crossfade is deep enough or needs further softening now that Rest has been reframed.
+- Whether the outer guide line is now quiet enough that new users follow the orb first and perceive the line as support.
 
 Follow-up: watch beta feedback for whether anyone still reports boundary anxiety after the lead window is live. If not, treat this as covered. Ask specifically:
 
@@ -153,6 +156,18 @@ Possible directions:
 - Allow per-phase duration overrides inside Session Setup (closer to free customization; reintroduces decision friction).
 
 Current answer: **Partially answered as of 2026-05-20, but Flow's shape is not fully validated.** Flow (4-0-6-2) shipped as a fourth rhythm preset rather than as a gated preview build; the original pre-merge validation gate was waived. First Flow follow-up signal from T-2026-05-19-08 says no-Hold helps, but the 2-second Relax/pause interrupts the otherwise smooth Inhale/Exhale loop. The same tester explicitly prefers removing the pause. Post-launch validation is now Stage 0 item 2 in `docs/TODO.md`: follow up with T-2026-05-19-03, -05, -06, -07 and ask whether Flow fits better than their current choice **and** whether it would be better with no pause at all. If at least one of them prefers current Flow and no one else flags the pause, keep 4-0-6-2. If an independent tester repeats the pause complaint, test 4-0-6-0 before considering free per-phase customization.
+
+### Does Full need clearer state-specific framing?
+
+Context: T-2026-05-19-08 tried Quick / Full / Small / Warm while at resting heart rate and found the 10-second Exhale difficult, but also said Full could be useful when someone needs focused help slowing breath from panic. They used the Relax phase as a recovery breath after the long exhale.
+
+Current answer: Open, but do not change the rhythm yet. Full may be doing its intended job as a deeper, more demanding option rather than a resting-baseline default. Keep it secondary, watch whether users choose it intentionally, and ask whether it feels useful during actual stress rather than only at rest.
+
+Follow-up:
+
+```text
+When you chose Full, did the longer exhale feel helpful, too demanding, or only useful in a more stressed state?
+```
 
 #### Flow rhythm design sketch (2026-05-19)
 

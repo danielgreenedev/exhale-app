@@ -92,6 +92,6 @@ Already implemented:
 - All interactive elements have `aria-label`
 
 Known gaps:
-- Color contrast: some UI text at reduced opacity (white/28–38) may fall below 4.5:1 against #090c0a; has not been formally audited
+- Color contrast: some UI text at reduced opacity (white/28–38) may fall below 4.5:1 against #0f1712; has not been formally audited
 - Canvas content (orb, phase rings, particles) is not accessible to screen readers; the phase label ARIA live region is the accessible equivalent
 - Session resume window (60s) has no extension mechanism for users who need more time

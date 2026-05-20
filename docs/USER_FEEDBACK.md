@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 20, 2026 (default Quick feedback logged)
+Last updated: May 20, 2026 (graphic designer Full feedback logged)
 
 ## Purpose
 
@@ -92,6 +92,95 @@ Use these after someone tries the Flow pace:
 1. 
 
 ## Recent Feedback Notes
+
+### 2026-05-20, T-2026-05-19-08, Graphic Designer Follow-Up, Full Rhythm And Soft-Cue Clarity
+
+#### Session
+
+- Tester ID: T-2026-05-19-08
+- Follow-up OK: Unknown
+- Source: Project owner's graphic designer friend
+- Environment: Production or local unknown
+- Device: iPhone
+- Browser: Safari
+- Session length: Quick / 3 minutes
+- Rhythm: Full
+- Circle Size: Small
+- Sound choice: Warm
+- Signal class: **Same design-eye tester, focused on Full rhythm load and visual cue hierarchy.**
+
+#### Context Notes
+
+- Tester was switching from Safari to Notes/Messenger while using the app. This may have affected sound behavior on iPhone.
+- Tester was at resting heart rate, not actively anxious or in panic, which matters because the long Full exhale may feel different when the user is trying to slow down from a stressed state.
+
+#### What Worked
+
+- Visuals and overall presentation still looked good.
+- The tester understood that Full could be useful when someone needs help focusing their breath to slow down from panic.
+- The Relax/pause phase was actively used after the long Full exhale, which supports keeping a recovery beat in deeper rhythms.
+- When the tester followed the center circle's timing, the visuals felt relaxing and supportive.
+
+#### Friction
+
+- Full's 10-second Exhale felt very long at rest. The tester had to strategize the exhale to make it to 10 seconds.
+- Following the outer line/soft cue could feel stressful, like the tester was already behind because the line starts quickly before the center circle.
+- The tester did not immediately understand the line as a pickup note or soft visual pre-cue.
+- The line may currently be too high contrast/neon relative to the center circle, causing the eye to follow the cue instead of the main orb.
+
+#### Actionable Recommendations
+
+1. Do not treat this as a reason to remove Full; it may serve a different state than resting baseline. Follow up with whether Full feels better during actual stress or after choosing it intentionally.
+2. Keep the center circle/orb as the primary timing object.
+3. Lower the contrast/chroma of the outer guide line and incoming soft cue so it reads as support, not the object to chase.
+4. Strengthen the center circle's rim/visual presence slightly so users understand it is the main timing anchor.
+5. Add iPhone app-switching to sound QA: Safari, silent mode on/off, leaving and returning from another app, and then tapping the sound control.
+
+#### Product Response
+
+- Accepted for immediate visual tuning: center orb rim slightly strengthened; current guide arc, outgoing arc, and incoming lead arc reduced in opacity/chroma so the pre-cue becomes quieter.
+- No rhythm change yet. Full's long exhale is doing what it is designed to do, but it may need clearer expectation-setting or remain a secondary-user/deeper-breath option.
+- Sound note folded into iPhone sound validation rather than treated as independent evidence that sound synthesis is broken.
+
+### 2026-05-20, T-2026-05-20-09, Marketing/UX First-Pass Mobile Feedback
+
+#### Session
+
+- Tester ID: T-2026-05-20-09
+- Follow-up OK: Unknown
+- Source: Project owner's marketing/UX friend
+- Environment: Production, inferred from mobile screenshots
+- Device: iPhone-class mobile viewport
+- Browser: Mobile browser, exact browser unknown
+- Signal class: **Marketing and first-impression UX signal.** Weight heavily for above-the-fold, legibility, and first-pass trust; keep rhythm-comfort conclusions separate.
+
+#### What Worked
+
+- Overall impression is positive: the app is "very close," "already very nice," and close to a polished first impression.
+- The tester framed the remaining items as final tightening rather than foundational problems.
+
+#### Friction
+
+- Sound did not work or was not perceived on first pass, regardless of sound mode.
+- Home screen top spacing and logo size leave important controls low in the viewport on a standard iPhone display.
+- In-session phase header and description have too much vertical space between them.
+- White/gray text is too small and low-contrast for older users or people with impaired vision.
+- The in-session description needs stronger contrast, likely via brighter text and text shadow.
+- Settle In text is visually weaker than the phase label and should feel consistent with the active session state.
+
+#### Actionable Recommendations
+
+1. Treat first-pass sound trust as a priority bug, not only a preference. The user should either hear sound or get a clear, timely hint about tapping for sound or checking silent mode.
+2. Reduce home-screen top padding and the home orb/logo footprint enough to improve first-viewport fit on iPhone without shrinking tap targets.
+3. Increase contrast on readable text, especially session instructions and secondary controls, while keeping the Still Water restraint.
+4. Compact the in-session phase label/instruction stack and strengthen the instruction text shadow.
+5. Style Settle In closer to the active phase label so the session start feels coherent and legible.
+
+#### Product Response
+
+- Accepted for immediate polish: compact mobile home header, slightly smaller mobile home orb, higher-contrast home/session text, tighter in-session label spacing, and stronger Settle In styling.
+- Accepted for immediate hardening: do not mark sound active when the Web Audio context is still suspended, and show the silent-mode hint after Settle In on iPhone-class browsers when sound is active.
+- Still needs validation on real iPhone hardware because iOS silent mode and browser autoplay policies can differ by browser.
 
 ### 2026-05-20, T-2026-05-19-08, Graphic Designer Follow-Up, Default Quick Positive Signal
 

@@ -35,18 +35,18 @@ export default function GameHUD({
     return () => window.clearTimeout(timeout);
   }, [currentPhase]);
 
-  const labelOpacity = settled ? 0.7 : 1;
-  const instructionOpacity = settled ? 0 : 0.82;
+  const labelOpacity = settled ? 0.76 : 1;
+  const instructionOpacity = settled ? 0 : 0.9;
   const timerIsLoadBearing = currentPhase.phase === 'hold' || currentPhase.phase === 'rest';
-  const timerOpacity = !settled ? 1 : timerIsLoadBearing ? 0.62 : 0.16;
+  const timerOpacity = !settled ? 1 : timerIsLoadBearing ? 0.68 : 0.18;
 
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-between pointer-events-none select-none">
       {/* Top: cycle count */}
       <div className="pt-8 w-full flex items-start justify-center relative">
         <p
-          className="text-still-white/65 text-sm tracking-[0.2em] uppercase font-light"
-          style={{ textShadow: '0 1px 8px rgba(0,0,0,0.7)' }}
+          className="text-still-white/72 text-sm tracking-[0.2em] uppercase font-light"
+          style={{ textShadow: '0 1px 8px rgba(15,23,18,0.7)' }}
           aria-live="polite"
           aria-label={`Breath ${cycleNumber} of ${totalCycles}`}
         >
@@ -56,15 +56,15 @@ export default function GameHUD({
 
       {/* Center: phase label + instruction + countdown — float in space, no backdrop */}
       {!centerHidden && (
-        <div className="flex w-full max-w-[calc(100vw-2rem)] flex-col items-center gap-0 translate-y-[clamp(50px,13vh,110px)] landscape:translate-y-[clamp(30px,7vh,60px)]">
-        <div className="flex w-full flex-col items-center gap-3 px-4">
-          <div className="relative h-10 w-full min-w-0 flex items-center justify-center">
+        <div className="flex w-full max-w-[calc(100vw-2rem)] flex-col items-center gap-0 translate-y-[clamp(46px,12vh,100px)] landscape:translate-y-[clamp(28px,7vh,56px)]">
+        <div className="flex w-full flex-col items-center gap-1.5 px-4">
+          <div className="relative h-9 w-full min-w-0 flex items-center justify-center">
             {previousPhase && (
               <h2
                 className="exhale-phase-out absolute inset-x-0 text-center text-3xl font-semibold tracking-[0.3em] uppercase text-still-white"
                 style={{
                   ['--phase-opacity' as string]: labelOpacity,
-                  textShadow: '0 2px 16px rgba(0,0,0,0.85), 0 1px 4px rgba(0,0,0,0.9)',
+                  textShadow: '0 2px 16px rgba(15,23,18,0.85), 0 1px 4px rgba(15,23,18,0.9)',
                   opacity: labelOpacity,
                 }}
                 aria-hidden="true"
@@ -76,7 +76,7 @@ export default function GameHUD({
               className={`absolute inset-x-0 text-center text-3xl font-semibold tracking-[0.3em] uppercase text-still-white ${previousPhase ? 'exhale-phase-in' : ''}`}
               style={{
                 ['--phase-opacity' as string]: labelOpacity,
-                textShadow: '0 2px 16px rgba(0,0,0,0.85), 0 1px 4px rgba(0,0,0,0.9)',
+                textShadow: '0 2px 16px rgba(15,23,18,0.85), 0 1px 4px rgba(15,23,18,0.9)',
                 opacity: labelOpacity,
               }}
               aria-live="polite"
@@ -85,13 +85,13 @@ export default function GameHUD({
             </h2>
           </div>
 
-          <div className="relative min-h-10 w-full max-w-[26rem] flex items-center justify-center">
+          <div className="relative min-h-8 w-full max-w-[27rem] flex items-center justify-center">
             {previousPhase && (
               <p
-                className="exhale-phase-out absolute inset-x-0 text-still-white text-xs sm:text-sm tracking-[0.06em] sm:tracking-[0.12em] font-light text-center leading-relaxed px-1"
+                className="exhale-phase-out absolute inset-x-0 text-still-white text-sm tracking-[0.04em] font-light text-center leading-snug px-1"
                 style={{
                   ['--phase-opacity' as string]: instructionOpacity,
-                  textShadow: '0 1px 10px rgba(0,0,0,0.85)',
+                  textShadow: '0 2px 14px rgba(15,23,18,0.92), 0 1px 4px rgba(15,23,18,0.9)',
                   opacity: instructionOpacity,
                 }}
                 aria-hidden="true"
@@ -100,10 +100,10 @@ export default function GameHUD({
               </p>
             )}
             <p
-              className={`absolute inset-x-0 text-still-white text-xs sm:text-sm tracking-[0.06em] sm:tracking-[0.12em] font-light text-center leading-relaxed px-1 ${previousPhase ? 'exhale-phase-in' : ''}`}
+              className={`absolute inset-x-0 text-still-white text-sm tracking-[0.04em] font-light text-center leading-snug px-1 ${previousPhase ? 'exhale-phase-in' : ''}`}
               style={{
                 ['--phase-opacity' as string]: instructionOpacity,
-                textShadow: '0 1px 10px rgba(0,0,0,0.85)',
+                textShadow: '0 2px 14px rgba(15,23,18,0.92), 0 1px 4px rgba(15,23,18,0.9)',
                 opacity: instructionOpacity,
                 transition: 'opacity 5s ease',
               }}
@@ -113,9 +113,9 @@ export default function GameHUD({
           </div>
 
           <div
-            className="text-6xl font-thin tabular-nums text-still-white/90 mt-1"
+            className="text-6xl font-thin tabular-nums text-still-white/92 mt-0"
             style={{
-              textShadow: '0 2px 20px rgba(0,0,0,0.9)',
+              textShadow: '0 2px 20px rgba(15,23,18,0.9)',
               opacity: timerOpacity,
               transition: 'opacity 520ms ease',
             }}
@@ -132,13 +132,13 @@ export default function GameHUD({
       <div className="pb-[calc(7rem+env(safe-area-inset-bottom))] flex flex-col items-center gap-1.5">
         {!settled && (
           <p
-            className="text-still-white/62 text-xs tracking-[0.15em] uppercase font-light"
-            style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
+            className="text-still-white/70 text-xs tracking-[0.15em] uppercase font-light"
+            style={{ textShadow: '0 1px 6px rgba(15,23,18,0.6)' }}
           >
             ~{minutesLeft} min remaining
           </p>
         )}
-        <p className="hidden sm:block text-still-white/55 text-xs tracking-[0.1em] font-light" aria-hidden="true">
+        <p className="hidden sm:block text-still-white/60 text-xs tracking-[0.1em] font-light" aria-hidden="true">
           space · pause &nbsp;·&nbsp; esc · exit
         </p>
       </div>

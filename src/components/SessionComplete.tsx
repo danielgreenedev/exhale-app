@@ -49,9 +49,20 @@ export default function SessionComplete({ totalCycles, sessionDuration, storageN
       <div className="flex flex-col items-center gap-8 max-w-sm text-center animate-fade-in">
         {/* Warm amber orb */}
         <div className="relative">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-300/75 to-amber-600/50 shadow-[0_0_60px_rgba(251,191,36,0.30)]" />
-          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent" />
-          <div className="absolute inset-[-14px] rounded-full border border-amber-400/20 shadow-[0_0_18px_rgba(251,191,36,0.10)]" />
+          <div
+            className="h-24 w-24 rounded-full"
+            style={{
+              background: 'radial-gradient(circle at 36% 30%, rgba(244,220,166,0.76) 0%, rgba(210,174,101,0.58) 50%, rgba(103,76,30,0.62) 100%)',
+            }}
+          />
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{ background: 'linear-gradient(135deg, rgba(245,245,242,0.15) 0%, rgba(245,245,242,0) 56%)' }}
+          />
+          <div
+            className="absolute inset-[-14px] rounded-full border"
+            style={{ borderColor: 'rgba(210,174,101,0.22)' }}
+          />
         </div>
 
         <div className="flex flex-col gap-3">
@@ -61,7 +72,7 @@ export default function SessionComplete({ totalCycles, sessionDuration, storageN
           <p className="text-still-white/68 text-base font-light leading-relaxed">
             You completed {totalCycles} breath cycles
           </p>
-          <p className="text-still-white/58 text-sm tracking-widest">
+          <p className="text-still-white/58 text-sm tracking-[0.04em]">
             {minutes}:{seconds.toString().padStart(2, '0')} of calm
           </p>
         </div>
@@ -71,7 +82,7 @@ export default function SessionComplete({ totalCycles, sessionDuration, storageN
             &ldquo;{quote.text}&rdquo;
           </p>
           {quote.attribution && (
-            <p className="text-still-white/55 text-xs tracking-[0.1em] font-light">
+            <p className="text-still-white/55 text-xs tracking-[0.04em] font-light">
               &mdash; {quote.attribution}
             </p>
           )}

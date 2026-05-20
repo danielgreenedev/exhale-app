@@ -27,6 +27,10 @@ The fourth phase is labeled `Relax` (not `Rest`) and its instruction is the sing
 
 Phase transitions have anticipatory support because beta feedback showed that exact boundary changes can take a beat to process. In the final 0.8s of each phase (or 25% of phase duration on short phases — whichever is smaller), the guide ring around the orb picks up the next phase's color and a quiet pre-cue tone plays when sound is on. The cap is set by `getPhaseLookahead(phase)` in `src/lib/breathing.ts`; the ceiling `PHASE_LOOKAHEAD_SECONDS = 0.8` is what most phases use, but Soft's 2s Hold, Soft's 3s Inhale, and Flow's 2s Relax all get a proportionally shorter lead so the cue does not occupy 40% of the phase. No textual HUD cue is shown; an earlier attempt at a `Next [phase]` label competed with the central phase label and countdown for attention, so it was removed.
 
+The active phase label and the Settle In label intentionally share the same semibold, shadowed treatment for legibility over the moving orb. The instruction line below the phase label is compact, brighter than decorative UI text, and shadowed for older/low-vision mobile users.
+
+The center orb is the primary timing object. Keep the outer guide ring and incoming-color lead visibly softer than the orb; graphic-designer feedback showed that a brighter line can feel like the user is already behind because it starts before the orb changes.
+
 ## Stack
 
 - `src/app/page.tsx` — home/menu screen
@@ -63,6 +67,7 @@ Web Audio API synthesis only — no external audio files. Zero load time, works 
 - Phase cues are synthesized from per-phase tone pairs in `CUE_MAP`; the rhythm-aware breath filter ramps with the active phase duration.
 - Autoplay policy is already handled: attempts auto-start, falls back to first user interaction.
 - During active sessions, `scheduleAmbientStop` schedules a Web Audio clock fade-out at the guided-session deadline so Chrome background-tab throttling cannot leave the ambient bed running after completion.
+- On iPhone-class browsers, the session screen shows a timed "still quiet? check silent mode" hint after Settle In when sound is active. `startAmbient` must not report success unless the Web Audio context is actually running.
 
 ## Phase Colors
 
@@ -149,6 +154,6 @@ Key named rules to enforce on every change:
 - Amber only on session complete — nowhere else
 - Only `font-thin/extralight/light/semibold` (100/200/300/600) — no `font-normal`
 - No `italic` anywhere in the interface
-- No `box-shadow` for structural elevation — orb glow only
+- No `box-shadow` for structural elevation. Static orb marks also avoid colored glow shadows; luminous phase light belongs inside the session canvas.
 - Session controls (Pause, Exit) at bottom corners — never top of screen on mobile
-- Dialog/guard backdrops use `rgba(0,0,0,0.65)` — never a colored tint
+- Dialog/guard backdrops use tinted forest-night scrims such as `rgba(15,23,18,0.85)` — never pure black and never a colored accent

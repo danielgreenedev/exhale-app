@@ -18,8 +18,16 @@ export default function TermsPage() {
       <article className="relative z-10 flex flex-col gap-8 max-w-2xl w-full">
         <header className="flex flex-col items-start gap-4">
           <div className="relative" aria-hidden="true">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-300/60 to-emerald-600/40 shadow-[0_0_24px_rgba(110,231,183,0.18)]" />
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent" />
+            <div
+              className="h-10 w-10 rounded-full"
+              style={{
+                background: 'radial-gradient(circle at 36% 30%, rgba(202,224,211,0.64) 0%, rgba(94,158,118,0.56) 48%, rgba(31,82,52,0.62) 100%)',
+              }}
+            />
+            <div
+              className="absolute inset-0 rounded-full"
+              style={{ background: 'linear-gradient(135deg, rgba(245,245,242,0.14) 0%, rgba(245,245,242,0) 56%)' }}
+            />
           </div>
           <div className="flex flex-col gap-2">
             <h1 className="text-2xl font-extralight tracking-[0.3em] uppercase text-still-white/88">

@@ -31,6 +31,11 @@ const RESUME_KEY = 'exhale-resume';
 const SETTLE_DURATION_MS = 8000;
 const SILENT_MODE_HINT_MS = 5000;
 
+function shouldOfferSilentModeHint() {
+  if (typeof navigator === 'undefined') return false;
+  return /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+}
+
 function saveResumeState(length: SessionLength, elapsed: number) {
   try {
     sessionStorage.setItem(RESUME_KEY, JSON.stringify({ length, elapsed, timestamp: Date.now() }));
@@ -156,6 +161,7 @@ function GameContent() {
   const prevPhaseIndexRef = useRef(-1);
   const anticipationCueRef = useRef(-1);
   const audioStartedRef = useRef(false);
+  const silentModeHintShownRef = useRef(false);
   const sessionSavedRef = useRef(false);
   const sessionStartedEventRef = useRef(false);
   const settleTimerRef = useRef<number | null>(null);
@@ -164,6 +170,15 @@ function GameContent() {
   const exitGuardResumeRef = useRef<HTMLButtonElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
 
+  const showSilentModeHintBriefly = useCallback(() => {
+    setShowSilentModeHint(true);
+    if (silentHintTimerRef.current !== null) window.clearTimeout(silentHintTimerRef.current);
+    silentHintTimerRef.current = window.setTimeout(() => {
+      setShowSilentModeHint(false);
+      silentHintTimerRef.current = null;
+    }, SILENT_MODE_HINT_MS);
+  }, []);
+
   const beginAudio = useCallback(async () => {
     if (audioStartedRef.current) return;
 
@@ -171,6 +186,11 @@ function GameContent() {
     try {
       const started = await startAmbient();
       setAudioActive(started);
+      if (!started) {
+        audioStartedRef.current = false;
+        setShowAudioPrompt(soundPalette !== 'off');
+        return;
+      }
       setShowAudioPrompt(false);
     } catch {
       audioStartedRef.current = false;
@@ -192,14 +212,9 @@ function GameContent() {
     } else {
       audioStartedRef.current = false;
       await beginAudio();
-      setShowSilentModeHint(true);
-      if (silentHintTimerRef.current !== null) window.clearTimeout(silentHintTimerRef.current);
-      silentHintTimerRef.current = window.setTimeout(() => {
-        setShowSilentModeHint(false);
-        silentHintTimerRef.current = null;
-      }, SILENT_MODE_HINT_MS);
+      showSilentModeHintBriefly();
     }
-  }, [audioActive, stopAmbient, beginAudio]);
+  }, [audioActive, stopAmbient, beginAudio, showSilentModeHintBriefly]);
 
   // Detect fullscreen support (not available on iOS Safari)
   useEffect(() => {
@@ -287,6 +302,14 @@ function GameContent() {
       }
     };
   }, [beginAudio]);
+
+  useEffect(() => {
+    if (settling || !audioActive || soundPalette === 'off') return;
+    if (silentModeHintShownRef.current || !shouldOfferSilentModeHint()) return;
+
+    silentModeHintShownRef.current = true;
+    showSilentModeHintBriefly();
+  }, [audioActive, settling, showSilentModeHintBriefly, soundPalette]);
 
   // Give the Web Audio clock its own completion deadline so ambient sound fades out even
   // when Chrome throttles React/RAF work in a background tab.
@@ -512,21 +535,21 @@ function GameContent() {
       {settling && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 pointer-events-none z-10 transition-opacity duration-700" data-exhale-settle aria-live="polite">
           <p
-            className="exhale-settle-title text-still-white/78 text-2xl tracking-[0.3em] uppercase font-extralight"
-            style={{ textShadow: '0 2px 16px rgba(0,0,0,0.8)' }}
+            className="exhale-settle-title text-still-white text-3xl tracking-[0.18em] sm:tracking-[0.3em] uppercase font-semibold"
+            style={{ textShadow: '0 2px 16px rgba(15,23,18,0.85), 0 1px 4px rgba(15,23,18,0.9)' }}
           >
             Settle in
           </p>
           <p
-            className="exhale-settle-subtitle text-still-white/58 text-xs tracking-[0.22em] font-light"
-            style={{ textShadow: '0 1px 8px rgba(0,0,0,0.6)' }}
+            className="exhale-settle-subtitle text-still-white/70 text-xs tracking-[0.22em] font-light"
+            style={{ textShadow: '0 2px 12px rgba(15,23,18,0.82), 0 1px 4px rgba(15,23,18,0.78)' }}
           >
             breathe normally
           </p>
           {isFirstVisit && (
             <p
-              className="exhale-settle-hint absolute bottom-16 text-still-white/52 text-[10px] tracking-[0.18em] font-light"
-              style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
+              className="exhale-settle-hint absolute bottom-16 text-still-white/62 text-[10px] tracking-[0.18em] font-light"
+              style={{ textShadow: '0 1px 8px rgba(15,23,18,0.75)' }}
             >
               the circle leads, just follow
             </p>
@@ -592,8 +615,8 @@ function GameContent() {
           </button>
           {(showAudioPrompt || showSilentModeHint) && soundPalette !== 'off' && (
             <p
-              className="absolute bottom-full left-1/2 mb-2 w-max max-w-[13rem] -translate-x-1/2 text-center text-[10px] font-light tracking-[0.12em] text-still-white/58"
-              style={{ textShadow: '0 1px 6px rgba(0,0,0,0.65)' }}
+              className="absolute bottom-full left-1/2 mb-2 w-max max-w-[13rem] -translate-x-1/2 text-center text-[10px] font-light tracking-[0.04em] text-still-white/58"
+              style={{ textShadow: '0 1px 6px rgba(15,23,18,0.65)' }}
             >
               {showAudioPrompt ? 'tap for sound' : 'still quiet? check silent mode'}
             </p>
@@ -610,13 +633,13 @@ function GameContent() {
           <div className="flex flex-col items-center gap-2 pointer-events-none">
             <p
               className="text-still-white/64 text-sm tracking-[0.4em] uppercase font-extralight"
-              style={{ textShadow: '0 1px 8px rgba(0,0,0,0.7)' }}
+              style={{ textShadow: '0 1px 8px rgba(15,23,18,0.7)' }}
             >
               Paused
             </p>
             <p
               className="text-still-white/58 text-xs tracking-[0.18em] font-light"
-              style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
+              style={{ textShadow: '0 1px 6px rgba(15,23,18,0.6)' }}
             >
               tap · space to resume
             </p>
@@ -669,14 +692,14 @@ function GameContent() {
               <p
                 id="exit-guard-title"
                 className="text-still-white/90 text-xl font-extralight tracking-[0.25em] uppercase"
-                style={{ textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
+                style={{ textShadow: '0 2px 12px rgba(15,23,18,0.8)' }}
               >
                 Leave this session?
               </p>
               <p
                 id="exit-guard-description"
-                className="text-still-white/62 text-xs tracking-[0.1em] font-light"
-                style={{ textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}
+                className="text-still-white/62 text-xs tracking-[0.04em] font-light"
+                style={{ textShadow: '0 1px 6px rgba(15,23,18,0.6)' }}
               >
                 {settling ? 'You can come back whenever you are ready.' : 'Your progress is saved for 60 seconds.'}
               </p>

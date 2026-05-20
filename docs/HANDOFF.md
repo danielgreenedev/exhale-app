@@ -1,14 +1,14 @@
 # Codex Handoff
 
-Last updated: 2026-05-20 (OAuth Backup & Sync app-side start and docs cleanup)
+Last updated: 2026-05-20 (pre-commit audit follow-up)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
 ## Branch State
 
 - Branch: `master`.
-- Current working tree contains a commit-ready OAuth/documentation checkpoint.
-- Verification passed on May 20, 2026: `npm.cmd run lint`, `npm.cmd test -- --runInBand`, and `npm.cmd run build`.
+- Current working tree contains a mobile polish / feedback documentation checkpoint after the OAuth commit.
+- Verification passed on May 20, 2026: `npm.cmd run lint`, `npm.cmd test -- --runInBand`, `npm.cmd run build`, and a mobile Playwright smoke on Home plus `/game?length=quick&rhythm=full&orb=0.75&sound=off`.
 - `next-env.d.ts` may be rewritten by `next build`; restore it to the checked-in dev routes import before committing if it changes.
 
 ## Current Batch Summary
@@ -19,12 +19,18 @@ This document is overwritten on each handoff. The previous handoff's content doe
 - **Policy pages updated.** `/privacy` and `/terms` now describe optional email/Google Backup & Sync, exact synced data, third-party provider involvement, deletion path, and the promise that sign-in is never required to breathe.
 - **Deployment docs updated.** `docs/DEPLOYMENT.md` now includes the Google OAuth setup checklist and cross-device sync acceptance checks.
 - **Feedback mode continues.** The project is still collecting beta signal on rhythm fit, Flow pause friction, transition cues, and Session Setup clarity.
+- **Mobile legibility and sound trust pass completed in this checkpoint.** Home spacing, in-session label contrast, Settle In styling, iPhone silent-mode hinting, and suspended-Web-Audio handling were tightened after marketing/UX feedback.
+- **Visual cue hierarchy adjusted.** Graphic-designer feedback on Full showed the center orb felt relaxing, but the outer guide line could feel like the user was already behind. The guide line and incoming cue should stay softer than the orb.
+- **Impeccable audit follow-up applied.** Static orb marks now avoid colored glow box-shadows, body/sentence tracking is calmer, and pure-black shadow/scrim values were replaced with tinted forest-night values. `DESIGN.md` and `CLAUDE.md` were updated to preserve those rules.
+- **Audit status.** The rerun cleared the neon/static-glow and wide-body-tracking findings. One pure-black scanner warning still appears despite source/computed visible styles using tinted Forest Night (`#0f1712`), so treat that as a residual audit false positive unless a visible pure-black surface is found.
 
 ## Key Functional State
 
 - **Four visible paces.** Steady (4-4-6-8), Soft (3-2-4-4), Full (6-6-10-4), and Flow (4-0-6-2). Flow's zero-duration Hold is skipped by `getPhaseAtTime` and `getNextPhase`.
 - **Fourth phase: Relax.** The user-facing label is `Relax` with instruction `Breathe`; the internal phase enum remains `'rest'`.
 - **Anticipatory phase cue.** `PHASE_LOOKAHEAD_SECONDS = 0.8` is still the ceiling. `getPhaseLookahead(phase)` returns `Math.min(0.8, phase.duration * 0.25)`. No HUD text cue is shown.
+- **Cue hierarchy.** The center orb is the primary timing object. The outer guide ring is a quiet pre-cue/support signal, not the thing users should chase.
+- **Static orb marks.** Home, stats, policy, terms, complete, and app icons use muted radial fills plus low-opacity outline rings. Avoid reintroducing `emerald-300`, `#6ee7b7`, or colored `box-shadow` on static orb marks.
 - **Background-tab audio fix.** `useAudioEngine.scheduleAmbientStop` schedules the ambient fade-out against the Web Audio clock, and `game/page.tsx` schedules that stop at the guided-session deadline.
 - **Local visual QA quieter.** `AuthProvider` skips Supabase anonymous auth on `localhost` / `127.0.0.1` in development unless `localStorage.setItem('exhale-enable-local-supabase', '1')` is set.
 
@@ -46,6 +52,8 @@ Current brand-new-user prompts live in `docs/USER_FEEDBACK.md`; key themes still
 - Whether Flow solves the Rest/Hold friction for testers who disliked interruption.
 - Whether Flow should become inhale/exhale only if a second tester confirms the 2-second pause feels interruptive.
 - Whether anticipatory color/audio cues make transitions easier or add noise.
+- Whether the softened guide line makes the orb feel clearly primary.
+- Whether Full's 10-second exhale needs clearer expectation-setting for resting vs stressed states.
 - Whether Session Setup labels and explanations feel natural to brand-new users.
 
 ## Parked Questions
