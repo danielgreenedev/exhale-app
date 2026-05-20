@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 19, 2026 (Facebook reply intake; Rest label resolved; Flow rhythm sketched; Facebook preview resolved; graphic-designer HUD coherence pass added)
+Last updated: May 19, 2026 (Facebook reply intake; Rest label resolved; Flow rhythm sketched; Facebook preview resolved; graphic-designer HUD coherence pass completed)
 
 ## Completed Rhythm Changes
 
@@ -139,6 +139,15 @@ Early beta feedback showed that presets alone may not solve phase-boundary frict
 - Kept anticipation in the audio pre-cue and ring-color lead; no textual HUD transition cue is shown.
 - Kept the underlying rhythm timings unchanged; this is a comprehension/handoff improvement, not a new rhythm.
 
+## Completed Visual Coherence Pass (2026-05-19)
+
+Graphic-designer feedback flagged that the active session was showing phase progress too many ways at once. The coordinated TODO 6c pass is now implemented:
+
+- Removed the innermost phase progress ring from `BreathingOrb`; the session ring and outer guide ring remain.
+- Made the countdown phase-aware after cycle 1: Inhale/Exhale fade to a quiet 16% visual opacity because the orb scale carries phase progress, while Hold/Relax stay readable at 62% because the orb is static and the timer is load-bearing.
+- Dampened the transition flash by phase duration so short phases, especially Gentle's 2-second Hold, do not strobe at full amplitude.
+- Smoke-tested Standard, Gentle, and Full in the browser at mobile width.
+
 ## Remaining To-Do
 
 Items are grouped loosely by roadmap stage. See `docs/ROADMAP.md` for the strategic context.
@@ -171,13 +180,7 @@ These can wait until after Stage 0 feedback signal is in.
 
 6b. Park: do rhythms need to support progressive ramping (each rep longer than the last) rather than only steady patterns? Single-user signal from T-2026-05-19-07. Do not act yet; revisit if a second tester independently asks for escalation or if competitive-framing usage shows up in `app_events`. If raised again, write it up as a full open question in `docs/OPEN_QUESTIONS.md` before any scoping.
 
-6c. Visual-coherence pass on the in-session HUD, driven by T-2026-05-19-08 (graphic designer, professional-eye signal — see `docs/USER_FEEDBACK.md`). Three coordinated changes that share the underlying intent of "stop showing the same signal three different ways" and should land together as one pass rather than three independent changes:
-
-- Drop the innermost phase progress ring in `src/components/BreathingOrb.tsx:295-322` (`ringR = maxR + 24`). The sweeping arc duplicates phase-progress signal already carried by the orb scale on Inhale/Exhale and by the countdown number on Hold/Relax. Two rings remain (session progress at `sessR`, outer guide at `guideR`).
-- Make the countdown text (`src/components/GameHUD.tsx:113-124`, `role="timer"`) phase-aware. Today's uniform 58% opacity after cycle 2 fades all phases equally; the designer wants Inhale/Exhale to fade deeper (or hide entirely) since the orb scale is the natural indicator there, while Hold/Relax stays visible since the orb is static and the countdown is the only "how long" signal.
-- Damp the phase-transition flash (`src/components/BreathingOrb.tsx:272-287`) by phase duration so Gentle's 2-second Hold does not strobe at full amplitude. Suggested formula: scale flash opacity by `Math.min(1, phase.duration / 4)` or similar; matches the proportional pattern raised for the anticipation lead window discussion.
-
-Implementation notes: this is design territory and the proof is on screen, not in the test suite. Smoke-test all three rhythms in browser before merging, and confirm that no phase loses its "how long" signal entirely (Hold/Relax must still feel paced, just without the phase-ring sweep). Keep `aria-label` on the countdown unconditional so screen readers can still announce time remaining; only the visual opacity changes by phase.
+6c. Resolved 2026-05-19: visual-coherence pass on the in-session HUD. See Completed Visual Coherence Pass above.
 
 7. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Secondary-user feedback asked about changing colors; evaluate that through a theme/skin system before considering freeform color controls. Run `/impeccable shape Garden skin` before building.
 

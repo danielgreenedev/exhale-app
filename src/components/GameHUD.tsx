@@ -37,6 +37,8 @@ export default function GameHUD({
 
   const labelOpacity = settled ? 0.7 : 1;
   const instructionOpacity = settled ? 0 : 0.82;
+  const timerIsLoadBearing = currentPhase.phase === 'hold' || currentPhase.phase === 'rest';
+  const timerOpacity = !settled ? 1 : timerIsLoadBearing ? 0.62 : 0.16;
 
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-between pointer-events-none select-none">
@@ -114,8 +116,8 @@ export default function GameHUD({
             className="text-6xl font-thin tabular-nums text-still-white/90 mt-1"
             style={{
               textShadow: '0 2px 20px rgba(0,0,0,0.9)',
-              opacity: settled ? 0.58 : 1,
-              transition: 'opacity 4s ease',
+              opacity: timerOpacity,
+              transition: 'opacity 520ms ease',
             }}
             role="timer"
             aria-label={`${timeRemaining} seconds remaining`}

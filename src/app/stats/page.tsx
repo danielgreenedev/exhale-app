@@ -280,13 +280,13 @@ export default function StatsPage() {
   const timeLabel = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
 
   return (
-    <main className="min-h-screen bg-forest-night flex flex-col items-center justify-center px-6 text-still-white">
+    <main className="min-h-screen bg-forest-night flex flex-col items-center justify-center px-4 sm:px-6 text-still-white">
       <div
         className="absolute inset-0 pointer-events-none"
         style={{ background: SURFACE_GLOWS.stats }}
       />
 
-      <div className="relative z-10 flex flex-col items-center gap-10 max-w-sm w-full">
+      <div className="relative z-10 flex w-full max-w-[18rem] flex-col items-center gap-10 sm:max-w-sm">
         <div className="flex flex-col items-center gap-5">
           <div className="relative orb-breathe" aria-hidden="true">
             <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-300/60 to-emerald-600/40 shadow-[0_0_36px_rgba(110,231,183,0.20)]" />

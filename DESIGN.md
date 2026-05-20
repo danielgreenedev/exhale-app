@@ -216,8 +216,8 @@ In the final `PHASE_LOOKAHEAD_SECONDS` (currently 0.8s) before each phase change
 
 ### Progress Indicators
 
-- **Phase ring:** Drawn on canvas around the orb — arc from `-π/2` sweeping with phase progress. Phase color at 80% opacity.
-- **Session ring:** Outer ring, same origin — session progress fill at 42% opacity over a 12% track. This is the sole session-level progress indicator; the redundant HUD progress bar was removed after a beta tester reported the floating colored segment more confusing than informative.
+- **Session ring:** Drawn on canvas around the orb, with session progress fill at 42% opacity over a 12% track. This is the sole session-level progress indicator; the redundant HUD progress bar was removed after a beta tester reported the floating colored segment more confusing than informative.
+- **Guide ring:** The outer breath rail shows current phase progress and the incoming phase color lead. The earlier separate inner phase-progress ring was removed after graphic-designer feedback because it duplicated the orb scale and countdown signals.
 
 ### Phase Transitions
 

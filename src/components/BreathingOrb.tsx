@@ -278,7 +278,8 @@ export default function BreathingOrb({
           const easedT = 1 - Math.pow(1 - ft, 3);
           const [fh, fs, fl] = targetColorRef.current;
           const flashRingR = orbRadius * (1.05 + easedT * 1.6);
-          const flashOpacity = (1 - ft) * 0.24;
+          const durationScale = Math.min(1, Math.max(0.35, phase.duration / 4));
+          const flashOpacity = (1 - ft) * 0.24 * durationScale;
           ctx.strokeStyle = `hsla(${fh}, ${fs}%, ${Math.min(fl + 22, 95)}%, ${flashOpacity})`;
           ctx.lineWidth = Math.max(0.5, 2.2 * (1 - ft * 0.5));
           ctx.lineCap = 'round';
@@ -292,36 +293,8 @@ export default function BreathingOrb({
         }
       }
 
-      // Phase progress ring
-      const ringR = maxR + 24;
-      ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${bl}%, 0.12)`;
-      ctx.lineWidth = 3;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
-      ctx.stroke();
-
-      const incomingArcOpacity = outgoingArcRef.current
-        ? 0.45 + 0.35 * easeInOutCubic(outgoingArcTRef.current)
-        : 0.8;
-      ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${bl}%, ${incomingArcOpacity})`;
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(cx, cy, ringR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * pp);
-      ctx.stroke();
-
-      if (outgoingArcRef.current) {
-        const [oh, os, ol] = outgoingArcRef.current.color;
-        const oldOpacity = 0.46 * (1 - easeInOutCubic(outgoingArcTRef.current));
-        ctx.strokeStyle = `hsla(${oh}, ${os}%, ${ol}%, ${oldOpacity})`;
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.arc(cx, cy, ringR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * outgoingArcRef.current.progress);
-        ctx.stroke();
-      }
-
       // Session progress ring — now the only session-level progress indicator after the HUD bar was removed
-      const sessR = ringR + 14;
+      const sessR = maxR + 38;
       ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${bl}%, 0.12)`;
       ctx.lineWidth = 2;
       ctx.beginPath();

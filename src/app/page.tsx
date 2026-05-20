@@ -291,14 +291,14 @@ function HomeContent() {
   const previewingSoundLabel = SOUND_PALETTES.find((palette) => palette.id === previewingSound)?.label;
 
   return (
-    <main className="min-h-screen bg-forest-night flex flex-col items-center px-6 text-still-white">
+    <main className="min-h-screen bg-forest-night flex flex-col items-center px-4 sm:px-6 text-still-white">
       {/* Warm forest glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{ background: SURFACE_GLOWS.home }}
       />
 
-      <div className="relative z-10 flex flex-col items-center gap-5 max-w-sm w-full py-12">
+      <div className="relative z-10 flex w-full max-w-[18rem] flex-col items-center gap-5 py-12 sm:max-w-sm">
 
         {/* Logo orb */}
         <div className="flex flex-col items-center gap-4">
