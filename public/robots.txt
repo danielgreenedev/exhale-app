@@ -22,5 +22,8 @@ Allow: /
 User-agent: Discordbot
 Allow: /
 
+User-agent: TelegramBot
+Allow: /
+
 User-agent: *
 Allow: /
