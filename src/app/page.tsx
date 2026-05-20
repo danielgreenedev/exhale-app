@@ -412,7 +412,7 @@ function HomeContent() {
               <span id="rhythm-label" className="text-still-white/62 text-xs tracking-[0.14em] uppercase font-light">
                 Rhythm
               </span>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-4 gap-1.5">
                 {(Object.values(RHYTHMS)).map((r) => {
                   const active = selectedRhythm === r.id;
                   const sig = r.pattern.map((p) => p.duration).join('-');

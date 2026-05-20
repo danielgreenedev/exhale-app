@@ -2,7 +2,7 @@ import { PHASE_COLORS } from '@/lib/colors';
 
 export type BreathingPhase = 'inhale' | 'hold' | 'exhale' | 'rest';
 export type SessionLength = 'quick' | 'short' | 'medium' | 'long';
-export type RhythmId = 'standard' | 'gentle' | 'full';
+export type RhythmId = 'standard' | 'gentle' | 'full' | 'flow';
 
 export const DEFAULT_SESSION_LENGTH: SessionLength = 'quick';
 export const DEFAULT_ORB_SCALE = 1;
@@ -144,10 +144,17 @@ export const RHYTHMS: Record<RhythmId, Rhythm> = {
     'Longer inhale, longer hold, and a much longer exhale. Good for experienced breathwork users. Named Full rather than Deep to avoid collision with the Deep sound texture label.',
     [6, 6, 10, 4]
   ),
+  flow: buildRhythm(
+    'flow',
+    'Flow',
+    'Open',
+    'Inhale and exhale with no hold and a brief pause. For users who find the Hold or longer Rest distracting.',
+    [4, 0, 6, 2]
+  ),
 };
 
 export function isRhythmId(value: unknown): value is RhythmId {
-  return value === 'standard' || value === 'gentle' || value === 'full';
+  return value === 'standard' || value === 'gentle' || value === 'full' || value === 'flow';
 }
 
 export function getRhythm(id: RhythmId | string | null | undefined): Rhythm {
@@ -171,7 +178,15 @@ export function getPhaseAtTime(
 }
 
 export function getNextPhase(phaseIndex: number, rhythm: Rhythm = RHYTHMS[DEFAULT_RHYTHM]): PhaseConfig {
-  return rhythm.pattern[(phaseIndex + 1) % rhythm.pattern.length];
+  // Skip zero-duration phases so anticipation cues never lead into a phase with no screen time.
+  // Flow (4-0-6-2) has a zero-duration Hold; without this skip, the cue between Inhale and Exhale
+  // would target Hold and never reach Exhale.
+  const len = rhythm.pattern.length;
+  for (let i = 1; i <= len; i++) {
+    const next = rhythm.pattern[(phaseIndex + i) % len];
+    if (next.duration > 0) return next;
+  }
+  return rhythm.pattern[(phaseIndex + 1) % len];
 }
 
 export function easeInOutCubic(t: number): number {

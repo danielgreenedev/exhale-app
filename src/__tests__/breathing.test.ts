@@ -92,8 +92,8 @@ describe('getPhaseAtTime', () => {
 });
 
 describe('RHYTHMS registry', () => {
-  it('exposes standard, gentle, and full rhythms', () => {
-    expect(Object.keys(RHYTHMS).sort()).toEqual(['full', 'gentle', 'standard']);
+  it('exposes standard, gentle, full, and flow rhythms', () => {
+    expect(Object.keys(RHYTHMS).sort()).toEqual(['flow', 'full', 'gentle', 'standard']);
   });
 
   it('standard rhythm preserves the canonical 4-4-6-8 timing', () => {
@@ -104,16 +104,32 @@ describe('RHYTHMS registry', () => {
     expect(RHYTHMS.standard.sessionCycles).toEqual({ quick: 8, short: 14, medium: 19, long: 27 });
   });
 
-  it('each rhythm has four phases in the canonical order with positive durations', () => {
-    (['standard', 'gentle', 'full'] as const).forEach((id) => {
+  it('flow rhythm uses the 4-0-6-2 hold-less timing', () => {
+    const phases = RHYTHMS.flow.pattern.map((p) => p.phase);
+    expect(phases).toEqual(['inhale', 'hold', 'exhale', 'rest']);
+    expect(RHYTHMS.flow.pattern.map((p) => p.duration)).toEqual([4, 0, 6, 2]);
+    expect(RHYTHMS.flow.cycleDuration).toBe(12);
+  });
+
+  it('each rhythm has four phases in the canonical order', () => {
+    (['standard', 'gentle', 'full', 'flow'] as const).forEach((id) => {
       const phases = RHYTHMS[id].pattern.map((p) => p.phase);
       expect(phases).toEqual(['inhale', 'hold', 'exhale', 'rest']);
-      RHYTHMS[id].pattern.forEach((p) => expect(p.duration).toBeGreaterThan(0));
+    });
+  });
+
+  it('Inhale and Exhale always have positive durations; Hold and Relax may be zero', () => {
+    (['standard', 'gentle', 'full', 'flow'] as const).forEach((id) => {
+      const pattern = RHYTHMS[id].pattern;
+      expect(pattern[0].duration).toBeGreaterThan(0); // inhale
+      expect(pattern[2].duration).toBeGreaterThan(0); // exhale
+      expect(pattern[1].duration).toBeGreaterThanOrEqual(0); // hold may be 0 (flow)
+      expect(pattern[3].duration).toBeGreaterThanOrEqual(0); // rest may be 0 (future rhythms)
     });
   });
 
   it('each rhythm reports its true cycle duration', () => {
-    (['standard', 'gentle', 'full'] as const).forEach((id) => {
+    (['standard', 'gentle', 'full', 'flow'] as const).forEach((id) => {
       const summed = RHYTHMS[id].pattern.reduce((acc, p) => acc + p.duration, 0);
       expect(RHYTHMS[id].cycleDuration).toBe(summed);
     });
@@ -121,7 +137,7 @@ describe('RHYTHMS registry', () => {
 
   it('session-cycle counts keep each label within one cycle of its target duration', () => {
     const targetsSec = { quick: 180, short: 300, medium: 420, long: 600 } as const;
-    (['standard', 'gentle', 'full'] as const).forEach((id) => {
+    (['standard', 'gentle', 'full', 'flow'] as const).forEach((id) => {
       const rhythm = RHYTHMS[id];
       (['quick', 'short', 'medium', 'long'] as const).forEach((len) => {
         const actual = rhythm.sessionCycles[len] * rhythm.cycleDuration;
@@ -133,10 +149,11 @@ describe('RHYTHMS registry', () => {
 });
 
 describe('isRhythmId', () => {
-  it('accepts the three known rhythms', () => {
+  it('accepts the four known rhythms', () => {
     expect(isRhythmId('standard')).toBe(true);
     expect(isRhythmId('gentle')).toBe(true);
     expect(isRhythmId('full')).toBe(true);
+    expect(isRhythmId('flow')).toBe(true);
   });
 
   it('rejects unknown strings and non-strings', () => {
@@ -171,6 +188,56 @@ describe('getNextPhase', () => {
 
   it('wraps from rest back to inhale', () => {
     expect(getNextPhase(3).phase).toBe('inhale');
+  });
+
+  it('skips zero-duration phases (Flow rhythm has Hold=0)', () => {
+    const flow = RHYTHMS.flow;
+    // From Inhale (index 0), the next visible phase is Exhale, not the zero-duration Hold.
+    expect(getNextPhase(0, flow).phase).toBe('exhale');
+    // From Hold (index 1, zero duration), next is still Exhale.
+    expect(getNextPhase(1, flow).phase).toBe('exhale');
+    // From Exhale (index 2), next is the brief Relax.
+    expect(getNextPhase(2, flow).phase).toBe('rest');
+    // From Relax (index 3), wrap back to Inhale (also skipping Hold).
+    expect(getNextPhase(3, flow).phase).toBe('inhale');
+  });
+});
+
+describe('getPhaseAtTime with the Flow rhythm', () => {
+  // Flow is 4-0-6-2 = 12s cycle. Phase index 1 (Hold) has zero duration.
+  const flow = RHYTHMS.flow;
+
+  it('returns inhale at t=0 and across the Inhale window', () => {
+    expect(getPhaseAtTime(0, flow).config.phase).toBe('inhale');
+    expect(getPhaseAtTime(2, flow).config.phase).toBe('inhale');
+    expect(getPhaseAtTime(3.99, flow).config.phase).toBe('inhale');
+  });
+
+  it('skips the zero-duration Hold and returns Exhale at t=4', () => {
+    const { config, phaseIndex } = getPhaseAtTime(4, flow);
+    expect(config.phase).toBe('exhale');
+    expect(phaseIndex).toBe(2);
+  });
+
+  it('stays in Exhale until t=10, then returns Relax', () => {
+    expect(getPhaseAtTime(9.99, flow).config.phase).toBe('exhale');
+    expect(getPhaseAtTime(10, flow).config.phase).toBe('rest');
+    expect(getPhaseAtTime(11.99, flow).config.phase).toBe('rest');
+  });
+
+  it('the zero-duration Hold is never the active phase', () => {
+    for (let t = 0; t < flow.cycleDuration; t += 0.1) {
+      const { phaseIndex } = getPhaseAtTime(t, flow);
+      expect(phaseIndex).not.toBe(1);
+    }
+  });
+
+  it('covers Inhale, Exhale, and Relax as t sweeps a full cycle (Hold is unreachable)', () => {
+    const seen = new Set<string>();
+    for (let t = 0; t < flow.cycleDuration; t += 0.1) {
+      seen.add(getPhaseAtTime(t, flow).config.phase);
+    }
+    expect(seen).toEqual(new Set(['inhale', 'exhale', 'rest']));
   });
 });
 
