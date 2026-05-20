@@ -244,3 +244,104 @@ describe('useBreathingSession - alternate rhythm', () => {
     expect(result.current.cycleDuration).toBe(13);
   });
 });
+
+describe('useBreathingSession - proportional anticipation cue cap', () => {
+  // The hook's RAF tick throttles state updates by an updateKey that quantizes leadProgress
+  // to quarters: floor(leadProgress * 4). A test that chains two advance() calls inside one
+  // bucket sees stale state. Each test below uses a fresh renderHook + single advance, and
+  // picks sample points that cross a quarter boundary so the updateKey actually changes.
+
+  // Standard rhythm Inhale is 4s; cap doesn't engage (4 * 0.25 = 1s > 0.8s ceiling).
+  // Lead window stays at the full 0.8s, activating at t=3.2s.
+  it('Standard Inhale lead is inactive at t=2.5s (0.7s before the 0.8s window opens)', () => {
+    const { result } = renderHook(() => useBreathingSession('short'));
+    act(() => { result.current.start(); });
+    advance(2500);
+    expect(result.current.currentPhase.phase).toBe('inhale');
+    expect(result.current.phaseLeadProgress).toBe(0);
+  });
+
+  it('Standard Inhale lead is active at t=3.5s (0.3s into the 0.8s window)', () => {
+    const { result } = renderHook(() => useBreathingSession('short'));
+    act(() => { result.current.start(); });
+    advance(3500);
+    expect(result.current.currentPhase.phase).toBe('inhale');
+    expect(result.current.phaseLeadProgress).toBeGreaterThan(0);
+  });
+
+  // Gentle Hold is 2s; cap engages at 25% = 0.5s. Hold runs t=3..5.
+  // Under the old 0.8s constant, t=4.3s (0.7s before end) would have leadProgress > 0;
+  // under the cap, the lead window only opens at t=4.5s.
+  it('Gentle Hold lead is inactive at t=4.3s (0.7s before end, outside the 0.5s cap)', () => {
+    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.gentle));
+    act(() => { result.current.start(); });
+    advance(4300);
+    expect(result.current.currentPhase.phase).toBe('hold');
+    expect(result.current.phaseLeadProgress).toBe(0);
+  });
+
+  it('Gentle Hold lead is active at t=4.8s (0.2s before end, inside the 0.5s cap)', () => {
+    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.gentle));
+    act(() => { result.current.start(); });
+    advance(4800);
+    expect(result.current.currentPhase.phase).toBe('hold');
+    expect(result.current.phaseLeadProgress).toBeGreaterThan(0);
+  });
+
+  // Flow Relax is 2s; cap engages at 25% = 0.5s. Flow is 4-0-6-2 so Relax runs t=10..12.
+  // Under the old constant, t=11.3s would have leadProgress > 0; under the cap, only t=11.5s+.
+  it('Flow Relax lead is inactive at t=11.3s (0.7s before end, outside the 0.5s cap)', () => {
+    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.flow));
+    act(() => { result.current.start(); });
+    advance(11300);
+    expect(result.current.currentPhase.phase).toBe('rest');
+    expect(result.current.phaseLeadProgress).toBe(0);
+  });
+
+  it('Flow Relax lead is active at t=11.8s (0.2s before end, inside the 0.5s cap)', () => {
+    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.flow));
+    act(() => { result.current.start(); });
+    advance(11800);
+    expect(result.current.currentPhase.phase).toBe('rest');
+    expect(result.current.phaseLeadProgress).toBeGreaterThan(0);
+  });
+
+  // Flow's Hold has zero duration. During Inhale (t=0..4), the anticipation cue's nextPhase
+  // must target Exhale (not Hold), so the user sees the right incoming color and hears the
+  // right pre-cue tone.
+  it('Flow Inhale anticipation targets Exhale, skipping the zero-duration Hold', () => {
+    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.flow));
+    act(() => { result.current.start(); });
+    advance(3500); // t=3.5s, inside Flow's 0.8s lead window before the Inhale→Exhale handoff
+    expect(result.current.currentPhase.phase).toBe('inhale');
+    expect(result.current.nextPhase.phase).toBe('exhale');
+    expect(result.current.phaseLeadProgress).toBeGreaterThan(0);
+  });
+
+  // The cap is the same proportional formula as the design sketch. This is a sweep check that
+  // for each rhythm/non-zero phase the lead is at most 25% of phase duration. Catches anyone
+  // who tries to "tune" PHASE_LOOKAHEAD_SECONDS up without updating the cap.
+  it('lead window never exceeds 25% of phase duration on any rhythm', () => {
+    (['standard', 'gentle', 'full', 'flow'] as const).forEach((id) => {
+      const rhythm = RHYTHMS[id];
+      const { result } = renderHook(() => useBreathingSession('short', 0, rhythm));
+      let accumulated = 0;
+      rhythm.pattern.forEach((phase) => {
+        if (phase.duration === 0) {
+          accumulated += phase.duration;
+          return;
+        }
+        // Sample 26% into the phase from the end — should still be outside the lead window.
+        const sampleSecsBeforeEnd = phase.duration * 0.26;
+        const targetMs = (accumulated + phase.duration - sampleSecsBeforeEnd) * 1000;
+        // Reset to t=0 and advance to the sample point.
+        act(() => { result.current.reset(); });
+        act(() => { result.current.start(); });
+        advance(targetMs);
+        expect(result.current.currentPhase.phase).toBe(phase.phase);
+        expect(result.current.phaseLeadProgress).toBe(0);
+        accumulated += phase.duration;
+      });
+    });
+  });
+});
