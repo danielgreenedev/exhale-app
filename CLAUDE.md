@@ -14,18 +14,18 @@ This means: no sign-up, no accounts, no onboarding gates, no streaks that guilt,
 
 ## Core Mechanic
 
-Selectable breathing rhythm exposed inside Session Setup on the home screen. Four options, default Standard:
+Selectable breathing rhythm exposed inside Session Setup on the home screen. Four visible pace options, default Steady. Internal ids stay `standard`, `gentle`, `full`, and `flow` for storage compatibility:
 
-- **Standard** — 4-4-6-8 (22s cycle). Default for first-time users.
-- **Gentle** — 3-2-4-4 (13s cycle). Shorter cycle with a lighter hold; for capacity-constrained users.
-- **Full** — 6-6-10-4 (26s cycle). Longer inhale, hold, and exhale; for experienced breathwork users.
-- **Flow** — 4-0-6-2 (12s cycle). No Hold, brief Relax; for users who find the Hold or longer Rest distracting. Hold phase has zero duration but stays in the canonical four-phase shape; `getNextPhase` skips zero-duration phases so the anticipation cue never lands on Hold during Flow.
+- **Steady** (`standard`) — 4-4-6-8 (22s cycle). Default for first-time users.
+- **Soft** (`gentle`) — 3-2-4-4 (13s cycle, 4.6 breaths/min). Shorter, lighter cycles for easier breathing.
+- **Full** (`full`) — 6-6-10-4 (26s cycle, 2.3 breaths/min). Slower, deeper rhythm with longer breaths.
+- **Flow** (`flow`) — 4-0-6-2 (12s cycle, 5.0 breaths/min). No hold, steady momentum. Hold phase has zero duration but stays in the canonical four-phase shape; `getNextPhase` skips zero-duration phases so the anticipation cue never lands on Hold during Flow.
 
 Fully guided, with no user input needed during a session. Session lengths: quick (~3m), short (~5m), medium (~7m), long (~10m). Cycle counts are recalibrated per rhythm so each minute label stays close to its target across all four patterns.
 
-The fourth phase is labeled `Relax` (not `Rest`) and its instruction is the single word `Breathe`. The phase exists to let the body do what it naturally wants after exhale, which is to take an inhale on its own time; "Rest" implied stillness in a way that did not match that intent. The phase enum stays `rest` as the internal discriminator. In Standard the phase is long enough for a full normal breath; Gentle, Full, and Flow reshape that balance for their respective audiences (Flow trims it to 2s as a transition beat).
+The fourth phase is labeled `Relax` (not `Rest`) and its instruction is the single word `Breathe`. The phase exists to let the body do what it naturally wants after exhale, which is to take an inhale on its own time; "Rest" implied stillness in a way that did not match that intent. The phase enum stays `rest` as the internal discriminator. In Steady the phase is long enough for a full normal breath; Soft, Full, and Flow reshape that balance for their respective audiences (Flow trims it to 2s as a transition beat).
 
-Phase transitions have anticipatory support because beta feedback showed that exact boundary changes can take a beat to process. In the final 0.8s of each phase (or 25% of phase duration on short phases — whichever is smaller), the guide ring around the orb picks up the next phase's color and a quiet pre-cue tone plays when sound is on. The cap is set by `getPhaseLookahead(phase)` in `src/lib/breathing.ts`; the ceiling `PHASE_LOOKAHEAD_SECONDS = 0.8` is what most phases use, but Gentle's 2s Hold, Gentle's 3s Inhale, and Flow's 2s Relax all get a proportionally shorter lead so the cue does not occupy 40% of the phase. No textual HUD cue is shown; an earlier attempt at a `Next [phase]` label competed with the central phase label and countdown for attention, so it was removed.
+Phase transitions have anticipatory support because beta feedback showed that exact boundary changes can take a beat to process. In the final 0.8s of each phase (or 25% of phase duration on short phases — whichever is smaller), the guide ring around the orb picks up the next phase's color and a quiet pre-cue tone plays when sound is on. The cap is set by `getPhaseLookahead(phase)` in `src/lib/breathing.ts`; the ceiling `PHASE_LOOKAHEAD_SECONDS = 0.8` is what most phases use, but Soft's 2s Hold, Soft's 3s Inhale, and Flow's 2s Relax all get a proportionally shorter lead so the cue does not occupy 40% of the phase. No textual HUD cue is shown; an earlier attempt at a `Next [phase]` label competed with the central phase label and countdown for attention, so it was removed.
 
 ## Stack
 
@@ -59,9 +59,10 @@ Phase transitions have anticipatory support because beta feedback showed that ex
 
 Web Audio API synthesis only — no external audio files. Zero load time, works offline.
 
-- Ambient drone: 174Hz
-- Phase tones (Solfeggio frequencies): 528Hz inhale, 432Hz hold, 396Hz exhale, 285Hz rest
-- Autoplay policy is already handled: attempts auto-start, falls back to first user interaction
+- Background sound palettes: Off, Air, Warm, Deep, Still. Air is the default.
+- Phase cues are synthesized from per-phase tone pairs in `CUE_MAP`; the rhythm-aware breath filter ramps with the active phase duration.
+- Autoplay policy is already handled: attempts auto-start, falls back to first user interaction.
+- During active sessions, `scheduleAmbientStop` schedules a Web Audio clock fade-out at the guided-session deadline so Chrome background-tab throttling cannot leave the ambient bed running after completion.
 
 ## Phase Colors
 
@@ -99,15 +100,17 @@ Supabase is optional from the user's point of view and only appears through Prac
 | `app_events` | Lightweight counts for timer selection, session start, early exit, and completion |
 | `quotes` | Rotating inspirational quotes for the session complete screen (read-only via RLS) |
 
+Local development on `localhost` / `127.0.0.1` uses local-only auth by default so blocked Supabase requests do not trigger the Next.js dev overlay during visual QA. To deliberately test local Supabase auth/sync, run `localStorage.setItem('exhale-enable-local-supabase', '1')` in the browser and reload.
+
 ## Key UX Decisions
 
 These are intentional — don't undo them without understanding the rationale:
 
 - **No user input during a session** — fully guided, not hold-to-breathe. Reduces intimidation for first-timers who don't know when to inhale.
 - **Abstract orb** — chosen over thematic visuals (ocean, lantern, mandala). More universal, less culturally loaded, works for any user.
-- **Selectable rhythm (Standard / Gentle / Full / Flow)** — Standard, Gentle, Full added after five of six recent beta testers reported rhythm-fit concerns across a range of capacities and preferences. Flow added after four testers (T-2026-05-19-03, -05, -06, -07) converged on Rest/Hold as the friction; Flow removes Hold entirely and shortens Relax to a transition beat. Default stays Standard 4-4-6-8; alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
+- **Selectable pace (Steady / Soft / Full / Flow)** — Steady, Soft, Full added after five of six recent beta testers reported rhythm-fit concerns across a range of capacities and preferences. Flow added after four testers (T-2026-05-19-03, -05, -06, -07) converged on Rest/Hold as the friction; Flow removes Hold entirely and shortens Relax to a transition beat. Default stays Steady 4-4-6-8; alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
 - **Fourth phase reframed as `Relax` with instruction `Breathe`** — "Rest" implied stillness when the body actually wants to inhale after exhale. `Relax` keeps imperative-verb parity with Inhale / Hold / Exhale and reads as permission. The instruction collapses to a single word because the label does the framing.
-- **Anticipatory cue in the final 0.8s of each phase, or 25% of phase duration, whichever is smaller** — guide-ring picks up the next-phase color and audio plays a quiet pre-cue. The proportional cap keeps the lead from feeling jittery on short phases (Gentle Hold, Flow Relax). No HUD text cue (removed because it competed with the central phase label and countdown).
+- **Anticipatory cue in the final 0.8s of each phase, or 25% of phase duration, whichever is smaller** — guide-ring picks up the next-phase color and audio plays a quiet pre-cue. The proportional cap keeps the lead from feeling jittery on short phases (Soft Hold, Flow Relax). No HUD text cue (removed because it competed with the central phase label and countdown).
 - **8s settle-in before first breath** — gives the user a quiet transition from "reading the screen" to "being in the session."
 - **New-user defaults** — Quick / 3 min and medium Circle Size are the first-run defaults so the first session feels short and visually balanced.
 - **Session resume (60s window)** — exiting a session shows an exit guard; sessionStorage holds state for 60s so accidental exits don't lose progress.

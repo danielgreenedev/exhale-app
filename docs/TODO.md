@@ -1,12 +1,13 @@
 # Exhale To-Do List
 
-Last updated: May 20, 2026 (Flow rhythm shipped; proportional cue cap; policy footer; TS cleanup)
+Last updated: May 20, 2026 (rhythm rate labels corrected; top breath counts removed; background-tab audio bug resolved)
 
 ## Completed Rhythm Changes
 
 - Settle In now lasts 8 seconds before the first guided inhale.
 - The core rhythm is now 4-4-6-8, with an 8-second Relax phase (internal phase enum `rest`).
 - Session breath counts were recalibrated so the 3, 5, 7, and 10 minute labels stay accurate.
+- Top-level session length buttons now show only time labels; rhythm-specific timing details stay behind the optional `View timing` reveal instead of the first decision surface.
 
 ## Completed UI Polish
 
@@ -14,9 +15,12 @@ Last updated: May 20, 2026 (Flow rhythm shipped; proportional cue cap; policy fo
 - Off is separated from sound textures and uses a mute icon.
 - Time, Circle Size, and Sound selected states share one quieter visual language.
 - View Sequence and Settings were merged into one Session Setup drawer.
+- Session Setup was split into three tabs to reduce density: Sequence, Visual, and Audio.
 - Begin remains the only solid green primary action.
 - Still is now audibly present.
 - Circle Size and Sound live inside Session Setup from the start; the 3-session hiding rule was removed.
+- Audio now shows an explicit Off option instead of an icon-only mute control.
+- `View timing` now reads as a secondary button with a disclosure caret instead of plain text.
 - When available, Resume now appears directly below Begin and before Session Setup.
 
 ## Completed From Sync And Measurement Follow-Up
@@ -101,9 +105,9 @@ Last updated: May 20, 2026 (Flow rhythm shipped; proportional cue cap; policy fo
 
 Alternate rhythm options shipped end to end:
 
-- `RHYTHMS` registry in `src/lib/breathing.ts` with three rhythms: Standard 4-4-6-8 (default), Gentle 3-2-4-4, Full 6-6-10-4. Per-rhythm session-cycle recalibration keeps the 3/5/7/10 minute labels honest.
+- `RHYTHMS` registry in `src/lib/breathing.ts` with four visible paces: Steady 4-4-6-8 (internal id `standard`, default), Soft 3-2-4-4 (internal id `gentle`), Full 6-6-10-4, and Flow 4-0-6-2. Per-rhythm session-cycle recalibration keeps the 3/5/7/10 minute labels honest.
 - Rhythm threaded through `useBreathingSession`, `BreathingOrb`, `GameHUD`, `useAudioEngine`, and `game/page.tsx` via a locked-at-first-render `rhythmRef` pattern.
-- Session Setup rhythm picker with one-word relative descriptors (Balanced / Easier / Longer); technical phase signature kept in title/aria-label but not visible by default, to avoid intimidating the skeptical primary user.
+- Session Setup rhythm picker now uses label-only pace tiles (Steady / Soft / Full / Flow); the connected helper row is human-first, and technical phase timing stays hidden by default behind `View timing` to avoid intimidating the skeptical primary user.
 - localStorage key `exhale-rhythm` plus Supabase `user_settings.rhythm` column (migration 002), with isRhythmId guard on parse.
 - Back-compat aliases (`BREATHING_PATTERN`, `CYCLE_DURATION`, `SESSION_CYCLES`) removed; all consumers read rhythm-aware data.
 - 11 new tests cover the registry shape, cycle recalibration accuracy, getPhaseAtTime boundary behavior with non-default rhythms, and the rhythm-lock invariant.
@@ -114,9 +118,9 @@ Two tester-follow-up tasks land here as Stage 0 work below.
 
 `/impeccable critique` scored the home page 36/40; three P3 items addressed:
 
-- Renamed the third rhythm `slow` to `full` (label, id, type) and added a per-rhythm one-word `summary` field used as the visible tile sub-label. Technical signature moves to title and aria-label.
+- Renamed the third rhythm `slow` to `full` (label, id, type) and added a per-rhythm one-word `summary` field for aria labels and helper context. Technical signature moved out of the tile and into the connected helper.
 - Practice History link now hidden on the home page until at least one completed session exists, so first-visit users see exactly one decision (length) and one action (Begin).
-- Tile sub-label styling unified with the time-button sub-label (text-[10px] tracking-[0.08em]).
+- Rhythm tile sub-labels were removed after mobile review; label-only tiles leave the connected helper to carry the extra context. The detailed phase list is now hidden by default behind `View timing`.
 - Data migration 003 rewrites any cloud `rhythm = 'slow'` values to `'full'`.
 
 ## Completed Audit-Driven Polish (2026-05-19)
@@ -143,7 +147,7 @@ Early beta feedback showed that presets alone may not solve phase-boundary frict
 
 A fourth rhythm preset shipped end to end, responsive to four converged tester signals on Rest/Hold friction (T-2026-05-19-03, -05, -06, -07):
 
-- `RHYTHMS.flow` added to `src/lib/breathing.ts` with pattern `[4, 0, 6, 2]`, 12s cycle, label `Flow`, summary `Open`, and a description framing the no-Hold and brief-Relax shape. Session-cycle recalibration produces 15 / 25 / 35 / 50 cycles for Quick / Short / Medium / Long.
+- `RHYTHMS.flow` added to `src/lib/breathing.ts` with pattern `[4, 0, 6, 2]`, 12s cycle, label `Flow`, summary `Continuous`, and a description framing the no-Hold and brief-Relax shape. Session-cycle recalibration produces 15 / 25 / 35 / 50 cycles for Quick / Short / Medium / Long.
 - `RhythmId` union and `isRhythmId` guard accept `'flow'`. Supabase `user_settings.rhythm` is plain text with no enum constraint, so no migration was needed.
 - `getNextPhase` updated to skip zero-duration phases. Without this fix the anticipation cue between Inhale and Exhale on Flow would target the zero-duration Hold and never reach Exhale. `getPhaseAtTime` and `getOrbScale` already handled zero-duration phases correctly through the existing strict-less-than boundary check.
 - Session Setup rhythm picker switched from a 3-column to a 4-column grid to fit the new tile at mobile width.
@@ -152,11 +156,11 @@ A fourth rhythm preset shipped end to end, responsive to four converged tester s
 
 ## Completed Proportional Anticipation Cue Cap (2026-05-20)
 
-Driven by the math in the smoke-test plan and the same "stop showing the same signal three different ways" intent as the visual coherence pass. The 0.8s lead window was occupying 40% of the 2-second Hold on Gentle and the 2-second Relax on Flow — the jitter threshold.
+Driven by the math in the smoke-test plan and the same "stop showing the same signal three different ways" intent as the visual coherence pass. The 0.8s lead window was occupying 40% of the 2-second Hold on Soft and the 2-second Relax on Flow — the jitter threshold.
 
 - New `getPhaseLookahead(phase)` helper in `src/lib/breathing.ts` returns `Math.min(PHASE_LOOKAHEAD_SECONDS, phase.duration * 0.25)`. Long phases keep the full 0.8s lead; short phases get capped to 25% of their own duration.
 - `useBreathingSession` (two call sites) and `BreathingOrb` updated to use the helper.
-- Concrete effects: Gentle Hold 0.8s → 0.5s; Gentle Inhale 0.8s → 0.75s; Flow Relax 0.8s → 0.5s; everything else unchanged.
+- Concrete effects: Soft Hold 0.8s → 0.5s; Soft Inhale 0.8s → 0.75s; Flow Relax 0.8s → 0.5s; everything else unchanged.
 - 8 new smoke tests in `src/__tests__/useBreathingSession.test.ts` lock the cap behavior per rhythm/phase, including a regression guard for Full Exhale (the imperceptibility-risk phase, where the cap must not engage). 104 tests now pass.
 - CLAUDE.md and DESIGN.md updated to describe the per-phase formula and the concrete values.
 
@@ -174,8 +178,8 @@ Graphic-designer feedback flagged that the active session was showing phase prog
 
 - Removed the innermost phase progress ring from `BreathingOrb`; the session ring and outer guide ring remain.
 - Made the countdown phase-aware after cycle 1: Inhale/Exhale fade to a quiet 16% visual opacity because the orb scale carries phase progress, while Hold/Relax stay readable at 62% because the orb is static and the timer is load-bearing.
-- Dampened the transition flash by phase duration so short phases, especially Gentle's 2-second Hold, do not strobe at full amplitude.
-- Smoke-tested Standard, Gentle, and Full in the browser at mobile width.
+- Dampened the transition flash by phase duration so short phases, especially Soft's 2-second Hold, do not strobe at full amplitude.
+- Smoke-tested Steady, Soft, and Full in the browser at mobile width.
 
 ## Remaining To-Do
 
@@ -187,13 +191,13 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 1. Pending feedback/data collection: test cross-device sync on Device B and verify Practice History, timer length, Circle Size, sound choice, and rhythm sync correctly through Supabase.
 
-2. Pending follow-up with rhythm-concern testers: ask the original five (T-2026-05-18-01 and T-2026-05-19-02 through -05) whether Gentle or Full fits better than Standard did, and ask the four Rest/Hold-frictioned testers (T-2026-05-19-03, -05, -06, -07) whether Flow fits better than their current choice. Capture answers in `docs/USER_FEEDBACK.md`. Flow shipped on 2026-05-20 without the original pre-merge validation gate; this follow-up is the post-launch validation.
+2. Pending follow-up with rhythm-concern testers: ask the original five (T-2026-05-18-01 and T-2026-05-19-02 through -05) whether Soft or Full fits better than Steady did, and ask the four Rest/Hold-frictioned testers (T-2026-05-19-03, -05, -06, -07) whether Flow fits better than their current choice. Capture answers in `docs/USER_FEEDBACK.md`. Flow shipped on 2026-05-20 without the original pre-merge validation gate; this follow-up is the post-launch validation.
 
 2a. Resolved 2026-05-19: the Rest phase is now labeled `Relax` with the single-word instruction `Breathe`. The phase enum stays `rest` as the internal discriminator. `Relax` preserves imperative-verb parity with Inhale/Hold/Exhale and reads as permission rather than instruction; the one-word instruction stops the copy from competing with the phase label for attention. See `CLAUDE.md` Core Mechanic and `src/lib/breathing.ts` for the canonical statement.
 
 2b. Resolved 2026-05-19: the `Next [phase]` HUD text cue was removed because it competed with the central phase label and countdown. Audio pre-cue and ring-color lead remain.
 
-3. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check: "Can you start breathing without thinking?", "Did matching the prompts feel pressuring?", "Did Exhale feel too long?", "Did any sound behavior surprise you?", and "Did Settle In feel optional enough?"
+3. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check. Current brand-new-user prompts: "Could you start breathing without thinking too much?", "Did the pace ever feel rushed, pressuring, or make you gasp/catch up?", "Did Relax help, or did it interrupt the rhythm?", "Did the phase changes feel easy to follow, or did they lag your brain a bit?", "If you opened Session Setup, did the options feel natural? Did the button names and explanations make sense?", "Would you use this again when stressed, tired, or needing to settle?", and "What would you change first?"
 
 4. Pending feedback/data collection: validate whether the new anticipatory transition cues help users keep up with phase shifts. Ask: "Did the color lead or soft pre-cue make the phase changes easier to follow, or did they add noise?"
 
@@ -205,11 +209,30 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 These can wait until after Stage 0 feedback signal is in.
 
-6a. Resolved 2026-05-20: Flow rhythm shipped to production (4-0-6-2, 12s cycle, label "Flow", summary "Open"). See "Completed Flow Rhythm" section below. The original design-sketch validation gate was waived in favor of shipping and collecting post-launch tester signal; follow-up with T-2026-05-19-03, -05, -06, -07 on Flow fit is now Stage 0 item 2.
+6a. Resolved 2026-05-20: Flow rhythm shipped to production (4-0-6-2, 12s cycle, label "Flow", summary "Continuous"). See "Completed Flow Rhythm" section below. The original design-sketch validation gate was waived in favor of shipping and collecting post-launch tester signal; follow-up with T-2026-05-19-03, -05, -06, -07 on Flow fit is now Stage 0 item 2.
 
 6b. Park: do rhythms need to support progressive ramping (each rep longer than the last) rather than only steady patterns? Single-user signal from T-2026-05-19-07. Do not act yet; revisit if a second tester independently asks for escalation or if competitive-framing usage shows up in `app_events`. If raised again, write it up as a full open question in `docs/OPEN_QUESTIONS.md` before any scoping.
 
 6c. Resolved 2026-05-19: visual-coherence pass on the in-session HUD. See Completed Visual Coherence Pass above.
+
+6d. Resolved 2026-05-20: background-tab audio no longer continues indefinitely after a session completes in Chrome.
+
+- Repro reported 2026-05-20: start a breathing exercise in Chrome with background audio on, switch focus to another tab/window, let the session run to completion while Exhale is in the background, and the background audio continues indefinitely until focus returns to the Exhale tab.
+- Root cause: completion cleanup was tied to the React/RAF session loop, which Chrome can throttle while a tab is hidden. The Web Audio sources kept playing because the completion effect did not run until focus returned.
+- Fix: `useAudioEngine` now exposes `scheduleAmbientStop`, which schedules a fade-out against the Web Audio clock itself. `game/page.tsx` schedules that stop when the guided session begins, using the remaining session duration from `elapsedRef`.
+- Expected behavior: ambient audio fades out at the guided-session deadline even if the tab is hidden. Returning focus after completion should show the complete screen with no ongoing audio. Pausing/exiting before completion keeps existing behavior because pause/stop/resume cancel the scheduled audio deadline.
+
+6e. Parked polish: make Session Setup tab-panel titles feel consistent and gently focal.
+
+- Current thought: keep `Background sound` unchanged for now, but later give each tab body a consistent title treatment for `Choose your pace`, `Circle size`, and `Background sound`.
+- Goal: add a mild visual cue that says "read this first" without making the drawer louder. Possible directions include a small emerald tick/dot, a softer active-title tint, or a thin connected accent inside the tab panel.
+- Do not implement until a later polish pass or tester feedback suggests the tab contents need stronger scanning guidance.
+
+6f. Resolved 2026-05-20: local Next dev overlay no longer appears from blocked Supabase anonymous auth during visual QA.
+
+- `AuthProvider` now skips automatic Supabase anonymous auth on `localhost` / `127.0.0.1` in development and continues with local-only settings.
+- Production, preview domains, and non-local development hosts still use Supabase auth as before.
+- Local sync/auth testing remains available by setting `localStorage.setItem('exhale-enable-local-supabase', '1')` and reloading.
 
 7. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Secondary-user feedback asked about changing colors; evaluate that through a theme/skin system before considering freeform color controls. Run `/impeccable shape Garden skin` before building.
 
@@ -227,4 +250,4 @@ Stage 2 comes after the Stage 0 and Stage 1 work above.
 
 ## Recommended Next Move
 
-Continue beta feedback collection. The natural next concrete step is following up with the five rhythm-concern testers (item 2 above) to validate whether Gentle or Full materially helps. Defer the Garden skin, contrast audit re-check, and distribution work until that signal is in.
+Continue beta feedback collection. The natural next concrete step is following up with the five rhythm-concern testers (item 2 above) to validate whether Soft or Full materially helps. Defer the Garden skin, contrast audit re-check, and distribution work until that signal is in.

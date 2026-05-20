@@ -158,6 +158,7 @@ export function useAudioEngine(
   const enabledRef = useRef(false);
   const paletteRef = useRef<SoundPaletteId>(soundPalette);
   const stopTimeoutRef = useRef<number | null>(null);
+  const scheduledStopTimeoutRef = useRef<number | null>(null);
   const previewTimeoutRef = useRef<number | null>(null);
   // Reverb buffer is expensive to generate (~150k iterations); cache per palette to skip on re-start
   const reverbCacheRef = useRef<Map<string, AudioBuffer>>(new Map());
@@ -179,6 +180,7 @@ export function useAudioEngine(
 
   const stopSources = useCallback(() => {
     clearTimer(stopTimeoutRef);
+    clearTimer(scheduledStopTimeoutRef);
 
     ambientSourcesRef.current.forEach((source) => {
       try {
@@ -313,6 +315,7 @@ export function useAudioEngine(
 
   const stopAmbient = useCallback((duration = 2.0) => {
     enabledRef.current = false;
+    clearTimer(scheduledStopTimeoutRef);
     clearTimer(previewTimeoutRef);
 
     const ctx = ctxRef.current;
@@ -330,15 +333,42 @@ export function useAudioEngine(
     stopTimeoutRef.current = window.setTimeout(stopSources, duration * 1000 + 120);
   }, [clearTimer, stopSources]);
 
+  const scheduleAmbientStop = useCallback((delaySeconds: number, fadeOut = 1.0) => {
+    clearTimer(scheduledStopTimeoutRef);
+
+    const ctx = ctxRef.current;
+    const master = masterGainRef.current;
+    if (!ctx || !master || !enabledRef.current) return false;
+
+    const delay = Math.max(0, delaySeconds);
+    const duration = Math.max(0.1, fadeOut);
+    const stopAt = ctx.currentTime + delay;
+
+    master.gain.cancelScheduledValues(stopAt);
+    master.gain.setTargetAtTime(0, stopAt, Math.max(0.05, duration / 5));
+
+    scheduledStopTimeoutRef.current = window.setTimeout(() => {
+      scheduledStopTimeoutRef.current = null;
+      enabledRef.current = false;
+      stopSources();
+    }, (delay + duration) * 1000 + 160);
+
+    return true;
+  }, [clearTimer, stopSources]);
+
   const pauseAmbient = useCallback(() => {
+    clearTimer(scheduledStopTimeoutRef);
+
     if (masterGainRef.current && ctxRef.current) {
       const now = ctxRef.current.currentTime;
       masterGainRef.current.gain.cancelScheduledValues(now);
       masterGainRef.current.gain.linearRampToValueAtTime(0, now + 0.5);
     }
-  }, []);
+  }, [clearTimer]);
 
   const resumeAmbient = useCallback(() => {
+    clearTimer(scheduledStopTimeoutRef);
+
     const paletteId = paletteRef.current;
     if (!isActivePalette(paletteId)) return;
     if (masterGainRef.current && ctxRef.current) {
@@ -346,7 +376,7 @@ export function useAudioEngine(
       masterGainRef.current.gain.cancelScheduledValues(now);
       masterGainRef.current.gain.linearRampToValueAtTime(AMBIENT_PALETTES[paletteId].masterVolume, now + 1.2);
     }
-  }, []);
+  }, [clearTimer]);
 
   const previewPalette = useCallback(async (paletteOverride?: SoundPaletteId) => {
     const started = await startAmbient(paletteOverride, 0.45);
@@ -481,5 +511,14 @@ export function useAudioEngine(
     };
   }, [clearTimer, stopSources]);
 
-  return { startAmbient, stopAmbient, pauseAmbient, resumeAmbient, previewPalette, playCue, playAnticipationCue };
+  return {
+    startAmbient,
+    stopAmbient,
+    scheduleAmbientStop,
+    pauseAmbient,
+    resumeAmbient,
+    previewPalette,
+    playCue,
+    playAnticipationCue,
+  };
 }

@@ -22,10 +22,9 @@ export interface PhaseConfig {
 
 export interface Rhythm {
   id: RhythmId;
-  label: string;        // Short name shown on the rhythm tile (e.g., "Standard").
-  summary: string;      // One-word relative descriptor under the label (e.g., "Balanced"),
-                        // used in place of the phase-duration signature for accessibility.
-  description: string;  // Full sentence used as the tile's title (tooltip).
+  label: string;        // Short name shown on the rhythm tile (e.g., "Steady").
+  summary: string;      // One-word relative descriptor for aria labels and helper context.
+  description: string;  // Short scannable phrase shown in the connected rhythm helper.
   pattern: PhaseConfig[];
   cycleDuration: number;
   sessionCycles: Record<SessionLength, number>;
@@ -125,30 +124,30 @@ function buildRhythm(
 export const RHYTHMS: Record<RhythmId, Rhythm> = {
   standard: buildRhythm(
     'standard',
-    'Standard',
+    'Steady',
     'Balanced',
-    'Balanced 4-4-6-8 pattern. The default for first-time users.',
+    'A balanced, grounding baseline rhythm.',
     [4, 4, 6, 8]
   ),
   gentle: buildRhythm(
     'gentle',
-    'Gentle',
-    'Easier',
-    'Shorter cycle with a lighter hold and a more permissive exhale. Good for new users or anyone who feels rushed by the standard pace.',
+    'Soft',
+    'Accessible',
+    'Shorter, lighter cycles for easier breathing.',
     [3, 2, 4, 4]
   ),
   full: buildRhythm(
     'full',
     'Full',
-    'Longer',
-    'Longer inhale, longer hold, and a much longer exhale. Good for experienced breathwork users. Named Full rather than Deep to avoid collision with the Deep sound texture label.',
+    'Deep',
+    'A slower, deeper rhythm with longer breaths.',
     [6, 6, 10, 4]
   ),
   flow: buildRhythm(
     'flow',
     'Flow',
-    'Open',
-    'Inhale and exhale with no hold and a brief pause. For users who find the Hold or longer Rest distracting.',
+    'Continuous',
+    'No hold, steady momentum.',
     [4, 0, 6, 2]
   ),
 };
@@ -178,7 +177,7 @@ export function getPhaseAtTime(
 }
 
 // The effective anticipation-cue lead window for a given phase. Capped at 25% of phase duration
-// so short phases (Gentle 2s Hold, Flow 2s Relax) don't have a lead that occupies 40% of the
+// so short phases (Soft 2s Hold, Flow 2s Relax) don't have a lead that occupies 40% of the
 // phase and reads as jittery. Long phases use the full PHASE_LOOKAHEAD_SECONDS constant.
 // Zero-duration phases return 0; getPhaseAtTime never makes them active, but defensive coding.
 export function getPhaseLookahead(phase: PhaseConfig): number {

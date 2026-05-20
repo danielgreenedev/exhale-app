@@ -39,6 +39,24 @@ function snapshotUser(user: User | null): Omit<AuthState, 'refreshUser' | 'signO
   };
 }
 
+function reportLocalAuthFallback(context: string, error: unknown) {
+  if (process.env.NODE_ENV !== 'production') {
+    console.warn(`[supabase] ${context}; continuing with local-only settings.`, error);
+  }
+}
+
+function shouldUseLocalOnlyAuth(): boolean {
+  if (process.env.NODE_ENV !== 'development' || typeof window === 'undefined') return false;
+  const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  if (!isLocalHost) return false;
+
+  try {
+    return localStorage.getItem('exhale-enable-local-supabase') !== '1';
+  } catch {
+    return true;
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authState, setAuthState] = useState<Omit<AuthState, 'refreshUser' | 'signOutToAnonymous'>>({
     userId: null,
@@ -50,21 +68,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const initRef = useRef(false);
 
   const setAnonymousUser = useCallback(async () => {
-    const { data } = await supabase.auth.signInAnonymously();
-    setAuthState(snapshotUser(data.user ?? null));
+    if (shouldUseLocalOnlyAuth()) {
+      setAuthState(snapshotUser(null));
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signInAnonymously();
+      if (error) throw error;
+      setAuthState(snapshotUser(data.user ?? null));
+    } catch (error) {
+      reportLocalAuthFallback('anonymous sign-in failed', error);
+      setAuthState(snapshotUser(null));
+    }
   }, []);
 
   const refreshUser = useCallback(async () => {
-    const { data: { user }, error } = await supabase.auth.getUser();
-    if (user && !error) {
-      setAuthState(snapshotUser(user));
+    if (shouldUseLocalOnlyAuth()) {
+      setAuthState(snapshotUser(null));
       return;
+    }
+
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (user && !error) {
+        setAuthState(snapshotUser(user));
+        return;
+      }
+    } catch (error) {
+      reportLocalAuthFallback('user refresh failed', error);
     }
     await setAnonymousUser();
   }, [setAnonymousUser]);
 
   const signOutToAnonymous = useCallback(async () => {
-    await supabase.auth.signOut();
+    if (shouldUseLocalOnlyAuth()) {
+      setAuthState(snapshotUser(null));
+      return;
+    }
+
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      reportLocalAuthFallback('sign-out failed', error);
+    }
     await setAnonymousUser();
   }, [setAnonymousUser]);
 
@@ -72,26 +119,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (initRef.current) return;
     initRef.current = true;
 
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        // Server-validate the JWT so a token for a deleted user can't silently
-        // poison every subsequent write with FK violations.
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (user && !error) {
-          setAuthState(snapshotUser(user));
-          return;
+    if (shouldUseLocalOnlyAuth()) {
+      setAuthState(snapshotUser(null));
+      return;
+    }
+
+    let active = true;
+
+    void (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          // Server-validate the JWT so a token for a deleted user can't silently
+          // poison every subsequent write with FK violations.
+          const { data: { user }, error } = await supabase.auth.getUser();
+          if (user && !error) {
+            if (active) setAuthState(snapshotUser(user));
+            return;
+          }
+          await supabase.auth.signOut();
         }
-        await supabase.auth.signOut();
+      } catch (error) {
+        reportLocalAuthFallback('auth bootstrap failed', error);
       }
-      await setAnonymousUser();
+      if (active) await setAnonymousUser();
     })();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setAuthState(snapshotUser(session?.user ?? null));
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, [setAnonymousUser]);
 
   return (

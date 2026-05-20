@@ -26,16 +26,17 @@ Pulled forward from Stage 1 after five of six recent beta testers reported rhyth
 
 Shipped:
 
-- Three selectable rhythms surfaced inside Session Setup, with one-word descriptors:
-  - **Standard** (Balanced) — 4-4-6-8, 22s cycle. Default for first-time users.
-  - **Gentle** (Easier) — 3-2-4-4, 13s cycle. Capacity-constrained users.
-  - **Full** (Longer) — 6-6-10-4, 26s cycle. Experienced breathwork users.
+- Four selectable paces surfaced inside Session Setup, with label-only tiles and human-first helper descriptions:
+  - **Steady** (`standard`) — 4-4-6-8, 22s cycle. Default for first-time users.
+  - **Soft** (`gentle`) — 3-2-4-4, 13s cycle. Shorter, lighter cycles.
+  - **Full** (`full`) — 6-6-10-4, 26s cycle. Slower, deeper rhythm.
+  - **Flow** (`flow`) — 4-0-6-2, 12s cycle. No hold, steady momentum.
 - Per-rhythm cycle counts recalibrated so all four minute labels stay close to their targets.
 - Rhythm threads through `useBreathingSession`, `BreathingOrb`, `GameHUD`, `useAudioEngine`, and `game/page.tsx` via a Rhythm object captured at first render.
 - Local persistence through `exhale-rhythm` localStorage key; cloud round-trip through `user_settings.rhythm` (Supabase migration 002 + 003 applied).
-- Picking a rhythm updates the live phase sequence preview directly underneath the picker.
+- Picking a pace updates the helper row; detailed phase timing is available behind `View timing`.
 
-The next signal worth gathering: circle back to the original five testers and ask whether one of Gentle or Full fits better than Standard did. That tester follow-up is captured as TODO item.
+The next signal worth gathering: circle back to the original five testers and ask whether one of Soft or Full fits better than Steady did. That tester follow-up is captured as TODO item.
 
 ## Stage 1, Ship-quality polish
 

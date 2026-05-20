@@ -133,7 +133,15 @@ function GameContent() {
     }
   }, [soundParam]);
 
-  const { startAmbient, stopAmbient, pauseAmbient, resumeAmbient, playCue, playAnticipationCue } = useAudioEngine(soundPalette, rhythm);
+  const {
+    startAmbient,
+    stopAmbient,
+    scheduleAmbientStop,
+    pauseAmbient,
+    resumeAmbient,
+    playCue,
+    playAnticipationCue,
+  } = useAudioEngine(soundPalette, rhythm);
 
   const [audioActive, setAudioActive] = useState(false);
   const [showAudioPrompt, setShowAudioPrompt] = useState(false);
@@ -279,6 +287,15 @@ function GameContent() {
       }
     };
   }, [beginAudio]);
+
+  // Give the Web Audio clock its own completion deadline so ambient sound fades out even
+  // when Chrome throttles React/RAF work in a background tab.
+  useEffect(() => {
+    if (sessionState !== 'running' || !audioActive) return;
+
+    const remainingSeconds = Math.max(0, sessionDuration - elapsedRef.current);
+    scheduleAmbientStop(remainingSeconds, 1.0);
+  }, [audioActive, elapsedRef, scheduleAmbientStop, sessionDuration, sessionState]);
 
   // Play phase cue when phase changes
   useEffect(() => {

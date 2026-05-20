@@ -1,9 +1,17 @@
+---
+target: "src/app/page.tsx and http://127.0.0.1:3000/"
+total_score: 35
+p0_count: 0
+p1_count: 0
+timestamp: 2026-05-20T14-15-09Z
+slug: src-app-page-tsx
+---
 ## Design Health Score
 
 | # | Heuristic | Score | Key Issue |
 |---|-----------|-------|-----------|
-| 1 | Visibility of System Status | 4 | Selected states are clear; setup tabs and audio preview states are legible; local auth QA noise has been quieted on localhost. |
-| 2 | Match System / Real World | 4 | "Choose your pace" and "Background sound" are clearer; technical timing is tucked behind View timing. |
+| 1 | Visibility of System Status | 3 | Selected states are clear; setup tabs and audio preview states are legible, but local dev auth/network noise still appears as a Next overlay during QA. |
+| 2 | Match System / Real World | 3 | "Choose a pattern" and "Background sound" are clearer; "Sequence" plus breath notation still assumes a little breathwork literacy. |
 | 3 | User Control and Freedom | 4 | The user can start, expand setup, change length, change preferences, or ignore setup without being trapped. |
 | 4 | Consistency and Standards | 4 | The three tabs, radio tiles, selected states, and quiet emerald control language now feel cohesive. |
 | 5 | Error Prevention | 4 | Defaults are sane, options are constrained, Off is explicit, and Background sound reduces misunderstanding. |
@@ -12,7 +20,7 @@
 | 8 | Aesthetic and Minimalist Design | 3 | The collapsed screen is excellent; expanded Sequence still carries the densest text and number load in the product. |
 | 9 | Error Recovery | 3 | The surface is low-risk; recovery for background auth/network failures is not user-facing from home. |
 | 10 | Help and Documentation | 4 | The helper row is the right level of contextual explanation for a no-onboarding app. |
-| **Total** | | **37/40** | **Good, nearly excellent** |
+| **Total** | | **35/40** | **Good, nearly excellent** |
 
 ## Anti-Patterns Verdict
 
@@ -20,11 +28,11 @@ LLM assessment: The home page still does not read as generic AI output. The orb,
 
 Deterministic scan: `npx impeccable detect --json src/app/page.tsx` returned `[]`. URL detection, run with the installed Chrome executable, returned five warnings: dark glow x2, AI color palette, wide tracking on body text, and pure black background. The dark glow and AI palette warnings are mostly false positives because the emerald orb glow is the product identity and the palette is not the common purple/cyan SaaS look. Wide tracking remains worth watching. The pure black warning appears to be a detector mismatch against the forest-night background or dev overlay.
 
-Visual inspection: Playwright screenshots were taken for mobile collapsed home, mobile Sequence setup, mobile Audio setup, and desktop home. The earlier local Next dev overlay from Supabase anonymous auth has since been addressed with a localhost-only auth bypass.
+Visual inspection: Playwright screenshots were taken for mobile collapsed home, mobile Sequence setup, mobile Audio setup, and desktop home. The local Next dev overlay appears because of the known sandbox Supabase/network issue; it is QA noise, not app chrome.
 
 ## Overall Impression
 
-This pass improved the exact problem we were worried about. Splitting Session Setup into Sequence, Visual, and Audio makes the drawer feel intentional rather than crowded. The new copy also helps: `Choose your pace` is better than repeating `Sequence`, and `Background sound` clarifies what the audio choices affect.
+This pass improved the exact problem we were worried about. Splitting Session Setup into Sequence, Visual, and Audio makes the drawer feel intentional rather than crowded. The new copy also helps: `Choose a pattern` is better than repeating `Sequence`, and `Background sound` clarifies what the audio choices affect.
 
 The strongest remaining opportunity is to make Sequence feel less technical for a brand-new user while still serving the breathwork-aware user who wants the numbers.
 
@@ -39,9 +47,9 @@ The strongest remaining opportunity is to make Sequence feel less technical for 
 
 **[P2] Sequence Still Leans Technical**
 
-Why it matters: A new user can choose Steady and ignore the details, but opening `View timing` still introduces phase numbers. That is the densest cognitive moment on the home page.
+Why it matters: A new user can choose Standard and ignore the details, but the helper row still asks them to parse `4-4-6-8`, `2.7 breaths/min`, and a benefit phrase at once. That is the densest cognitive moment on the home page.
 
-Fix: Keep the current tile labels and hidden timing model. If beta users still find the timing reveal too technical, keep the human helper row as the default and make the detailed phase list even quieter.
+Fix: Keep the current tile labels, but consider making the helper copy human-first and moving the notation to the end or a quieter line. For example: `Balanced grounding pace. 4s inhale, 4s hold, 6s exhale, 8s relax.` This is longer, but less code-like.
 
 Suggested command: `impeccable polish src/app/page.tsx`
 
@@ -61,19 +69,19 @@ Fix: If it starts to feel heavy in hand testing, reduce tracking for section lab
 
 Suggested command: `impeccable polish src/app/page.tsx`
 
-**[P3] Local QA Overlay Was Addressed After This Critique**
+**[P3] Local QA Overlay Still Pollutes Visual Checks**
 
-Why it matters: The red Next dev overlay could make screenshots look worse than the actual app and distract from UI review.
+Why it matters: The red Next dev overlay can make screenshots look worse than the actual app and can distract from UI review.
 
-Fix: Implemented as a localhost-only local-auth bypass unless local Supabase auth is explicitly enabled.
+Fix: Continue treating it as local QA noise unless it appears in production. A separate dev-mode Supabase mock or quieter local auth failure handling would make future visual review cleaner.
 
 Suggested command: normal engineering cleanup, not a design command
 
 ## Persona Red Flags
 
-**First-time stressed user**: The collapsed screen works well. They can pick time and press Begin without reading setup. If they open Sequence and then View timing, the numbers may look like a rule system rather than a calming choice.
+**First-time stressed user**: The collapsed screen works well. They can pick time and press Begin without reading setup. If they open Sequence, the notation may look like a rule system rather than a calming choice.
 
-**Capacity-constrained user**: Soft and Flow are now discoverable. The phase preview helps them understand Hold/Relax differences when they choose to reveal timing.
+**Capacity-constrained user**: Gentle and Flow are now discoverable. The phase preview helps them understand Hold/Relax differences, but "breaths/min" may be less meaningful than "shorter cycles" or "no hold."
 
 **Breathwork-aware user**: They are well served. The phase pattern, timing preview, and Full/Flow options give them enough control without full customization.
 
@@ -86,6 +94,6 @@ Suggested command: normal engineering cleanup, not a design command
 
 ## Questions To Consider
 
-- Should the View timing reveal stay as-is, or should detailed timing become even quieter after beta feedback?
+- Should the Sequence helper speak in human timing language first and numeric notation second?
 - Do beta users actually open Session Setup before their first session, or only after feeling rhythm friction?
 - Is `Sequence` the best tab name long-term, or does `Breath` / `Pace` / `Pattern` test better with brand-new users?

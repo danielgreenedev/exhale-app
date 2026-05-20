@@ -1,14 +1,16 @@
 # Social Preview Troubleshooting
 
-Last updated: May 19, 2026 (issue resolved)
+Last updated: May 20, 2026 (Discord and Telegram crawler challenges resolved)
 
-This note documents the Facebook/Open Graph preview troubleshooting done for `https://exhale.guide`.
+This note documents social/Open Graph preview troubleshooting done for `https://exhale.guide`.
 
 ## Current Status
 
-Resolved 2026-05-19. The Facebook preview now renders correctly for `exhale.guide` on shared posts. The Sharing Debugger 403 / parser issue cleared on its own once Meta's cache aged out; no further app-side or infrastructure change was needed beyond the work captured below. The earlier working conclusion (Meta-side parser/cache state, not an Exhale-side issue) held up.
+Resolved 2026-05-19 for Facebook. The Facebook preview now renders correctly for `exhale.guide` on shared posts. The Sharing Debugger 403 / parser issue cleared on its own once Meta's cache aged out; no further app-side or infrastructure change was needed beyond the work captured below. The earlier working conclusion (Meta-side parser/cache state, not an Exhale-side issue) held up.
 
-Keep this document as a reference playbook in case a future domain change, OG image swap, or Garden-skin update triggers similar cache symptoms. The Vercel firewall bypass rules and `robots.txt` allowances should not be reverted; they cost nothing to keep and prevent regressions if Meta cycles its crawler IPs again.
+Resolved 2026-05-20 for Discord and Telegram. Both platforms showed no link preview even though the OG metadata and image were valid. Vercel Firewall live view showed crawler traffic from `Discordbot` and `TelegramBot (like TwitterBot)` being challenged. After adding Telegram to `robots.txt` and allowing the Discord/Telegram crawler user agents through Vercel Firewall, previews worked on both platforms.
+
+Keep this document as a reference playbook in case a future domain change, OG image swap, or Garden-skin update triggers similar cache symptoms. The Vercel firewall bypass rules and `robots.txt` allowances should not be reverted; they cost nothing to keep and prevent regressions if social platforms change crawler IPs again.
 
 ## Goal
 
@@ -87,9 +89,65 @@ Allow: /
 User-agent: Slackbot
 Allow: /
 
+User-agent: Discordbot
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
 User-agent: *
 Allow: /
 ```
+
+## Discord and Telegram No-Preview Resolution
+
+Observed 2026-05-20:
+
+- Discord and Telegram did not render a preview.
+- Vercel Firewall live view showed `Challenged` traffic, not `Denied` traffic.
+- Top user agents included `Mozilla/5.0 (compatible; Discordbot/2.0; +http...)` and `TelegramBot (like TwitterBot)`.
+- Top request paths included `/` and `/og-image.png`.
+- Crawler-shaped PowerShell requests returned `429 Too Many Requests` for `/` and `/og-image.png`, which confirmed the crawlers were being challenged before they could parse metadata or fetch the preview image.
+
+Conclusion:
+
+```text
+When Discord or Telegram shows no preview, valid OG metadata is not enough. If Vercel challenges the crawler, the platform cannot solve the challenge and will fail to generate a preview.
+```
+
+Fix applied:
+
+1. Added `TelegramBot` to `public/robots.txt`. `Discordbot` was already present.
+2. Added Vercel Firewall bypass rules for crawler user agents:
+
+   ```text
+   IF User Agent contains Discordbot
+   THEN Bypass
+   ```
+
+   and:
+
+   ```text
+   IF User Agent contains TelegramBot
+   THEN Bypass
+   ```
+
+3. Retested Discord and Telegram; previews rendered on both.
+
+If this recurs:
+
+1. Open Vercel Firewall with the time filter set to `Live`.
+2. Post cache-busted test URLs:
+
+   ```text
+   https://exhale.guide/?discord_preview=YYYYMMDD
+   https://exhale.guide/?tg_preview=YYYYMMDD
+   ```
+
+3. Search/filter live traffic for `Discordbot` and `TelegramBot`.
+4. If the crawler requests are challenged, confirm the custom user-agent bypass rules are still active and published.
+5. If user-agent bypass rules match but system DDoS mitigation still challenges the request, add system bypass rules for the exact observed crawler IPs as `/32` entries scoped to `exhale.guide`.
+6. For Telegram, send the URL to `@WebpageBot` and refresh/update the preview after the firewall rule is active.
 
 ## Verified Good From Outside Meta
 
@@ -400,7 +458,7 @@ Path forward:
 - Do not invest more engineering on this; Facebook previews are not on the critical path for the beta audience.
 - Optionally re-check in 48 to 72 hours; stuck `og_object` cache entries sometimes clear on their own.
 - A Facebook bug report can be filed via the Sharing Debugger's "Report a Bug" link if Facebook sharing later becomes important.
-- Direct sharing via iMessage, LinkedIn, Twitter, Discord, Slack, and email all preview correctly today; only Facebook is affected.
+- Direct sharing via iMessage, LinkedIn, Twitter, Discord, Telegram, Slack, and email now preview correctly after the platform-specific cache/firewall issues described above.
 
 ## References
 

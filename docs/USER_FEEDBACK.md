@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 19, 2026 (Facebook reply intake; graphic-designer HUD feedback)
+Last updated: May 20, 2026 (brand-new user follow-up prompt updated)
 
 ## Purpose
 
@@ -27,6 +27,18 @@ Send a short, open prompt so feedback stays practical:
 2. Notice anything that feels rushed, confusing, too quiet, too loud, or hard to read.
 3. Try Practice History if you have time.
 4. Send back what worked, what felt off, and anything you would change.
+
+## Brand-New User Follow-Up Questions
+
+Use these when asking someone to try Exhale for the first time:
+
+- Could you start breathing without thinking too much?
+- Did the pace ever feel rushed, pressuring, or make you gasp/catch up?
+- Did Relax help, or did it interrupt the rhythm?
+- Did the phase changes feel easy to follow, or did they lag your brain a bit?
+- If you opened Session Setup, did the options feel natural? Did the button names and explanations make sense?
+- Would you use this again when stressed, tired, or needing to settle?
+- What would you change first?
 
 ## Feedback Intake Template
 

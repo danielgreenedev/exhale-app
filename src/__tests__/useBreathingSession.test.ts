@@ -212,7 +212,7 @@ describe('useBreathingSession - alternate rhythm', () => {
   });
 
   it('respects gentle rhythm phase boundaries during a running session', () => {
-    // Gentle is 3-2-4-4 = 13s cycle.
+    // Soft (internal id: gentle) is 3-2-4-4 = 13s cycle.
     const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.gentle));
     act(() => { result.current.start(); });
 
@@ -251,9 +251,9 @@ describe('useBreathingSession - proportional anticipation cue cap', () => {
   // bucket sees stale state. Each test below uses a fresh renderHook + single advance, and
   // picks sample points that cross a quarter boundary so the updateKey actually changes.
 
-  // Standard rhythm Inhale is 4s; cap doesn't engage (4 * 0.25 = 1s > 0.8s ceiling).
+  // Steady (internal id: standard) Inhale is 4s; cap doesn't engage (4 * 0.25 = 1s > 0.8s ceiling).
   // Lead window stays at the full 0.8s, activating at t=3.2s.
-  it('Standard Inhale lead is inactive at t=2.5s (0.7s before the 0.8s window opens)', () => {
+  it('Steady Inhale lead is inactive at t=2.5s (0.7s before the 0.8s window opens)', () => {
     const { result } = renderHook(() => useBreathingSession('short'));
     act(() => { result.current.start(); });
     advance(2500);
@@ -261,7 +261,7 @@ describe('useBreathingSession - proportional anticipation cue cap', () => {
     expect(result.current.phaseLeadProgress).toBe(0);
   });
 
-  it('Standard Inhale lead is active at t=3.5s (0.3s into the 0.8s window)', () => {
+  it('Steady Inhale lead is active at t=3.5s (0.3s into the 0.8s window)', () => {
     const { result } = renderHook(() => useBreathingSession('short'));
     act(() => { result.current.start(); });
     advance(3500);
@@ -269,10 +269,10 @@ describe('useBreathingSession - proportional anticipation cue cap', () => {
     expect(result.current.phaseLeadProgress).toBeGreaterThan(0);
   });
 
-  // Gentle Hold is 2s; cap engages at 25% = 0.5s. Hold runs t=3..5.
+  // Soft Hold is 2s; cap engages at 25% = 0.5s. Hold runs t=3..5.
   // Under the old 0.8s constant, t=4.3s (0.7s before end) would have leadProgress > 0;
   // under the cap, the lead window only opens at t=4.5s.
-  it('Gentle Hold lead is inactive at t=4.3s (0.7s before end, outside the 0.5s cap)', () => {
+  it('Soft Hold lead is inactive at t=4.3s (0.7s before end, outside the 0.5s cap)', () => {
     const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.gentle));
     act(() => { result.current.start(); });
     advance(4300);
@@ -280,7 +280,7 @@ describe('useBreathingSession - proportional anticipation cue cap', () => {
     expect(result.current.phaseLeadProgress).toBe(0);
   });
 
-  it('Gentle Hold lead is active at t=4.8s (0.2s before end, inside the 0.5s cap)', () => {
+  it('Soft Hold lead is active at t=4.8s (0.2s before end, inside the 0.5s cap)', () => {
     const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.gentle));
     act(() => { result.current.start(); });
     advance(4800);

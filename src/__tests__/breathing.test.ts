@@ -137,6 +137,18 @@ describe('RHYTHMS registry', () => {
     });
   });
 
+  it('rhythm labels and descriptions stay human-facing', () => {
+    expect(RHYTHMS.standard.label).toBe('Steady');
+    expect(RHYTHMS.gentle.label).toBe('Soft');
+    expect(RHYTHMS.full.label).toBe('Full');
+    expect(RHYTHMS.flow.label).toBe('Flow');
+
+    (['standard', 'gentle', 'full', 'flow'] as const).forEach((id) => {
+      expect(RHYTHMS[id].description).not.toContain('breaths/min');
+      expect(RHYTHMS[id].description).not.toMatch(/\d-\d-\d-\d/);
+    });
+  });
+
   it('session-cycle counts keep each label within one cycle of its target duration', () => {
     const targetsSec = { quick: 180, short: 300, medium: 420, long: 600 } as const;
     (['standard', 'gentle', 'full', 'flow'] as const).forEach((id) => {
@@ -207,7 +219,7 @@ describe('getNextPhase', () => {
 
 describe('getPhaseLookahead', () => {
   it('uses the full PHASE_LOOKAHEAD_SECONDS for phases of 3.2s or longer', () => {
-    // Standard Inhale 4s, Hold 4s, Exhale 6s, Relax 8s — all above the 3.2s breakpoint.
+    // Steady Inhale 4s, Hold 4s, Exhale 6s, Relax 8s — all above the 3.2s breakpoint.
     RHYTHMS.standard.pattern.forEach((p) => {
       expect(getPhaseLookahead(p)).toBe(PHASE_LOOKAHEAD_SECONDS);
     });
@@ -218,7 +230,7 @@ describe('getPhaseLookahead', () => {
   });
 
   it('caps the lookahead at 25% of phase duration for short phases', () => {
-    // Gentle Hold 2s -> 0.5s; Gentle Inhale 3s -> 0.75s; Gentle Exhale 4s -> 0.8s (unchanged); Relax 4s -> 0.8s.
+    // Soft Hold 2s -> 0.5s; Soft Inhale 3s -> 0.75s; Soft Exhale 4s -> 0.8s (unchanged); Relax 4s -> 0.8s.
     expect(getPhaseLookahead(RHYTHMS.gentle.pattern[0])).toBe(0.75); // inhale 3s
     expect(getPhaseLookahead(RHYTHMS.gentle.pattern[1])).toBe(0.5);  // hold 2s
     expect(getPhaseLookahead(RHYTHMS.gentle.pattern[2])).toBe(PHASE_LOOKAHEAD_SECONDS); // exhale 4s
@@ -287,7 +299,7 @@ describe('getPhaseAtTime with the Flow rhythm', () => {
 
 describe('getPhaseAtTime with a non-default rhythm', () => {
   it('uses gentle pattern boundaries when passed the gentle rhythm', () => {
-    // Gentle is 3-2-4-4 = 13s cycle.
+    // Soft is 3-2-4-4 = 13s cycle.
     const gentle = RHYTHMS.gentle;
     expect(getPhaseAtTime(0, gentle).config.phase).toBe('inhale');
     expect(getPhaseAtTime(2.99, gentle).config.phase).toBe('inhale');

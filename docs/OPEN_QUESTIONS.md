@@ -116,7 +116,7 @@ Was any specific phase change still hard to follow, such as Exhale to Relax or R
 
 ### Should Rest and Hold be partly or completely optional?
 
-Context: Originally raised by T-2026-05-19-03 (did not care for Rest, suggested an option to include or remove it) and T-2026-05-19-05 (capacity mismatch; gasping). Gentle already trims Hold to 2s and Rest to 4s, but that may not be far enough.
+Context: Originally raised by T-2026-05-19-03 (did not care for Rest, suggested an option to include or remove it) and T-2026-05-19-05 (capacity mismatch; gasping). Soft (internal id `gentle`) already trims Hold to 2s and Rest to 4s, but that may not be far enough.
 
 2026-05-19 update: Two unsolicited replies on the Facebook pacing question flagged Hold and/or Rest. T-2026-05-19-06 called Hold "the hardest part" and described an asymmetric exhale-to-inhale ratio as friction. T-2026-05-19-07 liked Hold and slow Exhale, but said the rests felt awkward. That is now four distinct testers flagging Rest/Relax, plus two flagging Hold - convergent enough to promote this from deferred to active.
 
@@ -136,17 +136,17 @@ Candidate shapes (tradeoff matrix):
 
 | Shape   | Cycle | Quick / Short / Medium / Long (cycles) | Profile |
 |---------|-------|----------------------------------------|---------|
-| 4-0-6-2 | 12s   | 15 / 25 / 35 / 50                      | Primary candidate. Brief Relax keeps a transition beat without reading as an interruption. Cycle counts comparable to Gentle (13s). |
+| 4-0-6-2 | 12s   | 15 / 25 / 35 / 50                      | Primary candidate. Brief Relax keeps a transition beat without reading as an interruption. Cycle counts comparable to Soft (13s). |
 | 4-0-6-0 | 10s   | 18 / 30 / 42 / 60                      | Strict in-out, no recovery beat. Cleanest answer to "remove Rest entirely," but 60 cycles in 10 min may feel demanding and the orb has no held-small visual beat between Exhale end and next Inhale start. |
 | 4-0-5-3 | 12s   | 15 / 25 / 35 / 50                      | More symmetric exhale:inhale ratio (5:4 vs 6:4). Directly addresses T-2026-05-19-06's "slower exhale then short inhale" framing, but loses some parasympathetic benefit of the longer exhale. |
-| 3-0-5-2 | 10s   | 18 / 30 / 42 / 60                      | Lighter still. Risks overlapping with Gentle's role (3-2-4-4) — both shorter and easier — without a distinct purpose. |
+| 3-0-5-2 | 10s   | 18 / 30 / 42 / 60                      | Lighter still. Risks overlapping with Soft's role (3-2-4-4) — both shorter and easier — without a distinct purpose. |
 
 Recommendation: ship **4-0-6-2** if anything ships. Reasoning:
 
 - Removes Hold, which is the unifier across the four frictioned testers (T-2026-05-19-03, -05, -06, -07).
 - Preserves the 6:4 exhale:inhale ratio so the parasympathetic effect is intact.
 - 2s Relax is short enough to feel like a transition beat rather than an interruption, addressing the Rest-awkward feedback without removing the breathing space entirely.
-- Cycle counts land in the same range as existing rhythms (Gentle: 14 / 23 / 32 / 46; Flow: 15 / 25 / 35 / 50). No cycle-counter UX regression.
+- Cycle counts land in the same range as existing rhythms (Soft: 14 / 23 / 32 / 46; Flow: 15 / 25 / 35 / 50). No cycle-counter UX regression.
 
 Code implications (for Codex; no implementation in this sketch):
 
@@ -154,27 +154,27 @@ Code implications (for Codex; no implementation in this sketch):
 2. `getNextPhase` currently returns the literal next index, including 0-duration phases. Change needed: skip zero-duration phases so the anticipation cue does not lead into a phase that has no time on screen. Single-line fix in `breathing.ts`.
 3. `getOrbScale` is correct as-is. 0-duration phases never become the active phase, so they never have a scale computed. `prevScale` carries continuity across them (Exhale ends at 0.45, next Inhale begins from 0.45).
 4. `useAudioEngine.playAnticipationCue` and `BreathingOrb`'s guide-ring lead both consume `nextPhase` from `useBreathingSession`. If `getNextPhase` is fixed to skip zero-duration phases, these inherit correct behavior automatically — no further change.
-5. Session Setup tile needs a new entry. Suggested label `Flow`; summary `Open` or `Lighter` (single word per `Rhythm.summary` contract); description "Inhale and exhale with no hold and a brief pause. For users who find the Hold or longer Rest distracting."
+5. Session Setup tile needs a new entry. Final shipped label: `Flow`; summary: `Continuous`; helper description now reads "No hold, steady momentum." Technical timing is hidden behind `View timing`.
 6. `RhythmId` union, `isRhythmId` guard, settings parser, and tests all need `'flow'` added. Supabase currently stores `user_settings.rhythm` as plain text with no enum/check constraint, so no database migration is required unless we intentionally add a constraint later. Existing parsers fall back to `DEFAULT_RHYTHM` on unknown values, so older clients hitting a flow-row stay safe.
 7. Tests in `src/__tests__/breathing.test.ts` to cover: Flow registry shape, `getNextPhase` zero-skip behavior, `getPhaseAtTime` boundaries across a Flow cycle, and cycle recalibration counts.
 
 What this does NOT do:
 
 - Does not introduce free per-phase customization. Decision-cost stays bounded to four named presets.
-- Does not change Standard, Gentle, or Full. Default first-time experience is unchanged.
-- Does not fully address T-2026-05-19-06's exhale-to-inhale ratio concern. Flow's 6:4 ratio is the same as Standard's; only 4-0-5-3 would directly address that. If the ratio concern persists after Flow lands with the other three testers, treat it as a separate question.
+- Does not change the underlying Steady (`standard`), Soft (`gentle`), or Full patterns. Default first-time experience is unchanged.
+- Does not fully address T-2026-05-19-06's exhale-to-inhale ratio concern. Flow's 6:4 ratio is the same as Steady's; only 4-0-5-3 would directly address that. If the ratio concern persists after Flow lands with the other three testers, treat it as a separate question.
 
 Validation gate before shipping (recorded so the bar is explicit, not retroactive):
 
-- Run the sketch past at least two of T-2026-05-19-03, -05, -06, -07 in a Vercel preview build or a private session before merging to master. If none of them prefer Flow over their current choice (Standard or Gentle), do not ship — the friction signal is real but the preset is not the right shape.
+- Run the sketch past at least two of T-2026-05-19-03, -05, -06, -07 in a Vercel preview build or a private session before merging to master. If none of them prefer Flow over their current choice (Steady or Soft), do not ship — the friction signal is real but the preset is not the right shape.
 - If at least one prefers Flow and the rest are neutral, ship as an optional fourth preset. This is not strong enough signal to make it the default for anyone, but is enough to justify giving Hold-frictioned users a path that exists.
 - If two or more prefer Flow, treat that as confirmation and watch `app_events` to see whether Flow's selection rate justifies its slot in Session Setup long-term.
 
 Open subquestions parked for after the sketch lands:
 
 - Should Flow have distinct phase colors, or inherit existing ones? Default: inherit. Phase identity is consistent across rhythms and Flow does not warrant breaking that.
-- Does the anticipation cue audio still feel right at a 12s cycle with the abrupt Exhale-to-Relax handoff? Worth testing during the validation gate above; if abrupt, scale `PHASE_LOOKAHEAD_SECONDS` proportional to phase duration so the 0.8s lead does not become a larger fraction of the shorter Exhale phase. (This is the same concern flagged for Gentle's Hold being 40% lead.)
-- Does the Flow rhythm tile's `Open` summary read well alongside Gentle's `Easier` and Full's `Longer`? Alternative single words: `Light`, `Steady`, `Free`. Decide during implementation with the visual context, not in this sketch.
+- Does the anticipation cue audio still feel right at a 12s cycle with the abrupt Exhale-to-Relax handoff? Worth testing during the validation gate above; if abrupt, scale `PHASE_LOOKAHEAD_SECONDS` proportional to phase duration so the 0.8s lead does not become a larger fraction of the shorter Exhale phase. (This is the same concern flagged for Soft's Hold being 40% lead.)
+- Does the Flow rhythm helper's `Continuous` summary read well alongside Soft's `Accessible` and Full's `Deep`? Earlier alternatives were `Open`, `Light`, `Steady`, and `Free`; revisit only if tester language suggests the current label is confusing. The compact rhythm tiles are now label-only, so this is helper/aria copy rather than visible tile copy.
 
 Constraints to note for implementation:
 
@@ -384,7 +384,7 @@ Follow-up: Promoted Priority added to `docs/ROADMAP.md` and `docs/TODO.md` to de
 
 ### Should Exhale offer customizable breath rhythms?
 
-Answer: Curated presets, not free customization. Three rhythms are now available inside Session Setup: Standard (4-4-6-8, default), Gentle (3-2-4-4, capacity-constrained users), and Full (6-6-10-4, experienced breathwork users). Each persists through `exhale-rhythm` localStorage and `user_settings.rhythm` cloud column. Free per-phase customization is intentionally not exposed; the presets handle the rhythm-fit complaints captured so far without forcing the skeptical primary user to make a multi-axis decision before pressing Begin.
+Answer: Curated presets, not free customization. Four rhythms are now available inside Session Setup as visible pace choices: Steady (internal id `standard`, 4-4-6-8), Soft (internal id `gentle`, 3-2-4-4), Full (`full`, 6-6-10-4), and Flow (`flow`, 4-0-6-2). Each persists through `exhale-rhythm` localStorage and `user_settings.rhythm` cloud column. Free per-phase customization is intentionally not exposed; the presets handle the rhythm-fit complaints captured so far without forcing the skeptical primary user to make a multi-axis decision before pressing Begin.
 
 Date answered: 2026-05-19
 
