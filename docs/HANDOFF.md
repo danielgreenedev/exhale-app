@@ -1,85 +1,91 @@
 # Codex Handoff
 
-Last updated: 2026-05-20 (Flow rhythm shipped to production; canonical docs updated)
+Last updated: 2026-05-20 (late evening — proportional anticipation cap, regression smoke tests, TS cleanup, policy footer)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
 ## Branch State
 
-- `master` and `preview` are both at the same head on origin and locally. No divergence.
+- `master` and `preview` are at the same head on origin and locally. No divergence.
 - Working tree was clean when this doc was written; if you see uncommitted changes, they are from after this handoff.
+- Test/typecheck/lint status: 104/104 pass; `npx tsc --noEmit` clean (the pre-existing appEvents spread-args error is fixed); `npx eslint src` silent.
 
-## What Shipped Today
+## What Shipped Recently
 
-Today's commits, oldest to newest:
+Commits since the last major handoff, oldest to newest:
 
-- `f1433b5` through `fef3aa5` — Rhythm registry rollout end to end. `RHYTHMS` registry in `src/lib/breathing.ts` with three rhythms (Standard 4-4-6-8 default, Gentle 3-2-4-4, Full 6-6-10-4). Rhythm threaded through `useBreathingSession`, `BreathingOrb`, `GameHUD`, `useAudioEngine`, and `game/page.tsx` via a locked-at-first-render `rhythmRef`. localStorage `exhale-rhythm` plus Supabase `user_settings.rhythm` (migrations 002, 003). 11 new tests.
-- `e31206e` — Polish from `/impeccable critique` (home page 36/40). Renamed third rhythm `slow` to `full`. Added per-rhythm one-word `summary` field. Practice History link hidden until first completed session. Tile sub-label styling unified.
-- `746e12d` — Apply `/impeccable audit` recommendations (codebase 19/20). P1 contrast bumps (SessionComplete quote attribution, stats sync copy). P3 debounced cloud writes (400ms trailing). P3 particle count scaling (22 below 600px viewport). P3 iOS PWA Add-to-Home-Screen tip on /stats.
-- `235ac1c` — Integrate today's work into the docs (CLAUDE / DESIGN / ROADMAP / TODO / OPEN_QUESTIONS).
-- `c9edf0e` — Polish social preview metadata (Codex authored).
-- `d9c3b3f` — Anticipatory phase cue, Relax phase reframe, and Rest/Hold signal capture. Major commit; see "Key Functional Changes" below.
-- `9d11751` — Log OAuth-vs-OTP friction question in OPEN_QUESTIONS.md.
-- `d205b67` — Close Facebook preview issue (Meta cache aged out; no app-side fix needed).
-- `f959b7e` — Flow rhythm design sketch + ARIA sweep fix. Design proposal for the Hold-less rhythm landed in OPEN_QUESTIONS.md; CLAUDE.md Phase Colors bullet relabeled "Rest" to "Relax" for parity.
-- `cab95ff` — Initial Codex handoff doc (this file, first pass).
-- `34ae14c` — Codex's mobile HUD polish + doc cleanup. `GameHUD.tsx` got mobile width/overflow polish: container max-widths, `min-w-0`, responsive instruction text (`text-xs sm:text-sm` with tighter mobile tracking), `leading-relaxed`. Also corrected my Flow sketch's migration claim (Supabase `user_settings.rhythm` is plain text, no migration needed) and the T-2026-05-19-07 framing (they liked Hold and slow Exhale; only Rest is the friction). Deduplicated a stale anticipatory-cue question in OPEN_QUESTIONS.md and added a new "Should Exhale support color or theme customization beyond Garden?" question from a secondary-user signal.
-- `0163e34` — Log graphic-designer HUD coherence feedback (T-2026-05-19-08) and add visual-coherence pass as TODO 6c.
-- `58e3603` — Second-pass HANDOFF.md update (this file) capturing Codex's mobile polish and the new design signal.
-- `e2a7c4c` — Visual coherence pass on the in-session HUD (TODO 6c shipped). Implements all three coordinated changes from T-2026-05-19-08: innermost phase progress ring removed in `BreathingOrb.tsx`, countdown opacity is now phase-aware in `GameHUD.tsx` (0.62 on Hold/Relax, 0.16 on Inhale/Exhale, full opacity during cycle-1 teaching), and phase-transition flash opacity scales by phase duration with a 35% floor so short Gentle phases don't strobe. Bonus mobile padding tweaks on `page.tsx` and `stats/page.tsx`. Smoke-tested Standard, Gentle, and Full at mobile width.
-- `f250fd7` — HANDOFF.md update after 6c shipped.
-- `fe3502a` — Flow rhythm shipped (4-0-6-2, 12s cycle). `'flow'` added to `RhythmId`, `isRhythmId`, and `RHYTHMS` in `src/lib/breathing.ts`. `getNextPhase` now skips zero-duration phases so anticipation cues stay correct. Session Setup rhythm picker is a 4-column grid. 89/89 tests pass. Pre-merge validation gate was waived in favor of post-launch tester signal collection (Stage 0 item 2).
+- `fe3502a` — **Flow rhythm shipped (4-0-6-2, 12s cycle).** `'flow'` added to `RhythmId`, `isRhythmId`, and `RHYTHMS` in `src/lib/breathing.ts`. `getNextPhase` skips zero-duration phases so anticipation cues stay correct. Session Setup rhythm picker is now a 4-column grid. Pre-merge validation gate was waived in favor of post-launch tester signal collection.
+- `e30873b` — Canonical docs (CLAUDE.md, DESIGN.md, TODO.md, OPEN_QUESTIONS.md) updated to reflect Flow as a fourth preset.
+- `2785803` — **Proportional anticipation cue cap.** New `getPhaseLookahead(phase)` helper returns `Math.min(0.8, phase.duration * 0.25)`. Long phases keep the full 0.8s lead; Gentle Hold (2s) and Flow Relax (2s) now get a 0.5s lead so the cue never occupies 40% of the phase. `useBreathingSession` (two call sites) and `BreathingOrb` updated to use the helper. CLAUDE.md and DESIGN.md updated with the new formula and concrete per-rhythm values.
+- `f056a9b` — **Smoke test for the cap.** 8 new tests in `useBreathingSession.test.ts` verify the lead window opens at the right moment per rhythm and per phase. Catches anyone reverting `getPhaseLookahead` or breaking `getNextPhase`'s zero-skip.
+- `9f620bb` — **Full Exhale regression guard.** Tight `toBeCloseTo(0.375, 2)` assertion that Full Exhale (10s, the imperceptibility-risk phase at 8%) keeps the full 0.8s lead. Catches any future "improvement" that silently shrinks the lead on long phases.
+- `c82b396` — Pre-existing TS spread-args error in `src/__tests__/appEvents.test.ts` fixed. The mocked `supabase.from` now has an explicit `(_table: string)` parameter matching the real signature.
+- `55fd8fd` — **Quiet privacy/terms footer (TODO 9 closed).** New `src/components/PolicyFooter.tsx` component mounted on home, session complete, and stats. 10px uppercase tracking-wide text at 45% white opacity; 75% on hover. Surfaces `/privacy` and `/terms` (which have existed but weren't linked from the main UI).
 
-## Key Functional Changes Since Your Last Pass
+## Key Functional State (Reference, Not Recent Changes)
 
-- **Anticipatory phase cue is live.** `PHASE_LOOKAHEAD_SECONDS = 0.8` in `src/lib/breathing.ts`. `useBreathingSession` returns `nextPhase`, `phaseLeadProgress` (0-1), and `timeUntilPhaseEnd`. `BreathingOrb` guide ring crossfades to the next-phase color during the lead window. `useAudioEngine.playAnticipationCue` plays a quiet pre-cue tone. **There is no HUD text cue**; an earlier `Next [phase]` experiment competed with the central phase label + countdown for attention and was removed. `nextPhase` and `phaseLeadProgress` stay on the hook return so the orb and audio engine still consume them.
-- **Fourth phase relabeled.** "Rest" → "Relax" with single-word instruction "Breathe". Phase enum stays `'rest'` as the internal discriminator. All user-facing surfaces flow from `PhaseConfig.label` / `PhaseConfig.instruction`, so aria-live announcements and HUD text update automatically with no consumer changes.
+- **Anticipatory phase cue.** `PHASE_LOOKAHEAD_SECONDS = 0.8` ceiling in `src/lib/breathing.ts`, with `getPhaseLookahead(phase)` returning the per-phase effective window. `useBreathingSession` returns `nextPhase`, `phaseLeadProgress` (0-1), and `timeUntilPhaseEnd`. `BreathingOrb` guide ring crossfades to next-phase color; `useAudioEngine.playAnticipationCue` plays a quiet pre-cue. No HUD text cue (a `Next [phase]` experiment was removed because it competed with the central phase label).
+- **Fourth phase: "Relax" with instruction "Breathe".** Phase enum stays `'rest'` as the internal discriminator. All user-facing surfaces flow from `PhaseConfig.label` / `PhaseConfig.instruction`.
+- **Four rhythms.** Standard (4-4-6-8 default), Gentle (3-2-4-4), Full (6-6-10-4), Flow (4-0-6-2). Flow's zero-duration Hold is skipped at runtime by `getPhaseAtTime` (strict less-than) and `getNextPhase` (proportional skip).
+- **Visual coherence pass shipped (e2a7c4c).** Innermost phase progress ring removed. Countdown opacity is phase-aware: 0.62 on Hold/Relax, 0.16 on Inhale/Exhale, full opacity during cycle-1 teaching. Phase-transition flash scales by phase duration with a 35% floor.
 
-## What's Mid-Flight (For You to Pick Up)
+## What's Mid-Flight (For You or the Project Owner to Pick Up)
 
-1. **Post-launch validation for Flow (Stage 0 item 2).** Flow shipped to production without the pre-merge tester pilot. Follow up with T-2026-05-19-03, -05, -06, -07 to confirm Flow fits better than their current choice. If at least one prefers Flow, the Rest/Hold question is fully answered. If none do, revisit whether the shape was wrong (4-0-6-0 or 4-0-5-3 from the sketch's alternatives) or whether free per-phase customization is needed.
+1. **Post-launch validation for Flow (Stage 0 item 2).** Flow shipped without the pre-merge tester pilot. Follow up with T-2026-05-19-03, -05, -06, -07 to confirm Flow fits better than their current choice. If at least one prefers Flow, the Rest/Hold question is fully answered. If none do, revisit whether the shape was wrong (4-0-6-0 or 4-0-5-3 from the sketch's alternatives in `docs/OPEN_QUESTIONS.md`) or whether free per-phase customization is needed. **Project owner has sent a feedback-question list to a graphic designer + several others (2026-05-20); responses expected over the next day or two.**
 
-2. **Visual smoke test of the anticipation cue across all four rhythms.** Code is live; needs browser confirmation. The 0.8s lead is a different fraction of each phase: Standard Exhale 13%, Gentle Hold 40% (jitter risk), Full Exhale 8% (imperceptibility risk). Flow's Inhale 4s gives a 20% lead and the brief Relax 2s gives a 40% lead — Flow's short Relax may want the same proportional dampening as Gentle's short Hold. If smoke test flags jitter, scale `PHASE_LOOKAHEAD_SECONDS` proportional to phase duration, e.g. `Math.min(0.8, phase.duration * 0.25)`.
+2. **OAuth-vs-OTP for Practice History sync** is parked as an open question. Lean is add Google Sign-In alongside existing OTP (not replace), pilot with beta testers, defer Apple. No implementation work scheduled — wants a tester pilot decision first. See `docs/OPEN_QUESTIONS.md`.
 
-3. **OAuth-vs-OTP for Practice History sync** is parked as an open question. Lean is add Google Sign-In alongside existing OTP (not replace), pilot with beta testers, defer Apple. No implementation work scheduled — wants a tester pilot decision first. See `docs/OPEN_QUESTIONS.md`.
+## Visual Verification Needed (Eyes Only — Codex If You Have Browser Access, Otherwise Project Owner)
 
-## Open Questions Promoted Today
+Five visual gaps that can't be closed by code or tests. If Codex has browser access on the user's machine, these are good candidates. If not, they're for the project owner.
 
-- **"Should Rest and Hold be partly or completely optional?"** promoted from deferred to **active** after four testers converged on Rest/Hold as friction (T-2026-05-19-03 didn't care for Rest; T-2026-05-19-05 capacity-mismatched/gasping; T-2026-05-19-06 hardest part is Hold + asymmetric exhale-inhale; T-2026-05-19-07 rests awkward + competitive/progressive interest). Flow sketch is the proposed answer.
-- **"Could OAuth (Google / Apple Sign-In) be lower-friction than email OTP for Practice History sync?"** — newly added. Distinct from the existing "fuller account system" question because the framing is friction-reduction within an existing optional gate, not adding a new account surface.
-- **Parked (single signal so far): progressive/ramping rhythms.** T-2026-05-19-07 asked for each rep to increase in duration. Single user; do not act. See `docs/TODO.md` 6b for the parking criteria.
+1. **Anticipation cue feel check at the new 0.5s cap.** The proportional cap shipped on 2026-05-20 takes Gentle Hold and Flow Relax leads from 0.8s to 0.5s. The math says the lead is no longer in the 40% jitter zone, but whether 0.5s of fading guide-ring color actually registers as "approaching transition" or as a flicker that's gone before the user notices is an eye question. Audio sync at the shorter window also needs an ear. **This is the most load-bearing visual check** because it directly validates today's shipped change.
 
-## Open Questions Answered Today
+2. **Flow rhythm orb transition smoothness.** Flow has the orb jump from end-of-Exhale (0.45 scale) straight to next-Inhale (0.45 → 1.0) with only a 2s Relax in between and a zero-duration Hold. Tests confirm phase ordering is correct; whether the visual jump feels "freeing" or "abrupt" is unanswered.
 
-- **"Is Facebook preview worth more attention?"** — closed. Meta cache aged out; preview renders correctly on current production build. Playbook preserved in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md` for future cache symptoms.
+3. **Flow tile at mobile width.** The rhythm picker is now a 4-column grid. Each tile gets ~65px on the 288px mobile container. The math says "Flow" / "Open" should fit, but visual crowding and tap-target comfort on a real phone needs hands.
 
-## Tester Signals Captured Today
+4. **Full Exhale imperceptibility verification.** The regression guard locks the 0.8s lead, but the underlying concern — that 8% of phase is too brief to register — was never visually confirmed. Could already be invisible in production. If imperceptible, the fix is a floor formula (e.g., scale the lead's visual opacity up on long phases), which is a separate change.
 
-Three new tester entries in `docs/USER_FEEDBACK.md` (verbatim quoted, anonymized):
+5. **Visual coherence pass net effect.** Phase ring removal, phase-aware countdown opacity, and flash dampening shipped together (e2a7c4c). The HUD intent was "calmer canvas without losing how-long signal." Whether it now feels coherent, sparse, or oddly empty needs a browser session, not a unit test.
 
-- **T-2026-05-19-06** (Facebook reply): "I think the hardest part for me was the hold and the slower exhale then a short inhale." Two frictions in one sentence — Hold and the asymmetric exhale-to-inhale ratio.
-- **T-2026-05-19-07** (Facebook reply): "I liked the hold and slow exhale. The rests were a little awkward. The competitive nature in me likes the idea of the breath, hold, and exhale increasing in duration by the last rep." Likes Hold/slow Exhale, flags Rest/Relax awkwardness, and shows progressive-escalation interest. Same tester later reported a teenager liked the simple UI and customization, and wondered about changing colors; color/theme customization is now parked as an open question.
-- **T-2026-05-19-08** (graphic designer, professional eye, annotated screenshot): four observations that cohere as one signal — phase progress is shown three different ways at once (orb scale, countdown number, innermost ring), and the phase-transition flash strobes on short phases. Drives TODO 6c (visual-coherence pass). Weight this entry as design-coherence input, not as "will this user return."
+## Open Questions Status
+
+- **Active**: "Should Rest and Hold be partly or completely optional?" — partially answered by Flow shipping. Full answer waits on tester follow-up (mid-flight item 1).
+- **Parked**: progressive/ramping rhythms (single signal from T-2026-05-19-07), color/theme customization beyond Garden (single signal from T-2026-05-19-07 follow-up), OAuth-vs-OTP (waiting on tester pilot).
+- **Recently answered**: "Is Facebook preview worth more attention?" closed when Meta cache aged out (playbook preserved in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md`).
+
+## Tester Signals Recently Captured
+
+Verbatim entries in `docs/USER_FEEDBACK.md`:
+
+- **T-2026-05-19-06** (Facebook): Hold is the hardest part; exhale-to-inhale ratio reads as abrupt.
+- **T-2026-05-19-07** (Facebook): Likes Hold and slow Exhale; rests feel awkward; competitive interest in progressive escalation. Same tester reports a teenager liked the simple UI and wondered about color customization.
+- **T-2026-05-19-08** (graphic designer, professional eye): Phase progress shown three ways at once; flash strobes on short phases. Drove TODO 6c (the visual coherence pass). Weight as design-coherence input, not target-audience signal.
+
+A new feedback round was sent out 2026-05-20 to the graphic designer plus several others, asking:
+
+```text
+Did the Relax/Rest period help you reset, or did it feel like it interrupted the breathing rhythm?
+Did the color lead or soft pre-cue make the phase changes easier to follow, or did they add noise?
+Did the rhythm ever make you feel like you had to gasp, catch up, or strain?
+Would you use Exhale again when you felt stressed, tired, or needed to settle?
+```
+
+Responses expected over the next day or two. When they come in, slot them into the open questions above and `docs/USER_FEEDBACK.md`.
 
 ## Do Not Revert / Preserve
 
-- **Vercel firewall bypass rules for Meta IP ranges** and the **`robots.txt` allowances** for Meta/Facebook/LinkedIn/Twitter crawlers stay in place even though the Facebook preview issue is resolved. They cost nothing and prevent regression if Meta cycles crawler IPs.
-- **`nextPhase` and `phaseLeadProgress` on `useBreathingSession`** are still consumed by `BreathingOrb` (guide ring lead) and `useAudioEngine` (anticipation cue) even though the HUD text cue was removed. Do not delete them — they look unused on the HUD side but are load-bearing on the orb and audio sides.
-- **Settle-In 8-second buffer**, **cycle-2 instruction-fade rule**, **60-second resume window**, **Pause/Exit at the bottom of the screen on mobile**, **mute control at 44px touch target with safe-area padding**, **rhythmRef locked at first render**: all intentional. See `CLAUDE.md` Key UX Decisions for rationale.
-- **`'rest'` phase enum**: stays as the internal discriminator. Only the user-facing label changed to "Relax". Do not rename the enum — it would force a Supabase column rename and break compatibility with any in-flight sessionStorage resume data.
+- **Vercel firewall bypass rules for Meta IP ranges** and the **`robots.txt` allowances** for Meta/Facebook/LinkedIn/Twitter crawlers stay in place even though the Facebook preview issue is resolved. Belt and braces.
+- **`nextPhase` and `phaseLeadProgress` on `useBreathingSession`** are still consumed by `BreathingOrb` (guide ring lead) and `useAudioEngine` (anticipation cue) even though the HUD text cue was removed.
+- **`getPhaseLookahead` cap behavior**: shipping a "remove the cap" or "tighten the ceiling" change would silently worsen the imperceptibility on Full Exhale. The regression guard test in `useBreathingSession.test.ts` should fail loudly if anyone tries.
+- **Settle-In 8-second buffer**, **cycle-2 instruction-fade rule**, **60-second resume window**, **Pause/Exit at bottom on mobile**, **mute control 44px touch target**, **rhythmRef locked at first render**: all intentional. See `CLAUDE.md` Key UX Decisions.
+- **`'rest'` phase enum**: stays as the internal discriminator even though user-facing label is "Relax". Renaming the enum would force a Supabase column rename and break sessionStorage resume.
 
 ## Recommended Next Concrete Step
 
-The big in-flight design work is now shipped (Flow + visual coherence). What remains is the validation cycle plus smaller open threads:
+The engineering surface is in a clean idle state. Most remaining work is feedback-dependent or eyes-only:
 
-- **Tester follow-up on Flow** is the most directly product-shaping work. The four Rest/Hold-frictioned testers (T-2026-05-19-03, -05, -06, -07) have not yet seen Flow; their reaction confirms or refutes the design. This is outreach work, not engineering.
-- **Anticipation cue smoke test** across all four rhythms in a browser. Flow's short Relax (2s) and Gentle's short Hold (2s) both have the 0.8s lead occupying 40% of the phase, which is the jitter-risk threshold. If either feels rushed, the fix is a per-phase proportional cap.
-- **OAuth-vs-OTP for Practice History sync** is still parked pending a tester pilot decision.
-
-If picking engineering work: the anticipation cue smoke test. If picking product work: the Flow tester follow-up.
-
-## Anything Else Worth Knowing
-
-- `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md` was moved to "Resolved" status but kept in full as a playbook for future cache symptoms.
-- The pre-existing TypeScript spread-argument issue in `src/__tests__/appEvents.test.ts` is unrelated to today's work; tests still pass at runtime. Untouched.
-- All 81 tests pass; `npx tsc --noEmit` clean; `npx eslint src` clean.
+- **If you have browser access**: knock out the five visual verification items above. #1 (anticipation cue feel at 0.5s) is the most load-bearing.
+- **If not**: stand down on engineering and let the in-flight feedback round arrive.
+- **For follow-up implementation work**: nothing scoped beyond what the feedback might surface. Garden skin (TODO 7) is the next sizable design piece and benefits from a fresh `/impeccable shape` pass before starting.

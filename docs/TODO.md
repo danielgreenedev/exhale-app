@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 20, 2026 (Flow rhythm shipped; canonical docs updated)
+Last updated: May 20, 2026 (Flow rhythm shipped; proportional cue cap; policy footer; TS cleanup)
 
 ## Completed Rhythm Changes
 
@@ -150,6 +150,24 @@ A fourth rhythm preset shipped end to end, responsive to four converged tester s
 - New tests in `src/__tests__/breathing.test.ts` cover the Flow registry shape, the relaxed "Hold/Relax may be zero" duration contract, `getPhaseAtTime` returning Exhale at t=4 in Flow (skipping the zero Hold), the Hold phase index never being active during a Flow cycle, and `getNextPhase` skipping zero-duration phases. Tests now total 89 passing.
 - The design sketch's pre-merge validation gate was waived in favor of shipping and collecting post-launch signal. Follow-up with the four frictioned testers on Flow fit lands as Stage 0 item 2.
 
+## Completed Proportional Anticipation Cue Cap (2026-05-20)
+
+Driven by the math in the smoke-test plan and the same "stop showing the same signal three different ways" intent as the visual coherence pass. The 0.8s lead window was occupying 40% of the 2-second Hold on Gentle and the 2-second Relax on Flow — the jitter threshold.
+
+- New `getPhaseLookahead(phase)` helper in `src/lib/breathing.ts` returns `Math.min(PHASE_LOOKAHEAD_SECONDS, phase.duration * 0.25)`. Long phases keep the full 0.8s lead; short phases get capped to 25% of their own duration.
+- `useBreathingSession` (two call sites) and `BreathingOrb` updated to use the helper.
+- Concrete effects: Gentle Hold 0.8s → 0.5s; Gentle Inhale 0.8s → 0.75s; Flow Relax 0.8s → 0.5s; everything else unchanged.
+- 8 new smoke tests in `src/__tests__/useBreathingSession.test.ts` lock the cap behavior per rhythm/phase, including a regression guard for Full Exhale (the imperceptibility-risk phase, where the cap must not engage). 104 tests now pass.
+- CLAUDE.md and DESIGN.md updated to describe the per-phase formula and the concrete values.
+
+## Completed Policy Footer (2026-05-20)
+
+TODO 9 closed. Quiet privacy/terms footer surfaced on home, session complete, and stats:
+
+- New `src/components/PolicyFooter.tsx` shared component. 10px uppercase tracking-wide text at 45% white opacity (75% on hover), with `py-2 px-1` providing a comfortable hit area without louder visual weight.
+- Mounted on home (after the Practice History link), session complete (below the Back to Menu button), and stats (below the Back link).
+- Stays neutral white on all three surfaces — amber stays exclusive to the celebratory orb and Breathe Again button on session complete.
+
 ## Completed Visual Coherence Pass (2026-05-19)
 
 Graphic-designer feedback flagged that the active session was showing phase progress too many ways at once. The coordinated TODO 6c pass is now implemented:
@@ -197,7 +215,7 @@ These can wait until after Stage 0 feedback signal is in.
 
 8. Resolved 2026-05-19: the Facebook preview now renders correctly on shared posts; the Sharing Debugger issue cleared once Meta's cache aged out, matching the working hypothesis. Playbook preserved in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md` for future reference. When the Garden skin lands, consider an updated OG image that shows both aesthetics — that is the only related thread still on the radar.
 
-9. Not a priority for now: add a UI affordance linking the main pages to `/privacy` and `/terms`. Likely a small footer link from home, game complete, and stats in keeping with the quiet aesthetic, but a more prominent button could also fit. The pages exist and are reachable; they are not surfaced from any other screen yet.
+9. Resolved 2026-05-20: quiet privacy/terms footer added to home, session complete, and stats. See "Completed Policy Footer" section above.
 
 ### Stage 2, distribution
 
