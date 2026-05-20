@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import Link from 'next/link';
-import { readStats, computeStats, storageAvailable } from '@/hooks/useSessionStats';
+import { readStats, computeStats, storageAvailable, writeStats } from '@/hooks/useSessionStats';
 import type { SessionRecord } from '@/hooks/useSessionStats';
 import { SURFACE_GLOWS } from '@/lib/colors';
 import { mergeSyncedSessions, missingLocalSessions } from '@/lib/sessionSync';
@@ -65,6 +65,9 @@ function friendlyOAuthError(message?: string): string {
   if (text.includes('manual') && text.includes('link')) {
     return 'Google sync needs identity linking enabled in Supabase first.';
   }
+  if (looksLikeExistingEmailError(message)) {
+    return 'That Google email already has email-code sync. Sign in with that email first, then link Google from Backup & Sync.';
+  }
   if (text.includes('provider') || text.includes('not enabled')) {
     return 'Google sync is not ready yet. Check the Supabase Google provider setup.';
   }
@@ -106,6 +109,7 @@ async function loadSyncedSessions(userId: string): Promise<{ sessions: SessionRe
   const sessionsToSync = missingLocalSessions(localSessions, cloudSessions);
 
   if (sessionsToSync.length === 0) {
+    writeStats({ sessions: cloudSessions });
     return { sessions: cloudSessions };
   }
 
@@ -121,9 +125,10 @@ async function loadSyncedSessions(userId: string): Promise<{ sessions: SessionRe
     };
   }
 
-  return {
-    sessions: mergeSyncedSessions(cloudSessions, (inserted ?? sessionsToSync) as SessionRecord[]),
-  };
+  const mergedSessions = mergeSyncedSessions(cloudSessions, (inserted ?? sessionsToSync) as SessionRecord[]);
+  writeStats({ sessions: mergedSessions });
+
+  return { sessions: mergedSessions };
 }
 
 export default function StatsPage() {
@@ -147,6 +152,7 @@ export default function StatsPage() {
   const [syncedEmail, setSyncedEmail] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [hasGoogleIdentity, setHasGoogleIdentity] = useState(false);
   const [showIosInstallTip, setShowIosInstallTip] = useState(false);
 
   // iOS Safari has no Fullscreen API, so the in-session toggle is hidden on iPhone.
@@ -199,6 +205,24 @@ export default function StatsPage() {
     setError(friendlyOAuthError(oauthError));
     window.history.replaceState(null, '', '/stats');
   }, []);
+
+  useEffect(() => {
+    if (!ready || !userId || isAnonymous) {
+      setHasGoogleIdentity(false);
+      return;
+    }
+
+    let active = true;
+
+    void supabase.auth.getUserIdentities().then(({ data, error: identitiesError }) => {
+      if (!active || identitiesError) return;
+      setHasGoogleIdentity(data.identities.some((identity) => identity.provider === 'google'));
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [isAnonymous, ready, userId]);
 
   const handleSendCode = async (e: FormEvent) => {
     e.preventDefault();
@@ -331,7 +355,7 @@ export default function StatsPage() {
   const timeLabel = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
 
   return (
-    <main className="min-h-screen bg-forest-night flex flex-col items-center justify-center px-4 sm:px-6 text-still-white">
+    <main className="min-h-screen bg-forest-night flex flex-col items-center px-4 py-10 sm:px-6 sm:py-14 text-still-white">
       <div
         className="absolute inset-0 pointer-events-none"
         style={{ background: SURFACE_GLOWS.stats }}
@@ -494,11 +518,21 @@ export default function StatsPage() {
           ) : syncState === 'synced' && syncedEmail ? (
             <div className="flex flex-col gap-3">
               <p className="text-still-white/58 text-sm font-light leading-relaxed">
-                Backup & Sync is on for {syncedEmail}. Use the same email or provider on another device to bring your practice there.
+                Backup & Sync is on for {syncedEmail}. Use the same {hasGoogleIdentity ? 'email or Google' : 'email'} on another device to bring your practice there.
               </p>
               <p className="text-still-white/55 text-xs font-light leading-relaxed">
                 {SYNC_SCOPE_COPY}
               </p>
+              {!hasGoogleIdentity && (
+                <button
+                  type="button"
+                  onClick={handleGoogleSync}
+                  disabled={busy}
+                  className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 bg-still-white/[0.03] text-still-white/72 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:bg-still-white/[0.06] hover:text-still-white/86 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                >
+                  {busy ? 'Opening Google...' : 'Link Google'}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={handleStopSync}

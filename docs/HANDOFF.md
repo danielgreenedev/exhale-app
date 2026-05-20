@@ -1,25 +1,27 @@
 # Codex Handoff
 
-Last updated: 2026-05-20 (pre-commit audit follow-up)
+Last updated: 2026-05-20 (OAuth smoke-test follow-up)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
 ## Branch State
 
 - Branch: `master`.
-- Current working tree contains a mobile polish / feedback documentation checkpoint after the OAuth commit.
-- Verification passed on May 20, 2026: `npm.cmd run lint`, `npm.cmd test -- --runInBand`, `npm.cmd run build`, and a mobile Playwright smoke on Home plus `/game?length=quick&rhythm=full&orb=0.75&sound=off`.
+- Current working tree contains OAuth smoke-test follow-up changes and the Practice page top-spacing fix.
+- Verification passed on May 20, 2026: `npm.cmd run lint`, `npm.cmd test -- --runInBand`, and `npm.cmd run build`.
 - `next-env.d.ts` may be rewritten by `next build`; restore it to the checked-in dev routes import before committing if it changes.
 
 ## Current Batch Summary
 
-- **Google Backup & Sync started.** Practice History now offers `Continue with Google` as a sibling to email-code sync, framed under `Backup & Sync`.
+- **Google Backup & Sync smoke-tested.** Localhost and production Google OAuth redirects now work after enabling Supabase manual linking and redirect allow-list entries.
 - **Anonymous-first preserved.** Home and session flow remain ungated. Google sync uses Supabase `linkIdentity()` first when a Supabase session already exists, so anonymous cloud rows can remain under the same user id where Supabase allows it.
-- **Provider setup still required.** Supabase Google provider, manual identity linking, redirect allow-list entries, and Google Cloud OAuth settings still need dashboard configuration before live OAuth testing.
+- **Email-code users can link Google.** Existing email-code synced users can now see `Link Google` in the synced Backup & Sync state when Supabase does not report a Google identity yet.
+- **Synced history feeds Home.** Practice History writes the reconciled cloud/local session list back to local storage so the Home screen Practice History counter can reflect synced sessions after Practice has loaded.
+- **Provider setup mostly complete.** Remaining OAuth validation is cross-device restore plus confirming the expected Google identity appears on the final synced user in Supabase.
 - **Policy pages updated.** `/privacy` and `/terms` now describe optional email/Google Backup & Sync, exact synced data, third-party provider involvement, deletion path, and the promise that sign-in is never required to breathe.
 - **Deployment docs updated.** `docs/DEPLOYMENT.md` now includes the Google OAuth setup checklist and cross-device sync acceptance checks.
 - **Feedback mode continues.** The project is still collecting beta signal on rhythm fit, Flow pause friction, transition cues, and Session Setup clarity.
-- **Mobile legibility and sound trust pass completed in this checkpoint.** Home spacing, in-session label contrast, Settle In styling, iPhone silent-mode hinting, and suspended-Web-Audio handling were tightened after marketing/UX feedback.
+- **Mobile legibility and sound trust pass completed in this checkpoint.** Home spacing, in-session label contrast, Settling In styling, iPhone silent-mode hinting, and suspended-Web-Audio handling were tightened after marketing/UX feedback.
 - **Visual cue hierarchy adjusted.** Graphic-designer feedback on Full showed the center orb felt relaxing, but the outer guide line could feel like the user was already behind. The guide line and incoming cue should stay softer than the orb.
 - **Impeccable audit follow-up applied.** Static orb marks now avoid colored glow box-shadows, body/sentence tracking is calmer, and pure-black shadow/scrim values were replaced with tinted forest-night values. `DESIGN.md` and `CLAUDE.md` were updated to preserve those rules.
 - **Audit status.** The rerun cleared the neon/static-glow and wide-body-tracking findings. One pure-black scanner warning still appears despite source/computed visible styles using tinted Forest Night (`#0f1712`), so treat that as a residual audit false positive unless a visible pure-black surface is found.
@@ -36,13 +38,9 @@ This document is overwritten on each handoff. The previous handoff's content doe
 
 ## OAuth Setup Remaining
 
-1. Enable Google provider in Supabase Auth.
-2. Add Google client ID and client secret to Supabase.
-3. Enable manual identity linking in Supabase so `linkIdentity()` can convert anonymous users.
-4. Add Supabase redirect allow-list URLs for production, local, and any preview environment used for testing.
-5. Add Google Cloud authorized origins and the Supabase callback redirect URI.
-6. Test Google Backup & Sync with the local Supabase flag enabled or on preview.
-7. Confirm a second device restores practice history, timer length, Circle Size, sound choice, and rhythm.
+1. Re-test `Link Google` while signed in as the existing email-code user, then confirm Supabase shows a Google identity on that user.
+2. Confirm a second browser/device restores practice history, timer length, Circle Size, sound choice, and rhythm.
+3. Keep an eye on the existing-email OAuth conflict path: if users hit it, the app should guide them to sign in with email first, then link Google from Backup & Sync.
 
 ## Feedback Mode
 
@@ -74,4 +72,4 @@ Current brand-new-user prompts live in `docs/USER_FEEDBACK.md`; key themes still
 
 ## Recommended Next Step
 
-Configure Supabase/Google OAuth, then do a real cross-device Backup & Sync test before considering the OAuth item done.
+Finish the Google identity attachment check, then do a real cross-device Backup & Sync restore before considering the OAuth item done.

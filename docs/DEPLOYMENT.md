@@ -25,7 +25,7 @@ Exhale uses Vercel for hosting, Supabase for data, and GitHub as the deployment 
 - `npm.cmd run lint`
 - `npm.cmd run build`
 - Home page starts a session.
-- Game page shows Settle In, the orb canvas, phase transitions, and sound behavior.
+- Game page shows Settling In, the orb canvas, phase transitions, and sound behavior.
 - Practice History shows stats and optional Backup & Sync.
 - Email sync verifies with a 6-digit email code.
 - Google sync opens the provider flow and returns to Practice History.
@@ -61,6 +61,7 @@ In Supabase:
 - Add redirect URLs for each environment that will test OAuth:
   - `https://exhale.guide/stats`
   - `http://localhost:3000/stats`
+  - `http://127.0.0.1:3000/stats`
   - Vercel preview URLs or the approved preview wildcard pattern, if OAuth is tested on preview.
 
 In Google Cloud:
@@ -69,6 +70,7 @@ In Google Cloud:
 - Add authorized JavaScript origins:
   - `https://exhale.guide`
   - `http://localhost:3000` for local testing.
+  - `http://127.0.0.1:3000` for local testing from the in-app browser.
 - Add the Supabase callback URL from the Supabase Google provider screen as an authorized redirect URI. It is usually `https://<project-ref>.supabase.co/auth/v1/callback`.
 - Add the production privacy and terms URLs to the consent screen:
   - `https://exhale.guide/privacy`
@@ -81,6 +83,13 @@ localStorage.setItem('exhale-enable-local-supabase', '1')
 ```
 
 Then reload `http://localhost:3000`.
+
+If an email-code synced user tries Google with the same email before Google is
+attached, Supabase can return "A user with this email address has already been
+registered." Sign in with the email-code identity first, then use the synced
+Backup & Sync state to `Link Google`. That calls `linkIdentity()` against the
+existing synced user instead of trying to attach Google to a fresh anonymous
+session.
 
 The Supabase email templates for sync should visibly include the 6-digit OTP token:
 

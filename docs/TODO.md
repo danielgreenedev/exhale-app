@@ -1,10 +1,10 @@
 # Exhale To-Do List
 
-Last updated: May 20, 2026 (pre-commit audit follow-up)
+Last updated: May 20, 2026 (OAuth and Settling In follow-up)
 
 ## Completed Rhythm Changes
 
-- Settle In now lasts 8 seconds before the first guided inhale.
+- Settling In now lasts 8 seconds before the first guided inhale.
 - The core rhythm is now 4-4-6-8, with an 8-second Relax phase (internal phase enum `rest`).
 - Session breath counts were recalibrated so the 3, 5, 7, and 10 minute labels stay accurate.
 - Top-level session length buttons now show only time labels; rhythm-specific timing details stay behind the optional `View timing` reveal instead of the first decision surface.
@@ -30,9 +30,9 @@ Last updated: May 20, 2026 (pre-commit audit follow-up)
 - Home mobile spacing tightened: reduced top padding, reduced mobile home orb/logo footprint by roughly 10%, and compacted the first screen enough to improve iPhone first-viewport fit while preserving large tap targets.
 - Home secondary text and controls gained modest contrast increases for older users and low-vision users.
 - In-session phase label/instruction stack was compacted, with stronger contrast and text shadow on the instruction line.
-- Settle In now uses the same strong phase-label treatment as the active session labels so the intro state feels consistent and legible.
+- Settling In now uses the same strong phase-label treatment, positioning, and shadowed instruction style as the active session labels so the intro state feels consistent and legible.
 - Center-orb timing hierarchy was reinforced: the orb rim is slightly stronger, while the outer guide/progress line and incoming soft cue are lower contrast and less neon so users are less likely to chase the pre-cue.
-- First-pass sound trust was hardened: Web Audio no longer reports active if the context remains suspended, and iPhone-class browsers get a timely silent-mode hint after Settle In when sound is active.
+- First-pass sound trust was hardened: Web Audio no longer reports active if the context remains suspended, and iPhone-class browsers get a timely silent-mode hint after Settling In when sound is active.
 - Remaining validation: test sound perception on a real iPhone in normal mode and silent mode, across Safari and the browser used by the tester if possible. Include app-switching away from Safari and back, because tester feedback suggests that may affect perceived sound.
 - Open question added: whether Full needs clearer state-specific framing after a resting-heart-rate tester found the 10-second exhale difficult but potentially useful during panic/stress.
 
@@ -53,9 +53,9 @@ Last updated: May 20, 2026 (pre-commit audit follow-up)
 
 ## Completed From Full UI Audit
 
-- Full UI audit was run against the current local UI, with browser checks for Home, Stats, Settle In, and the running breathing page.
-- Settle In now has an immediate quiet Exit path, and Escape opens the exit guard during the 8-second buffer.
-- Opening the exit guard during Settle In pauses the settle timer; Resume returns to Settle In instead of starting the session behind the dialog.
+- Full UI audit was run against the current local UI, with browser checks for Home, Stats, Settling In, and the running breathing page.
+- Settling In now has an immediate quiet Exit path, and Escape opens the exit guard during the 8-second buffer.
+- Opening the exit guard during Settling In pauses the settle timer; Resume returns to Settling In instead of starting the session behind the dialog.
 - The mute control now meets the 44x44 touch target floor.
 - The Begin button has more space above it so it no longer feels cramped against the timer buttons.
 - Home orb size changes and the session progress bar now animate with transforms instead of layout-width/height transitions.
@@ -93,7 +93,7 @@ Last updated: May 20, 2026 (pre-commit audit follow-up)
 - Production iPhone tester notes were captured in `docs/USER_FEEDBACK.md`.
 - Hold copy was softened to avoid mentioning strain.
 - One low-light iPhone readability pass reported that the color changes were clear and usable.
-- Settle In, pause length, phase-marker sounds, the main menu structure, and the Circle label were validated as working well.
+- Settling In, pause length, phase-marker sounds, the main menu structure, and the Circle label were validated as working well.
 
 ## Completed Auth Sign-In Sync
 
@@ -218,13 +218,13 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 - Scope: add Google OAuth as a sibling option to the existing email-code sync, using Supabase Auth provider support rather than custom OAuth handling.
 - Keep anonymous local use as the default. No sign-in prompt on Home, no auth before breathing, no blocking gate before Practice History can be viewed locally.
-- App-side status: initial Google button, OAuth return-error handling, privacy copy, terms copy, and deployment setup notes are implemented. Supabase/Google dashboard configuration and live end-to-end testing remain.
-- Preserve and merge existing local/anonymous practice history when a user links Google, matching the current Backup & Sync preservation goal. Implementation uses Supabase `linkIdentity()` first when an anonymous session exists, so existing cloud rows can stay under the same user id.
+- App-side status: initial Google button, OAuth return-error handling, email-code-to-Google linking, privacy copy, terms copy, and deployment setup notes are implemented. Localhost and production Google OAuth have been smoke-tested.
+- Preserve and merge existing local/anonymous practice history when a user links Google, matching the current Backup & Sync preservation goal. Implementation uses Supabase `linkIdentity()` first when a Supabase session exists, so existing cloud rows can stay under the same user id. Practice History now writes the reconciled cloud/local session list back to local storage so the Home counter can reflect synced history after Practice has loaded it.
 - Copy direction: frame this as "Backup & Sync" or "Save across devices." It is a persistence affordance, not an account system.
 - Portfolio rationale: demonstrates a privacy-first auth architecture suitable for a resume/GitHub project while respecting the app's anonymity promise.
 - Future path: Apple Sign-In can follow later if iPhone testers or privacy-sensitive users ask for it; do not take on Apple Developer/account overhead as the first provider.
 - Guardrails: no profile screen, avatars, passwords, account settings, premium gate, or auth-first onboarding as part of this task.
-- Acceptance requirement before calling this done: configure Supabase Google provider, enable manual identity linking, add redirect allow-list URLs, configure Google Cloud OAuth consent/redirects, test Google sync on local or preview with the local Supabase flag enabled, then test second-device restoration of practice history, timer length, Circle Size, sound choice, and rhythm.
+- Acceptance requirement before calling this done: test second-device restoration of practice history, timer length, Circle Size, sound choice, and rhythm, then confirm the same user has the expected Google identity attached in Supabase. Keep email-code sync available unless follow-up testing shows it is redundant.
 
 2. Pending follow-up with rhythm-concern testers: ask the original five (T-2026-05-18-01 and T-2026-05-19-02 through -05) whether Soft or Full fits better than Steady did, and ask the four Rest/Hold-frictioned testers (T-2026-05-19-03, -05, -06, -07) whether Flow fits better than their current choice. Use the Flow follow-up questions in `docs/USER_FEEDBACK.md` so the tiny-pause question is asked consistently. Capture answers in `docs/USER_FEEDBACK.md`. Flow shipped on 2026-05-20 without the original pre-merge validation gate; this follow-up is the post-launch validation. First Flow follow-up from T-2026-05-19-08 says no-Hold helps but the 2-second pause feels too fast and interruptive; the same tester explicitly said they would take out the pause.
 
@@ -240,7 +240,7 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 5. Pending feedback/data collection: recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
 
-6. Pending feedback/data collection: after a meaningful sample of synced sessions, review Supabase `app_events` counts (timer selections, session starts, Settle In exits, early exits, completions). Watch completion rate, return rate, and drop-off phase.
+6. Pending feedback/data collection: after a meaningful sample of synced sessions, review Supabase `app_events` counts (timer selections, session starts, Settling In exits, early exits, completions). Watch completion rate, return rate, and drop-off phase.
 
 ### Stage 1, ship-quality polish
 

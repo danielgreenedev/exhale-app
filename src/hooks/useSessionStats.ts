@@ -12,7 +12,7 @@ export interface SessionRecord {
   length: SessionLength;
 }
 
-interface StoredStats {
+export interface StoredStats {
   sessions: SessionRecord[];
 }
 
@@ -31,7 +31,7 @@ export function readStats(): StoredStats {
   }
 }
 
-function writeStats(stats: StoredStats): boolean {
+export function writeStats(stats: StoredStats): boolean {
   if (typeof window === 'undefined') return false;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));

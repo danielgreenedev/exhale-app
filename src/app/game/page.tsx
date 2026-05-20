@@ -531,29 +531,37 @@ function GameContent() {
         />
       )}
 
-      {/* Settle-in overlay — fades in heading first, then subtitle, then both fade before breathing starts */}
+      {/* Settle-in overlay — aligned to the phase HUD so it feels like the first instruction state */}
       {settling && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 pointer-events-none z-10 transition-opacity duration-700" data-exhale-settle aria-live="polite">
-          <p
-            className="exhale-settle-title text-still-white text-3xl tracking-[0.18em] sm:tracking-[0.3em] uppercase font-semibold"
-            style={{ textShadow: '0 2px 16px rgba(15,23,18,0.85), 0 1px 4px rgba(15,23,18,0.9)' }}
-          >
-            Settle in
-          </p>
-          <p
-            className="exhale-settle-subtitle text-still-white/70 text-xs tracking-[0.22em] font-light"
-            style={{ textShadow: '0 2px 12px rgba(15,23,18,0.82), 0 1px 4px rgba(15,23,18,0.78)' }}
-          >
-            breathe normally
-          </p>
-          {isFirstVisit && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-between pointer-events-none select-none transition-opacity duration-700" data-exhale-settle aria-live="polite">
+          <div className="pt-8 w-full flex items-start justify-center relative" aria-hidden="true">
+            <p className="invisible text-sm tracking-[0.2em] uppercase font-light">Breath 1 of 1</p>
+          </div>
+          <div className="flex w-full max-w-[calc(100vw-2rem)] translate-y-[clamp(46px,12vh,100px)] flex-col items-center gap-1.5 px-4 landscape:translate-y-[clamp(28px,7vh,56px)]">
             <p
-              className="exhale-settle-hint absolute bottom-16 text-still-white/62 text-[10px] tracking-[0.18em] font-light"
+              className="exhale-settle-title text-center text-3xl font-semibold tracking-[0.3em] uppercase text-still-white"
+              style={{ textShadow: '0 2px 16px rgba(15,23,18,0.85), 0 1px 4px rgba(15,23,18,0.9)' }}
+            >
+              Settling in
+            </p>
+            <p
+              className="exhale-settle-subtitle min-h-8 max-w-[27rem] px-1 text-center text-sm font-light leading-snug tracking-[0.04em] text-still-white"
+              style={{ textShadow: '0 2px 14px rgba(15,23,18,0.92), 0 1px 4px rgba(15,23,18,0.9)' }}
+            >
+              Breathe normally
+            </p>
+            <div className="invisible mt-0 text-6xl font-thin tabular-nums text-still-white/92" aria-hidden="true">
+              4
+            </div>
+          </div>
+          <div className="pb-[calc(7rem+env(safe-area-inset-bottom))] flex flex-col items-center gap-1.5">
+            <p
+              className={`exhale-settle-hint text-[10px] tracking-[0.18em] font-light ${isFirstVisit ? 'text-still-white/62' : 'invisible'}`}
               style={{ textShadow: '0 1px 8px rgba(15,23,18,0.75)' }}
             >
               the circle leads, just follow
             </p>
-          )}
+          </div>
         </div>
       )}
 

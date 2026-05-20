@@ -161,13 +161,13 @@ These shift the entire canvas (orb, glow, progress rings, particles) with each b
 
 - **Display** (extralight 200, 2.25rem, tracking 0.25em, uppercase): The "Exhale" wordmark on the home screen. One instance per app.
 - **Headline** (extralight 200, 1.875rem, tracking 0.3em, uppercase): Screen titles — "Practice", "Complete". Airy and formal.
-- **Title** (semibold 600, 1.875rem, tracking 0.3em, uppercase): The active phase label during a session — "Inhale", "Hold", "Exhale", "Relax". Settle In may use the same treatment because it functions as the pre-session state label. Together with the Begin button label, these are the only semibold uses in the system. Their weight is earned: they are the only instructions the user needs.
+- **Title** (semibold 600, 1.875rem, tracking 0.3em, uppercase): The active phase label during a session — "Inhale", "Hold", "Exhale", "Relax". Settling In uses the same treatment because it functions as the pre-session state label. Together with the Begin button label, these are the only semibold uses in the system. Their weight is earned: they are the only instructions the user needs.
 - **Body** (light 300, 0.875rem, tracking 0.04em): Taglines, descriptions, session complete quotes. Sentence case. 55–72% white. Body copy uses only subtle tracking; wide spacing is reserved for uppercase labels and controls.
 - **Label** (light 300, 0.75rem, tracking 0.18–0.28em, uppercase): Most button text, metadata, and stat labels. Secondary actions sit at 0.18em. The Begin button is the one sanctioned exception, using semibold 600 at tracking 0.20em for legibility against the emerald fill; see Begin (Primary) below.
 - **Timer** (thin 100, 3.75rem, tabular-nums): The countdown during a session. Uses `font-variant-numeric: tabular-nums` to prevent layout shift as numbers change.
 
 ### Named Rules
-**The Weight Ceiling Rule.** Semibold (600) is reserved for the active phase label, the Settle In pre-session label, and the Begin button label. Every other element uses 100, 200, or 300. Adding bold text anywhere else breaks the hierarchy. `font-normal` (400) is also prohibited — it sits in no-man's-land between the permitted weights. The Begin exception exists because the primary action pairs Forest Night text with an Emerald Pulse fill, which is a lower-contrast pairing than any other text in the system (everything else sits on the dark ground). No other surface pairs text with a saturated brand color, so the exception does not generalize.
+**The Weight Ceiling Rule.** Semibold (600) is reserved for the active phase label, the Settling In pre-session label, and the Begin button label. Every other element uses 100, 200, or 300. Adding bold text anywhere else breaks the hierarchy. `font-normal` (400) is also prohibited — it sits in no-man's-land between the permitted weights. The Begin exception exists because the primary action pairs Forest Night text with an Emerald Pulse fill, which is a lower-contrast pairing than any other text in the system (everything else sits on the dark ground). No other surface pairs text with a saturated brand color, so the exception does not generalize.
 
 **The Uppercase Contract.** Uppercase is for labels and controls only — things the user acts on or reads quickly. Copy (taglines, instructions, quotes) is always sentence case. Never all-caps a full sentence of human-facing copy.
 
@@ -208,7 +208,7 @@ The brand mark and the product itself. Three contexts:
 
 ### Breathing Rhythm
 
-The default Steady rhythm is 4-4-6-8: Inhale 4 seconds, Hold 4 seconds, Exhale 6 seconds, Relax 8 seconds (phase enum `rest`). Relax is intentionally long enough to allow a normal catch-up breath, a yawn, or a soft reset before the next guided inhale; "Relax" labels the phase rather than "Rest" because the body wants to inhale during this window, not hold still. The pre-session Settle In state lasts 8 seconds and is skipped when resuming a session. Soft and Full presets reshape the per-phase durations; see the Rhythm component spec.
+The default Steady rhythm is 4-4-6-8: Inhale 4 seconds, Hold 4 seconds, Exhale 6 seconds, Relax 8 seconds (phase enum `rest`). Relax is intentionally long enough to allow a normal catch-up breath, a yawn, or a soft reset before the next guided inhale; "Relax" labels the phase rather than "Rest" because the body wants to inhale during this window, not hold still. The pre-session Settling In state lasts 8 seconds and is skipped when resuming a session. Soft and Full presets reshape the per-phase durations; see the Rhythm component spec.
 
 ### Anticipatory Phase Cue
 
@@ -227,7 +227,7 @@ Phase changes should feel like a handoff rather than a switch. The HUD keeps the
 
 ### Session HUD Legibility
 
-The active phase label and Settle In label use semibold 600 with a dark text shadow because they sit directly on the canvas orb and must read on bright phase colors. The instruction line below the phase label is compact and higher contrast than decorative UI text; it also uses a dark text shadow. This is a legibility exception to the otherwise flat, no-shadow UI rule: the shadow belongs to text over moving canvas light, not to structural elevation.
+The active phase label and Settling In label use semibold 600 with a dark text shadow because they sit directly on the canvas orb and must read on bright phase colors. The instruction line below the phase label is compact and higher contrast than decorative UI text; it also uses a dark text shadow. This is a legibility exception to the otherwise flat, no-shadow UI rule: the shadow belongs to text over moving canvas light, not to structural elevation.
 
 ### Rhythm
 

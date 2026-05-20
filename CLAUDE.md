@@ -27,7 +27,7 @@ The fourth phase is labeled `Relax` (not `Rest`) and its instruction is the sing
 
 Phase transitions have anticipatory support because beta feedback showed that exact boundary changes can take a beat to process. In the final 0.8s of each phase (or 25% of phase duration on short phases — whichever is smaller), the guide ring around the orb picks up the next phase's color and a quiet pre-cue tone plays when sound is on. The cap is set by `getPhaseLookahead(phase)` in `src/lib/breathing.ts`; the ceiling `PHASE_LOOKAHEAD_SECONDS = 0.8` is what most phases use, but Soft's 2s Hold, Soft's 3s Inhale, and Flow's 2s Relax all get a proportionally shorter lead so the cue does not occupy 40% of the phase. No textual HUD cue is shown; an earlier attempt at a `Next [phase]` label competed with the central phase label and countdown for attention, so it was removed.
 
-The active phase label and the Settle In label intentionally share the same semibold, shadowed treatment for legibility over the moving orb. The instruction line below the phase label is compact, brighter than decorative UI text, and shadowed for older/low-vision mobile users.
+The active phase label and the Settling In label intentionally share the same semibold, shadowed treatment for legibility over the moving orb. The instruction line below the phase label is compact, brighter than decorative UI text, and shadowed for older/low-vision mobile users.
 
 The center orb is the primary timing object. Keep the outer guide ring and incoming-color lead visibly softer than the orb; graphic-designer feedback showed that a brighter line can feel like the user is already behind because it starts before the orb changes.
 
@@ -67,7 +67,7 @@ Web Audio API synthesis only — no external audio files. Zero load time, works 
 - Phase cues are synthesized from per-phase tone pairs in `CUE_MAP`; the rhythm-aware breath filter ramps with the active phase duration.
 - Autoplay policy is already handled: attempts auto-start, falls back to first user interaction.
 - During active sessions, `scheduleAmbientStop` schedules a Web Audio clock fade-out at the guided-session deadline so Chrome background-tab throttling cannot leave the ambient bed running after completion.
-- On iPhone-class browsers, the session screen shows a timed "still quiet? check silent mode" hint after Settle In when sound is active. `startAmbient` must not report success unless the Web Audio context is actually running.
+- On iPhone-class browsers, the session screen shows a timed "still quiet? check silent mode" hint after Settling In when sound is active. `startAmbient` must not report success unless the Web Audio context is actually running.
 
 ## Phase Colors
 
@@ -117,7 +117,7 @@ These are intentional — don't undo them without understanding the rationale:
 - **Selectable pace (Steady / Soft / Full / Flow)** — Steady, Soft, Full added after five of six recent beta testers reported rhythm-fit concerns across a range of capacities and preferences. Flow added after four testers (T-2026-05-19-03, -05, -06, -07) converged on Rest/Hold as the friction; Flow removes Hold entirely and shortens Relax to a transition beat. Default stays Steady 4-4-6-8; alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
 - **Fourth phase reframed as `Relax` with instruction `Breathe`** — "Rest" implied stillness when the body actually wants to inhale after exhale. `Relax` keeps imperative-verb parity with Inhale / Hold / Exhale and reads as permission. The instruction collapses to a single word because the label does the framing.
 - **Anticipatory cue in the final 0.8s of each phase, or 25% of phase duration, whichever is smaller** — guide-ring picks up the next-phase color and audio plays a quiet pre-cue. The proportional cap keeps the lead from feeling jittery on short phases (Soft Hold, Flow Relax). No HUD text cue (removed because it competed with the central phase label and countdown).
-- **8s settle-in before first breath** — gives the user a quiet transition from "reading the screen" to "being in the session."
+- **8s Settling In before first breath** — gives the user a quiet transition from "reading the screen" to "being in the session."
 - **New-user defaults** — Quick / 3 min and medium Circle Size are the first-run defaults so the first session feels short and visually balanced.
 - **Session resume (60s window)** — exiting a session shows an exit guard; sessionStorage holds state for 60s so accidental exits don't lose progress.
 - **Resume directly below Begin** — when a resumable session exists, the continuation action sits next to the primary start action before Session Setup.

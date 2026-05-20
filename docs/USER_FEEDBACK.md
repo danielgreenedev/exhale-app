@@ -178,8 +178,9 @@ Use these after someone tries the Flow pace:
 
 #### Product Response
 
-- Accepted for immediate polish: compact mobile home header, slightly smaller mobile home orb, higher-contrast home/session text, tighter in-session label spacing, and stronger Settle In styling.
-- Accepted for immediate hardening: do not mark sound active when the Web Audio context is still suspended, and show the silent-mode hint after Settle In on iPhone-class browsers when sound is active.
+- Accepted for immediate polish: compact mobile home header, slightly smaller mobile home orb, higher-contrast home/session text, tighter in-session label spacing, and stronger Settling In styling.
+- Accepted for immediate hardening: do not mark sound active when the Web Audio context is still suspended, and show the silent-mode hint after Settling In on iPhone-class browsers when sound is active.
+- Follow-up implementation: the pre-session label now reads `Settling in` and shares the active phase HUD's positioning, uppercase semibold label treatment, bright shadowed instruction style, and vertical spacing.
 - Still needs validation on real iPhone hardware because iOS silent mode and browser autoplay policies can differ by browser.
 
 ### 2026-05-20, T-2026-05-19-08, Graphic Designer Follow-Up, Default Quick Positive Signal

@@ -28,7 +28,7 @@ Possible evidence:
 
 ### What completion or drop-off rate would worry us enough to change the rhythm or first-run flow?
 
-Context: Supabase `app_events` can show timer selections, session starts, Settle In exits, early exits, and completions.
+Context: Supabase `app_events` can show timer selections, session starts, Settling In exits, early exits, and completions.
 
 Current answer: Open.
 
@@ -293,7 +293,7 @@ Current answer: Open.
 
 Context: Practice History sync currently uses email-code OTP. That requires the user to leave Exhale, open their email app, find the code, switch back, and paste it. OAuth providers offer a one-tap consent flow when the device is already signed into Google or Apple. For users who have already decided to sync (inside Practice History), OAuth is plausibly a strict friction reduction over OTP. This is a different question from "should Exhale have a fuller account system" below: the framing is friction-reduction within the existing optional sync gate, not adding a new account surface to the app.
 
-Current answer: **Promoted to active Stage 0 work on 2026-05-20.** Add Google OAuth as an optional Backup & Sync path inside Practice History alongside the existing email-code flow. Anonymous-first stays the default; the home screen does not change; breathing never requires sign-in. App-side wiring is started; Supabase/Google provider setup and live cross-device testing remain before this can be called done. Apple Sign-In remains a later candidate because it is privacy-aligned but adds Apple Developer/provider overhead.
+Current answer: **Promoted to active Stage 0 work on 2026-05-20.** Add Google OAuth as an optional Backup & Sync path inside Practice History alongside the existing email-code flow. Anonymous-first stays the default; the home screen does not change; breathing never requires sign-in. App-side wiring, Supabase/Google provider setup, manual linking, local smoke testing, and production redirect smoke testing are in place. Before calling this done, confirm Google attaches to the intended synced user and run a second-browser/device restore test for history and preferences. Apple Sign-In remains a later candidate because it is privacy-aligned but adds Apple Developer/provider overhead.
 
 Why this moved up:
 
@@ -307,12 +307,12 @@ Tradeoffs worth naming before building:
 - A "Sign in with Google" button reads as more account-gated than a text email field even when both gate the same Supabase identity. This sits slightly against the anonymous-first brand signal, even if the button only appears inside Practice History.
 - OAuth introduces Google (and eventually Apple) as third-party dependencies for synced users. Non-synced users are unaffected.
 - Apple Sign-In adds review/policy overhead and a separate provider config. Defensible to defer until a tester actually asks for it.
-- Implementation cost is low: Supabase supports both providers natively, and the current `linkEmailToAnonymousUser` flow already converts anonymous identities; OAuth would follow the same conversion path.
+- Implementation cost is low: Supabase supports both providers natively, and the current anonymous-to-email sync flow already converts anonymous identities; OAuth follows the same identity-linking stance when possible.
 
 Implementation stance:
 
 - Use Supabase Auth provider support, not manual OAuth handshakes.
-- Prefer `linkIdentity()` when an anonymous Supabase session already exists so existing cloud rows can remain under the same user id; fall back to `signInWithOAuth()` only when needed.
+- Prefer `linkIdentity()` when a Supabase session already exists so existing cloud rows can remain under the same user id; fall back to `signInWithOAuth()` only when there is no current session. Existing email-code synced users should link Google from the synced Backup & Sync state if the provider is not attached yet.
 - Add Google first, then evaluate Apple later.
 - Treat OAuth as "Backup & Sync" or "Save across devices," not as a profile/account feature.
 - Preserve and merge existing local/anonymous data when a provider is linked.
