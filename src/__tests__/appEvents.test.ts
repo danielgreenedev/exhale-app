@@ -1,9 +1,9 @@
 const mockInsert = jest.fn();
-const mockFrom = jest.fn(() => ({ insert: mockInsert }));
+const mockFrom = jest.fn((_table: string) => ({ insert: mockInsert }));
 
 jest.mock('@/lib/supabase', () => ({
   supabase: {
-    from: (...args: unknown[]) => mockFrom(...args),
+    from: (table: string) => mockFrom(table),
   },
 }));
 
