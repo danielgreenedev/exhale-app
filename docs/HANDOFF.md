@@ -1,6 +1,6 @@
 # Codex Handoff
 
-Last updated: 2026-05-19 (Claude → Codex, late evening — second pass after Codex's mobile HUD polish landed)
+Last updated: 2026-05-20 (Claude pickup after Codex's visual-coherence pass landed locally)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
@@ -25,6 +25,8 @@ Today's commits, oldest to newest:
 - `cab95ff` — Initial Codex handoff doc (this file, first pass).
 - `34ae14c` — Codex's mobile HUD polish + doc cleanup. `GameHUD.tsx` got mobile width/overflow polish: container max-widths, `min-w-0`, responsive instruction text (`text-xs sm:text-sm` with tighter mobile tracking), `leading-relaxed`. Also corrected my Flow sketch's migration claim (Supabase `user_settings.rhythm` is plain text, no migration needed) and the T-2026-05-19-07 framing (they liked Hold and slow Exhale; only Rest is the friction). Deduplicated a stale anticipatory-cue question in OPEN_QUESTIONS.md and added a new "Should Exhale support color or theme customization beyond Garden?" question from a secondary-user signal.
 - `0163e34` — Log graphic-designer HUD coherence feedback (T-2026-05-19-08) and add visual-coherence pass as TODO 6c.
+- `58e3603` — Second-pass HANDOFF.md update (this file) capturing Codex's mobile polish and the new design signal.
+- `e2a7c4c` — Visual coherence pass on the in-session HUD (TODO 6c shipped). Implements all three coordinated changes from T-2026-05-19-08: innermost phase progress ring removed in `BreathingOrb.tsx`, countdown opacity is now phase-aware in `GameHUD.tsx` (0.62 on Hold/Relax, 0.16 on Inhale/Exhale, full opacity during cycle-1 teaching), and phase-transition flash opacity scales by phase duration with a 35% floor so short Gentle phases don't strobe. Bonus mobile padding tweaks on `page.tsx` and `stats/page.tsx`. Smoke-tested Standard, Gentle, and Full at mobile width.
 
 ## Key Functional Changes Since Your Last Pass
 
@@ -38,12 +40,6 @@ Today's commits, oldest to newest:
 2. **Visual smoke test of the anticipation cue across all three rhythms.** Code is live; needs browser confirmation. The 0.8s lead is a different fraction of each phase: Standard Exhale 13%, Gentle Hold 40% (jitter risk), Full Exhale 8% (imperceptibility risk). If Gentle feels jittery on Hold, scale `PHASE_LOOKAHEAD_SECONDS` proportional to phase duration, e.g. `Math.min(0.8, phase.duration * 0.25)`. Lightweight follow-up if smoke test flags it.
 
 3. **OAuth-vs-OTP for Practice History sync** is parked as an open question. Lean is add Google Sign-In alongside existing OTP (not replace), pilot with beta testers, defer Apple. No implementation work scheduled — wants a tester pilot decision first. See `docs/OPEN_QUESTIONS.md`.
-
-4. **Visual-coherence pass on the in-session HUD (TODO 6c).** Driven by T-2026-05-19-08, a graphic designer with professional eye (not target-audience tester). Three coordinated changes that share intent ("stop showing the same signal three different ways") and should land together:
-   - Drop the innermost phase progress ring in `BreathingOrb.tsx:295-322` (`ringR = maxR + 24`). Sweeping arc duplicates orb scale (Inhale/Exhale) and countdown number (Hold/Relax).
-   - Make the countdown text in `GameHUD.tsx:113-124` phase-aware. Today's uniform 58% opacity after cycle 2 fades all phases equally; designer wants Inhale/Exhale to fade deeper (or hide entirely), Hold/Relax to stay visible. Keep `aria-label` unconditional so screen readers still announce time remaining.
-   - Damp the phase-transition flash in `BreathingOrb.tsx:272-287` by phase duration so Gentle's 2-second Hold does not strobe. Suggested formula: `Math.min(1, phase.duration / 4)`. Matches the proportional pattern already raised for the anticipation lead window.
-   This is design territory; proof is on screen, not in the test suite. Smoke-test all three rhythms in browser before merging. Full design rationale in `docs/USER_FEEDBACK.md` under T-2026-05-19-08.
 
 ## Open Questions Promoted Today
 
@@ -72,13 +68,14 @@ Three new tester entries in `docs/USER_FEEDBACK.md` (verbatim quoted, anonymized
 
 ## Recommended Next Concrete Step
 
-Three candidates, each a clean scoped piece of work:
+Two candidates remaining, each a clean scoped piece of work:
 
-- **TODO 6c (visual-coherence pass)** is the highest-leverage in-browser change available right now. Driven by a clear professional-design signal, all three sub-changes are scoped, and the rationale is documented. Best done in a focused session with the browser open so you can see the change as you make it.
-- **Implement the Flow rhythm sketch** behind the validation gate. The design is fully worked out; the only ambiguity is whether testers actually prefer it. Run it past at least two of the four frictioned testers in a Vercel preview, then ship as a fourth preset if at least one prefers it.
-- **Smoke-test the anticipation cue** across all three rhythms in a browser and decide whether `PHASE_LOOKAHEAD_SECONDS` needs to be scaled per phase. Lowest cost; could be folded into the same session as 6c since both are in-browser design judgment work.
+- **Implement the Flow rhythm sketch** behind the validation gate. Design is fully worked out in `docs/OPEN_QUESTIONS.md`; the only ambiguity is whether testers actually prefer it. Run past at least two of T-2026-05-19-03, -05, -06, -07 in a Vercel preview, then ship as a fourth preset only if at least one prefers it.
+- **Smoke-test the anticipation cue** across all three rhythms in a browser to decide whether `PHASE_LOOKAHEAD_SECONDS` needs to be scaled per phase. Lower-cost than Flow but lower upside; could be folded into the same session as the Flow tester pilot.
 
-If picking one: 6c. It's directly responsive, has design rationale already written, and lands a visible quality bump.
+If picking one: Flow. It's the higher-leverage answer to four converged tester signals. The smoke test is a nice-to-have that can be done alongside or after.
+
+The visual-coherence pass that was leading this section yesterday shipped in `e2a7c4c`; no further design work pending unless smoke testing reveals an issue.
 
 ## Anything Else Worth Knowing
 
