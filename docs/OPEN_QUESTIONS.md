@@ -1,6 +1,6 @@
 # Exhale Open Questions
 
-Last updated: May 20, 2026 (Flow rhythm shipped; Rest/Hold question partially answered pending tester follow-up)
+Last updated: May 20, 2026 (Flow pause follow-up logged)
 
 Use this as a living parking lot for product, validation, trust, accessibility, and strategy questions that are not ready to become implementation tasks. As questions are answered, add the answer, date, evidence, and any resulting TODO/doc updates.
 
@@ -71,6 +71,28 @@ If the rhythm did not fit you, did you want it gentler/easier, slower/deeper, or
 Did the rhythm ever make you feel like you had to gasp, catch up, or strain?
 ```
 
+Flow-specific follow-up prompts:
+
+```text
+Did Flow feel smoother than the other pace you tried?
+```
+
+```text
+Did removing Hold help?
+```
+
+```text
+Did the tiny pause after Exhale help you reset, or would Flow feel better as inhale/exhale only with no pause at all?
+```
+
+```text
+Did the pause, cue, or circle movement ever feel rushed, pushy, or interruptive?
+```
+
+```text
+Would you choose Flow again, or would you pick a different pace?
+```
+
 ### Should Exhale offer customizable breath rhythms?
 
 Answered 2026-05-19 with a partial yes: three curated presets, not free customization. See Answered Questions below for the full record.
@@ -120,13 +142,15 @@ Context: Originally raised by T-2026-05-19-03 (did not care for Rest, suggested 
 
 2026-05-19 update: Two unsolicited replies on the Facebook pacing question flagged Hold and/or Rest. T-2026-05-19-06 called Hold "the hardest part" and described an asymmetric exhale-to-inhale ratio as friction. T-2026-05-19-07 liked Hold and slow Exhale, but said the rests felt awkward. That is now four distinct testers flagging Rest/Relax, plus two flagging Hold - convergent enough to promote this from deferred to active.
 
+2026-05-20 update: T-2026-05-19-08 tested Flow and gave a split signal. Removing Hold helped; Inhale and Exhale felt smooth and well-paced. The remaining 2-second Relax/pause felt too fast, "spastic," and interruptive, and the anticipatory push felt rushed. When asked directly whether the tiny pause helped reset or whether Flow should be inhale/exhale only, the tester answered that they would take out the pause. This suggests Flow may need to become truly continuous (candidate 4-0-6-0) if another independent Flow tester reports the same pause friction.
+
 Possible directions:
 
 - Add a fourth rhythm preset with Hold=0 or Rest=0 (or both) instead of exposing free-phase customization. Working candidate: a "Flow" rhythm with no Hold, e.g. 4-0-6-2 or 4-0-6-0. Tracked as a Stage 1 sketch task in `docs/TODO.md`.
 - Reframe Rest's identity further beyond the Relax/Breathe rename if the awkwardness signal continues.
 - Allow per-phase duration overrides inside Session Setup (closer to free customization; reintroduces decision friction).
 
-Current answer: **Partially answered as of 2026-05-20.** Flow (4-0-6-2) shipped as a fourth rhythm preset rather than as a gated preview build; the original pre-merge validation gate was waived. Post-launch validation is now Stage 0 item 2 in `docs/TODO.md`: follow up with T-2026-05-19-03, -05, -06, -07 to confirm Flow fits better than their current choice. If at least one of them prefers Flow, treat this question as fully answered. If none do, revisit whether Flow's shape was wrong (try 4-0-6-0 or 4-0-5-3 from the sketch's alternatives), or whether the answer needs free per-phase customization after all.
+Current answer: **Partially answered as of 2026-05-20, but Flow's shape is not fully validated.** Flow (4-0-6-2) shipped as a fourth rhythm preset rather than as a gated preview build; the original pre-merge validation gate was waived. First Flow follow-up signal from T-2026-05-19-08 says no-Hold helps, but the 2-second Relax/pause interrupts the otherwise smooth Inhale/Exhale loop. The same tester explicitly prefers removing the pause. Post-launch validation is now Stage 0 item 2 in `docs/TODO.md`: follow up with T-2026-05-19-03, -05, -06, -07 and ask whether Flow fits better than their current choice **and** whether it would be better with no pause at all. If at least one of them prefers current Flow and no one else flags the pause, keep 4-0-6-2. If an independent tester repeats the pause complaint, test 4-0-6-0 before considering free per-phase customization.
 
 #### Flow rhythm design sketch (2026-05-19)
 
@@ -173,7 +197,7 @@ Validation gate before shipping (recorded so the bar is explicit, not retroactiv
 Open subquestions parked for after the sketch lands:
 
 - Should Flow have distinct phase colors, or inherit existing ones? Default: inherit. Phase identity is consistent across rhythms and Flow does not warrant breaking that.
-- Does the anticipation cue audio still feel right at a 12s cycle with the abrupt Exhale-to-Relax handoff? Worth testing during the validation gate above; if abrupt, scale `PHASE_LOOKAHEAD_SECONDS` proportional to phase duration so the 0.8s lead does not become a larger fraction of the shorter Exhale phase. (This is the same concern flagged for Soft's Hold being 40% lead.)
+- Does the anticipation cue audio still feel right at a 12s cycle with the abrupt Exhale-to-Relax handoff? First Flow follow-up signal says the "push" felt rushed and interruptive during the pause. The proportional cap is already live, so if the signal repeats, test removing Flow's Relax phase before adding more cue complexity.
 - Does the Flow rhythm helper's `Continuous` summary read well alongside Soft's `Accessible` and Full's `Deep`? Earlier alternatives were `Open`, `Light`, `Steady`, and `Free`; revisit only if tester language suggests the current label is confusing. The compact rhythm tiles are now label-only, so this is helper/aria copy rather than visible tile copy.
 
 Constraints to note for implementation:

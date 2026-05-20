@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 20, 2026 (rhythm rate labels corrected; top breath counts removed; background-tab audio bug resolved)
+Last updated: May 20, 2026 (Flow pause follow-up logged)
 
 ## Completed Rhythm Changes
 
@@ -191,7 +191,7 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 1. Pending feedback/data collection: test cross-device sync on Device B and verify Practice History, timer length, Circle Size, sound choice, and rhythm sync correctly through Supabase.
 
-2. Pending follow-up with rhythm-concern testers: ask the original five (T-2026-05-18-01 and T-2026-05-19-02 through -05) whether Soft or Full fits better than Steady did, and ask the four Rest/Hold-frictioned testers (T-2026-05-19-03, -05, -06, -07) whether Flow fits better than their current choice. Capture answers in `docs/USER_FEEDBACK.md`. Flow shipped on 2026-05-20 without the original pre-merge validation gate; this follow-up is the post-launch validation.
+2. Pending follow-up with rhythm-concern testers: ask the original five (T-2026-05-18-01 and T-2026-05-19-02 through -05) whether Soft or Full fits better than Steady did, and ask the four Rest/Hold-frictioned testers (T-2026-05-19-03, -05, -06, -07) whether Flow fits better than their current choice. Use the Flow follow-up questions in `docs/USER_FEEDBACK.md` so the tiny-pause question is asked consistently. Capture answers in `docs/USER_FEEDBACK.md`. Flow shipped on 2026-05-20 without the original pre-merge validation gate; this follow-up is the post-launch validation. First Flow follow-up from T-2026-05-19-08 says no-Hold helps but the 2-second pause feels too fast and interruptive; the same tester explicitly said they would take out the pause.
 
 2a. Resolved 2026-05-19: the Rest phase is now labeled `Relax` with the single-word instruction `Breathe`. The phase enum stays `rest` as the internal discriminator. `Relax` preserves imperative-verb parity with Inhale/Hold/Exhale and reads as permission rather than instruction; the one-word instruction stops the copy from competing with the phase label for attention. See `CLAUDE.md` Core Mechanic and `src/lib/breathing.ts` for the canonical statement.
 
@@ -228,7 +228,14 @@ These can wait until after Stage 0 feedback signal is in.
 - Goal: add a mild visual cue that says "read this first" without making the drawer louder. Possible directions include a small emerald tick/dot, a softer active-title tint, or a thin connected accent inside the tab panel.
 - Do not implement until a later polish pass or tester feedback suggests the tab contents need stronger scanning guidance.
 
-6f. Resolved 2026-05-20: local Next dev overlay no longer appears from blocked Supabase anonymous auth during visual QA.
+6f. Conditional Flow revision: evaluate a no-pause Flow variant.
+
+- Trigger: at least one more Flow tester independently reports that the 2-second Relax/pause feels rushed, spastic, interruptive, or pulls them out of the continuous Inhale/Exhale loop. T-2026-05-19-08 has already confirmed they would remove the pause; the remaining question is whether that signal repeats beyond one tester.
+- Candidate: Flow 4-0-6-0. Keep the current Inhale and Exhale timing because T-2026-05-19-08 said those felt smooth and well-paced.
+- Avoid solving this with more explanatory copy. The feedback says the interruption happens too quickly to process, so extra words are unlikely to help.
+- Keep parked until Stage 0 Flow follow-up produces a second confirming signal.
+
+6g. Resolved 2026-05-20: local Next dev overlay no longer appears from blocked Supabase anonymous auth during visual QA.
 
 - `AuthProvider` now skips automatic Supabase anonymous auth on `localhost` / `127.0.0.1` in development and continues with local-only settings.
 - Production, preview domains, and non-local development hosts still use Supabase auth as before.

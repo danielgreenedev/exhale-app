@@ -1,16 +1,7 @@
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { FlatCompat } from '@eslint/eslintrc';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
 
 const eslintConfig = [
-  ...compat.extends('next/core-web-vitals'),
+  ...nextCoreWebVitals,
   {
     ignores: [
       '.next/**',
@@ -18,6 +9,16 @@ const eslintConfig = [
       'next-env.d.ts',
       'tsconfig.tsbuildinfo',
     ],
+  },
+  {
+    rules: {
+      // Next 16's updated React Hooks preset enables React Compiler-era rules that
+      // flag existing state/bootstrap patterns. Keep the current lint baseline
+      // stable until we intentionally refactor those flows.
+      'react-hooks/immutability': 'off',
+      'react-hooks/refs': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
 ];
 

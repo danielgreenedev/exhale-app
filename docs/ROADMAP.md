@@ -1,6 +1,6 @@
 # Exhale Roadmap
 
-Last updated: May 19, 2026
+Last updated: May 20, 2026
 
 Exhale is organized around learning gates, not feature batches. Each stage carries one question: do we have enough signal to invest in the next stage? Engineering effort follows validation.
 
@@ -36,7 +36,7 @@ Shipped:
 - Local persistence through `exhale-rhythm` localStorage key; cloud round-trip through `user_settings.rhythm` (Supabase migration 002 + 003 applied).
 - Picking a pace updates the helper row; detailed phase timing is available behind `View timing`.
 
-The next signal worth gathering: circle back to the original five testers and ask whether one of Soft or Full fits better than Steady did. That tester follow-up is captured as TODO item.
+The next signal worth gathering: circle back to the original five testers and ask whether one of Soft or Full fits better than Steady did, and ask Flow testers whether the remaining 2-second Relax/pause helps or interrupts the rhythm. First Flow follow-up says no-Hold helps but the pause may need to become no-pause. That tester follow-up is captured as TODO item.
 
 ## Stage 1, Ship-quality polish
 

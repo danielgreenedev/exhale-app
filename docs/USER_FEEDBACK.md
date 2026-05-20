@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 20, 2026 (brand-new user follow-up prompt updated)
+Last updated: May 20, 2026 (Flow pause follow-up logged)
 
 ## Purpose
 
@@ -39,6 +39,16 @@ Use these when asking someone to try Exhale for the first time:
 - If you opened Session Setup, did the options feel natural? Did the button names and explanations make sense?
 - Would you use this again when stressed, tired, or needing to settle?
 - What would you change first?
+
+## Flow Follow-Up Questions
+
+Use these after someone tries the Flow pace:
+
+- Did Flow feel smoother than the other pace you tried?
+- Did removing Hold help?
+- Did the tiny pause after Exhale help you reset, or would Flow feel better as inhale/exhale only with no pause at all?
+- Did the pause, cue, or circle movement ever feel rushed, pushy, or interruptive?
+- Would you choose Flow again, or would you pick a different pace?
 
 ## Feedback Intake Template
 
@@ -82,6 +92,61 @@ Use these when asking someone to try Exhale for the first time:
 1. 
 
 ## Recent Feedback Notes
+
+### 2026-05-20, T-2026-05-19-08, Graphic Designer Follow-Up, Flow Pause Friction
+
+#### Session
+
+- Tester ID: T-2026-05-19-08
+- Follow-up OK: Unknown
+- Source: Project owner's graphic designer friend, responding to Flow-specific follow-up questions
+- Environment: Production or local unknown
+- Rhythm: Flow
+- Signal class: **Professional design eye plus live rhythm comfort signal.** Useful for both motion-coherence and Flow validation, but still weigh target-audience feedback separately.
+
+#### What Worked
+
+- Inhale and Exhale felt "really nice."
+- Removing Hold made the rhythm feel smoother.
+- The circle line/orb motion felt well-paced during Inhale and Exhale.
+- The tester liked the Flow timing overall and described the interface visuals as calm.
+
+#### Friction
+
+- The 2-second Relax/pause in Flow felt too fast and "spastic."
+- The pause pulled attention away from the otherwise positive Inhale and Exhale prompts.
+- The visual line/motion during the pause was the specific part that felt too fast.
+- The anticipatory "push" made the tester feel rushed and interrupted, pulling them out of flow.
+- Net assessment: the current Flow change made the experience both better and worse. Better because Hold is gone and Inhale/Exhale are pleasant; worse because the remaining pause interrupts the continuous feel.
+
+#### Direct Follow-Up
+
+Project owner asked:
+
+```text
+In Flow, did the tiny pause after Exhale help you reset, or would it feel better as inhale/exhale only with no pause at all?
+```
+
+Tester answered:
+
+```text
+I would take out the pause in the flow.
+```
+
+This confirms the same tester's signal: their preferred Flow shape is inhale/exhale only, not no-Hold plus a brief Relax beat.
+
+#### Actionable Recommendations
+
+1. Treat this as the first concrete post-launch signal that Flow's 4-0-6-2 shape may still have too much transition interruption.
+2. Before changing production, ask at least one independent Flow tester whether they would also prefer **no pause at all** after Exhale.
+3. If the same signal repeats, test a Flow variant with Relax removed entirely, likely 4-0-6-0, rather than adding more copy or cueing around the pause.
+4. Keep the Inhale/Exhale timing and visual pacing intact in any Flow revision; the problem is the pause/transition, not the main breathing phases.
+
+#### Open Questions
+
+1. Is Flow meant to be a truly continuous Inhale/Exhale loop, or a no-Hold rhythm with a brief reset beat?
+2. Does the anticipatory cue feel helpful on longer rhythms but too pushy on Flow's short Relax phase?
+3. If Relax is removed from Flow, does the Exhale-to-Inhale handoff feel natural or too abrupt?
 
 ### 2026-05-19, T-2026-05-19-08, Graphic Designer Professional Eye, In-Session HUD Coherence
 
