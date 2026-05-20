@@ -14,15 +14,16 @@ This means: no sign-up, no accounts, no onboarding gates, no streaks that guilt,
 
 ## Core Mechanic
 
-Selectable breathing rhythm exposed inside Session Setup on the home screen. Three options, default Standard:
+Selectable breathing rhythm exposed inside Session Setup on the home screen. Four options, default Standard:
 
 - **Standard** — 4-4-6-8 (22s cycle). Default for first-time users.
 - **Gentle** — 3-2-4-4 (13s cycle). Shorter cycle with a lighter hold; for capacity-constrained users.
 - **Full** — 6-6-10-4 (26s cycle). Longer inhale, hold, and exhale; for experienced breathwork users.
+- **Flow** — 4-0-6-2 (12s cycle). No Hold, brief Relax; for users who find the Hold or longer Rest distracting. Hold phase has zero duration but stays in the canonical four-phase shape; `getNextPhase` skips zero-duration phases so the anticipation cue never lands on Hold during Flow.
 
-Fully guided, with no user input needed during a session. Session lengths: quick (~3m), short (~5m), medium (~7m), long (~10m). Cycle counts are recalibrated per rhythm so each minute label stays close to its target across all three patterns.
+Fully guided, with no user input needed during a session. Session lengths: quick (~3m), short (~5m), medium (~7m), long (~10m). Cycle counts are recalibrated per rhythm so each minute label stays close to its target across all four patterns.
 
-The fourth phase is labeled `Relax` (not `Rest`) and its instruction is the single word `Breathe`. The phase exists to let the body do what it naturally wants after exhale, which is to take an inhale on its own time; "Rest" implied stillness in a way that did not match that intent. The phase enum stays `rest` as the internal discriminator. In Standard the phase is long enough for a full normal breath; Gentle and Full reshape that balance for their respective audiences.
+The fourth phase is labeled `Relax` (not `Rest`) and its instruction is the single word `Breathe`. The phase exists to let the body do what it naturally wants after exhale, which is to take an inhale on its own time; "Rest" implied stillness in a way that did not match that intent. The phase enum stays `rest` as the internal discriminator. In Standard the phase is long enough for a full normal breath; Gentle, Full, and Flow reshape that balance for their respective audiences (Flow trims it to 2s as a transition beat).
 
 Phase transitions have anticipatory support because beta feedback showed that exact boundary changes can take a beat to process. In the final 0.8s before each phase change, the guide ring around the orb picks up the next phase's color and a quiet pre-cue tone plays when sound is on. The lead window is set by `PHASE_LOOKAHEAD_SECONDS` in `src/lib/breathing.ts`. No textual HUD cue is shown; an earlier attempt at a `Next [phase]` label competed with the central phase label and countdown for attention, so it was removed.
 
@@ -83,7 +84,7 @@ Do not reuse these keys for new features:
 | `exhale-orb-scale` | localStorage | Circle size preference (0.75 / 1.0 / 1.25) |
 | `exhale-sound-palette` | localStorage | Sound palette preference (`air` / `warm` / `low` / `quiet` / `off`; labels are Air / Warm / Deep / Still / mute) |
 | `exhale-session-length` | localStorage | Last picked session length (`quick` / `short` / `medium` / `long`) |
-| `exhale-rhythm` | localStorage | Last picked breathing rhythm (`standard` / `gentle` / `full`) |
+| `exhale-rhythm` | localStorage | Last picked breathing rhythm (`standard` / `gentle` / `full` / `flow`) |
 | `exhale-visited` | localStorage | First-visit flag (cleared = first visit) |
 | `exhale-resume` | sessionStorage | In-progress session state, 60s TTL |
 
@@ -104,7 +105,7 @@ These are intentional — don't undo them without understanding the rationale:
 
 - **No user input during a session** — fully guided, not hold-to-breathe. Reduces intimidation for first-timers who don't know when to inhale.
 - **Abstract orb** — chosen over thematic visuals (ocean, lantern, mandala). More universal, less culturally loaded, works for any user.
-- **Selectable rhythm (Standard / Gentle / Full)** — added after five of six recent beta testers reported rhythm-fit concerns across a range of capacities and preferences. Default stays Standard 4-4-6-8; alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
+- **Selectable rhythm (Standard / Gentle / Full / Flow)** — Standard, Gentle, Full added after five of six recent beta testers reported rhythm-fit concerns across a range of capacities and preferences. Flow added after four testers (T-2026-05-19-03, -05, -06, -07) converged on Rest/Hold as the friction; Flow removes Hold entirely and shortens Relax to a transition beat. Default stays Standard 4-4-6-8; alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
 - **Fourth phase reframed as `Relax` with instruction `Breathe`** — "Rest" implied stillness when the body actually wants to inhale after exhale. `Relax` keeps imperative-verb parity with Inhale / Hold / Exhale and reads as permission. The instruction collapses to a single word because the label does the framing.
 - **Anticipatory cue in the final 0.8s of each phase** — guide-ring picks up the next-phase color and audio plays a quiet pre-cue. No HUD text cue (removed because it competed with the central phase label and countdown).
 - **8s settle-in before first breath** — gives the user a quiet transition from "reading the screen" to "being in the session."

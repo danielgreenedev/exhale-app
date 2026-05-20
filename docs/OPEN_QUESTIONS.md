@@ -1,6 +1,6 @@
 # Exhale Open Questions
 
-Last updated: May 19, 2026 (Rest/Hold promoted with Flow design sketch; OAuth-vs-OTP added; Facebook preview answered)
+Last updated: May 20, 2026 (Flow rhythm shipped; Rest/Hold question partially answered pending tester follow-up)
 
 Use this as a living parking lot for product, validation, trust, accessibility, and strategy questions that are not ready to become implementation tasks. As questions are answered, add the answer, date, evidence, and any resulting TODO/doc updates.
 
@@ -126,7 +126,7 @@ Possible directions:
 - Reframe Rest's identity further beyond the Relax/Breathe rename if the awkwardness signal continues.
 - Allow per-phase duration overrides inside Session Setup (closer to free customization; reintroduces decision friction).
 
-Current answer: Active, not deferred. Next move is to sketch the Flow (no-Hold) candidate rather than add free customization. Decision blocker now is design feasibility (0-duration phase handling in `getPhaseAtTime` and orb animation) and one round of testing the sketch with the Rest/Hold-frictioned testers, not more feedback intake.
+Current answer: **Partially answered as of 2026-05-20.** Flow (4-0-6-2) shipped as a fourth rhythm preset rather than as a gated preview build; the original pre-merge validation gate was waived. Post-launch validation is now Stage 0 item 2 in `docs/TODO.md`: follow up with T-2026-05-19-03, -05, -06, -07 to confirm Flow fits better than their current choice. If at least one of them prefers Flow, treat this question as fully answered. If none do, revisit whether Flow's shape was wrong (try 4-0-6-0 or 4-0-5-3 from the sketch's alternatives), or whether the answer needs free per-phase customization after all.
 
 #### Flow rhythm design sketch (2026-05-19)
 

@@ -227,13 +227,14 @@ Phase changes should feel like a handoff rather than a switch. The HUD keeps the
 
 ### Rhythm
 
-The breathing pattern itself is selectable inside Session Setup as the first row, above the static phase sequence preview so that picking a rhythm updates the preview live. Three options:
+The breathing pattern itself is selectable inside Session Setup as the first row, above the static phase sequence preview so that picking a rhythm updates the preview live. Four options:
 
 - **Standard** (`Balanced`) — 4-4-6-8, 22s cycle. Default for first-time users.
 - **Gentle** (`Easier`) — 3-2-4-4, 13s cycle. Shorter cycle with a lighter hold; for capacity-constrained users and anyone who feels rushed by Standard.
 - **Full** (`Longer`) — 6-6-10-4, 26s cycle. Longer inhale, hold, and exhale; for experienced breathwork users.
+- **Flow** (`Open`) — 4-0-6-2, 12s cycle. No Hold, brief Relax. For users who find the Hold or longer Rest distracting. Hold phase has zero duration but keeps the canonical four-phase shape.
 
-Each tile shows the rhythm name (uppercase 10px tracking-0.12em) above a one-word relative descriptor (sentence-case 10px tracking-0.08em) — `Balanced`, `Easier`, `Longer`. The technical phase signature (`4-4-6-8`) lives in the title attribute and aria-label for breathwork-aware users and screen readers, but is not visible by default; that disambiguates rhythm tiles from breathwork-savvy notation that intimidates the skeptical primary user.
+Each tile shows the rhythm name (uppercase 10px tracking-0.12em) above a one-word relative descriptor (sentence-case 10px tracking-0.08em) — `Balanced`, `Easier`, `Longer`, `Open`. The technical phase signature (`4-4-6-8`) lives in the title attribute and aria-label for breathwork-aware users and screen readers, but is not visible by default; that disambiguates rhythm tiles from breathwork-savvy notation that intimidates the skeptical primary user. The picker is a 4-column grid so all four rhythms fit on one row at mobile width without wrapping.
 
 Rhythm uses the same quiet emerald selected-state language as Time, Circle Size, and Sound. Default is `Standard`. The choice persists through `exhale-rhythm` in localStorage and `user_settings.rhythm` in Supabase. Rhythm cannot change mid-session; the picker is read once at session start and the resulting pattern drives the orb timing, audio cue ramps, and HUD time-remaining calculation. Switching rhythm requires returning to the home screen and starting a new session.
 
@@ -251,7 +252,7 @@ Circle Size uses compact S/M/L radio controls. New users default to M. The activ
 
 ### Session Setup Disclosure
 
-Session Setup is the single push-down disclosure below Begin and Resume. It contains the Rhythm picker first (3 options, sub-labeled with one-word descriptors), then the static 4-step phase sequence preview that updates live based on the active rhythm, a faint divider, then Circle Size and Sound. It is collapsed by default for everyone, with no completed-session rule. Practice History stays outside Session Setup because it is navigation, not a preference, and is shown only after at least one completed session so first-visit users see exactly one decision (length) and one action (Begin).
+Session Setup is the single push-down disclosure below Begin and Resume. It contains the Rhythm picker first (4 options, sub-labeled with one-word descriptors), then the static 4-step phase sequence preview that updates live based on the active rhythm, a faint divider, then Circle Size and Sound. It is collapsed by default for everyone, with no completed-session rule. Practice History stays outside Session Setup because it is navigation, not a preference, and is shown only after at least one completed session so first-visit users see exactly one decision (length) and one action (Begin).
 
 ### Stats Rows
 

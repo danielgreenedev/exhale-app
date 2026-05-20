@@ -1,6 +1,6 @@
 # Codex Handoff
 
-Last updated: 2026-05-20 (Claude pickup after Codex's visual-coherence pass landed locally)
+Last updated: 2026-05-20 (Flow rhythm shipped to production; canonical docs updated)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
@@ -27,6 +27,8 @@ Today's commits, oldest to newest:
 - `0163e34` — Log graphic-designer HUD coherence feedback (T-2026-05-19-08) and add visual-coherence pass as TODO 6c.
 - `58e3603` — Second-pass HANDOFF.md update (this file) capturing Codex's mobile polish and the new design signal.
 - `e2a7c4c` — Visual coherence pass on the in-session HUD (TODO 6c shipped). Implements all three coordinated changes from T-2026-05-19-08: innermost phase progress ring removed in `BreathingOrb.tsx`, countdown opacity is now phase-aware in `GameHUD.tsx` (0.62 on Hold/Relax, 0.16 on Inhale/Exhale, full opacity during cycle-1 teaching), and phase-transition flash opacity scales by phase duration with a 35% floor so short Gentle phases don't strobe. Bonus mobile padding tweaks on `page.tsx` and `stats/page.tsx`. Smoke-tested Standard, Gentle, and Full at mobile width.
+- `f250fd7` — HANDOFF.md update after 6c shipped.
+- `fe3502a` — Flow rhythm shipped (4-0-6-2, 12s cycle). `'flow'` added to `RhythmId`, `isRhythmId`, and `RHYTHMS` in `src/lib/breathing.ts`. `getNextPhase` now skips zero-duration phases so anticipation cues stay correct. Session Setup rhythm picker is a 4-column grid. 89/89 tests pass. Pre-merge validation gate was waived in favor of post-launch tester signal collection (Stage 0 item 2).
 
 ## Key Functional Changes Since Your Last Pass
 
@@ -35,9 +37,9 @@ Today's commits, oldest to newest:
 
 ## What's Mid-Flight (For You to Pick Up)
 
-1. **Flow rhythm implementation.** Full design proposal lives in `docs/OPEN_QUESTIONS.md` under "Should Rest and Hold be partly or completely optional?" -> sub-section "Flow rhythm design sketch (2026-05-19)". Primary candidate is **4-0-6-2** (Inhale 4s, no Hold, Exhale 6s, brief Relax 2s). Real code change is small: one-line fix to `getNextPhase` in `src/lib/breathing.ts` to skip 0-duration phases; `getPhaseAtTime` and `getOrbScale` already handle them correctly. Add `'flow'` to the client-side `RhythmId`, `isRhythmId`, settings parser, and tests. Supabase stores `user_settings.rhythm` as plain text with no enum/check constraint, so no database migration is required unless a constraint is intentionally added later. Implementation is **gated behind a tester validation step** - run the sketch past at least two of T-2026-05-19-03, -05, -06, -07 in a preview build before merging; ship as a fourth preset only if at least one prefers Flow over their current choice.
+1. **Post-launch validation for Flow (Stage 0 item 2).** Flow shipped to production without the pre-merge tester pilot. Follow up with T-2026-05-19-03, -05, -06, -07 to confirm Flow fits better than their current choice. If at least one prefers Flow, the Rest/Hold question is fully answered. If none do, revisit whether the shape was wrong (4-0-6-0 or 4-0-5-3 from the sketch's alternatives) or whether free per-phase customization is needed.
 
-2. **Visual smoke test of the anticipation cue across all three rhythms.** Code is live; needs browser confirmation. The 0.8s lead is a different fraction of each phase: Standard Exhale 13%, Gentle Hold 40% (jitter risk), Full Exhale 8% (imperceptibility risk). If Gentle feels jittery on Hold, scale `PHASE_LOOKAHEAD_SECONDS` proportional to phase duration, e.g. `Math.min(0.8, phase.duration * 0.25)`. Lightweight follow-up if smoke test flags it.
+2. **Visual smoke test of the anticipation cue across all four rhythms.** Code is live; needs browser confirmation. The 0.8s lead is a different fraction of each phase: Standard Exhale 13%, Gentle Hold 40% (jitter risk), Full Exhale 8% (imperceptibility risk). Flow's Inhale 4s gives a 20% lead and the brief Relax 2s gives a 40% lead — Flow's short Relax may want the same proportional dampening as Gentle's short Hold. If smoke test flags jitter, scale `PHASE_LOOKAHEAD_SECONDS` proportional to phase duration, e.g. `Math.min(0.8, phase.duration * 0.25)`.
 
 3. **OAuth-vs-OTP for Practice History sync** is parked as an open question. Lean is add Google Sign-In alongside existing OTP (not replace), pilot with beta testers, defer Apple. No implementation work scheduled — wants a tester pilot decision first. See `docs/OPEN_QUESTIONS.md`.
 
@@ -68,14 +70,13 @@ Three new tester entries in `docs/USER_FEEDBACK.md` (verbatim quoted, anonymized
 
 ## Recommended Next Concrete Step
 
-Two candidates remaining, each a clean scoped piece of work:
+The big in-flight design work is now shipped (Flow + visual coherence). What remains is the validation cycle plus smaller open threads:
 
-- **Implement the Flow rhythm sketch** behind the validation gate. Design is fully worked out in `docs/OPEN_QUESTIONS.md`; the only ambiguity is whether testers actually prefer it. Run past at least two of T-2026-05-19-03, -05, -06, -07 in a Vercel preview, then ship as a fourth preset only if at least one prefers it.
-- **Smoke-test the anticipation cue** across all three rhythms in a browser to decide whether `PHASE_LOOKAHEAD_SECONDS` needs to be scaled per phase. Lower-cost than Flow but lower upside; could be folded into the same session as the Flow tester pilot.
+- **Tester follow-up on Flow** is the most directly product-shaping work. The four Rest/Hold-frictioned testers (T-2026-05-19-03, -05, -06, -07) have not yet seen Flow; their reaction confirms or refutes the design. This is outreach work, not engineering.
+- **Anticipation cue smoke test** across all four rhythms in a browser. Flow's short Relax (2s) and Gentle's short Hold (2s) both have the 0.8s lead occupying 40% of the phase, which is the jitter-risk threshold. If either feels rushed, the fix is a per-phase proportional cap.
+- **OAuth-vs-OTP for Practice History sync** is still parked pending a tester pilot decision.
 
-If picking one: Flow. It's the higher-leverage answer to four converged tester signals. The smoke test is a nice-to-have that can be done alongside or after.
-
-The visual-coherence pass that was leading this section yesterday shipped in `e2a7c4c`; no further design work pending unless smoke testing reveals an issue.
+If picking engineering work: the anticipation cue smoke test. If picking product work: the Flow tester follow-up.
 
 ## Anything Else Worth Knowing
 

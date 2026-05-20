@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 19, 2026 (Facebook reply intake; Rest label resolved; Flow rhythm sketched; Facebook preview resolved; graphic-designer HUD coherence pass completed)
+Last updated: May 20, 2026 (Flow rhythm shipped; canonical docs updated)
 
 ## Completed Rhythm Changes
 
@@ -139,6 +139,17 @@ Early beta feedback showed that presets alone may not solve phase-boundary frict
 - Kept anticipation in the audio pre-cue and ring-color lead; no textual HUD transition cue is shown.
 - Kept the underlying rhythm timings unchanged; this is a comprehension/handoff improvement, not a new rhythm.
 
+## Completed Flow Rhythm (2026-05-20)
+
+A fourth rhythm preset shipped end to end, responsive to four converged tester signals on Rest/Hold friction (T-2026-05-19-03, -05, -06, -07):
+
+- `RHYTHMS.flow` added to `src/lib/breathing.ts` with pattern `[4, 0, 6, 2]`, 12s cycle, label `Flow`, summary `Open`, and a description framing the no-Hold and brief-Relax shape. Session-cycle recalibration produces 15 / 25 / 35 / 50 cycles for Quick / Short / Medium / Long.
+- `RhythmId` union and `isRhythmId` guard accept `'flow'`. Supabase `user_settings.rhythm` is plain text with no enum constraint, so no migration was needed.
+- `getNextPhase` updated to skip zero-duration phases. Without this fix the anticipation cue between Inhale and Exhale on Flow would target the zero-duration Hold and never reach Exhale. `getPhaseAtTime` and `getOrbScale` already handled zero-duration phases correctly through the existing strict-less-than boundary check.
+- Session Setup rhythm picker switched from a 3-column to a 4-column grid to fit the new tile at mobile width.
+- New tests in `src/__tests__/breathing.test.ts` cover the Flow registry shape, the relaxed "Hold/Relax may be zero" duration contract, `getPhaseAtTime` returning Exhale at t=4 in Flow (skipping the zero Hold), the Hold phase index never being active during a Flow cycle, and `getNextPhase` skipping zero-duration phases. Tests now total 89 passing.
+- The design sketch's pre-merge validation gate was waived in favor of shipping and collecting post-launch signal. Follow-up with the four frictioned testers on Flow fit lands as Stage 0 item 2.
+
 ## Completed Visual Coherence Pass (2026-05-19)
 
 Graphic-designer feedback flagged that the active session was showing phase progress too many ways at once. The coordinated TODO 6c pass is now implemented:
@@ -158,7 +169,7 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 1. Pending feedback/data collection: test cross-device sync on Device B and verify Practice History, timer length, Circle Size, sound choice, and rhythm sync correctly through Supabase.
 
-2. Pending follow-up with the original five rhythm-concern testers (T-2026-05-18-01 and T-2026-05-19-02 through -05). Ask whether Gentle or Full fits better than Standard did. Capture answers in `docs/USER_FEEDBACK.md`.
+2. Pending follow-up with rhythm-concern testers: ask the original five (T-2026-05-18-01 and T-2026-05-19-02 through -05) whether Gentle or Full fits better than Standard did, and ask the four Rest/Hold-frictioned testers (T-2026-05-19-03, -05, -06, -07) whether Flow fits better than their current choice. Capture answers in `docs/USER_FEEDBACK.md`. Flow shipped on 2026-05-20 without the original pre-merge validation gate; this follow-up is the post-launch validation.
 
 2a. Resolved 2026-05-19: the Rest phase is now labeled `Relax` with the single-word instruction `Breathe`. The phase enum stays `rest` as the internal discriminator. `Relax` preserves imperative-verb parity with Inhale/Hold/Exhale and reads as permission rather than instruction; the one-word instruction stops the copy from competing with the phase label for attention. See `CLAUDE.md` Core Mechanic and `src/lib/breathing.ts` for the canonical statement.
 
@@ -176,7 +187,7 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 These can wait until after Stage 0 feedback signal is in.
 
-6a. Flow rhythm design sketch landed 2026-05-19 in `docs/OPEN_QUESTIONS.md` under "Should Rest and Hold be partly or completely optional?" Tradeoff matrix of four candidate shapes (4-0-6-2, 4-0-6-0, 4-0-5-3, 3-0-5-2), recommendation of 4-0-6-2 as the primary candidate, full code implications (only `getNextPhase` needs a one-line change to skip 0-duration phases; `getPhaseAtTime` and `getOrbScale` already handle them correctly), and a validation gate are all written down. Next concrete step is implementation behind the validation gate: run the sketch past at least two of T-2026-05-19-03, -05, -06, -07 in a Vercel preview, and ship as an optional fourth preset only if at least one prefers Flow over their current choice.
+6a. Resolved 2026-05-20: Flow rhythm shipped to production (4-0-6-2, 12s cycle, label "Flow", summary "Open"). See "Completed Flow Rhythm" section below. The original design-sketch validation gate was waived in favor of shipping and collecting post-launch tester signal; follow-up with T-2026-05-19-03, -05, -06, -07 on Flow fit is now Stage 0 item 2.
 
 6b. Park: do rhythms need to support progressive ramping (each rep longer than the last) rather than only steady patterns? Single-user signal from T-2026-05-19-07. Do not act yet; revisit if a second tester independently asks for escalation or if competitive-framing usage shows up in `app_events`. If raised again, write it up as a full open question in `docs/OPEN_QUESTIONS.md` before any scoping.
 
