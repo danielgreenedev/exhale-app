@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState, FormEvent } from 'react';
+import { useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import Link from 'next/link';
-import { readStats, computeStats, storageAvailable, SessionRecord } from '@/hooks/useSessionStats';
+import { readStats, computeStats, storageAvailable } from '@/hooks/useSessionStats';
+import type { SessionRecord } from '@/hooks/useSessionStats';
 import { SURFACE_GLOWS } from '@/lib/colors';
 import { mergeSyncedSessions, missingLocalSessions } from '@/lib/sessionSync';
 import { supabase } from '@/lib/supabase';
@@ -21,7 +23,7 @@ function formatDate(dateStr: string): string {
 
 type SyncState = 'idle' | 'codeSent' | 'verifying' | 'synced';
 type SubmitMode = 'signin' | 'link';
-const SYNC_SCOPE_COPY = 'Only these sync: practice history, timer length, circle size, and sound choice.';
+const SYNC_SCOPE_COPY = 'Only these sync: practice history, timer length, circle size, sound choice, and rhythm.';
 
 function looksLikeExistingEmailError(message?: string): boolean {
   const text = (message ?? '').toLowerCase();
@@ -56,6 +58,33 @@ export function friendlySyncError(message?: string): string {
     return 'That code did not work. Check the email and try again.';
   }
   return message || 'Something went quiet on our side. Please try again.';
+}
+
+function friendlyOAuthError(message?: string): string {
+  const text = (message ?? '').toLowerCase();
+  if (text.includes('manual') && text.includes('link')) {
+    return 'Google sync needs identity linking enabled in Supabase first.';
+  }
+  if (text.includes('provider') || text.includes('not enabled')) {
+    return 'Google sync is not ready yet. Check the Supabase Google provider setup.';
+  }
+  if (text.includes('already') && text.includes('linked')) {
+    return 'That Google account is already linked. Try signing out here, then continue with Google again.';
+  }
+  return friendlySyncError(message);
+}
+
+function readOAuthReturnError(): string | null {
+  if (typeof window === 'undefined') return null;
+
+  const searchParams = new URLSearchParams(window.location.search);
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  return (
+    searchParams.get('error_description') ||
+    searchParams.get('error') ||
+    hashParams.get('error_description') ||
+    hashParams.get('error')
+  );
 }
 
 async function loadSyncedSessions(userId: string): Promise<{ sessions: SessionRecord[]; error?: string }> {
@@ -106,6 +135,7 @@ export default function StatsPage() {
     ready,
     refreshUser,
     signOutToAnonymous,
+    startGoogleBackupSync,
   } = useAuth();
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
   const [storageOk, setStorageOk] = useState(true);
@@ -161,6 +191,14 @@ export default function StatsPage() {
       }
     })();
   }, [authEmail, isAnonymous, pendingEmail, ready, syncState, userId]);
+
+  useEffect(() => {
+    const oauthError = readOAuthReturnError();
+    if (!oauthError) return;
+
+    setError(friendlyOAuthError(oauthError));
+    window.history.replaceState(null, '', '/stats');
+  }, []);
 
   const handleSendCode = async (e: FormEvent) => {
     e.preventDefault();
@@ -262,6 +300,18 @@ export default function StatsPage() {
 
   const handleVerifyClick = () => {
     if (code.length === 6) void submitCode(code);
+  };
+
+  const handleGoogleSync = async () => {
+    setBusy(true);
+    setError('');
+    const { error: googleError } = await startGoogleBackupSync();
+    if (googleError) {
+      setError(friendlyOAuthError(googleError));
+      setBusy(false);
+      return;
+    }
+    setBusy(false);
   };
 
   const handleStopSync = async () => {
@@ -421,7 +471,7 @@ export default function StatsPage() {
 
         <div className="flex flex-col gap-3 w-full pt-2 border-t border-still-white/10">
           <p className="text-still-white/52 text-xs tracking-[0.15em] uppercase font-light">
-            Sync across devices
+            Backup & Sync
           </p>
 
           {!ready ? (
@@ -433,7 +483,7 @@ export default function StatsPage() {
           ) : syncState === 'synced' && syncedEmail ? (
             <div className="flex flex-col gap-3">
               <p className="text-still-white/58 text-sm font-light leading-relaxed">
-                Signed in as {syncedEmail}. Use this email on another device to bring your practice there.
+                Backup & Sync is on for {syncedEmail}. Use the same email or provider on another device to bring your practice there.
               </p>
               <p className="text-still-white/55 text-xs font-light leading-relaxed">
                 {SYNC_SCOPE_COPY}
@@ -490,38 +540,51 @@ export default function StatsPage() {
               )}
             </div>
           ) : (
-            <form onSubmit={handleSendCode} className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
               <p className="text-still-white/55 text-xs font-light leading-relaxed -mt-1">
-                Sign in with email and a 6-digit code. Use the same email on another device to keep your practice in sync.
+                Save your practice across devices. Breathing still works without this.
               </p>
               <p className="text-still-white/55 text-xs font-light leading-relaxed">
                 {SYNC_SCOPE_COPY}
               </p>
-              <label htmlFor="sync-email" className="sr-only">Email</label>
-              <input
-                id="sync-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your email"
-                required
-                disabled={busy}
-                autoComplete="email"
-                className="w-full min-h-11 px-4 py-3 rounded-2xl bg-transparent border border-still-white/18 text-still-white/85 placeholder:text-still-white/40 text-sm tracking-[0.04em] font-light focus:border-still-white/35 focus:outline-none transition-colors duration-300 disabled:opacity-50"
-              />
               <button
-                type="submit"
-                disabled={busy || !email.trim()}
-                className="w-full min-h-11 py-3 rounded-2xl border border-emerald-pulse/35 bg-emerald-pulse/10 text-emerald-100/95 text-xs tracking-[0.2em] uppercase font-light hover:border-emerald-pulse/55 hover:bg-emerald-pulse/16 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                type="button"
+                onClick={handleGoogleSync}
+                disabled={busy}
+                className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 bg-still-white/[0.03] text-still-white/72 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:bg-still-white/[0.06] hover:text-still-white/86 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
               >
-                {busy ? 'Sending...' : 'Sign in'}
+                {busy ? 'Opening Google...' : 'Continue with Google'}
               </button>
+              <form onSubmit={handleSendCode} className="flex flex-col gap-2 pt-1">
+                <p className="text-still-white/42 text-[11px] tracking-[0.14em] uppercase font-light text-center">
+                  Or use email code
+                </p>
+                <label htmlFor="sync-email" className="sr-only">Email</label>
+                <input
+                  id="sync-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your email"
+                  required
+                  disabled={busy}
+                  autoComplete="email"
+                  className="w-full min-h-11 px-4 py-3 rounded-2xl bg-transparent border border-still-white/18 text-still-white/85 placeholder:text-still-white/40 text-sm tracking-[0.04em] font-light focus:border-still-white/35 focus:outline-none transition-colors duration-300 disabled:opacity-50"
+                />
+                <button
+                  type="submit"
+                  disabled={busy || !email.trim()}
+                  className="w-full min-h-11 py-3 rounded-2xl border border-emerald-pulse/35 bg-emerald-pulse/10 text-emerald-100/95 text-xs tracking-[0.2em] uppercase font-light hover:border-emerald-pulse/55 hover:bg-emerald-pulse/16 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                >
+                  {busy ? 'Sending...' : 'Send code'}
+                </button>
+              </form>
               {error && (
                 <p className="text-amber-100/72 text-xs font-light leading-relaxed text-center mt-1">
                   {error}
                 </p>
               )}
-            </form>
+            </div>
           )}
         </div>
 

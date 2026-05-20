@@ -12,7 +12,13 @@ interface AuthState {
   ready: boolean;
   refreshUser: () => Promise<void>;
   signOutToAnonymous: () => Promise<void>;
+  startGoogleBackupSync: () => Promise<{ error?: string }>;
 }
+
+type AuthSnapshot = Omit<
+  AuthState,
+  'refreshUser' | 'signOutToAnonymous' | 'startGoogleBackupSync'
+>;
 
 const AuthContext = createContext<AuthState>({
   userId: null,
@@ -22,6 +28,7 @@ const AuthContext = createContext<AuthState>({
   ready: false,
   refreshUser: async () => {},
   signOutToAnonymous: async () => {},
+  startGoogleBackupSync: async () => ({}),
 });
 
 function userIsAnonymous(user: User | null): boolean {
@@ -29,7 +36,7 @@ function userIsAnonymous(user: User | null): boolean {
   return Boolean((user as User & { is_anonymous?: boolean }).is_anonymous ?? !user.email);
 }
 
-function snapshotUser(user: User | null): Omit<AuthState, 'refreshUser' | 'signOutToAnonymous'> {
+function snapshotUser(user: User | null): AuthSnapshot {
   return {
     userId: user?.id ?? null,
     email: user?.email ?? null,
@@ -58,7 +65,7 @@ function shouldUseLocalOnlyAuth(): boolean {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [authState, setAuthState] = useState<Omit<AuthState, 'refreshUser' | 'signOutToAnonymous'>>({
+  const [authState, setAuthState] = useState<AuthSnapshot>({
     userId: null,
     email: null,
     pendingEmail: null,
@@ -115,6 +122,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await setAnonymousUser();
   }, [setAnonymousUser]);
 
+  const startGoogleBackupSync = useCallback(async (): Promise<{ error?: string }> => {
+    if (shouldUseLocalOnlyAuth()) {
+      return {
+        error: 'Google Backup & Sync needs Supabase auth enabled for local testing. Set exhale-enable-local-supabase to 1 and reload.',
+      };
+    }
+
+    const redirectTo = typeof window === 'undefined'
+      ? undefined
+      : `${window.location.origin}/stats?sync=google`;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const credentials = {
+        provider: 'google' as const,
+        options: { redirectTo },
+      };
+
+      const { data, error } = session?.user
+        ? await supabase.auth.linkIdentity(credentials)
+        : await supabase.auth.signInWithOAuth(credentials);
+
+      if (error) {
+        return { error: error.message };
+      }
+
+      if (data?.url && typeof window !== 'undefined') {
+        window.location.assign(data.url);
+      }
+
+      return {};
+    } catch (error) {
+      reportLocalAuthFallback('google backup sync failed', error);
+      return { error: 'Google Backup & Sync could not start. Please try again.' };
+    }
+  }, []);
+
   useEffect(() => {
     if (initRef.current) return;
     initRef.current = true;
@@ -156,7 +200,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [setAnonymousUser]);
 
   return (
-    <AuthContext.Provider value={{ ...authState, refreshUser, signOutToAnonymous }}>
+    <AuthContext.Provider value={{ ...authState, refreshUser, signOutToAnonymous, startGoogleBackupSync }}>
       {children}
     </AuthContext.Provider>
   );

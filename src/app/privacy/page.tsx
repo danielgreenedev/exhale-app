@@ -4,7 +4,7 @@ import { SURFACE_GLOWS } from '@/lib/colors';
 
 export const metadata: Metadata = {
   title: 'Privacy, Exhale',
-  description: 'How Exhale handles your data, sessions, and optional sync.',
+  description: 'How Exhale handles your data, sessions, and optional Backup & Sync.',
 };
 
 export default function PrivacyPage() {
@@ -26,7 +26,7 @@ export default function PrivacyPage() {
               Privacy
             </h1>
             <p className="text-still-white/52 text-xs tracking-[0.15em] font-light">
-              Last updated May 19, 2026
+              Last updated May 20, 2026
             </p>
           </div>
         </header>
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
           </p>
           <ul className="list-disc pl-5 mt-3 space-y-1.5 marker:text-still-white/35">
             <li>Your session history (date, duration, breath count, session length).</li>
-            <li>Your settings (circle size, sound choice, last session length).</li>
+            <li>Your settings (circle size, sound choice, rhythm, last session length).</li>
             <li>A first-visit flag so the app does not repeat its first-run hints.</li>
             <li>A short in-progress session, kept for 60 seconds after exiting so you can resume.</li>
           </ul>
@@ -63,31 +63,39 @@ export default function PrivacyPage() {
           </p>
         </Section>
 
-        <Section title="Optional email sync">
+        <Section title="Optional Backup & Sync">
           <p>
-            If you choose Sync Across Devices on the Practice screen and enter an email,
-            Exhale links that email to your existing anonymous identity. From then on:
+            If you choose Backup & Sync on the Practice screen, Exhale can link your
+            practice to either an email code or Google sign-in. This is optional. You can
+            keep using Exhale without any sign-in.
           </p>
           <ul className="list-disc pl-5 mt-3 space-y-1.5 marker:text-still-white/35">
-            <li>Your email is stored so Exhale can send 6-digit sign-in codes.</li>
             <li>
-              Your practice history, timer length, circle size, and sound choice are saved
-              to the Exhale backend and restored on other devices you sign into.
+              With email code sync, your email is stored so Exhale can send 6-digit
+              sign-in codes.
             </li>
             <li>
-              No marketing email is sent. Email is only used to send sign-in codes when you
-              choose to sign in.
+              With Google sync, Google and Supabase handle the sign-in flow. Exhale uses
+              the resulting identity only to keep your practice available across devices.
+            </li>
+            <li>
+              Your practice history, timer length, circle size, sound choice, and rhythm
+              are saved to the Exhale backend and restored on other devices you sign into.
+            </li>
+            <li>
+              No marketing email is sent. Email is only used for Backup & Sync and
+              deletion requests.
             </li>
           </ul>
         </Section>
 
         <Section title="Lightweight usage counts">
           <p>
-            For email-synced users only, Exhale logs simple event counts (timer selected,
+            For synced users only, Exhale logs simple event counts (timer selected,
             session started, session exited, session completed) to help understand whether
             the default timer, sound choice, and first-use flow are working. These counts
-            are tied to your anonymous user id, not to your email. They are not sold or
-            shared with third parties.
+            are tied to your Exhale user id. They are not sold or shared with third
+            parties.
           </p>
         </Section>
 
@@ -95,15 +103,16 @@ export default function PrivacyPage() {
           <p>
             Exhale does not use advertising, third-party analytics, social trackers,
             browser fingerprinting, push notifications, or location data. There are no
-            third-party scripts on the breathing pages.
+            third-party scripts on the breathing pages. Google is only involved if you
+            choose Google for Backup & Sync.
           </p>
         </Section>
 
         <Section title="How data is stored">
           <p>
-            Practice history, settings, and usage counts (when you have email sync turned
-            on) are stored on Supabase, with access controls so that only your identity
-            can read or write your records. Local-only data stays on your device.
+            Practice history, settings, and usage counts (when you have Backup & Sync
+            turned on) are stored on Supabase, with access controls so that only your
+            identity can read or write your records. Local-only data stays on your device.
           </p>
         </Section>
 
@@ -112,9 +121,9 @@ export default function PrivacyPage() {
             To delete data on this device, clear your browser storage for exhale.guide.
           </p>
           <p className="mt-3">
-            To delete cloud data after email sync, email djgreene@gmail.com from the
-            address you synced with and request deletion. Your records will be removed
-            from the Exhale backend.
+            To delete cloud data after Backup & Sync, email djgreene@gmail.com from the
+            address you synced with, or include the Google email you used for sync, and
+            request deletion. Your records will be removed from the Exhale backend.
           </p>
         </Section>
 

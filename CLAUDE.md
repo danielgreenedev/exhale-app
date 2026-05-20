@@ -10,7 +10,7 @@ To allow anyone to learn paced breathing as an anxiety coping skill.
 
 People who don't use self-care apps. The goal is as low friction and as few obstacles as possible to participating. It should also be usable for anyone, including people with existing breathwork experience.
 
-This means: no sign-up, no accounts, no onboarding gates, no streaks that guilt, no complexity that intimidates. Every screen should feel like an invitation, not a requirement.
+This means: no required sign-up, no required accounts, no onboarding gates, no streaks that guilt, no complexity that intimidates. Every screen should feel like an invitation, not a requirement.
 
 ## Core Mechanic
 
@@ -32,7 +32,7 @@ Phase transitions have anticipatory support because beta feedback showed that ex
 - `src/app/page.tsx` — home/menu screen
 - `src/app/game/page.tsx` — active session screen
 - `src/app/stats/page.tsx` — practice history screen
-- `src/app/privacy/page.tsx`, `src/app/terms/page.tsx` — quiet policy pages (not linked from main UI yet)
+- `src/app/privacy/page.tsx`, `src/app/terms/page.tsx` — quiet policy pages linked from the shared policy footer
 - `src/components/BreathingOrb.tsx` — canvas orb, particles, progress rings; rhythm-aware
 - `src/components/GameHUD.tsx` — in-session HUD overlay; rhythm-aware
 - `src/components/SessionComplete.tsx` — end-of-session screen
@@ -41,11 +41,11 @@ Phase transitions have anticipatory support because beta feedback showed that ex
 - `src/hooks/useSessionStats.ts` — localStorage + Supabase session persistence
 - `src/lib/breathing.ts` — RHYTHMS registry, phase configs, session lengths, easing math
 - `src/lib/sound.ts` — sound palette labels and storage IDs
-- `src/lib/auth.tsx` — anonymous-first auth with optional email upgrade
+- `src/lib/auth.tsx` — anonymous-first auth with optional Backup & Sync upgrade
 - `src/lib/supabase.ts` — browser Supabase client singleton
 - `src/lib/settingsSync.ts` — local/cloud round-trip for orb scale, sound, session length, rhythm
 - `src/lib/sessionSync.ts` — local/cloud session merge helpers (dedup-aware)
-- `src/lib/appEvents.ts` — Supabase event logging for email-synced users
+- `src/lib/appEvents.ts` — Supabase event logging for synced users
 
 ## Design Principles
 
@@ -91,7 +91,7 @@ Do not reuse these keys for new features:
 
 ## Supabase Data
 
-Supabase is optional from the user's point of view and only appears through Practice History sync.
+Supabase is optional from the user's point of view and only appears through Practice History Backup & Sync. The active direction is email-code sync plus optional Google OAuth via Supabase Auth, while preserving anonymous local use as the default. Google Backup & Sync should use `linkIdentity()` when a Supabase session already exists so anonymous cloud rows can remain attached to the same user id; fall back to `signInWithOAuth()` only when there is no current session.
 
 | Table | Purpose |
 |-------|---------|
@@ -107,6 +107,7 @@ Local development on `localhost` / `127.0.0.1` uses local-only auth by default s
 These are intentional — don't undo them without understanding the rationale:
 
 - **No user input during a session** — fully guided, not hold-to-breathe. Reduces intimidation for first-timers who don't know when to inhale.
+- **Anonymous by default, Backup & Sync by choice** — users can breathe and keep local history without signing in. Practice History may offer email-code sync and Google OAuth as optional persistence paths, but the home screen and session flow must never become auth-gated.
 - **Abstract orb** — chosen over thematic visuals (ocean, lantern, mandala). More universal, less culturally loaded, works for any user.
 - **Selectable pace (Steady / Soft / Full / Flow)** — Steady, Soft, Full added after five of six recent beta testers reported rhythm-fit concerns across a range of capacities and preferences. Flow added after four testers (T-2026-05-19-03, -05, -06, -07) converged on Rest/Hold as the friction; Flow removes Hold entirely and shortens Relax to a transition beat. Default stays Steady 4-4-6-8; alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
 - **Fourth phase reframed as `Relax` with instruction `Breathe`** — "Rest" implied stillness when the body actually wants to inhale after exhale. `Relax` keeps imperative-verb parity with Inhale / Hold / Exhale and reads as permission. The instruction collapses to a single word because the label does the framing.

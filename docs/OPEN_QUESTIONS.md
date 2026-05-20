@@ -1,6 +1,6 @@
 # Exhale Open Questions
 
-Last updated: May 20, 2026 (Flow pause follow-up logged)
+Last updated: May 20, 2026 (OAuth Backup & Sync promoted)
 
 Use this as a living parking lot for product, validation, trust, accessibility, and strategy questions that are not ready to become implementation tasks. As questions are answered, add the answer, date, evidence, and any resulting TODO/doc updates.
 
@@ -116,6 +116,8 @@ Current answer: partially answered. Implementing 2026-05-19:
 - `BreathingOrb` guide ring picks up the next-phase color during the lead window
 - `useAudioEngine` schedules a quiet pre-cue before each phase change
 - `GameHUD` initially showed a `Next [phase]` text cue but it competed for attention with the central phase label and countdown. Removed 2026-05-19; the audio pre-cue and ring color lead carry the anticipation signal on their own. `nextPhase` and `phaseLeadProgress` stay on the hook return so the orb and audio engine still consume them.
+
+2026-05-20 signal: T-2026-05-19-08 liked the color leads and soft pre-cues on the default Quick / Steady path. They specifically said the sequencing felt natural, did not add strain, and did not interrupt the rhythm. This is a positive cue-system signal for the default path, separate from the same tester's Flow-specific complaint that the short 2-second Relax/pause felt rushed.
 
 Still open from the original five:
 
@@ -240,9 +242,11 @@ If you could change one part of the rhythm, would it be Inhale, Hold, Exhale, Re
 
 ### Should feedback intake include a return-intent question?
 
-Context: Return use is part of the Stage 0 gate, but `docs/USER_FEEDBACK.md` does not yet directly ask whether a tester would use Exhale again.
+Context: Return use is part of the Stage 0 gate. `docs/USER_FEEDBACK.md` now asks whether a tester would use Exhale again when stressed, tired, or needing to settle.
 
-Current answer: Open.
+Current answer: Partially answered. The prompt is now in the brand-new-user follow-up set, but the gate still needs actual return-use signal, not only stated usefulness.
+
+2026-05-20 signal: T-2026-05-19-08 said Exhale is a good tool for feeling stressed, tired, or needing to settle, but also said they might not think to use it. That is positive product-value feedback and a reminder that retention may depend on whether the user remembers Exhale in the right moment.
 
 Possible prompt:
 
@@ -264,9 +268,9 @@ Context: `PRODUCT.md` says history is optional and never a source of pressure. C
 
 Current answer: Open.
 
-### Is optional email sync quiet enough?
+### Is optional Backup & Sync quiet enough?
 
-Context: Sync belongs only inside Practice History and must not make Exhale feel account-gated.
+Context: Backup & Sync belongs only inside Practice History and must not make Exhale feel account-gated. This now covers both email-code sync and the promoted Google OAuth path.
 
 Current answer: Open.
 
@@ -274,7 +278,14 @@ Current answer: Open.
 
 Context: Practice History sync currently uses email-code OTP. That requires the user to leave Exhale, open their email app, find the code, switch back, and paste it. OAuth providers offer a one-tap consent flow when the device is already signed into Google or Apple. For users who have already decided to sync (inside Practice History), OAuth is plausibly a strict friction reduction over OTP. This is a different question from "should Exhale have a fuller account system" below: the framing is friction-reduction within the existing optional sync gate, not adding a new account surface to the app.
 
-Current answer: Open. Lean is to add Google Sign-In as a second option inside Practice History alongside OTP rather than replacing OTP, pilot with the current beta tester group, and add Apple Sign-In later if iPhone testers reach for it. Anonymous-first stays the default; the home screen does not change.
+Current answer: **Promoted to active Stage 0 work on 2026-05-20.** Add Google OAuth as an optional Backup & Sync path inside Practice History alongside the existing email-code flow. Anonymous-first stays the default; the home screen does not change; breathing never requires sign-in. App-side wiring is started; Supabase/Google provider setup and live cross-device testing remain before this can be called done. Apple Sign-In remains a later candidate because it is privacy-aligned but adds Apple Developer/provider overhead.
+
+Why this moved up:
+
+- Product reliability: OAuth can make cross-device persistence more reliable and less brittle than email-code switching for users who already want sync.
+- Developer feedback: Shawn Beck recommended proper OAuth on Practice History so users can persist their data more reliably.
+- Future optionality: a stable provider-backed identity creates a cleaner path if premium subscriptions ever become relevant, while monetization remains conditional and deferred.
+- Portfolio value: implementing this as privacy-first optional account linking is a strong resume/GitHub signal because it demonstrates auth architecture without sacrificing product philosophy.
 
 Tradeoffs worth naming before building:
 
@@ -283,7 +294,15 @@ Tradeoffs worth naming before building:
 - Apple Sign-In adds review/policy overhead and a separate provider config. Defensible to defer until a tester actually asks for it.
 - Implementation cost is low: Supabase supports both providers natively, and the current `linkEmailToAnonymousUser` flow already converts anonymous identities; OAuth would follow the same conversion path.
 
-Decision blocker: tester preference. Before committing, run the dual-option Practice History past a few testers and watch which path they reach for. If OTP completion rate is the bottleneck on cross-device usage, OAuth should narrow that gap.
+Implementation stance:
+
+- Use Supabase Auth provider support, not manual OAuth handshakes.
+- Prefer `linkIdentity()` when an anonymous Supabase session already exists so existing cloud rows can remain under the same user id; fall back to `signInWithOAuth()` only when needed.
+- Add Google first, then evaluate Apple later.
+- Treat OAuth as "Backup & Sync" or "Save across devices," not as a profile/account feature.
+- Preserve and merge existing local/anonymous data when a provider is linked.
+- Keep email-code sync available unless it becomes clearly redundant after testing.
+- Keep `/privacy` and `/terms` aligned with the optional provider path so they describe provider sign-in, exact synced data, third-party involvement, deletion/request paths, and the anonymous-first promise.
 
 Related: the existing "fuller account system" question below addresses a different concern (account management surface area, not friction reduction within an existing optional gate).
 
@@ -291,7 +310,7 @@ Related: the existing "fuller account system" question below addresses a differe
 
 Context: Exhale currently uses anonymous Supabase identity by default and optional email-code sync only inside Practice History. `PRODUCT.md` and `DESIGN.md` both protect the anonymous-first promise: no required account, login, profile, onboarding gate, or sync prompt before breathing. Any fuller auth model, such as password login, OAuth, profiles, account settings, or persistent account management, would need a clear user benefit that optional email sync cannot provide.
 
-Current answer: Open, but not an implementation task during beta feedback collection.
+Current answer: Still no fuller account system. Optional Google OAuth for Practice History Backup & Sync has been promoted to active work, but that does not authorize profiles, account settings, passwords, avatars, required login, or auth-first onboarding.
 
 Possible reasons to revisit:
 
@@ -303,7 +322,7 @@ Possible reasons to revisit:
 Default stance:
 
 ```text
-Do not add fuller account auth unless beta feedback shows the value outweighs the extra friction.
+Do not add a fuller account surface beyond optional Practice History Backup & Sync unless beta feedback shows the value outweighs the extra friction.
 ```
 
 ## Accessibility
@@ -344,7 +363,7 @@ Future options:
 
 - Keep email deletion during beta.
 - Add in-app deletion inside Practice History.
-- Add a self-serve deletion confirmation flow after email sync.
+- Add a self-serve deletion confirmation flow after Backup & Sync.
 
 ## Strategy
 

@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 20, 2026 (Flow pause follow-up logged)
+Last updated: May 20, 2026 (default Quick feedback logged)
 
 ## Purpose
 
@@ -92,6 +92,45 @@ Use these after someone tries the Flow pace:
 1. 
 
 ## Recent Feedback Notes
+
+### 2026-05-20, T-2026-05-19-08, Graphic Designer Follow-Up, Default Quick Positive Signal
+
+#### Session
+
+- Tester ID: T-2026-05-19-08
+- Follow-up OK: Unknown
+- Source: Project owner's graphic designer friend, latest build follow-up
+- Environment: Production or local unknown
+- Session length: Quick / 3 minutes
+- Rhythm: Default Steady, inferred from "hit begin as is"
+- Signal class: **Same professional design-eye tester, now giving default-path comfort feedback.** This should be read separately from their Flow-specific pause critique.
+
+#### What Worked
+
+- Opening the app and pressing Begin with the default 3-minute session "feels really nice where it is at."
+- The default Relax/pause felt good.
+- Inhale, Exhale, and Hold all felt good.
+- Relax did not interrupt the breathing rhythm.
+- Color leads were good.
+- The soft pre-cues were liked.
+- The slight sequencing where the circle started a moment after the time track felt natural and easy to follow.
+- The rhythm did not make the tester feel like they needed to gasp, catch up, or strain.
+- The tester said Exhale is a good tool for feeling stressed, tired, or needing to settle.
+
+#### Friction
+
+- Return intent is positive but not fully spontaneous: the tester said they might not think to use it, but it would be a great resource if they did.
+
+#### Actionable Recommendations
+
+1. Do not overcorrect the default Steady / Quick path because of Flow-specific pause feedback. For this tester, the default pause and transition cues are working.
+2. Treat the current color lead and soft pre-cue system as provisionally validated on the default path for this tester.
+3. Keep return-use questions active. "Useful if remembered" is not the same as actual retention; it points toward future discoverability/habit-context work, not an immediate product rewrite.
+
+#### Open Questions
+
+1. Will target-audience testers remember to use Exhale when stressed, or does it need a later, non-pushy discoverability/reminder strategy?
+2. Are the color lead and pre-cue only problematic on Flow's short 2-second Relax, while helpful on the default Steady rhythm?
 
 ### 2026-05-20, T-2026-05-19-08, Graphic Designer Follow-Up, Flow Pause Friction
 
@@ -405,7 +444,7 @@ I think the hardest part for me was the hold and the slower exhale then a short 
 
 - The tester noticed performance pressure around matching breath timing and being ready for the next prompt.
 - Hold copy that mentions strain can accidentally make the user think about straining.
-- Exhale may feel slightly long for some users; this needs more validation before changing the core 4-4-6-8 rhythm.
+- Exhale may feel slightly long for some users; this needs more validation before changing the default Steady rhythm.
 - In-session sound control is small in the top-right, and iPhone silent mode made sound behavior harder to diagnose.
 
 #### Actionable Recommendations
@@ -425,7 +464,7 @@ I think the hardest part for me was the hold and the slower exhale then a short 
 
 ### Rhythm Comfort
 
-- Does the 4-4-6-8 rhythm feel natural?
+- Does the default Steady rhythm feel natural?
 - Is Rest long enough to feel permissive?
 - Are transitions between Inhale, Hold, Exhale, and Rest smooth enough?
 

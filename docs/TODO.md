@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 20, 2026 (Flow pause follow-up logged)
+Last updated: May 20, 2026 (OAuth Backup & Sync implementation started)
 
 ## Completed Rhythm Changes
 
@@ -26,7 +26,7 @@ Last updated: May 20, 2026 (Flow pause follow-up logged)
 ## Completed From Sync And Measurement Follow-Up
 
 - Supabase sync copy now indicates that timer setting, Circle Size, audio choice, and Practice History sync.
-- App events are logged for email-synced users when they select a timer, start a session, exit early through the app, or complete a session.
+- App events are logged for synced users when they select a timer, start a session, exit early through the app, or complete a session.
 - Practice completion is still recorded in `breathing_sessions`; behavioral counts now have a lightweight path through `app_events`.
 
 ## Completed From Full UI Audit
@@ -78,6 +78,7 @@ Last updated: May 20, 2026 (Flow pause follow-up logged)
 - Practice History now has an optional email sign-in flow instead of an OTP-only sync branch.
 - New email sign-ins convert the current anonymous Supabase user where possible, preserving existing `breathing_sessions`, `user_settings`, and `app_events` rows under the same user id.
 - Existing email sign-ins merge local practice history into the signed-in `breathing_sessions` records and restore synced timer length, Circle Size, and sound choice through `user_settings`.
+- Google Backup & Sync is now being added as a sibling provider path, not a replacement for email code sync.
 
 ## Completed Mobile Sound Control
 
@@ -97,9 +98,9 @@ Last updated: May 20, 2026 (Flow pause follow-up logged)
 
 ## Completed Policy Pages
 
-- `/privacy` now covers anonymous browser identity, local storage, optional email sync, Supabase storage, lightweight `app_events`, deletion, and the absence of advertising or third-party tracking.
-- `/terms` now covers no medical advice, use at your own discretion, acceptable use, intellectual property, service availability, no warranties, and contact.
-- Both pages are reachable directly and have quiet Exhale-styled layouts; they still need to be surfaced from the main app UI.
+- `/privacy` now covers anonymous browser identity, local storage, optional Backup & Sync through email code or Google, Supabase storage, lightweight `app_events`, deletion, and the absence of advertising or third-party tracking.
+- `/terms` now covers no medical advice, use at your own discretion, optional Backup & Sync, acceptable use, intellectual property, service availability, no warranties, and contact.
+- Both pages are reachable directly, linked from the shared policy footer, and styled in the quiet Exhale layout.
 
 ## Completed Promoted Priority (2026-05-19)
 
@@ -191,15 +192,27 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 1. Pending feedback/data collection: test cross-device sync on Device B and verify Practice History, timer length, Circle Size, sound choice, and rhythm sync correctly through Supabase.
 
+1a. Active promoted work: add optional OAuth-backed Backup & Sync inside Practice History.
+
+- Scope: add Google OAuth as a sibling option to the existing email-code sync, using Supabase Auth provider support rather than custom OAuth handling.
+- Keep anonymous local use as the default. No sign-in prompt on Home, no auth before breathing, no blocking gate before Practice History can be viewed locally.
+- App-side status: initial Google button, OAuth return-error handling, privacy copy, terms copy, and deployment setup notes are implemented. Supabase/Google dashboard configuration and live end-to-end testing remain.
+- Preserve and merge existing local/anonymous practice history when a user links Google, matching the current Backup & Sync preservation goal. Implementation uses Supabase `linkIdentity()` first when an anonymous session exists, so existing cloud rows can stay under the same user id.
+- Copy direction: frame this as "Backup & Sync" or "Save across devices." It is a persistence affordance, not an account system.
+- Portfolio rationale: demonstrates a privacy-first auth architecture suitable for a resume/GitHub project while respecting the app's anonymity promise.
+- Future path: Apple Sign-In can follow later if iPhone testers or privacy-sensitive users ask for it; do not take on Apple Developer/account overhead as the first provider.
+- Guardrails: no profile screen, avatars, passwords, account settings, premium gate, or auth-first onboarding as part of this task.
+- Acceptance requirement before calling this done: configure Supabase Google provider, enable manual identity linking, add redirect allow-list URLs, configure Google Cloud OAuth consent/redirects, test Google sync on local or preview with the local Supabase flag enabled, then test second-device restoration of practice history, timer length, Circle Size, sound choice, and rhythm.
+
 2. Pending follow-up with rhythm-concern testers: ask the original five (T-2026-05-18-01 and T-2026-05-19-02 through -05) whether Soft or Full fits better than Steady did, and ask the four Rest/Hold-frictioned testers (T-2026-05-19-03, -05, -06, -07) whether Flow fits better than their current choice. Use the Flow follow-up questions in `docs/USER_FEEDBACK.md` so the tiny-pause question is asked consistently. Capture answers in `docs/USER_FEEDBACK.md`. Flow shipped on 2026-05-20 without the original pre-merge validation gate; this follow-up is the post-launch validation. First Flow follow-up from T-2026-05-19-08 says no-Hold helps but the 2-second pause feels too fast and interruptive; the same tester explicitly said they would take out the pause.
 
 2a. Resolved 2026-05-19: the Rest phase is now labeled `Relax` with the single-word instruction `Breathe`. The phase enum stays `rest` as the internal discriminator. `Relax` preserves imperative-verb parity with Inhale/Hold/Exhale and reads as permission rather than instruction; the one-word instruction stops the copy from competing with the phase label for attention. See `CLAUDE.md` Core Mechanic and `src/lib/breathing.ts` for the canonical statement.
 
 2b. Resolved 2026-05-19: the `Next [phase]` HUD text cue was removed because it competed with the central phase label and countdown. Audio pre-cue and ring-color lead remain.
 
-3. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check. Current brand-new-user prompts: "Could you start breathing without thinking too much?", "Did the pace ever feel rushed, pressuring, or make you gasp/catch up?", "Did Relax help, or did it interrupt the rhythm?", "Did the phase changes feel easy to follow, or did they lag your brain a bit?", "If you opened Session Setup, did the options feel natural? Did the button names and explanations make sense?", "Would you use this again when stressed, tired, or needing to settle?", and "What would you change first?"
+3. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check. Current brand-new-user prompts: "Could you start breathing without thinking too much?", "Did the pace ever feel rushed, pressuring, or make you gasp/catch up?", "Did Relax help, or did it interrupt the rhythm?", "Did the phase changes feel easy to follow, or did they lag your brain a bit?", "If you opened Session Setup, did the options feel natural? Did the button names and explanations make sense?", "Would you use this again when stressed, tired, or needing to settle?", and "What would you change first?" First latest-build signal from T-2026-05-19-08 on default Quick / Steady is positive: no gasp/catch-up/strain, default Relax did not interrupt, and the session felt useful.
 
-4. Pending feedback/data collection: validate whether the new anticipatory transition cues help users keep up with phase shifts. Ask: "Did the color lead or soft pre-cue make the phase changes easier to follow, or did they add noise?"
+4. Pending feedback/data collection: validate whether the new anticipatory transition cues help users keep up with phase shifts. Ask: "Did the color lead or soft pre-cue make the phase changes easier to follow, or did they add noise?" First latest-build signal from T-2026-05-19-08 is positive on default Quick / Steady: color leads and soft pre-cues were liked and felt natural. Keep testing because the same tester still found Flow's short pause/cue pushy.
 
 5. Pending feedback/data collection: recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
 

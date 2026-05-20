@@ -16,9 +16,44 @@ Confirm the premise: does the right kind of person find this useful?
 - Note: Facebook link-preview scraping still has a 403/parser issue despite verified app-side Open Graph metadata. Treat it as non-blocking unless Facebook sharing becomes important to beta acquisition.
 - Recruit roughly 10 to 20 testers from the target audience (people who do not normally use self-care apps).
 - Watch Supabase `app_events` for completion rate, return rate, and drop-off phase.
+- Current build-quality investment: add optional OAuth-backed Backup & Sync inside Practice History while preserving anonymous local use as the default.
 - Decide if real retention signal exists before investing more engineering.
 
 Gate: roughly ten testers, mostly target-audience, with at least one signal of return use.
+
+## Promoted Priority, Optional OAuth Backup & Sync (active 2026-05-20)
+
+Pulled into the current phase for two reasons: product reliability and portfolio polish.
+
+Product framing:
+
+- Exhale still starts anonymous and local-first. No authentication before breathing, no account gate on the home screen, and no OAuth prompt during first use.
+- Practice History already contains optional email-code sync. OAuth is an additional Backup & Sync path for users who have already chosen persistence.
+- The goal is reliable cross-device continuity for practice history, timer length, Circle Size, sound choice, and rhythm.
+- The feature should be presented as "Backup & Sync" or "Save across devices," not as a profile, social account, or onboarding step.
+
+Technical/product rationale:
+
+- Developer feedback from Shawn Beck recommended proper OAuth on Practice History so users can persist data more reliably.
+- Google OAuth is a practical first provider because Supabase Auth can manage the provider flow, sessions, and identity linking without a custom auth backend.
+- Apple Sign-In is privacy-aligned because of Hide My Email, but it adds Apple Developer account overhead and provider setup. Defer until iPhone testers or privacy-sensitive users ask for it.
+- Optional OAuth creates a cleaner path if premium features or subscriptions ever become relevant, while monetization remains conditional and deferred.
+- From a portfolio/resume perspective, this demonstrates privacy-first auth architecture: anonymous local use by default, optional OAuth-backed persistence when the user asks for it.
+
+Risks to guard:
+
+- A "Sign in with Google" button can weaken the perceived anonymity promise if it appears too early or too loudly.
+- OAuth adds third-party provider dependency for synced users. Non-synced users must remain unaffected.
+- Do not add profile screens, avatars, passwords, account settings, or auth-first navigation as part of this work.
+
+Success shape:
+
+- Practice History offers email-code sync and Google OAuth as quiet sibling options.
+- Existing anonymous/local data is preserved and merged when a user links a provider.
+- Privacy copy states what syncs and makes clear that breathing remains usable without any sign-in.
+- `/privacy` and `/terms` explain optional OAuth provider involvement and the anonymous-first philosophy in plain language.
+- Implementation uses Supabase Auth provider support rather than custom OAuth handshakes. App-side wiring starts with `linkIdentity()` when an anonymous Supabase session exists, preserving existing cloud rows under the same user id where Supabase allows it.
+- Remaining rollout work is provider setup: enable Google in Supabase, enable manual identity linking, configure Google Cloud OAuth, and live-test cross-device sync.
 
 ## Promoted Priority, Alternate Rhythm Options (complete 2026-05-19)
 

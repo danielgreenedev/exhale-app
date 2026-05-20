@@ -26,15 +26,15 @@ export default function TermsPage() {
               Terms
             </h1>
             <p className="text-still-white/52 text-xs tracking-[0.15em] font-light">
-              Last updated May 19, 2026
+              Last updated May 20, 2026
             </p>
           </div>
         </header>
 
         <Section title="What Exhale is">
           <p>
-            Exhale is a free, guided breathing tool. It teaches a paced 4-4-6-8 breathing
-            rhythm and lets people practice it without an account or any required setup.
+            Exhale is a free, guided breathing tool. It offers paced breathing rhythms
+            and lets people practice without an account or any required setup.
             By using Exhale at exhale.guide, you agree to these terms.
           </p>
         </Section>
@@ -71,6 +71,23 @@ export default function TermsPage() {
             </li>
             <li>Use the service to harm others or to violate any law.</li>
           </ul>
+        </Section>
+
+        <Section title="Optional Backup & Sync">
+          <p>
+            Exhale can be used anonymously. Backup & Sync is optional and exists only to
+            help you keep practice history and settings across devices.
+          </p>
+          <p className="mt-3">
+            If you choose email code sync or Google sign-in, Supabase and the selected
+            provider are used to maintain your session and connect your practice data to
+            the same identity on another device. You are responsible for access to any
+            email or provider account you use for sync.
+          </p>
+          <p className="mt-3">
+            Backup & Sync is provided on the same best-effort basis as the rest of
+            Exhale. It is not required to start or complete a breathing session.
+          </p>
         </Section>
 
         <Section title="Intellectual property">
