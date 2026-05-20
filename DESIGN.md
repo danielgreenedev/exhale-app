@@ -212,7 +212,7 @@ The Standard rhythm is 4-4-6-8: Inhale 4 seconds, Hold 4 seconds, Exhale 6 secon
 
 ### Anticipatory Phase Cue
 
-In the final `PHASE_LOOKAHEAD_SECONDS` (currently 0.8s) before each phase change, the guide ring around the orb crossfades to the incoming phase color and a quiet pre-cue tone plays when sound is on. The intent is to give the brain a beat to register the upcoming transition without changing the actual phase timing. No textual HUD cue is shown; an earlier `Next [phase]` text experiment competed with the central phase label and the countdown for attention and was removed. Hook returns `nextPhase`, `phaseLeadProgress` (0-1), and `timeUntilPhaseEnd` so other consumers can opt in to anticipation without re-deriving them.
+In the final lead window before each phase change, the guide ring around the orb crossfades to the incoming phase color and a quiet pre-cue tone plays when sound is on. The lead window is per-phase: `getPhaseLookahead(phase)` returns `Math.min(PHASE_LOOKAHEAD_SECONDS, phase.duration * 0.25)`, with `PHASE_LOOKAHEAD_SECONDS = 0.8`. Long phases get the full 0.8s; short phases (≤3.2s) get capped at 25% of their own duration so the cue never occupies 40% of the phase and reads as jittery. Concretely: Gentle Hold 2s → 0.5s lead, Gentle Inhale 3s → 0.75s lead, Flow Relax 2s → 0.5s lead, everything else → 0.8s. The intent is to give the brain a beat to register the upcoming transition without changing the actual phase timing. No textual HUD cue is shown; an earlier `Next [phase]` text experiment competed with the central phase label and the countdown for attention and was removed. Hook returns `nextPhase`, `phaseLeadProgress` (0-1), and `timeUntilPhaseEnd` so other consumers can opt in to anticipation without re-deriving them.
 
 ### Progress Indicators
 
@@ -221,7 +221,7 @@ In the final `PHASE_LOOKAHEAD_SECONDS` (currently 0.8s) before each phase change
 
 ### Phase Transitions
 
-During the last 0.8 seconds of a phase, the guide ring begins to show the next phase color as a faint incoming arc. This is an anticipatory cue, not a new phase; it gives the user's eye a beat to understand that a transition is coming.
+During the last lead window of a phase (0.8s on long phases, capped to 25% of phase duration on short phases — see Anticipatory Phase Cue above), the guide ring begins to show the next phase color as a faint incoming arc. This is an anticipatory cue, not a new phase; it gives the user's eye a beat to understand that a transition is coming.
 
 Phase changes should feel like a handoff rather than a switch. The HUD keeps the current phase label active; anticipation is carried by the guide-ring color lead and quiet pre-cue sound. Visual color transitions are deliberately softened; the boundary can be sensed before the orb changes state, especially for users who need a moment to process the new instruction.
 

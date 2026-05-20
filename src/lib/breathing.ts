@@ -177,6 +177,15 @@ export function getPhaseAtTime(
   return { config: last, timeInPhase: last.duration, phaseIndex: rhythm.pattern.length - 1 };
 }
 
+// The effective anticipation-cue lead window for a given phase. Capped at 25% of phase duration
+// so short phases (Gentle 2s Hold, Flow 2s Relax) don't have a lead that occupies 40% of the
+// phase and reads as jittery. Long phases use the full PHASE_LOOKAHEAD_SECONDS constant.
+// Zero-duration phases return 0; getPhaseAtTime never makes them active, but defensive coding.
+export function getPhaseLookahead(phase: PhaseConfig): number {
+  if (phase.duration <= 0) return 0;
+  return Math.min(PHASE_LOOKAHEAD_SECONDS, phase.duration * 0.25);
+}
+
 export function getNextPhase(phaseIndex: number, rhythm: Rhythm = RHYTHMS[DEFAULT_RHYTHM]): PhaseConfig {
   // Skip zero-duration phases so anticipation cues never lead into a phase with no screen time.
   // Flow (4-0-6-2) has a zero-duration Hold; without this skip, the cue between Inhale and Exhale

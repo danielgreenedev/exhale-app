@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import {
   DEFAULT_RHYTHM,
-  PHASE_LOOKAHEAD_SECONDS,
+  getPhaseLookahead,
   PhaseConfig,
   RHYTHMS,
   Rhythm,
@@ -151,10 +151,10 @@ export default function BreathingOrb({
       const { config: phase, timeInPhase, phaseIndex } = getPhaseAtTime(elapsed % activeRhythm.cycleDuration, activeRhythm);
       const nextPhase = getNextPhase(phaseIndex, activeRhythm);
       const timeUntilPhaseEnd = phase.duration - timeInPhase;
-      const phaseLeadProgress = Math.max(
-        0,
-        Math.min(1, (PHASE_LOOKAHEAD_SECONDS - timeUntilPhaseEnd) / PHASE_LOOKAHEAD_SECONDS)
-      );
+      const lookahead = getPhaseLookahead(phase);
+      const phaseLeadProgress = lookahead > 0
+        ? Math.max(0, Math.min(1, (lookahead - timeUntilPhaseEnd) / lookahead))
+        : 0;
       const nextColor = parseHSL(nextPhase.color);
       const pp = timeInPhase / phase.duration;
       const sp = Math.min(1, elapsed / sessionDuration);

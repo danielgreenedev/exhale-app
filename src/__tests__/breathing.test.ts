@@ -2,9 +2,11 @@ import {
   DEFAULT_RHYTHM,
   getNextPhase,
   getPhaseAtTime,
+  getPhaseLookahead,
   getRhythm,
   easeInOutCubic,
   isRhythmId,
+  PHASE_LOOKAHEAD_SECONDS,
   RHYTHMS,
 } from '@/lib/breathing';
 
@@ -200,6 +202,48 @@ describe('getNextPhase', () => {
     expect(getNextPhase(2, flow).phase).toBe('rest');
     // From Relax (index 3), wrap back to Inhale (also skipping Hold).
     expect(getNextPhase(3, flow).phase).toBe('inhale');
+  });
+});
+
+describe('getPhaseLookahead', () => {
+  it('uses the full PHASE_LOOKAHEAD_SECONDS for phases of 3.2s or longer', () => {
+    // Standard Inhale 4s, Hold 4s, Exhale 6s, Relax 8s — all above the 3.2s breakpoint.
+    RHYTHMS.standard.pattern.forEach((p) => {
+      expect(getPhaseLookahead(p)).toBe(PHASE_LOOKAHEAD_SECONDS);
+    });
+    // Full Inhale 6s, Hold 6s, Exhale 10s, Relax 4s — also all above.
+    RHYTHMS.full.pattern.forEach((p) => {
+      expect(getPhaseLookahead(p)).toBe(PHASE_LOOKAHEAD_SECONDS);
+    });
+  });
+
+  it('caps the lookahead at 25% of phase duration for short phases', () => {
+    // Gentle Hold 2s -> 0.5s; Gentle Inhale 3s -> 0.75s; Gentle Exhale 4s -> 0.8s (unchanged); Relax 4s -> 0.8s.
+    expect(getPhaseLookahead(RHYTHMS.gentle.pattern[0])).toBe(0.75); // inhale 3s
+    expect(getPhaseLookahead(RHYTHMS.gentle.pattern[1])).toBe(0.5);  // hold 2s
+    expect(getPhaseLookahead(RHYTHMS.gentle.pattern[2])).toBe(PHASE_LOOKAHEAD_SECONDS); // exhale 4s
+    expect(getPhaseLookahead(RHYTHMS.gentle.pattern[3])).toBe(PHASE_LOOKAHEAD_SECONDS); // relax 4s
+  });
+
+  it('caps Flow Relax (2s) to 0.5s', () => {
+    const flowRelax = RHYTHMS.flow.pattern[3];
+    expect(getPhaseLookahead(flowRelax)).toBe(0.5);
+  });
+
+  it('returns 0 for zero-duration phases (Flow Hold)', () => {
+    const flowHold = RHYTHMS.flow.pattern[1];
+    expect(flowHold.duration).toBe(0);
+    expect(getPhaseLookahead(flowHold)).toBe(0);
+  });
+
+  it('never returns a value exceeding 25% of phase duration', () => {
+    (['standard', 'gentle', 'full', 'flow'] as const).forEach((id) => {
+      RHYTHMS[id].pattern.forEach((p) => {
+        if (p.duration > 0) {
+          expect(getPhaseLookahead(p)).toBeLessThanOrEqual(p.duration * 0.25 + 1e-9);
+        }
+      });
+    });
   });
 });
 

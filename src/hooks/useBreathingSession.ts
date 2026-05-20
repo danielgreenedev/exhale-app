@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   DEFAULT_RHYTHM,
-  PHASE_LOOKAHEAD_SECONDS,
+  getPhaseLookahead,
   RHYTHMS,
   Rhythm,
   SessionLength,
@@ -77,10 +77,10 @@ export function useBreathingSession(
     const { config: phase, timeInPhase, phaseIndex: pi } = getPhaseAtTime(elapsedInCycle, activeRhythm);
     const tr = Math.ceil(phase.duration - timeInPhase);
     const timeUntilPhaseEnd = phase.duration - timeInPhase;
-    const leadProgress = Math.max(
-      0,
-      Math.min(1, (PHASE_LOOKAHEAD_SECONDS - timeUntilPhaseEnd) / PHASE_LOOKAHEAD_SECONDS)
-    );
+    const lookahead = getPhaseLookahead(phase);
+    const leadProgress = lookahead > 0
+      ? Math.max(0, Math.min(1, (lookahead - timeUntilPhaseEnd) / lookahead))
+      : 0;
     const updateKey = pi * 1000 + tr * 10 + Math.floor(leadProgress * 4);
     if (updateKey !== lastUpdateKeyRef.current) {
       lastUpdateKeyRef.current = updateKey;
@@ -130,10 +130,10 @@ export function useBreathingSession(
   const timeUntilPhaseEnd = currentPhase.duration - timeInPhase;
   const timeRemaining = Math.ceil(timeUntilPhaseEnd);
   const nextPhase = getNextPhase(phaseIndex, activeRhythm);
-  const phaseLeadProgress = Math.max(
-    0,
-    Math.min(1, (PHASE_LOOKAHEAD_SECONDS - timeUntilPhaseEnd) / PHASE_LOOKAHEAD_SECONDS)
-  );
+  const currentLookahead = getPhaseLookahead(currentPhase);
+  const phaseLeadProgress = currentLookahead > 0
+    ? Math.max(0, Math.min(1, (currentLookahead - timeUntilPhaseEnd) / currentLookahead))
+    : 0;
 
   return {
     sessionState,
