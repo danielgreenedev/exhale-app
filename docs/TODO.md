@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 21, 2026 (voice guidance and in-app browser audio follow-up)
+Last updated: May 21, 2026 (rhythm event-tracking follow-up)
 
 ## Completed Rhythm Changes
 
@@ -246,7 +246,7 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 5. Pending feedback/data collection: recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
 
-6. Pending feedback/data collection: after a meaningful sample of synced sessions, review Supabase `app_events` counts (timer selections, session starts, Settling In exits, early exits, completions). Watch completion rate, return rate, and drop-off phase.
+6. Pending feedback/data collection and instrumentation check: make sure rhythm is included in relevant Supabase `app_events` payloads before interpreting rhythm comfort from usage data. After a meaningful sample of synced sessions, review counts by timer and rhythm (timer selections, rhythm selections, session starts, Settling In exits, early exits, completions). Watch completion rate, return rate, selected rhythm, completed rhythm, and drop-off phase so Steady / Soft / Full / Flow can be compared against the tester notes.
 
 ### Stage 1, ship-quality polish
 
