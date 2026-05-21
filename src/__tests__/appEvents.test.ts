@@ -26,6 +26,7 @@ describe('logAppEvent', () => {
   it('writes an app event for a signed-in user', () => {
     logAppEvent('user-123', 'session_started', {
       length: 'short',
+      rhythm: 'gentle',
       duration: 308,
       cycles: 14,
     });
@@ -36,6 +37,7 @@ describe('logAppEvent', () => {
       event: 'session_started',
       properties: {
         length: 'short',
+        rhythm: 'gentle',
         duration: 308,
         cycles: 14,
       },

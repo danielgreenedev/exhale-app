@@ -345,6 +345,7 @@ function GameContent() {
     sessionStartedEventRef.current = true;
     logAppEvent(userId, 'session_started', {
       length: lengthParam,
+      rhythm: rhythm.id,
       duration: sessionDuration,
       cycles: totalCycles,
       resumed: initialElapsed > 0,
@@ -352,7 +353,7 @@ function GameContent() {
       sound: soundPalette,
       orb_scale: orbScale,
     });
-  }, [sessionState, userId, lengthParam, sessionDuration, totalCycles, initialElapsed, soundPalette, orbScale]);
+  }, [sessionState, userId, lengthParam, rhythm, sessionDuration, totalCycles, initialElapsed, soundPalette, orbScale]);
 
   // Save session and stop audio on complete
   useEffect(() => {
@@ -372,9 +373,10 @@ function GameContent() {
         duration: sessionDuration,
         cycles: totalCycles,
         length: lengthParam,
+        rhythm: rhythm.id,
       });
     }
-  }, [sessionState, stopAmbient, saveSession, sessionDuration, totalCycles, lengthParam, userId]);
+  }, [sessionState, stopAmbient, saveSession, sessionDuration, totalCycles, lengthParam, rhythm, userId]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -446,6 +448,7 @@ function GameContent() {
       clearSettleTimer();
       logAppEvent(userId, 'session_exited', {
         length: lengthParam,
+        rhythm: rhythm.id,
         elapsed: 0,
         duration: sessionDuration,
         cycles: totalCycles,
@@ -458,6 +461,7 @@ function GameContent() {
       saveResumeState(lengthParam, elapsedRef.current);
       logAppEvent(userId, 'session_exited', {
         length: lengthParam,
+        rhythm: rhythm.id,
         elapsed,
         duration: sessionDuration,
         cycles: totalCycles,

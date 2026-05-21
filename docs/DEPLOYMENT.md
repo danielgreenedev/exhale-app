@@ -47,7 +47,7 @@ Supabase stores:
 
 - `breathing_sessions`: practice history.
 - `user_settings`: timer length, Circle Size, sound choice, and rhythm.
-- `app_events`: timer selections, session starts, early exits, and completions for synced users.
+- `app_events`: timer selections, session starts, early exits, and completions for synced users. Session start, completion, and exit payloads include `rhythm` so Supabase reads can compare completion and drop-off by pace.
 
 ## Google OAuth Setup
 
