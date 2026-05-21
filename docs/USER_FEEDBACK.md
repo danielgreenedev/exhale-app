@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 20, 2026 (tester prompt refresh after OAuth and Settling In polish)
+Last updated: May 21, 2026 (voice guidance and in-app browser audio feedback logged)
 
 ## Purpose
 
@@ -123,6 +123,109 @@ Use these when a tester is willing to do functionality testing after at least on
 1. 
 
 ## Recent Feedback Notes
+
+### 2026-05-21, T-2026-05-21-11, First-Time User, Voice Guidance Request
+
+#### Session
+
+- Tester ID: T-2026-05-21-11
+- Follow-up OK: Unknown
+- Date: 2026-05-21
+- Environment: Production assumed
+- Device: Unknown
+- Browser: Unknown
+- Route tested: Home/session
+- Session length: Unknown
+- Rhythm: Unknown
+- Sound choice: Unknown
+- Circle Size: Unknown
+
+#### What Worked
+
+- Tester understood the visual-guidance concept and suggested an additional modality rather than rejecting the core experience.
+
+#### Friction
+
+- Tester wondered whether Exhale could include a voice to guide the breathing along with the visual.
+
+#### Accessibility Notes
+
+- Voice guidance could help users who struggle to track the visual orb, phase colors, or upcoming phase transitions.
+- Voice guidance could also help users who cannot or do not want to stare at the screen during the session.
+- Voice guidance depends on the same mobile/in-app-browser audio reliability questions now being tracked separately.
+
+#### Emotional Tone
+
+- Calm / Clear / Rushed / Confusing / Overstimulating / Other: Constructive / Curious
+- Notes: Treat as a modality/accessibility suggestion, not as evidence that the current visual system failed for this tester.
+
+#### Actionable Recommendations
+
+1. Park optional voice guidance as an open product question.
+2. If implemented later, keep it optional and off by default unless repeated feedback shows voice is needed for first-run success.
+3. Consider lower-risk variants first: short spoken phase names only, spoken transition prompts, or a separate voice-guided mode.
+
+#### Open Questions
+
+1. Would optional voice guidance reduce phase uncertainty, or would it make Exhale feel less quiet/minimal?
+2. Should voice guidance be a background-sound option, a separate toggle, or a dedicated guided mode?
+3. Can voice guidance work reliably in mobile browsers and Facebook's in-app browser?
+
+### 2026-05-21, T-2026-05-21-10, First-Time User, Transition-Cue Uncertainty
+
+#### Session
+
+- Tester ID: T-2026-05-21-10
+- Follow-up OK: Unknown
+- Date: 2026-05-21
+- Environment: Production assumed
+- Device: iPhone 14 reported in follow-up
+- Browser: Facebook in-app browser
+- Route tested: Home/session
+- Session length: Unknown
+- Rhythm: Unknown
+- Sound choice: Unknown
+- Circle Size: Unknown
+
+#### What Worked
+
+- Tester engaged enough to give concrete product-level feedback about first-run clarity and phase signaling.
+- The visual orb model was legible enough for the tester to reason about how expanding/morphing shapes could communicate the current and upcoming phase.
+
+#### Friction
+
+- Brand-new-user uncertainty about the next phase caused stress and prevented the tester from completing the process.
+- Existing phase colors felt too similar to reliably distinguish transitions.
+- Existing cues did not sufficiently communicate that a phase change was imminent, especially the move toward Exhale.
+- Tester suggested an optional tutorial for brand-new users.
+- Follow-up answer to "Could you tell what phase was coming next without reading extra text?": no, not at all.
+- Audio did not work at all for this tester on iPhone 14.
+- Tester opened Exhale by tapping the project owner's Facebook post link. Facebook kept the page inside its built-in in-app browser rather than opening the user's default browser. The iPhone silent switch was not on.
+
+#### Accessibility Notes
+
+- Distinguishing phases by color alone may not be robust enough. Consider redundant cues such as shape, motion, or stronger state-specific visual behavior.
+- If a cue is added, it should clarify the next phase without competing with the central instruction text or recreating the removed `Next [phase]` HUD problem.
+- Facebook in-app browser audio is a live QA risk across mobile platforms. Need to distinguish Facebook iOS, Facebook Android, Safari/Chrome, silent switch or system mute state, volume, autoplay policy, and whether the user tapped Begin/sound controls.
+
+#### Emotional Tone
+
+- Calm / Clear / Rushed / Confusing / Overstimulating / Other: Confusing / Stressful
+- Notes: The key phrase to preserve is that uncertainty caused stress and inability to complete the process. This is stronger than a simple preference complaint.
+
+#### Actionable Recommendations
+
+1. Keep optional tutorial/onboarding as an open question, but avoid making first-run feel instructional or account-like.
+2. Revisit phase cue distinctness. Candidate direction: each phase has a slightly more distinctive color/shape/motion signature while preserving the center orb as the primary timing anchor.
+3. Explore whether the last second before a phase change can subtly morph toward the next phase through color or shape, especially before Exhale, without adding text.
+4. Add this tester's iPhone 14 / Facebook in-app browser audio report to the sound QA queue rather than treating sound as fully validated. The project owner has also personally seen similar behavior in Facebook's in-app browser on Google Pixel.
+
+#### Open Questions
+
+1. Do brand-new users need an optional tutorial, or can the in-session cues become self-explanatory enough?
+2. Are current phase colors too similar for first-time users?
+3. Should the orb itself communicate phase transitions through shape/motion changes, not only color and the outer guide line?
+4. Does audio fail specifically in Facebook's in-app browser on iPhone/Android, while working in Safari/Chrome?
 
 ### 2026-05-20, T-2026-05-19-08, Graphic Designer Follow-Up, Full Rhythm And Soft-Cue Clarity
 

@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 20, 2026 (OAuth complete and beta feedback follow-up)
+Last updated: May 21, 2026 (voice guidance and in-app browser audio follow-up)
 
 ## Completed Rhythm Changes
 
@@ -33,7 +33,7 @@ Last updated: May 20, 2026 (OAuth complete and beta feedback follow-up)
 - Settling In now uses the same strong phase-label treatment, positioning, and shadowed instruction style as the active session labels so the intro state feels consistent and legible.
 - Center-orb timing hierarchy was reinforced: the orb rim is slightly stronger, while the outer guide/progress line and incoming soft cue are lower contrast and less neon so users are less likely to chase the pre-cue.
 - First-pass sound trust was hardened: Web Audio no longer reports active if the context remains suspended, and iPhone-class browsers get a timely silent-mode hint after Settling In when sound is active.
-- Remaining validation: test sound perception on a real iPhone in normal mode and silent mode, across Safari and the browser used by the tester if possible. Include app-switching away from Safari and back, because tester feedback suggests that may affect perceived sound. Also validate latest Firefox on Windows 11 after a fresh build/profile: Session Setup should default to Air, while the in-session sound icon may still appear inactive until Web Audio starts from a user gesture.
+- Remaining validation: test sound perception on a real iPhone in normal mode and silent mode, across Safari and the browser used by the tester if possible. Include app-switching away from Safari and back, because tester feedback suggests that may affect perceived sound. Add Facebook's in-app browser on iPhone 14 and Google Pixel/Android to this matrix after T-2026-05-21-10 reported no audio when opening Exhale from a Facebook post inside the Facebook iOS app, and the project owner saw similar Facebook in-app browser behavior on Pixel. Also validate latest Firefox on Windows 11 after a fresh build/profile: Session Setup should default to Air, while the in-session sound icon may still appear inactive until Web Audio starts from a user gesture.
 - Open question added: whether Full needs clearer state-specific framing after a resting-heart-rate tester found the 10-second exhale difficult but potentially useful during panic/stress.
 
 ## Completed Pre-Commit Impeccable Audit Follow-Up
@@ -232,11 +232,17 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 2b. Resolved 2026-05-19: the `Next [phase]` HUD text cue was removed because it competed with the central phase label and countdown. Audio pre-cue and ring-color lead remain.
 
-3. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check. Use the refreshed Brand-New User, Session Setup, Flow, Transition Cue Diagnostic, and Practice History And Sync question sets in `docs/USER_FEEDBACK.md`. First latest-build signal from T-2026-05-19-08 on default Quick / Steady is positive: no gasp/catch-up/strain, default Relax did not interrupt, and the session felt useful.
+3. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check. Use the refreshed Brand-New User, Session Setup, Flow, Transition Cue Diagnostic, and Practice History And Sync question sets in `docs/USER_FEEDBACK.md`. First latest-build signal from T-2026-05-19-08 on default Quick / Steady is positive: no gasp/catch-up/strain, default Relax did not interrupt, and the session felt useful. New first-time signal from T-2026-05-21-10 says phase uncertainty caused stress and prevented completion; when asked whether they could tell what phase was coming next without extra text, they answered no, not at all. Ask the next brand-new tester the same question.
 
-4. Pending feedback/data collection: validate whether the new anticipatory transition cues help users keep up with phase shifts. Ask: "Did the color lead or soft pre-cue make the phase changes easier to follow, or did they add noise?" First latest-build signal from T-2026-05-19-08 is positive on default Quick / Steady: color leads and soft pre-cues were liked and felt natural. Keep testing because the same tester still found Flow's short pause/cue pushy.
+4. Pending feedback/data collection: validate whether the new anticipatory transition cues help users keep up with phase shifts. Ask: "Did the color lead or soft pre-cue make the phase changes easier to follow, or did they add noise?" First latest-build signal from T-2026-05-19-08 is positive on default Quick / Steady: color leads and soft pre-cues were liked and felt natural. Keep testing because the same tester still found Flow's short pause/cue pushy, and T-2026-05-21-10 found phase colors too similar and wanted stronger transition signaling.
 
 4a. Pending feedback/data collection: validate whether the softened outer guide line now reads as support rather than a timing object to chase. First Full follow-up from T-2026-05-19-08 said the center circle timing was relaxing, but the line could feel like being already behind because it begins before the orb changes. The current implementation lowers guide-line contrast/chroma and strengthens the orb rim; ask the next design-eye tester whether the orb clearly feels primary.
+
+4b. Parked investigation: optional tutorial or stronger self-explanatory orb cues for brand-new users. Trigger: one more first-time tester reports that uncertainty about the next phase caused stress, confusion, or inability to complete the session. Candidate directions: non-blocking "How it works" affordance, more distinct phase colors, phase-specific shape/motion language, or a subtle final-second morph toward the next phase.
+
+4c. Pending feedback/data collection: reproduce Facebook in-app browser audio behavior on iPhone and Android. T-2026-05-21-10 opened Exhale from a Facebook post inside Facebook's iOS in-app browser, with silent switch off, and sound never played. The project owner has seen similar behavior on Google Pixel. Compare Facebook in-app browser against opening the same URL in Safari/Chrome, and note whether tapping the sound button changes anything.
+
+4d. Parked investigation: optional spoken voice guidance. T-2026-05-21-11 asked whether a voice could guide breathing along with the visual. Do not build yet; collect whether this repeats and whether it is about accessibility, phase-transition clarity, or preference. If it repeats, evaluate a voice-guided mode or spoken phase names as an optional Audio setting.
 
 5. Pending feedback/data collection: recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
 

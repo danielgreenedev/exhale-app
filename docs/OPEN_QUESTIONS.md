@@ -1,6 +1,6 @@
 # Exhale Open Questions
 
-Last updated: May 20, 2026 (Full rhythm and visual cue feedback)
+Last updated: May 21, 2026 (voice guidance and in-app browser audio feedback)
 
 Use this as a living parking lot for product, validation, trust, accessibility, and strategy questions that are not ready to become implementation tasks. As questions are answered, add the answer, date, evidence, and any resulting TODO/doc updates.
 
@@ -52,6 +52,39 @@ Clarify whether target beta testers must be:
 Context: Practice History and sync are optional by design. Asking everyone to test them could distort first-breath feedback, but cross-device sync still needs validation.
 
 Current answer: Open.
+
+### Do brand-new users need an optional tutorial?
+
+Context: T-2026-05-21-10 suggested an optional tutorial after first-use uncertainty around phase changes caused stress and prevented completion. This is a first concrete request for tutorial-like support, but it conflicts with Exhale's low-friction first-run goal if handled too loudly.
+
+Current answer: Open, but do not implement a tutorial yet. First try to learn whether clearer in-session cues can solve the same confusion without adding a pre-session instruction step.
+
+Possible options:
+
+- A very quiet "How it works" link near Session Setup, never blocking Begin.
+- A one-screen optional tutorial reachable from Practice History or footer.
+- A first-session-only microcopy line before Begin, if repeated feedback shows people need it.
+- No tutorial, but stronger self-explanatory cue design in the orb itself.
+
+### Should Exhale offer optional spoken voice guidance?
+
+Context: T-2026-05-21-11 asked whether Exhale could have a voice guide the breathing along with the visual. This overlaps with the transition-cue uncertainty signal from T-2026-05-21-10, but it is a separate modality question: spoken guidance could make phases easier to follow, but it could also make Exhale feel less quiet, more intrusive, and more dependent on mobile audio reliability.
+
+Current answer: Open, not an immediate build task. Keep gathering signal. If the idea repeats, consider a small optional voice mode rather than replacing the current visual-first experience.
+
+Possible approaches:
+
+- Spoken phase names only: "Inhale", "Hold", "Exhale", "Relax".
+- Spoken anticipatory prompts: "exhale next" or a very soft countdown cue, if visual-only cues remain unclear.
+- A separate voice-guided mode inside Session Setup Audio.
+- A one-time optional tutorial with voice, rather than voice during every session.
+
+Risks:
+
+- Voice may break the quiet/minimal tone.
+- Voice may be harder to internationalize and personalize.
+- Voice requires reliable audio, which is currently under investigation in Facebook's in-app browser.
+- Voice could increase cognitive load if it overlaps with visual labels, tones, and background sound.
 
 ### How many similar reports are enough to act?
 
@@ -121,11 +154,15 @@ Current answer: partially answered. Implementing 2026-05-19:
 
 2026-05-20 second signal from the same tester: on Quick / Full / Small / Warm, the tester found the center circle relaxing when used as the timing object, but the outer guide line felt like a "pickup note" that could make them feel already behind because it begins before the center circle changes. Product response: keep the center orb as the primary timing anchor, lower the contrast/chroma of the guide line and incoming cue, and strengthen the orb rim slightly. This reframes the open question from "do we need cues?" to "are the cues quiet enough to support without becoming something to chase?"
 
+2026-05-21 signal: T-2026-05-21-10, a brand-new user, found phase uncertainty stressful enough that they could not complete the process. They reported that phase colors felt too similar and suggested more distinct cues, including phase-specific shapes or a one-second anticipatory morph as the orb approaches the next phase. When asked whether they could tell what phase was coming next without reading extra text, they answered no, not at all. This pushes the question beyond "quiet enough" toward "clear enough for first-time users without adding distracting text."
+
 Still open from the original five:
 
 - (1) and (5) have a first attempt: the user-facing phase is now `Relax` with instruction `Breathe`, while the internal enum remains `rest`. Follow-up should test whether that reframe is enough or whether the phase itself still feels awkward.
 - Whether the current crossfade is deep enough or needs further softening now that Rest has been reframed.
 - Whether the outer guide line is now quiet enough that new users follow the orb first and perceive the line as support.
+- Whether phase colors are distinct enough, or whether each phase needs a redundant shape/motion cue.
+- Whether the orb itself should preview the next phase during the final second instead of relying mainly on the outer guide line.
 
 Follow-up: watch beta feedback for whether anyone still reports boundary anxiety after the lead window is live. If not, treat this as covered. Ask specifically:
 
@@ -139,6 +176,34 @@ Did the transition cues feel helpful, or did they add too much information?
 
 ```text
 Was any specific phase change still hard to follow, such as Exhale to Relax or Relax to Inhale?
+```
+
+```text
+Could you tell what phase was coming next without reading extra text?
+```
+
+### Is audio reliable enough inside Facebook's in-app browser?
+
+Context: Multiple testers have now reported mobile sound uncertainty. Earlier feedback suggested app-switching and silent mode may affect perceived sound. T-2026-05-21-10 reported that audio did not work at all on iPhone 14 after opening Exhale from a Facebook post inside Facebook's built-in in-app browser; the iPhone silent switch was not on. The project owner has also personally experienced similar Facebook in-app browser behavior on a Google Pixel. This suggests the risk may be Facebook's in-app browser capture path, not only iPhone/Safari.
+
+Current answer: Open. Existing hardening improved suspended Web Audio reporting and iPhone silent-mode hints, but real-device validation is still needed across Facebook iOS, Facebook Android, Safari, Chrome, silent switch/system mute state, volume state, and app switching.
+
+Follow-up prompts:
+
+```text
+Did sound fail inside the Facebook app browser, or also after opening the same link in Safari/Chrome?
+```
+
+```text
+Was the phone muted or in silent mode, and did other web audio play normally?
+```
+
+```text
+After tapping Begin, did tapping the sound button start audio, or did it stay silent?
+```
+
+```text
+Could you open the link in your default browser and check whether sound works there?
 ```
 
 ### Should Rest and Hold be partly or completely optional?
