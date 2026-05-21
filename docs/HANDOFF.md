@@ -24,7 +24,7 @@ This document is overwritten on each handoff. The previous handoff's content doe
 - **Mobile legibility and sound trust pass completed in this checkpoint.** Home spacing, in-session label contrast, Settling In styling, iPhone silent-mode hinting, and suspended-Web-Audio handling were tightened after marketing/UX feedback.
 - **Visual cue hierarchy adjusted.** Graphic-designer feedback on Full showed the center orb felt relaxing, but the outer guide line could feel like the user was already behind. The guide line and incoming cue should stay softer than the orb.
 - **Impeccable audit follow-up applied.** Static orb marks now avoid colored glow box-shadows, body/sentence tracking is calmer, and pure-black shadow/scrim values were replaced with tinted forest-night values. `DESIGN.md` and `CLAUDE.md` were updated to preserve those rules.
-- **Audit status.** The rerun cleared the neon/static-glow and wide-body-tracking findings. One pure-black scanner warning still appears despite source/computed visible styles using tinted Forest Night (`#0f1712`), so treat that as a residual audit false positive unless a visible pure-black surface is found.
+- **Audit status.** The rerun cleared the neon/static-glow and wide-body-tracking findings. One pure-black scanner warning still appears despite source/computed visible styles using tinted Forest Night (`#0f1712`), so treat that as a residual audit false positive unless a visible pure-black surface is found. On this Windows machine, use `npm.cmd run audit:impeccable -- http://127.0.0.1:3000/`; the wrapper sets `PUPPETEER_EXECUTABLE_PATH` to system Chrome so Puppeteer does not fail on a missing cached browser.
 
 ## Key Functional State
 

@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 21, 2026 (voice guidance and in-app browser audio feedback logged)
+Last updated: May 21, 2026 (brand-new tester phase-clarity prompt tuned)
 
 ## Purpose
 
@@ -42,6 +42,7 @@ Use these when asking someone to try Exhale for the first time. Ask them to star
 - Did the pace feel rushed, pressuring, or make you gasp/catch up?
 - Did Relax help you reset, or did it interrupt the rhythm?
 - Did the phase changes feel easy to follow, or did they lag your brain a bit?
+- Could you tell what phase was coming next without reading extra text?
 - Were the words, contrast, and sounds easy enough to notice without feeling distracting?
 - Would you use this again when stressed, tired, or needing to settle?
 - What would you change first?
