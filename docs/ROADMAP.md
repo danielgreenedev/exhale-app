@@ -1,6 +1,6 @@
 # Exhale Roadmap
 
-Last updated: May 20, 2026
+Last updated: May 21, 2026
 
 Exhale is organized around learning gates, not feature batches. Each stage carries one question: do we have enough signal to invest in the next stage? Engineering effort follows validation.
 
@@ -81,6 +81,9 @@ Make Exhale feel like a "v1 you would link publicly."
 - Discoverability: Open Graph tags, social card image, meta description, friendly page title; consider a small landing-screen treatment on the home page.
 - Privacy policy page and terms of use page; footer links from main pages.
 - Color contrast audit on text at low opacity (white/28 to 38 against forest-night).
+- Accessibility candidates, after targeted validation:
+  - **High Visual Contrast**: optional visual mode that makes phase colors and cues easier to tell apart for colorblind users, low-vision users, and first-time users who cannot distinguish phase changes quickly enough. Prefer stronger color separation plus non-color cue differences over a generic "colorblind mode" label.
+  - **Voice Cues**: optional Audio setting that speaks only phase names (`Inhale`, `Hold`, `Exhale`, `Relax`) for blind users, screen-reader users, or testers who need non-visual guidance. Keep off by default, synthesized only, and separate from background sound.
 - Ongoing polish in response to beta feedback.
 
 ## Stage 2, Distribution
