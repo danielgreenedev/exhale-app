@@ -1,30 +1,27 @@
 # Codex Handoff
 
-Last updated: 2026-05-20 (OAuth complete)
+Last updated: 2026-05-22 (beta feedback closeout)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
 ## Branch State
 
 - Branch: `master`.
-- Current working tree contains documentation updates marking OAuth Backup & Sync complete.
-- Verification passed on May 20, 2026: `npm.cmd run lint`, `npm.cmd test -- --runInBand`, and `npm.cmd run build`.
+- Working tree was clean at the May 22 closeout check.
+- Latest commits on `master`: `05cc631 docs: add accessibility cue candidates`, `f81ed88 fix: accept email change sync codes`, and `b85a732 chore: add local impeccable audit wrapper`.
+- Verification from the latest code batch passed: `npm.cmd test -- statsSyncCodeLength.test.ts --runInBand`, `npm.cmd test -- --runInBand`, and `npm.cmd run lint`.
 - `next-env.d.ts` may be rewritten by `next build`; restore it to the checked-in dev routes import before committing if it changes.
 
 ## Current Batch Summary
 
-- **Google Backup & Sync complete.** Localhost and production Google OAuth redirects now work after enabling Supabase manual linking and redirect allow-list entries. Firefox production restore through `Continue with Google` succeeded after Google was linked to the existing email-code user.
-- **Anonymous-first preserved.** Home and session flow remain ungated. Google sync uses normal Google sign-in from idle/anonymous states, because fresh browsers hold anonymous Supabase sessions by default. Existing email-code synced users use `Link Google`, which calls Supabase `linkIdentity()`.
-- **Email-code users can link Google.** Existing email-code synced users can now see `Link Google` in the synced Backup & Sync state when Supabase does not report a Google identity yet.
-- **Synced history feeds Home.** Practice History writes the reconciled cloud/local session list back to local storage so the Home screen Practice History counter can reflect synced sessions after Practice has loaded.
-- **Provider setup complete.** Supabase shows Email and Google enabled on the same final synced user, and production Firefox restored synced Practice History through Google sign-in.
-- **Policy pages updated.** `/privacy` and `/terms` now describe optional email/Google Backup & Sync, exact synced data, third-party provider involvement, deletion path, and the promise that sign-in is never required to breathe.
-- **Deployment docs updated.** `docs/DEPLOYMENT.md` now includes the Google OAuth setup checklist and cross-device sync acceptance checks.
-- **Feedback mode continues.** The project is still collecting beta signal on rhythm fit, Flow pause friction, transition cues, and Session Setup clarity.
-- **Mobile legibility and sound trust pass completed in this checkpoint.** Home spacing, in-session label contrast, Settling In styling, iPhone silent-mode hinting, and suspended-Web-Audio handling were tightened after marketing/UX feedback.
-- **Visual cue hierarchy adjusted.** Graphic-designer feedback on Full showed the center orb felt relaxing, but the outer guide line could feel like the user was already behind. The guide line and incoming cue should stay softer than the orb.
-- **Impeccable audit follow-up applied.** Static orb marks now avoid colored glow box-shadows, body/sentence tracking is calmer, and pure-black shadow/scrim values were replaced with tinted forest-night values. `DESIGN.md` and `CLAUDE.md` were updated to preserve those rules.
-- **Audit status.** The rerun cleared the neon/static-glow and wide-body-tracking findings. One pure-black scanner warning still appears despite source/computed visible styles using tinted Forest Night (`#0f1712`), so treat that as a residual audit false positive unless a visible pure-black surface is found. On this Windows machine, use `npm.cmd run audit:impeccable -- http://127.0.0.1:3000/`; the wrapper sets `PUPPETEER_EXECUTABLE_PATH` to system Chrome so Puppeteer does not fail on a missing cached browser.
+- **Beta feedback mode continues.** Do not start new features unless feedback clearly promotes them. Current signal is about rhythm fit, Flow pause friction, transition clarity, audio reliability, and first-time understanding of Relax.
+- **Rhythm telemetry is live.** `session_started`, `session_complete`, and `session_exited` now include `rhythm` in the `app_events` payload so future Supabase reads can compare completion/drop-off by pace.
+- **Resend SMTP is configured through Supabase.** Auth email now sends from `Exhale <no-reply@auth.exhale.guide>` through Resend/Supabase custom SMTP. `docs/DEPLOYMENT.md` records the setup.
+- **Email change codes are fixed in-app.** Supabase Change Email Address emails can send 8-digit `{{ .Token }}` codes, so the Backup & Sync UI now accepts the expected 8 digits for link/email-change mode while keeping 6 digits for sign-in mode.
+- **Accessibility candidates are parked on the roadmap.** `docs/ROADMAP.md` now lists High Visual Contrast and Voice Cues as Stage 1 accessibility candidates. They are not promoted implementation work yet.
+- **Illinois sister feedback logged.** Latest feedback says audio was present but could feel fuller/richer, visual focus was useful, Relax copy was fine but surprising on first appearance, and a pre-start sequence where words appear one at a time may help.
+- **Playwright is usable again.** Managed browser install was stuck on Windows due partial/stale cache behavior, but the Playwright Chromium cache was repaired manually and `chromium.launch({ headless: true })` works.
+- **Impeccable audit wrapper exists.** Use `npm.cmd run audit:impeccable -- http://127.0.0.1:3000/`; the wrapper sets `PUPPETEER_EXECUTABLE_PATH` to system Chrome so Puppeteer does not fail on a missing cached browser.
 
 ## Key Functional State
 
@@ -41,6 +38,13 @@ This document is overwritten on each handoff. The previous handoff's content doe
 - Complete as of 2026-05-20.
 - Keep an eye on the existing-email OAuth conflict path during beta: if users hit it, the app should guide them to sign in with email first, then link Google from Backup & Sync.
 
+## Email Delivery Status
+
+- Resend domain: `auth.exhale.guide`.
+- From address: `Exhale <no-reply@auth.exhale.guide>`.
+- Supabase custom SMTP is configured with Resend. API keys should remain in Supabase/Resend only and should not be committed.
+- Next validation: request a fresh Backup & Sync code in incognito or a fresh browser state, confirm delivery from the new sender, enter the full code, and check that sync completes.
+
 ## Feedback Mode
 
 Current brand-new-user prompts live in `docs/USER_FEEDBACK.md`; key themes still waiting on more signal are:
@@ -52,6 +56,8 @@ Current brand-new-user prompts live in `docs/USER_FEEDBACK.md`; key themes still
 - Whether the softened guide line makes the orb feel clearly primary.
 - Whether Full's 10-second exhale needs clearer expectation-setting for resting vs stressed states.
 - Whether Session Setup labels and explanations feel natural to brand-new users.
+- Whether first-time users need a pre-start sequence preview such as `Inhale -> Hold -> Exhale -> Relax`, potentially with each word appearing one at a time.
+- Whether audio needs to be fuller/richer, or whether volume/context/browser behavior is the real problem.
 
 ## Parked Questions
 
@@ -71,4 +77,4 @@ Current brand-new-user prompts live in `docs/USER_FEEDBACK.md`; key themes still
 
 ## Recommended Next Step
 
-Continue beta feedback collection. OAuth Backup & Sync is complete unless new tester evidence exposes an edge case.
+Continue beta feedback collection. The smallest next Codex-ready closeout item is validating the deployed Backup & Sync email-code flow after the 8-digit fix. The smallest next human-feedback item is following up with rhythm-concern testers on Flow, especially whether the 2-second Relax pause interrupts the inhale/exhale loop.
