@@ -49,6 +49,17 @@ Supabase stores:
 - `user_settings`: timer length, Circle Size, sound choice, and rhythm.
 - `app_events`: timer selections, session starts, early exits, and completions for synced users. Session start, completion, and exit payloads include `rhythm` so Supabase reads can compare completion and drop-off by pace.
 
+## Email Auth Delivery
+
+Exhale uses Supabase Auth email OTP for optional Practice History Backup & Sync. Production auth email should use Resend with a dedicated auth sending subdomain:
+
+- Sending domain: `auth.exhale.guide`
+- From address: `Exhale <no-reply@auth.exhale.guide>`
+- Provider: Resend via Supabase Auth custom SMTP
+- SMTP settings: host `smtp.resend.com`, port `465`, username `resend`, password stored only in Supabase as the Resend API key
+- Rationale: keep authentication email reputation separate from the main `exhale.guide` website domain and any future general-contact or marketing email. This follows Supabase's recommendation to avoid mixing auth and marketing email domains.
+- Status: configured 2026-05-21; validate by requesting a Backup & Sync email code from production and confirming delivery plus code verification.
+
 ## Google OAuth Setup
 
 Google OAuth is an optional Backup & Sync provider inside Practice History. Exhale should still work anonymously without it.
@@ -91,10 +102,10 @@ Backup & Sync state to `Link Google`. From idle or anonymous browsers, the app
 should use normal Google sign-in; `linkIdentity()` is reserved for the synced
 email-code state.
 
-The Supabase email templates for sync should visibly include the 6-digit OTP token:
+The Supabase email templates for sync should visibly include the OTP token:
 
-- Magic Link: include `{{ .Token }}` instead of a sign-in link.
-- Change Email Address: include `{{ .Token }}` instead of a confirmation link.
+- Magic Link: include `{{ .Token }}` instead of a sign-in link. This is the normal sign-in code path and currently displays as 6 digits.
+- Change Email Address: include `{{ .Token }}` instead of a confirmation link. This is the anonymous-to-email link path and may display as 8 digits; Exhale's code input must allow that longer token.
 
 ## Do Not Commit
 

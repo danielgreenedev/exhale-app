@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 21, 2026 (brand-new tester phase-clarity prompt tuned)
+Last updated: May 21, 2026 (partial audio and Relax clarity feedback logged)
 
 ## Purpose
 
@@ -124,6 +124,56 @@ Use these when a tester is willing to do functionality testing after at least on
 1. 
 
 ## Recent Feedback Notes
+
+### 2026-05-21, T-2026-05-21-12, First-Time User, Audio Immersion And Relax Clarity
+
+#### Session
+
+- Tester ID: T-2026-05-21-12
+- Follow-up OK: Yes, partial follow-up received
+- Date: 2026-05-21
+- Environment: Production assumed
+- Device: Unknown
+- Browser: Unknown
+- Route tested: Home/session
+- Session length: Unknown
+- Rhythm: Steady assumed
+- Sound choice: Unknown; tester did not think they picked a sound setting
+- Circle Size: Unknown
+
+#### What Worked
+
+- Tester heard the audio and said it was pretty good without voice guidance.
+- Keeping eyes open gave the tester something to focus on, suggesting the visual-first session model worked for this user.
+- Tester figured out Relax after the next cycle and later clarified that the short Relax wording was good; the issue was that Relax appeared unexpectedly.
+
+#### Friction
+
+- Audio felt pretty quiet and could feel fuller/richer, but not necessarily nature-like.
+- Relax caused first-cycle uncertainty: when Relax appeared, the tester was unsure whether they were supposed to breathe because they did not see that phase coming.
+- Tester thought a tiny pre-start cycle cue could help and responded positively to the idea of each word in `Inhale -> Hold -> Exhale -> Relax` appearing one at a time.
+
+#### Accessibility Notes
+
+- This is a first-run sequence-preview signal, not a clear request for voice guidance or a Relax renaming. The tester explicitly said the session was pretty good without voice guidance and later said the short Relax wording was good.
+- The audio signal points toward sound presence/richness and default volume perception rather than mobile audio failure.
+
+#### Emotional Tone
+
+- Calm / Clear / Rushed / Confusing / Overstimulating / Other: Mostly constructive; briefly confusing at Relax
+- Notes: The tester recovered after one cycle and did not reject the word Relax, so treat this as first-cycle sequence-preview feedback rather than evidence that Relax itself failed.
+
+#### Actionable Recommendations
+
+1. Do not build yet. Wait for the remaining follow-up answers before promoting a pre-start sequence cue.
+2. If this repeats, consider a first-session-only, non-blocking animated sequence cue before the exercise starts.
+3. Keep voice guidance parked; this tester did not need it.
+4. Track whether "more immersive" audio means louder default, richer synthesis, or a different sound palette expectation.
+
+#### Open Questions
+
+1. Would a first-session-only sequence cue feel helpful, or would it make the app feel more instructional?
+2. Was the audio too quiet because of device/browser volume, default Air texture, or the selected sound setting?
 
 ### 2026-05-21, T-2026-05-21-11, First-Time User, Voice Guidance Request
 

@@ -25,6 +25,10 @@ type SyncState = 'idle' | 'codeSent' | 'verifying' | 'synced';
 type SubmitMode = 'signin' | 'link';
 const SYNC_SCOPE_COPY = 'Only these sync: practice history, timer length, circle size, sound choice, and rhythm.';
 
+export function expectedCodeLength(submitMode: SubmitMode | null): number {
+  return submitMode === 'link' ? 8 : 6;
+}
+
 function looksLikeExistingEmailError(message?: string): boolean {
   const text = (message ?? '').toLowerCase();
   return (
@@ -277,7 +281,7 @@ export default function StatsPage() {
   };
 
   const submitCode = async (codeValue: string) => {
-    if (codeValue.length !== 6 || !syncedEmail || !submitMode) return;
+    if (codeValue.length !== expectedCodeLength(submitMode) || !syncedEmail || !submitMode) return;
     setSyncState('verifying');
     setError('');
 
@@ -315,15 +319,16 @@ export default function StatsPage() {
   };
 
   const handleCodeChange = (value: string) => {
-    const cleaned = value.replace(/\D/g, '').slice(0, 6);
+    const codeLength = expectedCodeLength(submitMode);
+    const cleaned = value.replace(/\D/g, '').slice(0, codeLength);
     setCode(cleaned);
-    if (cleaned.length === 6) {
+    if (cleaned.length === codeLength) {
       void submitCode(cleaned);
     }
   };
 
   const handleVerifyClick = () => {
-    if (code.length === 6) void submitCode(code);
+    if (code.length === expectedCodeLength(submitMode)) void submitCode(code);
   };
 
   const handleGoogleSync = async () => {
@@ -550,30 +555,30 @@ export default function StatsPage() {
           ) : (syncState === 'codeSent' || syncState === 'verifying') && syncedEmail ? (
             <div className="flex flex-col gap-3">
               <p className="text-still-white/58 text-sm font-light leading-relaxed">
-                We sent a 6-digit code to {syncedEmail}. Open the email and enter the code below.
+                We sent a {expectedCodeLength(submitMode)}-digit code to {syncedEmail}. Open the email and enter the code below.
               </p>
               <p className="text-still-white/55 text-xs font-light leading-relaxed -mt-1">
                 {SYNC_SCOPE_COPY}
               </p>
-              <label htmlFor="otp-code" className="sr-only">6-digit code</label>
+              <label htmlFor="otp-code" className="sr-only">{expectedCodeLength(submitMode)}-digit code</label>
               <input
                 id="otp-code"
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                maxLength={6}
+                maxLength={expectedCodeLength(submitMode)}
                 value={code}
                 onChange={(e) => handleCodeChange(e.target.value)}
                 placeholder="------"
                 disabled={syncState === 'verifying'}
                 autoComplete="one-time-code"
-                aria-label="6-digit confirmation code"
+                aria-label={`${expectedCodeLength(submitMode)}-digit confirmation code`}
                 className="w-full min-h-14 px-4 py-3 rounded-2xl bg-transparent border border-still-white/18 text-still-white/90 placeholder:text-still-white/25 text-2xl tracking-[0.5em] font-light text-center tabular-nums focus:border-still-white/40 focus:outline-none transition-colors duration-300 disabled:opacity-50"
               />
               <button
                 type="button"
                 onClick={handleVerifyClick}
-                disabled={code.length !== 6 || syncState === 'verifying'}
+                disabled={code.length !== expectedCodeLength(submitMode) || syncState === 'verifying'}
                 className="w-full min-h-11 py-3 rounded-2xl border border-emerald-pulse/35 bg-emerald-pulse/10 text-emerald-100/95 text-xs tracking-[0.2em] uppercase font-light hover:border-emerald-pulse/55 hover:bg-emerald-pulse/16 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
               >
                 {syncState === 'verifying' ? 'Verifying...' : 'Confirm'}
