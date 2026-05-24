@@ -271,13 +271,13 @@ Could you open the link in your default browser and check whether sound works th
 
 Context: T-2026-05-23-14 confirmed that Facebook's in-app preview browser can render Exhale correctly while breaking at least the fullscreen affordance. A later screenshot confirmed Messenger opens Exhale inside its own in-app browser too. Prior feedback already raised Facebook in-app browser audio uncertainty. A referenced Stack Overflow thread on forcing Facebook links into external browsers does not provide a reliable, current, cross-platform escape hatch; comments and answers are inconsistent, and some approaches were Android-only, Messenger-only, or no longer reliable. The safest app-side move is detection plus a quiet user-facing nudge, not trying to force escape.
 
-Current answer: Implemented for fullscreen in the session screen. Do not block breathing. When a Meta in-app browser is detected, hide unsupported controls such as fullscreen and show a compact note: open in your browser for fullscreen.
+Current answer: Implemented in the session screen. Do not block breathing. When a Meta in-app browser is detected, hide unsupported controls such as fullscreen and show a compact note: tap the browser menu to open in a normal browser for sound or fullscreen.
 
 Possible approaches:
 
 - Hide fullscreen when the browser reports no usable Fullscreen API or when a Facebook webview user agent is detected.
-- Keep fullscreen hidden and show a one-time small hint near the top-right area: `Open in browser for fullscreen`.
-- Add a broader in-app-browser note only if audio failures repeat: `Sound or fullscreen may work better in your browser`.
+- Keep fullscreen hidden and show a one-time small hint near the top-right area: `Tap menu to open in browser for sound or fullscreen`.
+- Avoid stronger blocking or modal treatment unless audio failures repeat after this compact hint.
 - Add instructions to tester prompts: if opening from Facebook, use the menu to open in external browser before reporting browser-specific bugs.
 
 Follow-up prompts:

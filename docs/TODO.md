@@ -29,7 +29,7 @@ Last updated: May 24, 2026 (Impeccable follow-ups parked for beta validation)
 - Follow-up readability investigation tested dark text with a light shadow against dimmer orb treatments. The accepted direction is dimmer, less glowy phase orbs plus slightly softer HUD text; dark text helped on the orb center but became fragile around darker circle edges.
 - Phase label/instruction changes now crossfade for roughly one second at phase boundaries without adding time to the breathing rhythm.
 - Session Complete now shows the selected duration label, for example `3 minutes complete`, instead of exact elapsed seconds such as `2:56 of calm`.
-- Meta in-app browser detection, covering Facebook and Messenger, hides the fullscreen button and shows a quiet `Open in browser for fullscreen` hint instead of presenting a control that cannot work reliably there.
+- Meta in-app browser detection, covering Facebook and Messenger, hides the fullscreen button and shows a quiet `Tap menu to open in browser for sound or fullscreen` hint instead of presenting a control that cannot work reliably there.
 - Verified the changes with mobile Playwright checks for running session, phase transition, Facebook-preview behavior, and completion copy.
 - May 24 pre-tester smoke passed: fresh local visitor sees time choices, Begin, and first-cycle cue without Session Setup; the session reaches Settling In, Inhale, Hold, Exhale, and Relax with `Breathe naturally`; completion shows `3 minutes complete`; returning home after completion reveals `Adjust next session`.
 - May 24 `/impeccable critique` scored the first-run flow 31/40. Recommended Impeccable follow-ups are intentionally parked until the next beta test produces signal: `/impeccable clarify Relax phase`, `/impeccable distill active session HUD`, `/impeccable harden Meta in-app browser state`, and `/impeccable onboard first-run cue`.
@@ -323,6 +323,7 @@ These can wait until after Stage 0 feedback signal is in.
 - Trigger: T-2026-05-23-14 reported the top-right fullscreen button did not function in Facebook's in-app preview browser on Android. A follow-up screenshot showed Messenger opens the link in its own in-app browser as well.
 - Candidate: when Fullscreen API is unsupported or Meta webview is detected, hide the fullscreen control or replace it with a quiet "open in browser for fullscreen" hint.
 - Do not try to force Facebook to open the external browser. External reports are inconsistent and platform-dependent; detection plus guidance is safer.
+- 2026-05-24 follow-up: the project owner reported that escaping the Facebook/Messenger browser still does not seem to be working reliably. Broadened the in-session hint to name the browser menu and include both sound and fullscreen: `Tap menu to open in browser for sound or fullscreen`.
 
 6j. Resolved 2026-05-23: revise Session Complete duration copy.
 

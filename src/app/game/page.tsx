@@ -671,10 +671,10 @@ function GameContent() {
       {/* Fullscreen toggle — top right (hidden on iOS Safari) */}
       {metaInAppBrowser && !showExitGuard && !settling && (
         <p
-          className="absolute right-5 top-20 max-w-[8.5rem] text-right text-[10px] font-light uppercase leading-snug tracking-[0.12em] text-still-white/52"
+          className="absolute right-5 top-20 max-w-[10.5rem] text-right text-[10px] font-light uppercase leading-snug tracking-[0.1em] text-still-white/55"
           style={{ textShadow: '0 1px 8px rgba(15,23,18,0.72)' }}
         >
-          Open in browser for fullscreen
+          Tap menu to open in browser for sound or fullscreen
         </p>
       )}
 
