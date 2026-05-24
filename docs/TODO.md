@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 24, 2026 (next beta tester release prep)
+Last updated: May 24, 2026 (Impeccable follow-ups parked for beta validation)
 
 ## Completed Rhythm Changes
 
@@ -32,6 +32,7 @@ Last updated: May 24, 2026 (next beta tester release prep)
 - Meta in-app browser detection, covering Facebook and Messenger, hides the fullscreen button and shows a quiet `Open in browser for fullscreen` hint instead of presenting a control that cannot work reliably there.
 - Verified the changes with mobile Playwright checks for running session, phase transition, Facebook-preview behavior, and completion copy.
 - May 24 pre-tester smoke passed: fresh local visitor sees time choices, Begin, and first-cycle cue without Session Setup; the session reaches Settling In, Inhale, Hold, Exhale, and Relax with `Breathe naturally`; completion shows `3 minutes complete`; returning home after completion reveals `Adjust next session`.
+- May 24 `/impeccable critique` scored the first-run flow 31/40. Recommended Impeccable follow-ups are intentionally parked until the next beta test produces signal: `/impeccable clarify Relax phase`, `/impeccable distill active session HUD`, `/impeccable harden Meta in-app browser state`, and `/impeccable onboard first-run cue`.
 
 ## Completed Marketing/Accessibility Mobile Polish
 
@@ -337,6 +338,14 @@ These can wait until after Stage 0 feedback signal is in.
 - Implemented: first-time local visitors see the time picker and Begin only; after one completed local session, the disclosure appears as `Adjust next session`.
 - Guardrail: do not lock customization behind an account. The gate is local and anonymous. If localStorage is unavailable, show setup rather than trapping the user in defaults.
 
+6l. Parked Impeccable follow-ups: wait for next beta signal before running.
+
+- `/impeccable clarify Relax phase`: run only if the next tester still finds `Relax` confusing, counterproductive, or like a breath hold after seeing `Breathe naturally`.
+- `/impeccable distill active session HUD`: run only if the next tester still reports phase text readability, visual overload, or jarring first-cycle instruction load after the dimmer-orb/HUD pass.
+- `/impeccable harden Meta in-app browser state`: run only if another Facebook, Messenger, or Meta in-app browser tester reports audio or capability failure beyond fullscreen.
+- `/impeccable onboard first-run cue`: run only after the next tester tells us whether the first-cycle cue helped, felt too instructional, or was ignored.
+- Rationale: the current build is a clean testable hypothesis. Do not change Relax timing, HUD density, Meta-webview copy, or first-run cue behavior until fresh tester feedback tells us which branch is real.
+
 7. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Secondary-user feedback asked about changing colors; evaluate that through a theme/skin system before considering freeform color controls. Run `/impeccable shape Garden skin` before building.
 
 8. Resolved 2026-05-19: the Facebook preview now renders correctly on shared posts; the Sharing Debugger issue cleared once Meta's cache aged out, matching the working hypothesis. Playbook preserved in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md` for future reference. When the Garden skin lands, consider an updated OG image that shows both aesthetics — that is the only related thread still on the radar.
@@ -353,4 +362,4 @@ Stage 2 comes after the Stage 0 and Stage 1 work above.
 
 ## Recommended Next Move
 
-Continue beta feedback collection. The best next step is validation, not another rhythm rewrite: use the Next Tester Prompt in `docs/USER_FEEDBACK.md`, and ask T-2026-05-23-14 and T-2026-05-23-18 whether the new HUD readability, phase crossfade, completion copy, and Facebook-preview hint solve the reported friction. Keep Relax-duration changes, setup gating, and voice guidance behind one more validation pass.
+Continue beta feedback collection. The best next step is validation, not another rhythm rewrite or Impeccable command run: use the Next Tester Prompt in `docs/USER_FEEDBACK.md`, and ask T-2026-05-23-14 and T-2026-05-23-18 whether the new HUD readability, phase crossfade, completion copy, first-run cue, setup gate, and Facebook-preview hint solve the reported friction. Keep Relax-duration changes, setup gating changes, voice guidance, and the parked Impeccable follow-ups behind one more validation pass.

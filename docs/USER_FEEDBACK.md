@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 24, 2026 (next tester prompt prepared after beta polish)
+Last updated: May 24, 2026 (next tester prompt and parked Impeccable follow-ups)
 
 ## Purpose
 
@@ -15,6 +15,7 @@ Use `https://exhale.guide` for the current beta round. Use a Vercel preview only
 - First-run defaults should remain 3 minutes / Medium circle / Steady pace / Air background sound.
 - If Firefox on Windows 11 appears to enter a session with sound off, verify whether Session Setup actually selected `Off` or whether Web Audio simply has not started yet. The former is a settings persistence bug; the latter is expected browser autoplay behavior if it resolves after a tap.
 - When a tester reports "Brave" or "Chrome" from a Facebook-shared link, verify whether they are actually in Facebook's in-app preview browser. Facebook preview can render Exhale correctly while still blocking or degrading browser features such as fullscreen.
+- Parked Impeccable follow-ups should wait until the next beta response: Relax confusion triggers `/impeccable clarify Relax phase`; continued visual overload/readability friction triggers `/impeccable distill active session HUD`; another Meta-webview audio/capability failure triggers `/impeccable harden Meta in-app browser state`; first-cycle cue feedback triggers `/impeccable onboard first-run cue`.
 
 ## Privacy Rules
 

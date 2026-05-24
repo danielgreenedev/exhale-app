@@ -1,6 +1,6 @@
 # Codex Handoff
 
-Last updated: 2026-05-24 (next beta tester release prep)
+Last updated: 2026-05-24 (Impeccable follow-ups parked for beta validation)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
@@ -29,6 +29,7 @@ This document is overwritten on each handoff. The previous handoff's content doe
 - **Targeted follow-up queue added.** `docs/USER_FEEDBACK.md` now has ready-to-use follow-up prompts for T-2026-05-22-13, T-2026-05-21-12, Flow validation, and original rhythm-fit testers.
 - **Next beta tester prompt prepared.** `docs/USER_FEEDBACK.md` now includes a short clean-test prompt focused on default 3-minute use, Relax meaning, phase-text readability, phase-transition smoothness, and whether hiding settings before the first run helps.
 - **May 24 local smoke passed.** A fresh mobile browser context confirmed first-run setup hiding, first-cycle cue, Begin navigation, Settling In, Inhale/Hold/Exhale/Relax labels, `Breathe naturally`, `3 minutes complete`, and `Adjust next session` after a saved completion.
+- **May 24 Impeccable critique parked follow-ups.** The latest critique scored the first-run flow 31/40 and is saved at `.impeccable/critique/2026-05-24T05-17-55Z__src-app-page-tsx.md`. Do not run the recommended follow-ups yet. Wait for next beta signal before `/impeccable clarify Relax phase`, `/impeccable distill active session HUD`, `/impeccable harden Meta in-app browser state`, or `/impeccable onboard first-run cue`.
 - **Playwright is usable again.** Managed browser install was stuck on Windows due partial/stale cache behavior, but the Playwright Chromium cache was repaired manually and `chromium.launch({ headless: true })` works.
 - **Impeccable audit wrapper exists.** Use `npm.cmd run audit:impeccable -- http://127.0.0.1:3000/`; the wrapper sets `PUPPETEER_EXECUTABLE_PATH` to system Chrome so Puppeteer does not fail on a missing cached browser.
 
@@ -74,6 +75,7 @@ Current brand-new-user prompts live in `docs/USER_FEEDBACK.md`; key themes still
 - Whether Steady's 8-second Relax should become shorter, clearer, or replaced by a more recognizable post-exhale pause in some rhythm.
 - Whether Session Complete should show selected duration (`3 minutes complete`) instead of exact elapsed seconds.
 - Whether hiding Session Setup until after the first completed local session reduces first-use friction without frustrating customization-oriented testers.
+- Which parked Impeccable follow-up, if any, is validated by the next tester: Relax clarity, active HUD distillation, Meta-webview hardening, or first-run cue/onboarding.
 
 ## Parked Questions
 
