@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 21, 2026 (rhythm event-tracking follow-up)
+Last updated: May 24, 2026 (next beta tester release prep)
 
 ## Completed Rhythm Changes
 
@@ -22,6 +22,16 @@ Last updated: May 21, 2026 (rhythm event-tracking follow-up)
 - Audio now shows an explicit Off option instead of an icon-only mute control.
 - `View timing` now reads as a secondary button with a disclosure caret instead of plain text.
 - When available, Resume now appears directly below Begin and before Session Setup.
+
+## Completed Beta Feedback Polish
+
+- Central in-session phase text now uses a softer fill, lighter weight, stronger dark edge contrast, and a subtle local text halo so it reads better over the phase circle without becoming brighter.
+- Follow-up readability investigation tested dark text with a light shadow against dimmer orb treatments. The accepted direction is dimmer, less glowy phase orbs plus slightly softer HUD text; dark text helped on the orb center but became fragile around darker circle edges.
+- Phase label/instruction changes now crossfade for roughly one second at phase boundaries without adding time to the breathing rhythm.
+- Session Complete now shows the selected duration label, for example `3 minutes complete`, instead of exact elapsed seconds such as `2:56 of calm`.
+- Meta in-app browser detection, covering Facebook and Messenger, hides the fullscreen button and shows a quiet `Open in browser for fullscreen` hint instead of presenting a control that cannot work reliably there.
+- Verified the changes with mobile Playwright checks for running session, phase transition, Facebook-preview behavior, and completion copy.
+- May 24 pre-tester smoke passed: fresh local visitor sees time choices, Begin, and first-cycle cue without Session Setup; the session reaches Settling In, Inhale, Hold, Exhale, and Relax with `Breathe naturally`; completion shows `3 minutes complete`; returning home after completion reveals `Adjust next session`.
 
 ## Completed Marketing/Accessibility Mobile Polish
 
@@ -232,9 +242,11 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 2b. Resolved 2026-05-19: the `Next [phase]` HUD text cue was removed because it competed with the central phase label and countdown. Audio pre-cue and ring-color lead remain.
 
-3. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check. Use the refreshed Brand-New User, Session Setup, Flow, Transition Cue Diagnostic, and Practice History And Sync question sets in `docs/USER_FEEDBACK.md`. First latest-build signal from T-2026-05-19-08 on default Quick / Steady is positive: no gasp/catch-up/strain, default Relax did not interrupt, and the session felt useful. New first-time signal from T-2026-05-21-10 says phase uncertainty caused stress and prevented completion; when asked whether they could tell what phase was coming next without extra text, they answered no, not at all. Ask the next brand-new tester the same question.
+3. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check. Use the refreshed Brand-New User, Session Setup, Flow, Transition Cue Diagnostic, Practice History And Sync, and Targeted Follow-Up Queue question sets in `docs/USER_FEEDBACK.md`. First latest-build signal from T-2026-05-19-08 on default Quick / Steady is positive: no gasp/catch-up/strain, default Relax did not interrupt, and the session felt useful. New first-time signal from T-2026-05-21-10 says phase uncertainty caused stress and prevented completion; when asked whether they could tell what phase was coming next without extra text, they answered no, not at all. New clinical-observer signal from T-2026-05-22-13 says Settling In felt too short, Relax read like a possible breathing pause, and a progressive build-up might help. Ask targeted follow-ups before changing durations or rhythm math.
 
-4. Pending feedback/data collection: validate whether the new anticipatory transition cues help users keep up with phase shifts. Ask: "Did the color lead or soft pre-cue make the phase changes easier to follow, or did they add noise?" First latest-build signal from T-2026-05-19-08 is positive on default Quick / Steady: color leads and soft pre-cues were liked and felt natural. Keep testing because the same tester still found Flow's short pause/cue pushy, and T-2026-05-21-10 found phase colors too similar and wanted stronger transition signaling.
+3a. Pending targeted follow-up with T-2026-05-22-13: clarify whether "at least 5 breaths" means a literal multi-breath settle or simply a longer arrival buffer; whether the 8-second Relax felt like a held pause versus permission to breathe naturally; whether clearer Relax framing would reduce the ramp request; and whether "build up" means a short ease-in over the first few cycles or escalation across the whole session. Do not implement longer Settling In, a progressive rhythm, or a Relax rename until these answers are captured.
+
+4. Pending feedback/data collection: validate whether the new anticipatory transition cues help users keep up with phase shifts. Ask: "Did the color lead or soft pre-cue make the phase changes easier to follow, or did they add noise?" First latest-build signal from T-2026-05-19-08 is positive on default Quick / Steady: color leads and soft pre-cues were liked and felt natural. Keep testing because the same tester still found Flow's short pause/cue pushy, and T-2026-05-21-10 found phase colors too similar and wanted stronger transition signaling. T-2026-05-23-18 could follow transitions and did not want extra time between phases, so avoid adding global transition seconds unless more evidence appears.
 
 4a. Pending feedback/data collection: validate whether the softened outer guide line now reads as support rather than a timing object to chase. First Full follow-up from T-2026-05-19-08 said the center circle timing was relaxing, but the line could feel like being already behind because it begins before the orb changes. The current implementation lowers guide-line contrast/chroma and strengthens the orb rim; ask the next design-eye tester whether the orb clearly feels primary.
 
@@ -242,7 +254,9 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 4c. Pending feedback/data collection: reproduce Facebook in-app browser audio behavior on iPhone and Android. T-2026-05-21-10 opened Exhale from a Facebook post inside Facebook's iOS in-app browser, with silent switch off, and sound never played. The project owner has seen similar behavior on Google Pixel. Compare Facebook in-app browser against opening the same URL in Safari/Chrome, and note whether tapping the sound button changes anything.
 
-4d. Parked investigation: optional spoken voice guidance. T-2026-05-21-11 asked whether a voice could guide breathing along with the visual. Do not build yet; collect whether this repeats and whether it is about accessibility, phase-transition clarity, or preference. If it repeats, evaluate a voice-guided mode or spoken phase names as an optional Audio setting.
+4d. Pending feedback/data collection: verify Facebook in-app browser capability gaps separately from external-browser behavior. T-2026-05-23-14 first believed they were testing Brave on a Galaxy S26 Ultra, but the screenshot showed Facebook's in-app preview browser. The app rendered and policy pages loaded, but fullscreen did not work. Ask testers who open from Facebook to repeat in the external browser before classifying bugs as Brave/Chrome/Safari issues.
+
+4e. Roadmap candidate, not a build task yet: optional spoken voice guidance. T-2026-05-21-11 asked whether a voice could guide breathing along with the visual. On 2026-05-23, T-2026-05-23-14 supported voice narration but warned that an AI voice may create negative perception, and three additional family testers liked the idea of voice. Next step is scoping the smallest voice experiment, likely spoken phase names only, optional and off by default, before implementation.
 
 5. Pending feedback/data collection: recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
 
@@ -254,7 +268,7 @@ These can wait until after Stage 0 feedback signal is in.
 
 6a. Resolved 2026-05-20: Flow rhythm shipped to production (4-0-6-2, 12s cycle, label "Flow", summary "Continuous"). See "Completed Flow Rhythm" section below. The original design-sketch validation gate was waived in favor of shipping and collecting post-launch tester signal; follow-up with T-2026-05-19-03, -05, -06, -07 on Flow fit is now Stage 0 item 2.
 
-6b. Park: do rhythms need to support progressive ramping (each rep longer than the last) rather than only steady patterns? Single-user signal from T-2026-05-19-07. Do not act yet; revisit if a second tester independently asks for escalation or if competitive-framing usage shows up in `app_events`. If raised again, write it up as a full open question in `docs/OPEN_QUESTIONS.md` before any scoping.
+6b. Active open question, not a build task: should rhythms support progressive/ramping shapes rather than only steady patterns? The second independent signal arrived on 2026-05-22 from T-2026-05-22-13, after the original T-2026-05-19-07 competitive-escalation ask. This is now written up in `docs/OPEN_QUESTIONS.md`. Next step is tester clarification, not implementation: determine whether the need is a first-cycle/first-few-cycles ease-in, a whole-session escalation, or mostly a Relax-clarity problem. Preserve the locked-at-start predictability invariant unless a future scoped ramp design explicitly explains the curve before the session starts.
 
 6c. Resolved 2026-05-19: visual-coherence pass on the in-session HUD. See Completed Visual Coherence Pass above.
 
@@ -278,11 +292,50 @@ These can wait until after Stage 0 feedback signal is in.
 - Avoid solving this with more explanatory copy. The feedback says the interruption happens too quickly to process, so extra words are unlikely to help.
 - Keep parked until Stage 0 Flow follow-up produces a second confirming signal.
 
+6f-1. Conditional default-path Relax revision: evaluate shorter or clearer Steady Relax.
+
+- Trigger: T-2026-05-23-14 found the 8-second Relax potentially counterproductive; T-2026-05-23-18 said Relax took her out of the moment because the pause was too long and did not know whether to hold, breathe deeply, or breathe normally.
+- Candidate: before changing durations, test the latest `Breathe naturally` copy and first-cycle cue. If confusion persists, compare a shorter Relax, a square-breathing-style post-exhale hold, and Flow/no-pause variants.
+- Guardrail: a post-exhale hold may be recognizable to some users, but it can be less accessible for anxious or breath-capacity-constrained users. Do not replace natural-breathing Relax with an exhale hold without validation.
+
 6g. Resolved 2026-05-20: local Next dev overlay no longer appears from blocked Supabase anonymous auth during visual QA.
 
 - `AuthProvider` now skips automatic Supabase anonymous auth on `localhost` / `127.0.0.1` in development and continues with local-only settings.
 - Production, preview domains, and non-local development hosts still use Supabase auth as before.
 - Local sync/auth testing remains available by setting `localStorage.setItem('exhale-enable-local-supabase', '1')` and reloading.
+
+6h. Resolved 2026-05-23: smooth the central phase label/instruction transition.
+
+- Trigger: T-2026-05-23-14 reported that phase transitions felt jarring and "popped" rather than easing, despite finding the breathing exercise effective.
+- Candidate: a true boundary crossfade where the old instruction fades out and the new one fades in around the zero boundary. Start with roughly 1 second, then tune in browser so it does not make the user feel late.
+- Keep separate from the existing color/audio pre-cue work. This is about the perceived swap of the central instruction text itself.
+- Constraint: T-2026-05-23-18 could follow the transitions and did not think time between phases needed extension. Keep this visual-only; do not lengthen the rhythm.
+
+6h-1. Resolved 2026-05-23: improve central HUD text readability over the phase circle.
+
+- Trigger: T-2026-05-23-18 said the title and instruction text overlaid on each phase was too bright but still did not contrast well enough with the phase circle color, making it hard to read.
+- Candidate: audit the text-over-orb treatment by phase color. Explore placement, edge contrast, shadow, and a subtle local scrim/backdrop that does not become a card. Do not simply raise text opacity.
+- Validate on mobile OLED screens and against Hold/Relax colors in particular.
+
+6i. Resolved 2026-05-23: handle Facebook in-app browser fullscreen limitations.
+
+- Trigger: T-2026-05-23-14 reported the top-right fullscreen button did not function in Facebook's in-app preview browser on Android. A follow-up screenshot showed Messenger opens the link in its own in-app browser as well.
+- Candidate: when Fullscreen API is unsupported or Meta webview is detected, hide the fullscreen control or replace it with a quiet "open in browser for fullscreen" hint.
+- Do not try to force Facebook to open the external browser. External reports are inconsistent and platform-dependent; detection plus guidance is safer.
+
+6j. Resolved 2026-05-23: revise Session Complete duration copy.
+
+- Trigger: T-2026-05-23-14 chose 3 minutes and found `2:56 of calm` confusing.
+- Candidate: show the selected duration label, for example `3 minutes complete`, or remove duration from the completion card and rely on breath cycles plus quote.
+- Preserve completion quotes; this tester explicitly liked the quote addition, reinforcing earlier quote-positive feedback.
+
+6k. Resolved 2026-05-23: hide Session Setup until after the first completed session.
+
+- Trigger: T-2026-05-23-14 argued that immediate customization may undermine a guided breathing tool by letting the user change guidance before feeling the default. This conflicts with prior positive customization feedback and the accessibility need for fit controls.
+- 2026-05-23 owner note: this idea is worth saving for later. Hiding settings until one completed exercise may reduce first-session friction and distraction while preserving customization after the user has felt the default.
+- Technical note: this does not require a login or cookie. Completed sessions already persist locally in `exhale-stats`; settings persist in localStorage via `exhale-session-length`, `exhale-rhythm`, `exhale-orb-scale`, and sound palette storage. If built, derive "has completed one session" from local session count, and fall back to showing setup when localStorage is unavailable.
+- Implemented: first-time local visitors see the time picker and Begin only; after one completed local session, the disclosure appears as `Adjust next session`.
+- Guardrail: do not lock customization behind an account. The gate is local and anonymous. If localStorage is unavailable, show setup rather than trapping the user in defaults.
 
 7. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Secondary-user feedback asked about changing colors; evaluate that through a theme/skin system before considering freeform color controls. Run `/impeccable shape Garden skin` before building.
 
@@ -300,4 +353,4 @@ Stage 2 comes after the Stage 0 and Stage 1 work above.
 
 ## Recommended Next Move
 
-Continue beta feedback collection. The natural next concrete step is following up with the five rhythm-concern testers (item 2 above) to validate whether Soft or Full materially helps. Defer the Garden skin, contrast audit re-check, and distribution work until that signal is in.
+Continue beta feedback collection. The best next step is validation, not another rhythm rewrite: use the Next Tester Prompt in `docs/USER_FEEDBACK.md`, and ask T-2026-05-23-14 and T-2026-05-23-18 whether the new HUD readability, phase crossfade, completion copy, and Facebook-preview hint solve the reported friction. Keep Relax-duration changes, setup gating, and voice guidance behind one more validation pass.

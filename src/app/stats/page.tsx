@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
 import { syncUserSettings } from '@/lib/settingsSync';
 import { PolicyFooter } from '@/components/PolicyFooter';
+import { OrbMark } from '@/components/OrbMark';
 
 function formatDate(dateStr: string): string {
   const today = new Date().toISOString().split('T')[0];
@@ -368,22 +369,7 @@ export default function StatsPage() {
 
       <div className="relative z-10 flex w-full max-w-[18rem] flex-col items-center gap-10 sm:max-w-sm">
         <div className="flex flex-col items-center gap-5">
-          <div className="relative orb-breathe" aria-hidden="true">
-            <div
-              className="h-14 w-14 rounded-full"
-              style={{
-                background: 'radial-gradient(circle at 36% 30%, rgba(202,224,211,0.66) 0%, rgba(94,158,118,0.58) 48%, rgba(31,82,52,0.64) 100%)',
-              }}
-            />
-            <div
-              className="absolute inset-0 rounded-full"
-              style={{ background: 'linear-gradient(135deg, rgba(245,245,242,0.14) 0%, rgba(245,245,242,0) 56%)' }}
-            />
-            <div
-              className="absolute inset-[-10px] rounded-full border"
-              style={{ borderColor: 'rgba(93,177,132,0.20)' }}
-            />
-          </div>
+          <OrbMark size="stats" ring breathe />
           <div className="flex flex-col items-center gap-2">
             <h1 className="text-3xl font-extralight tracking-[0.3em] uppercase text-still-white/88">
               Practice
@@ -399,9 +385,17 @@ export default function StatsPage() {
         )}
 
         {totalSessions === 0 ? (
-          <p className="text-still-white/58 text-sm font-light text-center leading-relaxed">
-            No sessions yet. Complete your first session to begin tracking your practice.
-          </p>
+          <div className="flex w-full flex-col items-center gap-3 text-center">
+            <p className="text-still-white/62 text-sm font-light leading-relaxed">
+              Your first completed session will appear here.
+            </p>
+            <Link
+              href="/"
+              className="w-full min-h-11 py-3 rounded-2xl border border-emerald-pulse/35 bg-emerald-pulse/10 text-emerald-100/95 text-xs tracking-[0.18em] uppercase font-light hover:border-emerald-pulse/55 hover:bg-emerald-pulse/16 transition-all duration-300 flex items-center justify-center"
+            >
+              Begin a session
+            </Link>
+          </div>
         ) : (
           <>
             <div className="flex flex-col gap-0 w-full">
@@ -509,8 +503,8 @@ export default function StatsPage() {
           </>
         )}
 
-        <div className="flex flex-col gap-3 w-full pt-2 border-t border-still-white/10">
-          <p className="text-still-white/52 text-xs tracking-[0.15em] uppercase font-light">
+        <div className={`flex flex-col gap-3 w-full border-t border-still-white/10 ${totalSessions === 0 ? 'pt-4 opacity-80' : 'pt-2'}`}>
+          <p className="text-still-white/58 text-xs tracking-[0.15em] uppercase font-light">
             Backup & Sync
           </p>
 
@@ -591,22 +585,30 @@ export default function StatsPage() {
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              <p className="text-still-white/55 text-xs font-light leading-relaxed -mt-1">
-                Save your practice across devices. Breathing still works without this.
+              <p className="text-still-white/58 text-xs font-light leading-relaxed -mt-1">
+                {totalSessions === 0
+                  ? 'After you have history here, you can save it across devices.'
+                  : 'Save your practice across devices. Breathing still works without this.'}
               </p>
-              <p className="text-still-white/55 text-xs font-light leading-relaxed">
+              {totalSessions > 0 && (
+                <p className="text-still-white/55 text-xs font-light leading-relaxed">
                 {SYNC_SCOPE_COPY}
-              </p>
+                </p>
+              )}
               <button
                 type="button"
                 onClick={handleGoogleSync}
                 disabled={busy}
-                className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 bg-still-white/[0.03] text-still-white/72 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:bg-still-white/[0.06] hover:text-still-white/86 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                className={`w-full min-h-11 py-3 rounded-2xl border text-xs tracking-[0.18em] uppercase font-light disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 ${
+                  totalSessions === 0
+                    ? 'border-still-white/14 text-still-white/58 hover:border-still-white/24 hover:text-still-white/72'
+                    : 'border-still-white/18 bg-still-white/[0.03] text-still-white/72 hover:border-still-white/30 hover:bg-still-white/[0.06] hover:text-still-white/86'
+                }`}
               >
                 {busy ? 'Opening Google...' : 'Continue with Google'}
               </button>
               <form onSubmit={handleSendCode} className="flex flex-col gap-2 pt-1">
-                <p className="text-still-white/42 text-[11px] tracking-[0.14em] uppercase font-light text-center">
+                <p className="text-still-white/58 text-xs tracking-[0.08em] uppercase font-light text-center">
                   Or use email code
                 </p>
                 <label htmlFor="sync-email" className="sr-only">Email</label>

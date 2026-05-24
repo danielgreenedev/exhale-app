@@ -36,6 +36,11 @@ function shouldOfferSilentModeHint() {
   return /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
 }
 
+function isMetaInAppBrowser() {
+  if (typeof navigator === 'undefined') return false;
+  return /(FBAN|FBAV|FB_IAB|FB4A|FBIOS|MessengerForiOS|MessengerLite|FBAN\/Messenger|FB_IAB\/MESSENGER|Orca)/i.test(navigator.userAgent);
+}
+
 function saveResumeState(length: SessionLength, elapsed: number) {
   try {
     sessionStorage.setItem(RESUME_KEY, JSON.stringify({ length, elapsed, timestamp: Date.now() }));
@@ -156,6 +161,7 @@ function GameContent() {
   const [sessionSaveError, setSessionSaveError] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fullscreenSupported, setFullscreenSupported] = useState(false);
+  const [metaInAppBrowser, setMetaInAppBrowser] = useState(false);
   const [showSilentModeHint, setShowSilentModeHint] = useState(false);
 
   const prevPhaseIndexRef = useRef(-1);
@@ -216,9 +222,11 @@ function GameContent() {
     }
   }, [audioActive, stopAmbient, beginAudio, showSilentModeHintBriefly]);
 
-  // Detect fullscreen support (not available on iOS Safari)
+  // Detect fullscreen support and known in-app browser limitations.
   useEffect(() => {
-    setFullscreenSupported(!!document.documentElement.requestFullscreen);
+    const inMetaPreview = isMetaInAppBrowser();
+    setMetaInAppBrowser(inMetaPreview);
+    setFullscreenSupported(!inMetaPreview && !!document.documentElement.requestFullscreen);
   }, []);
 
   // Fullscreen state sync
@@ -502,7 +510,7 @@ function GameContent() {
     return (
       <SessionComplete
         totalCycles={totalCycles}
-        sessionDuration={sessionDuration}
+        sessionLength={lengthParam}
         storageNote={sessionSaveError}
         onRestart={() => router.push(`/?length=${lengthParam}`)}
         onMenu={() => router.push('/')}
@@ -560,10 +568,10 @@ function GameContent() {
           </div>
           <div className="pb-[calc(7rem+env(safe-area-inset-bottom))] flex flex-col items-center gap-1.5">
             <p
-              className={`exhale-settle-hint text-[10px] tracking-[0.18em] font-light ${isFirstVisit ? 'text-still-white/62' : 'invisible'}`}
+              className={`exhale-settle-hint max-w-[17rem] px-4 text-center text-xs leading-relaxed tracking-[0.04em] font-light ${isFirstVisit ? 'text-still-white/68' : 'invisible'}`}
               style={{ textShadow: '0 1px 8px rgba(15,23,18,0.75)' }}
             >
-              the circle leads, just follow
+              Inhale, hold, exhale, then breathe naturally.
             </p>
           </div>
         </div>
@@ -584,7 +592,7 @@ function GameContent() {
       {!showExitGuard && (settling || sessionState === 'running' || sessionState === 'paused') && (
         <button
           onClick={requestExit}
-          className={`absolute bottom-[max(1.5rem,calc(env(safe-area-inset-bottom)+0.75rem))] right-6 min-h-11 min-w-20 text-xs tracking-[0.2em] uppercase font-light border px-4 py-2 rounded-lg transition-all duration-300 ${settling ? 'text-still-white/48 hover:text-still-white/72 border-still-white/16 hover:border-still-white/30 hover:bg-still-white/5' : 'text-still-white/62 hover:text-still-white/82 border-still-white/22 hover:border-still-white/38 hover:bg-still-white/5'}`}
+          className={`absolute bottom-[max(1.5rem,calc(env(safe-area-inset-bottom)+0.75rem))] right-6 min-h-11 min-w-20 text-xs tracking-[0.2em] uppercase font-light border px-4 py-2 rounded-lg transition-all duration-300 ${settling ? 'text-still-white/55 hover:text-still-white/75 border-still-white/18 hover:border-still-white/30 hover:bg-still-white/5' : 'text-still-white/62 hover:text-still-white/82 border-still-white/22 hover:border-still-white/38 hover:bg-still-white/5'}`}
           aria-label="Exit session"
         >
           ← Exit
@@ -621,13 +629,13 @@ function GameContent() {
               audioActive
                 ? 'border-emerald-pulse/34 bg-emerald-pulse/10 text-emerald-100/90 hover:border-emerald-pulse/52 hover:bg-emerald-pulse/15'
                 : 'border-still-white/22 text-still-white/62 hover:border-still-white/38 hover:bg-still-white/5 hover:text-still-white/82'
-            } disabled:pointer-events-none disabled:border-still-white/12 disabled:text-still-white/28`}
+            } disabled:pointer-events-none disabled:border-still-white/12 disabled:text-still-white/40`}
           >
             {audioActive ? <SoundOnIcon /> : <SoundOffIcon />}
           </button>
           {(showAudioPrompt || showSilentModeHint) && soundPalette !== 'off' && (
             <p
-              className="absolute bottom-full left-1/2 mb-2 w-max max-w-[13rem] -translate-x-1/2 text-center text-[10px] font-light tracking-[0.04em] text-still-white/58"
+              className="absolute bottom-full left-1/2 mb-2 w-max max-w-[13rem] -translate-x-1/2 text-center text-[11px] font-light tracking-[0.04em] text-still-white/62"
               style={{ textShadow: '0 1px 6px rgba(15,23,18,0.65)' }}
             >
               {showAudioPrompt ? 'tap for sound' : 'still quiet? check silent mode'}
@@ -661,6 +669,15 @@ function GameContent() {
 
 
       {/* Fullscreen toggle — top right (hidden on iOS Safari) */}
+      {metaInAppBrowser && !showExitGuard && !settling && (
+        <p
+          className="absolute right-5 top-20 max-w-[8.5rem] text-right text-[10px] font-light uppercase leading-snug tracking-[0.12em] text-still-white/52"
+          style={{ textShadow: '0 1px 8px rgba(15,23,18,0.72)' }}
+        >
+          Open in browser for fullscreen
+        </p>
+      )}
+
       {fullscreenSupported && !showExitGuard && !settling && (
         <button
           onClick={toggleFullscreen}

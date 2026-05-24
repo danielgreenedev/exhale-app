@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { PolicyFooter } from '@/components/PolicyFooter';
+import { OrbMark } from '@/components/OrbMark';
+import type { SessionLength } from '@/lib/breathing';
 
 interface Quote {
   text: string;
@@ -19,15 +21,20 @@ const FALLBACK_QUOTES: Quote[] = [
 
 interface Props {
   totalCycles: number;
-  sessionDuration: number;
+  sessionLength: SessionLength;
   storageNote?: boolean;
   onRestart: () => void;
   onMenu: () => void;
 }
 
-export default function SessionComplete({ totalCycles, sessionDuration, storageNote, onRestart, onMenu }: Props) {
-  const minutes = Math.floor(sessionDuration / 60);
-  const seconds = sessionDuration % 60;
+const SESSION_LENGTH_LABELS: Record<SessionLength, string> = {
+  quick: '3 minutes',
+  short: '5 minutes',
+  medium: '7 minutes',
+  long: '10 minutes',
+};
+
+export default function SessionComplete({ totalCycles, sessionLength, storageNote, onRestart, onMenu }: Props) {
   const [quote, setQuote] = useState<Quote>(
     () => FALLBACK_QUOTES[Math.floor(Math.random() * FALLBACK_QUOTES.length)]
   );
@@ -47,23 +54,7 @@ export default function SessionComplete({ totalCycles, sessionDuration, storageN
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-forest-night text-still-white px-8">
       <div className="flex flex-col items-center gap-8 max-w-sm text-center animate-fade-in">
-        {/* Warm amber orb */}
-        <div className="relative">
-          <div
-            className="h-24 w-24 rounded-full"
-            style={{
-              background: 'radial-gradient(circle at 36% 30%, rgba(244,220,166,0.76) 0%, rgba(210,174,101,0.58) 50%, rgba(103,76,30,0.62) 100%)',
-            }}
-          />
-          <div
-            className="absolute inset-0 rounded-full"
-            style={{ background: 'linear-gradient(135deg, rgba(245,245,242,0.15) 0%, rgba(245,245,242,0) 56%)' }}
-          />
-          <div
-            className="absolute inset-[-14px] rounded-full border"
-            style={{ borderColor: 'rgba(210,174,101,0.22)' }}
-          />
-        </div>
+        <OrbMark size="complete" tone="amber" ring />
 
         <div className="flex flex-col gap-3">
           <h1 className="text-3xl font-extralight tracking-[0.3em] uppercase text-amber-200/90">
@@ -73,7 +64,7 @@ export default function SessionComplete({ totalCycles, sessionDuration, storageN
             You completed {totalCycles} breath cycles
           </p>
           <p className="text-still-white/58 text-sm tracking-[0.04em]">
-            {minutes}:{seconds.toString().padStart(2, '0')} of calm
+            {SESSION_LENGTH_LABELS[sessionLength]} complete
           </p>
         </div>
 
@@ -83,7 +74,7 @@ export default function SessionComplete({ totalCycles, sessionDuration, storageN
           </p>
           {quote.attribution && (
             <p className="text-still-white/55 text-xs tracking-[0.04em] font-light">
-              &mdash; {quote.attribution}
+              - {quote.attribution}
             </p>
           )}
         </div>

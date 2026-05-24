@@ -1,3 +1,11 @@
+---
+target: src/app/page.tsx
+total_score: 30
+p0_count: 0
+p1_count: 2
+timestamp: 2026-05-23T12-39-25Z
+slug: src-app-page-tsx
+---
 # Impeccable Critique: Exhale Home And Core Session
 
 Target: `src/app/page.tsx`

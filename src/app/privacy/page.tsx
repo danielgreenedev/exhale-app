@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { SURFACE_GLOWS } from '@/lib/colors';
+import { OrbMark } from '@/components/OrbMark';
 
 export const metadata: Metadata = {
   title: 'Privacy, Exhale',
@@ -15,25 +16,14 @@ export default function PrivacyPage() {
         style={{ background: SURFACE_GLOWS.stats }}
         aria-hidden="true"
       />
-      <article className="relative z-10 flex flex-col gap-8 max-w-2xl w-full">
+      <article className="relative z-10 flex w-full max-w-[58ch] flex-col gap-8">
         <header className="flex flex-col items-start gap-4">
-          <div className="relative" aria-hidden="true">
-            <div
-              className="h-10 w-10 rounded-full"
-              style={{
-                background: 'radial-gradient(circle at 36% 30%, rgba(202,224,211,0.64) 0%, rgba(94,158,118,0.56) 48%, rgba(31,82,52,0.62) 100%)',
-              }}
-            />
-            <div
-              className="absolute inset-0 rounded-full"
-              style={{ background: 'linear-gradient(135deg, rgba(245,245,242,0.14) 0%, rgba(245,245,242,0) 56%)' }}
-            />
-          </div>
+          <OrbMark size="policy" />
           <div className="flex flex-col gap-2">
             <h1 className="text-2xl font-extralight tracking-[0.3em] uppercase text-still-white/88">
               Privacy
             </h1>
-            <p className="text-still-white/52 text-xs tracking-[0.15em] font-light">
+            <p className="text-still-white/58 text-xs tracking-[0.05em] font-light">
               Last updated May 20, 2026
             </p>
           </div>
@@ -157,7 +147,7 @@ export default function PrivacyPage() {
 
         <Link
           href="/"
-          className="mt-4 inline-flex items-center text-still-white/52 text-xs tracking-[0.2em] uppercase font-light hover:text-still-white/75 transition-colors duration-300"
+          className="mt-4 inline-flex min-h-11 items-center text-still-white/58 text-xs tracking-[0.08em] uppercase font-light hover:text-still-white/78 transition-colors duration-300"
         >
           &larr; Back to Exhale
         </Link>
@@ -169,10 +159,10 @@ export default function PrivacyPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-still-white/52 text-xs tracking-[0.18em] uppercase font-light">
+      <h2 className="text-still-white/58 text-xs tracking-[0.08em] uppercase font-light">
         {title}
       </h2>
-      <div className="text-still-white/72 text-sm font-light leading-relaxed">
+      <div className="text-still-white/74 text-[15px] font-light leading-relaxed">
         {children}
       </div>
     </section>

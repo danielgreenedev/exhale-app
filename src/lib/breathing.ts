@@ -61,14 +61,11 @@ const BASE_PHASES: Omit<PhaseConfig, 'duration'>[] = [
   },
   {
     // The phase enum stays 'rest' as the canonical discriminator across rhythm presets.
-    // User-facing label and instruction were reframed on 2026-05-19: "Rest" implied
-    // stillness when the body wants to inhale, and beta feedback flagged the verbiage
-    // gap. "Relax" is the only imperative-verb candidate that gives the four labels
-    // grammatical parity (Inhale / Hold / Exhale / Relax); the instruction collapses
-    // to a single word because the label already does the framing work.
+    // "Relax" keeps grammatical parity with the other labels; the instruction carries
+    // the clarification beta testers needed so it cannot be mistaken for a pause.
     phase: 'rest',
     label: 'Relax',
-    instruction: 'Breathe',
+    instruction: 'Breathe naturally',
     targetOrbScale: 0.45,
     color: PHASE_COLORS.rest.color,
     glowColor: PHASE_COLORS.rest.glowColor,

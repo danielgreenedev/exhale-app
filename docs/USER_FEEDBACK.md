@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 21, 2026 (partial audio and Relax clarity feedback logged)
+Last updated: May 24, 2026 (next tester prompt prepared after beta polish)
 
 ## Purpose
 
@@ -14,6 +14,7 @@ Use `https://exhale.guide` for the current beta round. Use a Vercel preview only
 
 - First-run defaults should remain 3 minutes / Medium circle / Steady pace / Air background sound.
 - If Firefox on Windows 11 appears to enter a session with sound off, verify whether Session Setup actually selected `Off` or whether Web Audio simply has not started yet. The former is a settings persistence bug; the latter is expected browser autoplay behavior if it resolves after a tap.
+- When a tester reports "Brave" or "Chrome" from a Facebook-shared link, verify whether they are actually in Facebook's in-app preview browser. Facebook preview can render Exhale correctly while still blocking or degrading browser features such as fullscreen.
 
 ## Privacy Rules
 
@@ -32,6 +33,22 @@ Send a short, open prompt so feedback stays practical:
 2. Notice anything that feels rushed, confusing, too quiet, too loud, hard to read, or hard to follow.
 3. If you have time, open Session Setup and Practice History.
 4. Send back what worked, what felt off, and anything you would change first.
+
+## Next Tester Prompt
+
+Use this for the next clean beta pass after the May 23 HUD/readability, phase-crossfade, completion-copy, Meta-browser, and first-session setup-gate polish:
+
+```text
+Could you try the default 3-minute session first, without opening any settings?
+
+I am especially curious about four things:
+- Did Relax make sense, or did it interrupt the rhythm?
+- Was the phase text easy to read over the circle?
+- Did phase changes feel smooth or jarring?
+- Did you miss having settings before the first run, or was it better to start with fewer choices?
+
+After that, if you want, try another session or look around and tell me anything that felt confusing, too quiet, too bright, hard to follow, or worth changing first.
+```
 
 ## Brand-New User Follow-Up Questions
 
@@ -65,6 +82,99 @@ Use these after someone mentions Hold, Relax, rushed transitions, interruption, 
 - Did the tiny pause after Exhale help you reset, or would Flow feel better as inhale/exhale only with no pause at all?
 - Did the pause, cue, or circle movement ever feel rushed, pushy, or interruptive?
 - Would you choose Flow again, or would you pick a different pace?
+
+## Targeted Follow-Up Queue
+
+Use this as the active beta queue before promoting any new feature work. Keep the tone conversational; do not ask every question if the tester has limited time.
+
+### T-2026-05-23-14: Android Facebook/Brave Rhythm, Transition, And Setup Follow-Up
+
+Goal: separate browser-container issues from core product issues, and check whether the latest Relax clarification/first-cycle cue changes answer the confusion before changing rhythm math.
+
+Priority questions:
+
+- In the real Brave app, did the fullscreen button work differently than it did inside Facebook's in-app browser?
+- In Brave proper, did the phase transitions still feel like they popped in, or was that mainly the Facebook preview run?
+- After seeing "Breathe naturally" for Relax, does Relax still feel counterproductive, or does the issue shift to the length of the 8-second segment?
+- Would Flow feel better for you than Steady, or would Flow need to remove its remaining pause entirely?
+- If Session Setup were hidden until after one completed session, would that feel helpful, or would it feel like the app is withholding useful control?
+- Would voice guidance be useful if it used a human-recorded voice or simple local audio prompts, or is the concern specifically about AI voice perception?
+
+Decision guardrail: do not change the default Steady durations from this note alone. The actionable near-term signals are transition crossfade, Facebook in-app-browser hardening, completion-duration copy, and Session Setup exposure. Rhythm-duration changes should wait until we know whether the latest Relax clarity and/or Flow answer the same concern.
+
+### T-2026-05-23-18: Clinical Relax-Length And Text Readability Follow-Up
+
+Goal: separate Relax duration/meaning from transition timing, and reproduce the text-over-orb readability issue.
+
+Priority questions:
+
+- Did Relax feel too long because you did not know what to do, because the circle was no longer giving a controlled-breathing task, or both?
+- Would a shorter post-exhale hold, like square breathing's exhale-hold, feel clearer than an 8-second natural-breathing Relax?
+- Would Flow's shorter Relax pause feel better, or should Relax be removed entirely for your preferred rhythm?
+- Which phase color made the overlaid title/instruction hardest to read?
+- Was the issue brightness/glare, low contrast against the circle, text shadow blur, or the text sitting directly on top of the phase circle?
+- If the phase text sat just above the circle, or had a quieter contrast treatment, would it be easier to read?
+
+Decision guardrail: this is a high-value clinical signal, but do not solve it by simply making text brighter. The tester explicitly said the text was too bright and still did not contrast well against the phase circle. Treat this as placement/backdrop/color-pairing work, not only opacity work.
+
+Implementation note, 2026-05-23: local visual investigation compared dark text with a light shadow against dimmer orb treatments. Dark text improved contrast on the brightest center of the orb but became unreliable against darker orb edges and surrounding canvas. The implemented direction keeps light text, softens HUD opacity, and reduces the orb core brightness, glow, guide rings, flash, and particle pulse.
+
+### T-2026-05-22-13: Settling In, Relax Meaning, And Ramp Clarification
+
+Goal: separate three overlapping signals before changing the app: whether Settling In is too short, whether Relax reads as a breath hold, and whether a progressive/ramping rhythm is still desired after Relax is clearer.
+
+Priority questions:
+
+- When you said Settling In should be "at least 5 breaths," did you mean literally five full guided breaths, or more generally that you wanted more time to settle before the first prompt?
+- Would something shorter, like 15-25 seconds, have felt long enough to arrive before the first Inhale?
+- When Relax appeared, did it feel like the app wanted you to hold your breath, or like it was giving you room to breathe naturally?
+- If Relax said or implied "breathe naturally" more clearly, would you still want the session to build up gradually?
+- When you said "build up to the 8 second pause," did you mean the first few cycles should be shorter and grow into the full rhythm, or that the whole session should keep escalating from short to long?
+- Did you only try the default Steady pace, or did you also try Soft, Full, or Flow?
+
+Decision guardrail: do not implement longer Settling In, progressive/ramping rhythms, or a Relax rename from this signal alone. Use the answers to decide whether the next experiment is first-cycle Relax clarity, a pre-start sequence preview, a longer/active settle-in shape, or a scoped ramp concept.
+
+### T-2026-05-21-12: First-Cycle Sequence Preview
+
+Goal: check whether Relax confusion was caused by the phase appearing unexpectedly rather than by the word Relax itself.
+
+Priority questions:
+
+- Would a tiny first-session preview like `Inhale -> Hold -> Exhale -> Relax` have helped, or would it make the app feel too instructional?
+- If Relax had briefly said "Breathe naturally" the first time only, would that have answered your question without adding too much text?
+- Was the audio too quiet because of device volume, browser behavior, or because the default Air sound itself felt too thin?
+
+Decision guardrail: if this tester and T-2026-05-22-13 both prefer a preview/first-cycle clarification, sketch that before changing rhythm durations.
+
+### Flow Validation: Rest/Hold-Friction Testers
+
+Goal: decide whether Flow should stay 4-0-6-2 or be tested as inhale/exhale only.
+
+Ask T-2026-05-19-03, T-2026-05-19-05, T-2026-05-19-06, and T-2026-05-19-07 to try Flow if they are willing.
+
+Priority questions:
+
+- Did Flow feel smoother than Steady, Soft, or Full?
+- Did removing Hold help?
+- Did the tiny pause after Exhale help you reset, or would Flow feel better as inhale/exhale only with no pause at all?
+- Did the pause, cue, or circle movement ever feel rushed, pushy, or interruptive?
+- Would you choose Flow again?
+
+Decision guardrail: if one independent tester repeats T-2026-05-19-08's "take out the pause" signal, test a Flow 4-0-6-0 variant before adding copy or cue complexity.
+
+### Rhythm-Fit Recheck: Original Pace-Concern Testers
+
+Goal: learn whether the existing four paces already cover the most important comfort needs.
+
+Ask T-2026-05-18-01 and T-2026-05-19-02 through T-2026-05-19-05 to compare Steady with Soft and/or Full if they are willing.
+
+Priority questions:
+
+- Did Soft feel easier, too fast, or better matched to your natural breathing?
+- Did Full feel useful, too demanding, or only useful when stressed?
+- Did any rhythm make you gasp, catch up, strain, or feel pressure to perform?
+- Which rhythm would you choose if you were actually stressed or tired?
+- Would more explanation before the first cycle have helped, or was the rhythm itself the issue?
 
 ## Transition Cue Diagnostic
 
@@ -124,6 +234,223 @@ Use these when a tester is willing to do functionality testing after at least on
 1. 
 
 ## Recent Feedback Notes
+
+### 2026-05-23, T-2026-05-23-18, Pediatrician, Relax Length/Meaning And In-Session Text Readability
+
+#### Session
+
+- Tester ID: T-2026-05-23-18
+- Follow-up OK: Yes
+- Source: Project owner's sister, pediatrician in Cleveland
+- Date: 2026-05-23
+- Environment: Production assumed
+- Device: Unknown
+- Browser: Unknown
+- Route tested: Home/session
+- Session length: Unknown
+- Rhythm: Steady assumed unless follow-up says otherwise
+- Sound choice: Unknown
+- Circle Size: Unknown
+- Signal class: **High-credibility clinical signal.** Medical training plus user-level first-run perception. Weight Relax semantics, duration, and readability feedback heavily, but separate from formal clinical validation.
+
+#### What Worked
+
+- Tester liked the app overall.
+- Tester could follow the phase transitions. She did not think time between phases needed to be extended.
+- Tester recognized that some square-breathing techniques hold briefly after exhaling, which gives useful domain context for post-exhale pauses.
+
+#### Friction
+
+- Relax phase took the tester out of the moment because the pause felt too long.
+- Relax was unclear: tester did not know whether to hold breath, breathe deeply, or breathe normally.
+- The phase title and instruction text overlaid on the phase circle was visually problematic: it felt too bright, but also did not contrast well enough against the phase circle color, making it hard to read.
+
+#### Accessibility Notes
+
+- This is the clearest signal so far that the central HUD text treatment itself may fail against some phase colors. Increasing opacity alone is probably the wrong fix because the tester perceived the text as already too bright.
+- This cuts against the idea that all transition friction needs longer timing or crossfade. For this tester, transitions were followable; the issue was Relax meaning/length and text readability.
+- The square-breathing comment suggests a possible reframing: a short post-exhale hold may be more recognizable than a long natural-breathing Relax for some users.
+
+#### Emotional Tone
+
+- Calm / Clear / Rushed / Confusing / Overstimulating / Other: Positive overall, disrupted by Relax and hard-to-read HUD text
+- Notes: This is a useful corrective to over-weighting Ryan's transition-crossfade suggestion. Smoother transitions may still help, but they are not the primary barrier for every clinical-signal tester.
+
+#### Correlation To Existing Feedback
+
+- Relax length/meaning reinforces T-2026-05-23-14, T-2026-05-22-13, T-2026-05-21-12, T-2026-05-19-03, and T-2026-05-19-07. The pattern is now strong enough to treat Relax as the core rhythm/semantics issue in the default path.
+- "Could follow transitions" partially conflicts with T-2026-05-23-14's jarring-transition signal. Synthesis: do not lengthen time between phases globally. Consider visual/text smoothing, but keep timing changes targeted to Relax/Flow experiments.
+- Text over phase circle correlates with T-2026-05-21-10's phase-color clarity concern and the existing high-contrast roadmap candidate. It adds a more specific defect: bright text can still be hard to read when placed over a colored orb.
+
+#### Actionable Recommendations
+
+1. Promote in-session text readability over the active circle to a near-term visual/accessibility task. Explore placement, shadow/backdrop, color pairing, and contrast, not just brighter text.
+2. Do not globally extend time between phases based on Ryan's feedback; Sara could follow the transitions. If a crossfade is implemented, keep it visual-only and do not add extra rhythm time.
+3. Treat Relax as the highest-priority rhythm/semantics problem. Test whether a shorter post-exhale pause, a no-pause Flow, or clearer "breathe normally" framing works better before changing all durations.
+4. Ask this tester to try Flow if willing, with the specific question of whether the shorter pause still interrupts her.
+
+#### Open Questions
+
+1. Which phase color made the text hardest to read?
+2. Was the text hard to read because of color contrast, text shadow blur, brightness/glare, or because it sits directly over the orb?
+3. Would Relax feel acceptable if it were shorter and named/framed as a post-exhale hold, or should it be natural breathing only outside the controlled rhythm?
+4. Would Flow 4-0-6-2 or a no-pause Flow variant solve this tester's Relax objection?
+
+### 2026-05-23, T-2026-05-23-14, Android Facebook/Brave Tester, Browser Container, Transition Smoothness, Relax Meaning, Customization, And Voice
+
+#### Session
+
+- Tester ID: T-2026-05-23-14
+- Follow-up OK: Yes
+- Source: Android tester reached through a Facebook-shared link
+- Date: 2026-05-23
+- Environment: Production
+- Device: Samsung Galaxy S26 Ultra
+- Browser: First run was Facebook in-app preview browser, initially believed to be Brave. Follow-up run was Brave mobile proper.
+- Follow-up screenshot: tapping the link from Messenger opened an Android Messenger in-app browser header (`Messenger` over `exhale.guide`) with the home screen rendered correctly. Treat Messenger as the same Meta in-app-browser family for capability checks, not as the user's external browser.
+- Route tested: Privacy, Terms, Home/session, Session Complete, Session Setup
+- Session length: 3 minutes
+- Rhythm: Steady assumed from default screenshots unless follow-up says otherwise
+- Sound choice: Unknown; audio button visible in screenshot
+- Circle Size: Unknown
+
+#### What Worked
+
+- The app loaded and ran in the Facebook in-app preview browser, despite that being a degraded browser container.
+- Privacy and Terms loaded correctly with no visible formatting issues.
+- The session was effective enough that the tester reported feeling relaxed.
+- The core guidance outside Relax matched familiar clinical breathing-exercise instruction, including the Hold phase.
+- Completion quote was strongly positive. Tester called the quote an excellent addition.
+- In Brave mobile proper, the interface displayed correctly with no formatting issues.
+
+#### Friction
+
+- The top-right fullscreen button did not work in Facebook's in-app preview browser. Treat this as an in-app-browser capability problem, not a Brave problem.
+- Transitions between phases felt jarring and "popped" rather than easing. Tester suggested fading the outgoing instruction and fading in the next instruction around the zero boundary, starting around 1 second.
+- Relax remained unclear and potentially counterproductive. Tester understood it might mean returning to normal breathing, but questioned whether interrupting controlled breathing for 8 seconds supports anxiety reduction.
+- Tester noticed Exhale appeared one second longer than Inhale. This is correct for Steady (4s Inhale, 6s Exhale), but the user-facing mental model may need to make intentional exhale length feel less surprising.
+- Completion screen saying `2:56 of calm` after choosing a 3-minute session felt bizarre and potentially confusing. Tester recommended removing that exact elapsed-time display because the user chose 3 minutes and has no useful reason to inspect the rounded actual duration.
+- Session Setup customization created a product-philosophy concern: because Exhale is guided breathing, too much immediate customization may let a first-time user change the guidance before they understand it.
+- Tester suggested locking customization behind an account or at least after a full run. Treat account-locking as misaligned with Exhale's anonymous-first stance, but the "after one completed session" part is relevant.
+- Tester thought voice narration could be good, but warned that an AI voice could trigger negative perception.
+
+#### Accessibility Notes
+
+- Meta in-app browsers are now confirmed as a real browser-container risk on Android, not only iPhone/Pixel audio speculation. Facebook and Messenger can display the app but still break or degrade capability-dependent controls such as fullscreen.
+- The fullscreen control needs environment-aware behavior: hide it, disable it with explanation, or show "Open in browser for fullscreen" when inside Facebook's preview browser.
+- Transition smoothness is an accessibility and comprehension issue, not only visual polish. It affects how quickly the user can switch instructions without feeling behind.
+- Voice guidance has now repeated across multiple independent family/tester signals. Keep it optional and clearly separate from background sound; do not let it replace the visual-first session.
+
+#### Emotional Tone
+
+- Calm / Clear / Rushed / Confusing / Overstimulating / Other: Effective but mechanically jarring
+- Notes: The tester was direct and product-minded. They validated the core calming effect while asking for smoother phase handoffs and a clearer rationale for Relax.
+
+#### Correlation To Existing Feedback
+
+- Relax friction reinforces T-2026-05-21-12, T-2026-05-22-13, T-2026-05-19-03, T-2026-05-19-07, and the Internal phase-transition observation. This is no longer a single-copy issue; it is a combined semantics, duration, and transition-shape issue.
+- Transition-pop feedback reinforces the open transition-cue question. Earlier work added anticipatory color/audio cues, but this tester is specifically asking for a label/instruction crossfade at the boundary.
+- Fullscreen failure correlates with the Facebook in-app-browser audio/open-webview risk already tracked in `docs/OPEN_QUESTIONS.md`.
+- Customization concern pushes against T-2026-05-19-07's secondary teen signal that liked customization. The emerging answer is not "more" or "less" customization universally; it is "customization should stay optional and maybe delayed until after first value."
+- Voice guidance is now a stronger pattern: T-2026-05-21-11 asked for it, this tester supported it with AI-voice caution, and three additional family testers liked the idea.
+- Completion quote praise reinforces T-2026-05-19-01's positive quote feedback, but the exact duration display is a new clarity issue.
+
+#### Actionable Recommendations
+
+1. Near-term: smooth the GameHUD phase label/instruction transition with a true boundary crossfade. The current visual treatment is not being perceived as smooth enough on at least one real Android run.
+2. Near-term: detect Facebook's in-app browser and hide or soften the fullscreen affordance there. Provide a quiet hint to open in the external browser for fullscreen/sound reliability rather than presenting a control that fails.
+3. Near-term: replace the completion elapsed copy (`2:56 of calm`) with a user-facing selected-duration message, such as `3 minutes complete`, or omit duration entirely and let breath cycles plus quote carry completion.
+4. Next: compare the latest Relax copy (`Breathe naturally`) and first-cycle cue with this tester before changing Steady durations. If Relax still feels counterproductive, test reducing/removing Relax in a variant or steering them to Flow.
+5. Next: test whether Session Setup should stay visible but framed as optional, or remain hidden until one completed session. Do not lock customization behind an account.
+6. Later: promote optional voice guidance to a roadmap candidate. Prefer human-recorded or very restrained system-generated prompts; avoid a prominently "AI voice" framed feature during beta.
+
+#### Open Questions
+
+1. Did the transition-pop feeling persist in Brave mobile proper, or only in Facebook preview?
+2. Does the latest first-cycle cue plus `Breathe naturally` solve the Relax meaning problem for this tester?
+3. Would this tester prefer Flow over Steady, and if so, current Flow (4-0-6-2) or a no-pause Flow variant (4-0-6-0)?
+4. Would hiding Session Setup until after one completed session increase trust or frustrate customization-oriented users?
+5. Should Session Complete show only the chosen duration label instead of actual rounded elapsed seconds?
+
+### 2026-05-23, Voice Guidance Pattern From Three Additional Family Testers
+
+#### Session
+
+- Tester IDs: T-2026-05-23-15 through T-2026-05-23-17
+- Follow-up OK: Unknown
+- Date: 2026-05-23
+- Environment, device, browser, route: Unknown
+- Signal class: Product direction only. Not enough detail to evaluate implementation shape.
+
+#### What Worked / Requested
+
+- Three separate family testers liked the idea of voice narration.
+
+#### Correlation To Existing Feedback
+
+- Reinforces T-2026-05-21-11's voice-guidance request and T-2026-05-23-14's suggestion that voice could help, with the caveat that AI voice perception may be negative.
+- Voice guidance may address the same root problem as first-cycle sequence preview and transition crossfade: some people want to follow without reading the screen continuously.
+
+#### Actionable Recommendations
+
+1. Promote optional voice narration from parked idea to roadmap candidate, but do not build immediately.
+2. Define the smallest voice experiment before implementation: spoken phase names only, optional, off by default, probably inside Audio.
+3. Test human-recorded voice or a neutral non-AI-branded voice first because AI-voice perception is now an explicit concern.
+
+#### Open Questions
+
+1. Do these testers want voice because they close their eyes, because transitions are hard to follow, or because voice makes the app feel more guided?
+2. Should voice replace background sound, layer over it, or be a separate mode?
+3. Is voice useful only for the first session, or for every session?
+
+### 2026-05-22, T-2026-05-22-13, First-Time User, Settling-In Length, Relax Clarity, And Progressive Ramp Request
+
+#### Session
+
+- Tester ID: T-2026-05-22-13
+- Follow-up OK: Yes
+- Source: Project owner's mother, retired ICU nurse and childbirth educator
+- Date: 2026-05-22
+- Environment: Production assumed
+- Device: Samsung S24
+- Browser: Unknown
+- Route tested: Home/session
+- Session length: Unknown
+- Rhythm: Steady assumed (default); not explicitly confirmed
+- Sound choice: Unknown
+- Circle Size: Unknown
+- Signal class: **High-credibility clinical signal.** Career spent teaching people to use breath to move from fast/stressed states to calm states (ICU bedside, childbirth education). Weigh pacing-onboarding, transition-clarity, and rhythm-shape feedback heavily; weigh separately from preference signal.
+
+#### Friction
+
+- Settling In felt too short. Verbatim: "I think the settle in should be longer ..at least 5 breaths." Current Settling In is 8 seconds; five Steady breaths would be ~110 seconds, so read the number as directional rather than literal. The underlying signal: 8s is not enough time to actually move someone from "reading the screen" to "in the session," especially for a tester whose professional threshold for "settled" is high.
+- Relax phase was unclear on first encounter. Verbatim: "And I wonder about the relax. Is that a pause in breathing." For a clinical breathing educator to ask this directly means the single-word `Breathe` instruction is not carrying enough framing on first exposure. Echoes T-2026-05-21-12's first-cycle Relax uncertainty.
+- Asked for a progressive ramp up to the long Relax phase. Verbatim: "And do you think you could build up to the 8 second pause." She is naming Steady's 8-second Relax as "the 8 second pause" — which is itself evidence she has interpreted Relax as a held pause rather than as permission to breathe naturally. The ramp ask and the Relax-clarity ask may share a root cause: if Relax is read as "hold breath for 8 seconds," dropping straight into 8 seconds feels too steep, and ramping up makes sense.
+
+#### Accessibility Notes
+
+- Settling-In signal coheres with prior first-run uncertainty feedback (T-2026-05-21-10 stress; T-2026-05-21-12 wanted a pre-start sequence cue) but is mechanistically different — this tester is asking for more time to physically settle, not more information up front.
+- Relax-clarity signal is now multi-tester (T-2026-05-21-12, T-2026-05-22-13). The Rest -> Relax + `Breathe` reframe did not eliminate the first-cycle "what am I supposed to do" question for at least two testers, including one career breathing educator.
+- Progressive-ramp signal is the **second independent ask** for a non-isochronous rhythm shape. First was T-2026-05-19-07 (competitive framing, wanted breath/hold/exhale to increase by the last rep). The two asks differ in framing — competitive escalation vs. clinical "build up to the long pause" — but share the underlying shape: rhythm that is not the same every cycle. The handoff's Parked Questions list named "Progressive/ramping rhythms if a second tester independently asks for escalation" as the explicit promotion trigger; that trigger has now fired.
+
+#### Emotional Tone
+
+- Calm / Clear / Rushed / Confusing / Overstimulating / Other: Constructive / Clinically observant
+- Notes: All three points were framed as suggestions, not complaints. The clinical framing matters: this is the kind of tester who has watched many people transition from fast to calm breathing under real stress, including in childbirth where the breath ramp is part of the curriculum.
+
+#### Actionable Recommendations
+
+1. Do not immediately lengthen Settling In to a fixed multi-breath duration. Watch for one more independent signal that 8s is insufficient before changing the default. Worth thinking about whether the better intervention is a longer Settling In or a different settle-in shape (for example, a guided first breath the user can follow during Settling In, which would also address T-2026-05-21-12's pre-start sequence preview ask).
+2. Treat the Relax-clarity signal as enough to actively design a first-cycle clarification, not enough to rename Relax. Possible directions: a one-time first-cycle instruction expansion (e.g., "Breathe naturally" only on cycle 1); a slightly different instruction word that reads less ambiguous; or the pre-start sequence cue from T-2026-05-21-12. Defer choice until at least one option is sketched against the no-text / quiet design constraint.
+3. Promote progressive/ramping rhythms from Parked to an actively-considered Open Question in `docs/OPEN_QUESTIONS.md`. Surface the design tension with the locked-at-start invariant before any implementation.
+4. Park "build up to 8 seconds" as also potentially a Relax-framing problem, not only a ramp ask. If the next iteration of Relax clarity lands well (whatever shape that takes), re-ask this tester whether she still wants a ramp, or whether the long Relax stops feeling like a held pause she needs to acclimate to.
+
+#### Open Questions
+
+1. Is "5 breaths" of Settling In a literal ask, or a way of saying "give me a real pre-session settle"? Follow-up: would something between 15-25 seconds have felt sufficient?
+2. Did the tester try only Steady, or also Soft / Full / Flow? The "8 second pause" wording maps cleanly to Steady's 8s Relax but could overlap with Full's perception of duration.
+3. Would a one-time, first-session-only "What's about to happen" preview reduce both Settling-In-too-short and Relax-unclear signals at once, without becoming an instructional onboarding gate?
+4. Does the clinical-observer pattern (knows breathwork deeply, seeing this specific guided flow for the first time) call for different copy than a true first-time-breather pattern, or do both populations want the same clarifications?
 
 ### 2026-05-21, T-2026-05-21-12, First-Time User, Audio Immersion And Relax Clarity
 
@@ -547,7 +874,7 @@ But really positive
 #### Actionable Recommendations
 
 1. Reinforces "Should Rest and Hold be partly or completely optional?" - Rest/Relax itself, not only its duration, is the issue for some users.
-2. New product question parked: should rhythms support a guided ramp/escalation instead of only steady patterns? Single-user signal; do not act yet.
+2. This was the first product signal for guided ramp/escalation instead of only steady patterns. As of T-2026-05-22-13, it has a second independent signal and is promoted to an active open question, but still not a build task.
 3. Park a color/theme customization question: ask whether "change colors" means orb/phase colors, background/skin, or accessibility/contrast preference.
 
 ### 2026-05-19, T-2026-05-19-06, Facebook Reply, Hold And Exhale-Inhale Ratio

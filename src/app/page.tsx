@@ -20,7 +20,8 @@ import {
   SoundPaletteId,
 } from '@/lib/sound';
 import { PolicyFooter } from '@/components/PolicyFooter';
-import { readStats, computeStats } from '@/hooks/useSessionStats';
+import { OrbMark } from '@/components/OrbMark';
+import { readStats, computeStats, storageAvailable } from '@/hooks/useSessionStats';
 import { SURFACE_GLOWS } from '@/lib/colors';
 import { useUserId } from '@/lib/auth';
 import { logAppEvent } from '@/lib/appEvents';
@@ -128,6 +129,7 @@ function HomeContent() {
   const [orbScale, setOrbScaleState] = useState<number>(DEFAULT_ORB_SCALE);
   const [soundPalette, setSoundPaletteState] = useState<SoundPaletteId>(DEFAULT_SOUND_PALETTE);
   const [firstVisit, setFirstVisit] = useState(false);
+  const [sessionSetupAvailable, setSessionSetupAvailable] = useState(false);
   const [showSessionSetup, setShowSessionSetup] = useState(false);
   const [showSequenceTiming, setShowSequenceTiming] = useState(false);
   const [setupTab, setSetupTab] = useState<SetupTab>('sequence');
@@ -236,13 +238,17 @@ function HomeContent() {
       if (!isRhythmId(urlRhythm)) {
         setSelectedRhythm(settings.rhythm);
       }
-      if (!localStorage.getItem('exhale-visited')) setFirstVisit(true);
-      const { sessions } = readStats();
-      if (sessions.length > 0) {
-        const { totalSessions } = computeStats(sessions);
+      const localStats = readStats();
+      const hasCompletedSession = localStats.sessions.length > 0;
+      if (!localStorage.getItem('exhale-visited') && !hasCompletedSession) setFirstVisit(true);
+      setSessionSetupAvailable(hasCompletedSession || !storageAvailable());
+      if (hasCompletedSession) {
+        const { totalSessions } = computeStats(localStats.sessions);
         setHomeStat({ sessions: totalSessions });
       }
-    } catch { /* unavailable */ }
+    } catch {
+      setSessionSetupAvailable(true);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -309,27 +315,13 @@ function HomeContent() {
         {/* Logo orb */}
         <div className="flex flex-col items-center gap-3.5">
           <div className="h-28 sm:h-32 flex items-center justify-center" aria-hidden="true">
-            <div
+            <OrbMark
+              size="home"
+              ring
+              breathe
+              scale={orbScale}
               className="transition-transform duration-500 ease-out"
-              style={{ transform: `scale(${orbScale})` }}
-            >
-              <div className="relative h-[4.5rem] w-[4.5rem] sm:h-20 sm:w-20 orb-breathe">
-                <div
-                  className="h-full w-full rounded-full"
-                  style={{
-                    background: 'radial-gradient(circle at 36% 30%, rgba(202,224,211,0.68) 0%, rgba(94,158,118,0.60) 46%, rgba(31,82,52,0.64) 100%)',
-                  }}
-                />
-                <div
-                  className="absolute inset-0 rounded-full"
-                  style={{ background: 'linear-gradient(135deg, rgba(245,245,242,0.14) 0%, rgba(245,245,242,0) 56%)' }}
-                />
-                <div
-                  className="absolute inset-[-12px] rounded-full border sm:inset-[-14px]"
-                  style={{ borderColor: 'rgba(93,177,132,0.20)' }}
-                />
-              </div>
-            </div>
+            />
           </div>
 
           <div className="flex flex-col items-center gap-1.5">
@@ -389,6 +381,12 @@ function HomeContent() {
         >
           Begin
         </button>
+
+        {firstVisit && (
+          <p className="-mt-1 text-center text-xs leading-relaxed tracking-[0.04em] text-still-white/64">
+            First cycle: inhale, hold, exhale, then breathe naturally.
+          </p>
+        )}
         </form>
 
         {/* Resume button — only shown within 60s of exiting a session */}
@@ -407,23 +405,31 @@ function HomeContent() {
           </Link>
         )}
 
-        <button
-          type="button"
-          onClick={() => setShowSessionSetup((show) => !show)}
-          aria-expanded={showSessionSetup}
-          aria-controls="session-setup"
-          className="w-full min-h-11 py-3 rounded-2xl border border-still-white/22 text-still-white/68 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/34 hover:text-still-white/84 hover:bg-still-white/5 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 text-center"
-        >
-          <span>Session setup</span>
-          <DisclosureCaret open={showSessionSetup} />
-        </button>
+        {sessionSetupAvailable && (
+          <button
+            type="button"
+            onClick={() => setShowSessionSetup((show) => !show)}
+            aria-expanded={showSessionSetup}
+            aria-controls="session-setup"
+            className="w-full min-h-11 py-3 rounded-2xl border border-still-white/22 text-still-white/68 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/34 hover:text-still-white/84 hover:bg-still-white/5 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 text-center"
+          >
+            <span>{homeStat ? 'Adjust next session' : 'Session setup'}</span>
+            <DisclosureCaret open={showSessionSetup} />
+          </button>
+        )}
 
-        {showSessionSetup && (
+        {sessionSetupAvailable && showSessionSetup && (
           <section
             id="session-setup"
             aria-label="Session setup"
             className="w-full border-y border-still-white/10 py-2 flex flex-col gap-3"
           >
+            <div className="flex items-center justify-between gap-3 px-1">
+              <p className="text-xs leading-relaxed tracking-[0.04em] text-still-white/58">
+                Steady pace, medium circle, Air sound are already set.
+              </p>
+            </div>
+
             <div
               className="grid grid-cols-3 gap-1 rounded-lg border border-still-white/10 bg-still-white/[0.02] p-1"
               role="tablist"
@@ -441,10 +447,10 @@ function HomeContent() {
                     aria-controls="session-setup-panel"
                     onClick={() => setSetupTab(tab.id)}
                     className={`
-                      min-h-10 rounded-md border text-[10px] tracking-[0.1em] uppercase font-light transition-all duration-300
+                      min-h-11 rounded-md border text-xs tracking-[0.08em] uppercase font-light transition-all duration-300
                       ${active
                         ? SELECTED_SETTING_CLASS
-                        : 'border-transparent text-still-white/58 hover:border-still-white/18 hover:bg-still-white/5 hover:text-still-white/78'}
+                        : 'border-transparent text-still-white/60 hover:border-still-white/18 hover:bg-still-white/5 hover:text-still-white/80'}
                       focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-emerald-200/80
                     `}
                   >
@@ -464,7 +470,7 @@ function HomeContent() {
                 <div className="flex flex-col gap-3 w-full">
                   <div className="flex flex-col gap-2 w-full px-1" role="radiogroup" aria-labelledby="sequence-label">
                     <span id="sequence-label" className="text-still-white/62 text-xs tracking-[0.14em] uppercase font-light">
-                      Choose your pace
+                      Pace
                     </span>
                     <div className="overflow-hidden rounded-lg border border-still-white/10 bg-still-white/[0.02]">
                       <div className="grid grid-cols-4 gap-1 p-1">
@@ -497,7 +503,7 @@ function HomeContent() {
                                 onChange={() => updateRhythm(r.id)}
                                 className="sr-only"
                               />
-                              <span className="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-[10px] tracking-[0.02em] uppercase font-light leading-none">
+                              <span className="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-[11px] tracking-[0.02em] uppercase font-light leading-none">
                                 {r.label}
                               </span>
                             </label>
@@ -509,7 +515,7 @@ function HomeContent() {
                         className="min-h-[2.75rem] border-t border-still-white/10 px-3 py-2 text-xs leading-relaxed tracking-[0.04em] text-still-white/70"
                       >
                         <span className="uppercase tracking-[0.14em] text-still-white/78">{describedRhythm.label}</span>
-                        <span className="px-1.5 text-still-white/32">/</span>
+                        <span className="px-1.5 text-still-white/40">/</span>
                         {describedRhythm.description}
                       </p>
                     </div>
@@ -520,9 +526,9 @@ function HomeContent() {
                     aria-expanded={showSequenceTiming}
                     aria-controls="sequence-timing"
                     onClick={() => setShowSequenceTiming((show) => !show)}
-                    className="self-center inline-flex min-h-10 min-w-36 items-center justify-center gap-2 rounded-lg border border-still-white/18 bg-still-white/[0.025] px-4 py-2 text-[10px] uppercase tracking-[0.14em] text-still-white/62 transition-all duration-300 hover:border-still-white/30 hover:bg-still-white/[0.055] hover:text-still-white/82 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-emerald-200/80"
+                    className="self-center inline-flex min-h-11 min-w-36 items-center justify-center gap-2 rounded-lg border border-still-white/18 bg-still-white/[0.025] px-4 py-2 text-xs uppercase tracking-[0.1em] text-still-white/62 transition-all duration-300 hover:border-still-white/30 hover:bg-still-white/[0.055] hover:text-still-white/82 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-emerald-200/80"
                   >
-                    <span>{showSequenceTiming ? 'Hide timing' : 'View timing'}</span>
+                    <span>{showSequenceTiming ? 'Hide pattern' : 'Show pattern'}</span>
                     <DisclosureCaret open={showSequenceTiming} />
                   </button>
 

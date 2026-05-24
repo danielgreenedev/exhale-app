@@ -3,6 +3,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { DEFAULT_RHYTHM, PhaseConfig, RHYTHMS, Rhythm } from '@/lib/breathing';
 
+const PHASE_FADE_MS = 960;
+const phaseLabelShadow = '0 1px 2px rgba(8,14,10,0.98), 0 5px 18px rgba(8,14,10,0.86), 0 0 28px rgba(8,14,10,0.52)';
+const instructionShadow = '0 1px 2px rgba(8,14,10,0.96), 0 4px 16px rgba(8,14,10,0.82), 0 0 24px rgba(8,14,10,0.48)';
+
 interface Props {
   currentPhase: PhaseConfig;
   timeRemaining: number;
@@ -31,14 +35,14 @@ export default function GameHUD({
     setPreviousPhase(lastPhaseRef.current);
     lastPhaseRef.current = currentPhase;
 
-    const timeout = window.setTimeout(() => setPreviousPhase(null), 520);
+    const timeout = window.setTimeout(() => setPreviousPhase(null), PHASE_FADE_MS);
     return () => window.clearTimeout(timeout);
   }, [currentPhase]);
 
-  const labelOpacity = settled ? 0.76 : 1;
-  const instructionOpacity = settled ? 0 : 0.9;
+  const labelOpacity = settled ? 0.62 : 0.82;
+  const instructionOpacity = settled ? 0 : 0.76;
   const timerIsLoadBearing = currentPhase.phase === 'hold' || currentPhase.phase === 'rest';
-  const timerOpacity = !settled ? 1 : timerIsLoadBearing ? 0.68 : 0.18;
+  const timerOpacity = !settled ? 0.78 : timerIsLoadBearing ? 0.56 : 0.14;
 
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-between pointer-events-none select-none">
@@ -54,17 +58,21 @@ export default function GameHUD({
         </p>
       </div>
 
-      {/* Center: phase label + instruction + countdown — float in space, no backdrop */}
+      {/* Center: phase label + instruction + countdown, floating over the orb */}
       {!centerHidden && (
         <div className="flex w-full max-w-[calc(100vw-2rem)] flex-col items-center gap-0 translate-y-[clamp(46px,12vh,100px)] landscape:translate-y-[clamp(28px,7vh,56px)]">
-        <div className="flex w-full flex-col items-center gap-1.5 px-4">
-          <div className="relative h-9 w-full min-w-0 flex items-center justify-center">
+          <div className="relative flex w-full flex-col items-center gap-1.5 px-4">
+            <div
+              className="pointer-events-none absolute left-1/2 top-1/2 h-32 w-[min(24rem,88vw)] -translate-x-1/2 -translate-y-[57%] rounded-full bg-forest-night/24 blur-2xl"
+              aria-hidden="true"
+            />
+            <div className="relative h-9 w-full min-w-0 flex items-center justify-center">
             {previousPhase && (
               <h2
-                className="exhale-phase-out absolute inset-x-0 text-center text-3xl font-semibold tracking-[0.3em] uppercase text-still-white"
+                className="exhale-phase-out absolute inset-x-0 text-center text-[1.75rem] font-light leading-none tracking-[0.24em] text-still-white/84 uppercase sm:text-3xl"
                 style={{
                   ['--phase-opacity' as string]: labelOpacity,
-                  textShadow: '0 2px 16px rgba(15,23,18,0.85), 0 1px 4px rgba(15,23,18,0.9)',
+                  textShadow: phaseLabelShadow,
                   opacity: labelOpacity,
                 }}
                 aria-hidden="true"
@@ -73,25 +81,25 @@ export default function GameHUD({
               </h2>
             )}
             <h2
-              className={`absolute inset-x-0 text-center text-3xl font-semibold tracking-[0.3em] uppercase text-still-white ${previousPhase ? 'exhale-phase-in' : ''}`}
+              className={`absolute inset-x-0 text-center text-[1.75rem] font-light leading-none tracking-[0.24em] text-still-white/84 uppercase sm:text-3xl ${previousPhase ? 'exhale-phase-in' : ''}`}
               style={{
                 ['--phase-opacity' as string]: labelOpacity,
-                textShadow: '0 2px 16px rgba(15,23,18,0.85), 0 1px 4px rgba(15,23,18,0.9)',
+                textShadow: phaseLabelShadow,
                 opacity: labelOpacity,
               }}
               aria-live="polite"
             >
               {currentPhase.label}
             </h2>
-          </div>
+            </div>
 
-          <div className="relative min-h-8 w-full max-w-[27rem] flex items-center justify-center">
+          <div className="relative flex min-h-11 w-full max-w-[17rem] items-center justify-center sm:max-w-[27rem]">
             {previousPhase && (
               <p
-                className="exhale-phase-out absolute inset-x-0 text-still-white text-sm tracking-[0.04em] font-light text-center leading-snug px-1"
+                className="exhale-phase-out absolute inset-x-0 px-1 text-center text-sm font-light leading-snug tracking-[0.04em] text-still-white/76"
                 style={{
                   ['--phase-opacity' as string]: instructionOpacity,
-                  textShadow: '0 2px 14px rgba(15,23,18,0.92), 0 1px 4px rgba(15,23,18,0.9)',
+                  textShadow: instructionShadow,
                   opacity: instructionOpacity,
                 }}
                 aria-hidden="true"
@@ -100,12 +108,11 @@ export default function GameHUD({
               </p>
             )}
             <p
-              className={`absolute inset-x-0 text-still-white text-sm tracking-[0.04em] font-light text-center leading-snug px-1 ${previousPhase ? 'exhale-phase-in' : ''}`}
+              className={`absolute inset-x-0 px-1 text-center text-sm font-light leading-snug tracking-[0.04em] text-still-white/76 ${previousPhase ? 'exhale-phase-in' : ''}`}
               style={{
                 ['--phase-opacity' as string]: instructionOpacity,
-                textShadow: '0 2px 14px rgba(15,23,18,0.92), 0 1px 4px rgba(15,23,18,0.9)',
+                textShadow: instructionShadow,
                 opacity: instructionOpacity,
-                transition: 'opacity 5s ease',
               }}
             >
               {currentPhase.instruction}
@@ -113,11 +120,11 @@ export default function GameHUD({
           </div>
 
           <div
-            className="text-6xl font-thin tabular-nums text-still-white/92 mt-0"
+            className="text-6xl font-thin tabular-nums text-still-white/86 mt-0"
             style={{
               textShadow: '0 2px 20px rgba(15,23,18,0.9)',
               opacity: timerOpacity,
-              transition: 'opacity 520ms ease',
+              transition: 'opacity 700ms ease',
             }}
             role="timer"
             aria-label={`${timeRemaining} seconds remaining`}

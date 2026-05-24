@@ -1,6 +1,6 @@
 # Exhale Open Questions
 
-Last updated: May 21, 2026 (voice guidance and in-app browser audio feedback)
+Last updated: May 23, 2026 (pediatrician Relax and HUD readability feedback added)
 
 Use this as a living parking lot for product, validation, trust, accessibility, and strategy questions that are not ready to become implementation tasks. As questions are answered, add the answer, date, evidence, and any resulting TODO/doc updates.
 
@@ -70,7 +70,9 @@ Possible options:
 
 Context: T-2026-05-21-11 asked whether Exhale could have a voice guide the breathing along with the visual. This overlaps with the transition-cue uncertainty signal from T-2026-05-21-10, but it is a separate modality question: spoken guidance could make phases easier to follow, but it could also make Exhale feel less quiet, more intrusive, and more dependent on mobile audio reliability.
 
-Current answer: Open, not an immediate build task. Keep gathering signal. If the idea repeats, consider a small optional voice mode rather than replacing the current visual-first experience.
+2026-05-23 update: the idea has repeated. T-2026-05-23-14 thought voice narration could be good, but warned that an AI voice could create a negative reaction. Three additional family testers also liked the idea of voice narration. This is now enough to treat voice as a roadmap candidate, but still not enough to build before the transition/Relax work is clarified.
+
+Current answer: Open, promoted from parked idea to candidate. Keep visual-first as the default. If built, voice should be optional, off by default, and likely start with spoken phase names only. Avoid marketing or framing it as an "AI voice" feature during beta.
 
 Possible approaches:
 
@@ -85,6 +87,21 @@ Risks:
 - Voice may be harder to internationalize and personalize.
 - Voice requires reliable audio, which is currently under investigation in Facebook's in-app browser.
 - Voice could increase cognitive load if it overlaps with visual labels, tones, and background sound.
+- AI-voice perception could hurt trust even if the guidance itself helps.
+
+Follow-up prompts:
+
+```text
+Would you want voice because you close your eyes, because the transitions are hard to follow, or because it makes the app feel more guided?
+```
+
+```text
+Would a simple human-recorded voice saying only the phase names be enough?
+```
+
+```text
+Should voice replace the background sound, layer over it, or be a separate mode?
+```
 
 ### How many similar reports are enough to act?
 
@@ -156,6 +173,12 @@ Current answer: partially answered. Implementing 2026-05-19:
 
 2026-05-21 signal: T-2026-05-21-10, a brand-new user, found phase uncertainty stressful enough that they could not complete the process. They reported that phase colors felt too similar and suggested more distinct cues, including phase-specific shapes or a one-second anticipatory morph as the orb approaches the next phase. When asked whether they could tell what phase was coming next without reading extra text, they answered no, not at all. This pushes the question beyond "quiet enough" toward "clear enough for first-time users without adding distracting text."
 
+2026-05-23 signal: T-2026-05-23-14 completed a 3-minute Android session and found the core exercise effective, but said phase transitions felt jarring and popped in. They specifically suggested a one-second fade where the old instruction fades out and the new instruction fades in at the boundary. This is different from the existing color/audio pre-cue; it is a request for the central label/instruction transition itself to feel smoother.
+
+2026-05-23 second signal: T-2026-05-23-18, a pediatrician, could follow the phase transitions and did not think the time between phases needed to be extended. This is an important constraint: if transition polish ships, it should be a visual/readability crossfade or cue refinement, not added seconds between phases.
+
+Current answer: Partially answered. Label/instruction boundary smoothing remains a near-term polish candidate, but do not add a global transition delay. Evidence now says some users can follow the timing, while others perceive the visual swap as abrupt.
+
 Still open from the original five:
 
 - (1) and (5) have a first attempt: the user-facing phase is now `Relax` with instruction `Breathe`, while the internal enum remains `rest`. Follow-up should test whether that reframe is enough or whether the phase itself still feels awkward.
@@ -182,11 +205,49 @@ Was any specific phase change still hard to follow, such as Exhale to Relax or R
 Could you tell what phase was coming next without reading extra text?
 ```
 
+```text
+Did the instruction text fade smoothly, or did the next phase feel like it popped in?
+```
+
+```text
+Could you follow the timing, but still found the text hard to read?
+```
+
+### Is the central phase text readable over every phase color?
+
+Context: The phase label and instruction sit over the animated phase circle. Earlier feedback raised phase-color distinctness; T-2026-05-23-18 added a more specific accessibility concern: the overlaid title/instruction text felt too bright and still did not contrast well enough with the phase circle, making it hard to read.
+
+Current answer: Partially addressed in the beta polish pass, still awaiting tester validation. Do not solve with "make the text brighter." A local visual comparison found dark text with a light shadow helpful only on the brightest orb center and fragile around darker edges. The accepted first pass keeps light text, lowers HUD intensity, adds a local text halo, and reduces orb brightness/glow/pulse so the text and canvas no longer compete as strongly.
+
+Possible approaches:
+
+- Move the instruction stack slightly off the brightest part of the orb while preserving the centered meditation feel.
+- Add a very subtle local text scrim or contrast layer that does not read as a card.
+- Tune phase-specific text color/shadow so Hold/Relax do not wash out against amber/pink fills.
+- Reduce title brightness while improving edge contrast, since the tester perceived both glare and poor legibility.
+- Validate at mobile brightness settings, especially on OLED Android and iPhone screens.
+
+Follow-up prompts:
+
+```text
+Which phase was hardest to read: Inhale, Hold, Exhale, or Relax?
+```
+
+```text
+Was the text hard to read because it was too bright, too soft/blurry, too close in color to the circle, or directly on top of the brightest part?
+```
+
+```text
+Would moving the text slightly above the circle make the phase easier to read, or would it feel less calm?
+```
+
 ### Is audio reliable enough inside Facebook's in-app browser?
 
 Context: Multiple testers have now reported mobile sound uncertainty. Earlier feedback suggested app-switching and silent mode may affect perceived sound. T-2026-05-21-10 reported that audio did not work at all on iPhone 14 after opening Exhale from a Facebook post inside Facebook's built-in in-app browser; the iPhone silent switch was not on. The project owner has also personally experienced similar Facebook in-app browser behavior on a Google Pixel. This suggests the risk may be Facebook's in-app browser capture path, not only iPhone/Safari.
 
-Current answer: Open. Existing hardening improved suspended Web Audio reporting and iPhone silent-mode hints, but real-device validation is still needed across Facebook iOS, Facebook Android, Safari, Chrome, silent switch/system mute state, volume state, and app switching.
+2026-05-23 update: T-2026-05-23-14 first believed they were testing Brave on a Galaxy S26 Ultra, but screenshots showed the session was actually inside Facebook's in-app preview browser. The app rendered and the policy pages loaded correctly, but the fullscreen button did not function. Follow-up in real Brave mobile showed the interface displaying correctly. A later screenshot showed Messenger also opens `exhale.guide` inside a Messenger in-app browser. This broadens the question from audio reliability to browser-capability reliability inside Meta webviews.
+
+Current answer: Open. Existing hardening improved suspended Web Audio reporting and iPhone silent-mode hints, but real-device validation is still needed across Facebook iOS, Facebook Android, Messenger Android/iOS, Safari, Chrome, Brave, silent switch/system mute state, volume state, fullscreen support, and app switching.
 
 Follow-up prompts:
 
@@ -206,6 +267,29 @@ After tapping Begin, did tapping the sound button start audio, or did it stay si
 Could you open the link in your default browser and check whether sound works there?
 ```
 
+### Should Exhale detect Meta's in-app browsers and guide users to an external browser?
+
+Context: T-2026-05-23-14 confirmed that Facebook's in-app preview browser can render Exhale correctly while breaking at least the fullscreen affordance. A later screenshot confirmed Messenger opens Exhale inside its own in-app browser too. Prior feedback already raised Facebook in-app browser audio uncertainty. A referenced Stack Overflow thread on forcing Facebook links into external browsers does not provide a reliable, current, cross-platform escape hatch; comments and answers are inconsistent, and some approaches were Android-only, Messenger-only, or no longer reliable. The safest app-side move is detection plus a quiet user-facing nudge, not trying to force escape.
+
+Current answer: Implemented for fullscreen in the session screen. Do not block breathing. When a Meta in-app browser is detected, hide unsupported controls such as fullscreen and show a compact note: open in your browser for fullscreen.
+
+Possible approaches:
+
+- Hide fullscreen when the browser reports no usable Fullscreen API or when a Facebook webview user agent is detected.
+- Keep fullscreen hidden and show a one-time small hint near the top-right area: `Open in browser for fullscreen`.
+- Add a broader in-app-browser note only if audio failures repeat: `Sound or fullscreen may work better in your browser`.
+- Add instructions to tester prompts: if opening from Facebook, use the menu to open in external browser before reporting browser-specific bugs.
+
+Follow-up prompts:
+
+```text
+Did the issue happen inside the Facebook app browser, or after opening the link in your regular browser?
+```
+
+```text
+If Exhale showed a small "open in browser for fullscreen" hint, would that feel helpful or annoying?
+```
+
 ### Should Rest and Hold be partly or completely optional?
 
 Context: Originally raised by T-2026-05-19-03 (did not care for Rest, suggested an option to include or remove it) and T-2026-05-19-05 (capacity mismatch; gasping). Soft (internal id `gentle`) already trims Hold to 2s and Rest to 4s, but that may not be far enough.
@@ -214,13 +298,109 @@ Context: Originally raised by T-2026-05-19-03 (did not care for Rest, suggested 
 
 2026-05-20 update: T-2026-05-19-08 tested Flow and gave a split signal. Removing Hold helped; Inhale and Exhale felt smooth and well-paced. The remaining 2-second Relax/pause felt too fast, "spastic," and interruptive, and the anticipatory push felt rushed. When asked directly whether the tiny pause helped reset or whether Flow should be inhale/exhale only, the tester answered that they would take out the pause. This suggests Flow may need to become truly continuous (candidate 4-0-6-0) if another independent Flow tester reports the same pause friction.
 
+2026-05-23 update: T-2026-05-23-14 independently questioned whether an 8-second Relax segment is counterproductive during anxiety reduction, because it seems to interrupt controlled breathing by returning to normal breathing. They suggested using that time more productively by lengthening transitions or Hold. This signal is not identical to "remove Rest" because the tester may be reacting to the concept of normal-breathing space in Steady rather than Flow's short pause, but it increases the weight of the Rest/Relax design question.
+
+2026-05-23 second update: T-2026-05-23-18, a pediatrician, liked the app but said Relax took her out of the moment because the pause was too long. She also did not know whether to hold breath, breathe deep, or breathe normally during Relax, and noted that some square breathing techniques use a short hold after exhaling. This is another independent clinical signal that Steady's 8-second Relax is semantically and structurally confusing.
+
 Possible directions:
 
 - Add a fourth rhythm preset with Hold=0 or Rest=0 (or both) instead of exposing free-phase customization. Working candidate: a "Flow" rhythm with no Hold, e.g. 4-0-6-2 or 4-0-6-0. Tracked as a Stage 1 sketch task in `docs/TODO.md`.
 - Reframe Rest's identity further beyond the Relax/Breathe rename if the awkwardness signal continues.
 - Allow per-phase duration overrides inside Session Setup (closer to free customization; reintroduces decision friction).
+- Test whether the default Steady fourth phase should be shorter or more explicitly a post-exhale hold. Be careful: "hold after exhale" is recognizable in square breathing, but may be less accessible for anxious users than permission to breathe naturally.
 
-Current answer: **Partially answered as of 2026-05-20, but Flow's shape is not fully validated.** Flow (4-0-6-2) shipped as a fourth rhythm preset rather than as a gated preview build; the original pre-merge validation gate was waived. First Flow follow-up signal from T-2026-05-19-08 says no-Hold helps, but the 2-second Relax/pause interrupts the otherwise smooth Inhale/Exhale loop. The same tester explicitly prefers removing the pause. Post-launch validation is now Stage 0 item 2 in `docs/TODO.md`: follow up with T-2026-05-19-03, -05, -06, -07 and ask whether Flow fits better than their current choice **and** whether it would be better with no pause at all. If at least one of them prefers current Flow and no one else flags the pause, keep 4-0-6-2. If an independent tester repeats the pause complaint, test 4-0-6-0 before considering free per-phase customization.
+Current answer: **Partially answered as of 2026-05-20, but Flow's shape and Steady's 8-second Relax both need revalidation.** Flow (4-0-6-2) shipped as a fourth rhythm preset rather than as a gated preview build; the original pre-merge validation gate was waived. First Flow follow-up signal from T-2026-05-19-08 says no-Hold helps, but the 2-second Relax/pause interrupts the otherwise smooth Inhale/Exhale loop. The same tester explicitly prefers removing the pause. New Steady/default-path signals from T-2026-05-23-14 and T-2026-05-23-18 say the 8-second Relax feels counterproductive or too long and remains unclear. Post-launch validation is now Stage 0 item 2 in `docs/TODO.md`: follow up with Rest/Hold-frictioned testers and ask whether Flow fits better than their current choice **and** whether it would be better with no pause at all. If an independent tester repeats the Flow pause complaint, test 4-0-6-0 before considering free per-phase customization. Separately, test whether Steady's Relax should be shorter or reframed.
+
+### Should Exhale support progressive/ramping rhythms?
+
+Context: Two independent testers have asked for a rhythm shape that changes across the session rather than staying identical every cycle. T-2026-05-19-07 framed it competitively: "The competitive nature in me likes the idea of the breath, hold, and exhale increasing in duration by the last rep." T-2026-05-22-13 (retired ICU nurse and childbirth educator) framed it clinically: could the session "build up to the 8 second pause" rather than dropping the user straight into Steady's full-length Relax? Two testers, two different framings (escalation vs. acclimation), one underlying ask — a non-isochronous shape. Per the handoff's Parked Questions list, second-independent-signal was the explicit promotion trigger.
+
+Current answer: **Promoted from Parked on 2026-05-22.** Not yet a build task. Resolve the design tension first.
+
+Design tension:
+
+- All four current rhythms are isochronous: every cycle has the same per-phase durations. Progressive ramping breaks that property by design.
+- `CLAUDE.md` records that rhythm is locked at session start and does not change mid-session. That decision was driven by predictability — the user should never feel the floor shift under them. A progressive ramp shape *does* change durations mid-session, but it does so on a stated curve the user signed up for at start. The invariant the user actually wants is "no surprises," not "no change"; a transparent ramp can preserve that. Framing has to make the curve unambiguous.
+- `rhythmRef` locking in `useBreathingSession`, `BreathingOrb`, `GameHUD`, and `useAudioEngine` assumes a static `Rhythm` object captured at first render. Progressive shapes would need either a richer Rhythm shape (per-phase scaling function over cycle index) or a derived per-cycle Rhythm computed at the start of each cycle.
+- Anticipatory cue math (`getPhaseLookahead`, `PHASE_LOOKAHEAD_SECONDS = 0.8` with the 25% cap) assumes fixed phase durations. The lookahead would need to compute against the current cycle's phase duration, not a registry constant.
+- Cycle counts per minute length (`quick`/`short`/`medium`/`long`) are recalibrated per rhythm today. A ramp shape changes the average cycle length over the session, so the cycle count -> minute label mapping needs to be recomputed for any ramp curve.
+
+Possible shapes:
+
+- A single named preset ("Build" or similar) that ramps Inhale/Hold/Exhale/Relax from short toward target durations over the first N cycles, then sustains. Easiest to add. Compatible with the locked-at-start invariant if the curve is fixed and disclosed.
+- An "ease in" modifier on any of the four existing rhythms — applies a soft-start ramp on top of the chosen pattern. More flexible, more decision-cost on Session Setup, harder to communicate.
+- A first-cycle-only soft start that warms into the chosen rhythm. Smallest visible product change. Could also partially address T-2026-05-22-13's Settling-In-too-short feedback if framed as part of the settle, not as a separate ramp.
+
+Open subquestions:
+
+- Should the ramp cover only the first N cycles ("build up, then sustain") or the whole session ("escalate throughout")? The childbirth-educator framing implies the former; the competitive framing implies the latter.
+- If shipped, does this become a fifth preset (more home-screen decision-cost) or a modifier on existing presets (more Session Setup decision-cost, more flexibility)?
+- Does the ramp ask from T-2026-05-22-13 partly disappear if the Relax-clarity work lands? She is naming the 8s Relax as "the 8 second pause," which suggests she is interpreting it as a held pause she needs to acclimate to. If Relax stops reading as a pause, the ramp ask may shrink.
+- For T-2026-05-19-07's competitive framing, does the ask survive if Hold and Exhale already feel right at their target durations, or is escalation specifically the appeal?
+
+Follow-up prompts:
+
+```text
+When you said "build up to the 8 second pause," did you mean the first few cycles should be shorter and grow into the full rhythm, or that the whole session should escalate from short to long?
+```
+
+```text
+Would a single named "Build" rhythm work for you, or would you want any rhythm to be able to ramp?
+```
+
+```text
+If the long Relax stopped feeling like a held pause, would you still want a ramp?
+```
+
+Do not implement until at least the first two follow-ups have a tester answer.
+
+### Should Session Setup be visible before a first completed session?
+
+Context: Session Setup started as a way to avoid hiding necessary fit controls from people whose breathing capacity, sound needs, or visual comfort differ from the default. The product tension is now explicit. Some testers like customization and even ask for more, such as color/theme changes. T-2026-05-23-14 argued the opposite: because Exhale is guided breathing, first-time users may undermine the guidance if they can immediately change timing and settings before feeling the default.
+
+Current answer: Answered and implemented on 2026-05-23. Session Setup is hidden until one local completed session exists, then appears as `Adjust next session`. Time selection remains visible because it is the primary first decision. This preserves the anonymous-first design: no account, cookie, or sync requirement.
+
+2026-05-23 owner note: Ryan's suggestion to hide settings for brand-new users until they complete the exercise once feels directionally right because it could reduce first-session friction and distraction while preserving customization after the user understands the default.
+
+Technical implementation: completed sessions are stored locally under `exhale-stats` via `useSessionStats`, and settings are stored in localStorage through `exhale-session-length`, `exhale-rhythm`, `exhale-orb-scale`, and the sound palette key. There is no session cookie required. `sessionStorage` is only used for short resume state. The gate reads localStorage session count, and if localStorage is unavailable, falls back to showing setup rather than trapping users in the default.
+
+Possible approaches:
+
+- Keep current setup visible, but continue to frame it as optional and secondary.
+- Hide Session Setup until one completed session exists, then reveal it as "Adjust next session."
+- Hide advanced setup until one completed session exists, but keep the time choices visible because they are the primary first decision.
+- Show only non-rhythm controls first, such as Circle Size and Sound, and delay pace/timing details.
+- Add a small post-session nudge: `Want to adjust the next one?`
+
+Follow-up prompts:
+
+```text
+Did seeing Session Setup before your first session make you feel more in control or less guided?
+```
+
+```text
+Would you rather try the default once before seeing pace and sound options?
+```
+
+```text
+If setup appeared after one completed session, would that feel natural or frustrating?
+```
+
+### Should Session Complete show exact elapsed seconds?
+
+Context: T-2026-05-23-14 chose a 3-minute session and saw `2:56 of calm` on Session Complete. They found this bizarre and potentially confusing because the consumer-facing promise was "3 minutes." The discrepancy is likely honest runtime rounding/cycle calibration, but exact seconds do not help the user at completion and may undermine trust in the timer label.
+
+Current answer: Open, leaning toward removing exact elapsed display. Prefer a selected-duration label such as `3 minutes complete`, or omit duration and let breath cycles plus the quote carry the moment.
+
+Follow-up prompts:
+
+```text
+After a 3-minute session, would "3 minutes complete" feel clearer than showing the exact elapsed time?
+```
+
+```text
+Do you care about the exact seconds, or only that the session matched the time you picked?
+```
 
 ### Does Full need clearer state-specific framing?
 
