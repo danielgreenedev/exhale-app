@@ -59,14 +59,14 @@ describe('getPhaseAtTime', () => {
     expect(phaseIndex).toBe(3);
   });
 
-  it('returns rest mid-phase at t=18', () => {
-    const { config, timeInPhase } = getPhaseAtTime(18);
+  it('returns rest mid-phase at t=16', () => {
+    const { config, timeInPhase } = getPhaseAtTime(16);
     expect(config.phase).toBe('rest');
-    expect(timeInPhase).toBe(4);
+    expect(timeInPhase).toBe(2);
   });
 
-  it('clamps at cycle end and returns last phase at t=22', () => {
-    const { config, phaseIndex } = getPhaseAtTime(22);
+  it('clamps at cycle end and returns last phase at t=18', () => {
+    const { config, phaseIndex } = getPhaseAtTime(18);
     expect(config.phase).toBe('rest');
     expect(phaseIndex).toBe(3);
   });
@@ -98,12 +98,12 @@ describe('RHYTHMS registry', () => {
     expect(Object.keys(RHYTHMS).sort()).toEqual(['flow', 'full', 'gentle', 'standard']);
   });
 
-  it('standard rhythm preserves the canonical 4-4-6-8 timing', () => {
+  it('standard rhythm uses the 4-4-6-4 Steady timing', () => {
     const phases = RHYTHMS.standard.pattern.map((p) => p.phase);
     expect(phases).toEqual(['inhale', 'hold', 'exhale', 'rest']);
-    expect(RHYTHMS.standard.pattern.map((p) => p.duration)).toEqual([4, 4, 6, 8]);
-    expect(RHYTHMS.standard.cycleDuration).toBe(22);
-    expect(RHYTHMS.standard.sessionCycles).toEqual({ quick: 8, short: 14, medium: 19, long: 27 });
+    expect(RHYTHMS.standard.pattern.map((p) => p.duration)).toEqual([4, 4, 6, 4]);
+    expect(RHYTHMS.standard.cycleDuration).toBe(18);
+    expect(RHYTHMS.standard.sessionCycles).toEqual({ quick: 10, short: 17, medium: 23, long: 33 });
   });
 
   it('flow rhythm uses the 4-0-6-2 hold-less timing', () => {
@@ -219,11 +219,11 @@ describe('getNextPhase', () => {
 
 describe('getPhaseLookahead', () => {
   it('uses the full PHASE_LOOKAHEAD_SECONDS for phases of 3.2s or longer', () => {
-    // Steady Inhale 4s, Hold 4s, Exhale 6s, Relax 8s — all above the 3.2s breakpoint.
+    // Steady Inhale 4s, Hold 4s, Exhale 6s, Relax 4s — all at or above the 3.2s breakpoint.
     RHYTHMS.standard.pattern.forEach((p) => {
       expect(getPhaseLookahead(p)).toBe(PHASE_LOOKAHEAD_SECONDS);
     });
-    // Full Inhale 6s, Hold 6s, Exhale 10s, Relax 4s — also all above.
+    // Full Inhale 6s, Hold 6s, Exhale 10s, Relax 6s — also all above.
     RHYTHMS.full.pattern.forEach((p) => {
       expect(getPhaseLookahead(p)).toBe(PHASE_LOOKAHEAD_SECONDS);
     });
@@ -310,14 +310,14 @@ describe('getPhaseAtTime with a non-default rhythm', () => {
   });
 
   it('uses deep pattern boundaries when passed the deep rhythm', () => {
-    // Deep is 6-6-10-4 = 26s cycle.
+    // Deep is 6-6-10-6 = 28s cycle.
     const deep = RHYTHMS.full;
     expect(getPhaseAtTime(0, deep).config.phase).toBe('inhale');
     expect(getPhaseAtTime(5.99, deep).config.phase).toBe('inhale');
     expect(getPhaseAtTime(6, deep).config.phase).toBe('hold');
     expect(getPhaseAtTime(12, deep).config.phase).toBe('exhale');
     expect(getPhaseAtTime(22, deep).config.phase).toBe('rest');
-    expect(getPhaseAtTime(25.99, deep).config.phase).toBe('rest');
+    expect(getPhaseAtTime(27.99, deep).config.phase).toBe('rest');
   });
 });
 

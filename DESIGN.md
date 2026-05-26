@@ -208,7 +208,7 @@ The brand mark and the product itself. Three contexts:
 
 ### Breathing Rhythm
 
-The default Steady rhythm is 4-4-6-8: Inhale 4 seconds, Hold 4 seconds, Exhale 6 seconds, Relax 8 seconds (phase enum `rest`). Relax is intentionally long enough to allow a normal catch-up breath, a yawn, or a soft reset before the next guided inhale; "Relax" labels the phase rather than "Rest" because the body wants to inhale during this window, not hold still. The pre-session Settling In state lasts 8 seconds and is skipped when resuming a session. Soft and Full presets reshape the per-phase durations; see the Rhythm component spec.
+The default Steady rhythm is 4-4-6-4: Inhale 4 seconds, Hold 4 seconds, Exhale 6 seconds, Relax 4 seconds (phase enum `rest`). Relax is a short breath-back beat that lets the user take a natural inhale before the next guided cycle; "Relax" labels the phase rather than "Rest" because the body wants to inhale during this window, not hold still. Steady Relax was shortened from 8 seconds to 4 seconds on 2026-05-26 after multiple beta testers reported the longer pause felt too long and counterproductive (T-2026-05-23-14, T-2026-05-23-18 among others). The pre-session Settling In state lasts 8 seconds and is skipped when resuming a session. Soft, Full, and Flow presets reshape the per-phase durations; see the Rhythm component spec.
 
 ### Anticipatory Phase Cue
 
@@ -233,9 +233,9 @@ The active phase label and Settling In label use semibold 600 with a dark text s
 
 The breathing pattern itself is selectable inside the `Sequence` tab of Session Setup under the label `Choose your pace`. Four options:
 
-- **Steady** (`standard`, `Balanced`) — 4-4-6-8, 22s cycle. Default for first-time users.
+- **Steady** (`standard`, `Balanced`) — 4-4-6-4, 18s cycle. Default for first-time users.
 - **Soft** (`gentle`, `Accessible`) — 3-2-4-4, 13s cycle. Shorter, lighter cycles for easier breathing.
-- **Full** (`full`, `Deep`) — 6-6-10-4, 26s cycle. Slower, deeper rhythm with longer breaths.
+- **Full** (`full`, `Deep`) — 6-6-10-6, 28s cycle. Slower, deeper rhythm with longer breaths.
 - **Flow** (`flow`, `Continuous`) — 4-0-6-2, 12s cycle. No hold, steady momentum. Hold phase has zero duration but keeps the canonical four-phase shape.
 
 Each tile shows only the pace name (uppercase 10px tracking-0.02em): `Steady`, `Soft`, `Full`, `Flow`. One-word descriptors (`Balanced`, `Accessible`, `Deep`, `Continuous`) stay in aria-labels for screen readers and implementation clarity, but are not visible inside the compact tile. This keeps the picker readable at mobile width and prevents the skeptical primary user from parsing breathwork notation before pressing Begin.

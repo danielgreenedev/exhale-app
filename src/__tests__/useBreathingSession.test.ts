@@ -44,10 +44,10 @@ describe('useBreathingSession - initial state', () => {
   });
 
   it('exposes the correct totalCycles for each session length', () => {
-    expect(renderHook(() => useBreathingSession('quick')).result.current.totalCycles).toBe(8);
-    expect(renderHook(() => useBreathingSession('short')).result.current.totalCycles).toBe(14);
-    expect(renderHook(() => useBreathingSession('medium')).result.current.totalCycles).toBe(19);
-    expect(renderHook(() => useBreathingSession('long')).result.current.totalCycles).toBe(27);
+    expect(renderHook(() => useBreathingSession('quick')).result.current.totalCycles).toBe(10);
+    expect(renderHook(() => useBreathingSession('short')).result.current.totalCycles).toBe(17);
+    expect(renderHook(() => useBreathingSession('medium')).result.current.totalCycles).toBe(23);
+    expect(renderHook(() => useBreathingSession('long')).result.current.totalCycles).toBe(33);
   });
 
   it('starts at cycle 1', () => {
@@ -126,17 +126,17 @@ describe('useBreathingSession - phase progression', () => {
     expect(result.current.currentPhase.phase).toBe('exhale');
   });
 
-  it('is in rest phase during t=14-22s', () => {
+  it('is in rest phase during t=14-18s', () => {
     const { result } = renderHook(() => useBreathingSession('short'));
     act(() => { result.current.start(); });
-    advance(18000);
+    advance(15000);
     expect(result.current.currentPhase.phase).toBe('rest');
   });
 
-  it('wraps back to inhale at the start of the second cycle around t=22s', () => {
+  it('wraps back to inhale at the start of the second cycle around t=18s', () => {
     const { result } = renderHook(() => useBreathingSession('short'));
     act(() => { result.current.start(); });
-    advance(22500);
+    advance(18500);
     expect(result.current.currentPhase.phase).toBe('inhale');
     expect(result.current.cycleNumber).toBe(2);
   });
@@ -169,7 +169,7 @@ describe('useBreathingSession - phase progression', () => {
 
 describe('useBreathingSession - session completion', () => {
   it('completes after all cycles elapse', () => {
-    const { result } = renderHook(() => useBreathingSession('quick')); // 8 x 22s = 176s
+    const { result } = renderHook(() => useBreathingSession('quick')); // 10 x 18s = 180s
     act(() => { result.current.start(); });
     for (let t = 0; t <= 181_000; t += 1000) advance(1000);
     expect(result.current.sessionState).toBe('complete');
@@ -206,8 +206,8 @@ describe('useBreathingSession - alternate rhythm', () => {
 
   it('uses the deep rhythm cycle duration and cycle count', () => {
     const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.full));
-    expect(result.current.cycleDuration).toBe(26);
-    expect(result.current.totalCycles).toBe(12);
+    expect(result.current.cycleDuration).toBe(28);
+    expect(result.current.totalCycles).toBe(11);
     expect(result.current.rhythm.id).toBe('full');
   });
 
@@ -309,7 +309,7 @@ describe('useBreathingSession - proportional anticipation cue cap', () => {
   // Regression guard for the imperceptibility-risk phase. Full Exhale is 10s — at 8% of phase,
   // the 0.8s lead is already the narrowest readable window. If anyone tightens the formula
   // (e.g., caps long phases too), the cue here would shrink further and become invisible.
-  // Full is 6-6-10-4, so Exhale runs t=12..22. At t=21.5s (0.5s before end), with the 0.8s
+  // Full is 6-6-10-6, so Exhale runs t=12..22. At t=21.5s (0.5s before end), with the 0.8s
   // lookahead intact, leadProgress should be (0.8 - 0.5) / 0.8 = 0.375.
   it('Full Exhale (10s phase) keeps the full 0.8s lead — imperceptibility regression guard', () => {
     const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.full));

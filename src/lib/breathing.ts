@@ -124,7 +124,7 @@ export const RHYTHMS: Record<RhythmId, Rhythm> = {
     'Steady',
     'Balanced',
     'A balanced, grounding baseline rhythm.',
-    [4, 4, 6, 8]
+    [4, 4, 6, 4]
   ),
   gentle: buildRhythm(
     'gentle',
@@ -138,7 +138,7 @@ export const RHYTHMS: Record<RhythmId, Rhythm> = {
     'Full',
     'Deep',
     'A slower, deeper rhythm with longer breaths.',
-    [6, 6, 10, 4]
+    [6, 6, 10, 6]
   ),
   flow: buildRhythm(
     'flow',

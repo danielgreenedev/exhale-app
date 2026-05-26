@@ -1,6 +1,6 @@
 # Codex Handoff
 
-Last updated: 2026-05-26 (Footer signed-in state and sync anchor)
+Last updated: 2026-05-26 (Steady and Full Relax revised; footer signed-in state and sync anchor)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
@@ -8,7 +8,7 @@ This document is overwritten on each handoff. The previous handoff's content doe
 
 - Branch: `master`.
 - Working tree is clean after this handoff's commit. Untracked entries are dev logs (`.next-dev.err.log`, `.next-dev.out.log`, `debug.log`, `tmp/`) that should stay out of git.
-- Recently committed and pushed: auth refresh hardening (3b4a031), shared sign-in footer link (3b4a031), and auth-aware label + sync anchor on the footer link (1b447bf).
+- Recently committed and pushed: auth refresh hardening (3b4a031), shared sign-in footer link (3b4a031), auth-aware label + sync anchor on the footer link (1b447bf), doc reconciliation (f850b5f), and the 2026-05-26 Steady (4-4-6-4) / Full (6-6-10-6) Relax revisions (current commit).
 - Verification from this batch: `npm.cmd run lint` clean, `npm.cmd test -- --runInBand` 107/107 passing, Playwright screenshots at 375 / 390 / 640 px on home and stats.
 - `next-env.d.ts` may be rewritten by `next build`; restore it to the checked-in dev routes import before committing if it changes.
 
@@ -25,7 +25,7 @@ This document is overwritten on each handoff. The previous handoff's content doe
 
 ## Key Functional State
 
-- **Four visible paces.** Steady (4-4-6-8), Soft (3-2-4-4), Full (6-6-10-4), and Flow (4-0-6-2). Flow's zero-duration Hold is skipped by `getPhaseAtTime` and `getNextPhase`.
+- **Four visible paces.** Steady (4-4-6-4, cycle 18s), Soft (3-2-4-4, cycle 13s), Full (6-6-10-6, cycle 28s), and Flow (4-0-6-2, cycle 12s). Steady was 4-4-6-8 and Full was 6-6-10-4 before the 2026-05-26 Relax revisions. Flow's zero-duration Hold is skipped by `getPhaseAtTime` and `getNextPhase`.
 - **Fourth phase: Relax.** User-facing label `Relax`, instruction `Breathe naturally`; the internal phase enum remains `'rest'`.
 - **Anticipatory phase cue.** `PHASE_LOOKAHEAD_SECONDS = 0.8` is still the ceiling. `getPhaseLookahead(phase)` returns `Math.min(0.8, phase.duration * 0.25)`. No HUD text cue is shown.
 - **Cue hierarchy.** The center orb is the primary timing object. The outer guide ring is a quiet pre-cue/support signal, not the thing users should chase.
@@ -65,7 +65,7 @@ Current brand-new-user prompts live in `docs/USER_FEEDBACK.md`; key themes still
 - Whether the Facebook/Messenger in-app browser hint is clear enough without distracting from the session, and whether the tester can actually find an external-browser option in the Meta menu.
 - Whether the one-second visual crossfade makes phase changes feel smoother without making testers feel late.
 - Whether the revised central phase label/instruction and dimmer orb treatment are readable over each phase color without glare or washout.
-- Whether Steady's 8-second Relax should become shorter, clearer, or replaced by a more recognizable post-exhale pause in some rhythm.
+- Whether Steady's revised 4-second Relax now feels clean and well-timed, or whether it has tipped too short for testers who liked the longer breath-back beat. T-2026-05-23-14 and T-2026-05-23-18 are the most direct validation candidates since they both flagged the prior 8s as too long.
 - Whether Session Complete should show selected duration (`3 minutes complete`) instead of exact elapsed seconds.
 - Whether hiding Session Setup until after the first completed local session reduces first-use friction without frustrating customization-oriented testers.
 - Whether the anonymous-state footer label `Sign In to Sync` reads as inviting for fresh visitors, and whether the signed-in `Signed In` label is recognized as a working entry point or read as a status badge. T-2026-05-25-19 is the trigger tester; next first-time and next returning-synced testers are the validation reads.

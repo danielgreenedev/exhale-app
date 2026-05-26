@@ -1,11 +1,11 @@
 # Exhale To-Do List
 
-Last updated: May 26, 2026 (Footer signed-in state and sync anchor)
+Last updated: May 26, 2026 (Steady and Full Relax durations revised)
 
 ## Completed Rhythm Changes
 
 - Settling In now lasts 8 seconds before the first guided inhale.
-- The core rhythm is now 4-4-6-8, with an 8-second Relax phase (internal phase enum `rest`).
+- The default Steady rhythm is now 4-4-6-4 (cycle 18s), with a 4-second Relax phase (internal phase enum `rest`). The pattern was originally 4-4-6-8 at the 2026-05-19 alternate-rhythm launch and was revised on 2026-05-26 after Relax-too-long beta feedback.
 - Session breath counts were recalibrated so the 3, 5, 7, and 10 minute labels stay accurate.
 - Top-level session length buttons now show only time labels; rhythm-specific timing details stay behind the optional `View timing` reveal instead of the first decision surface.
 
@@ -123,6 +123,19 @@ Driven by T-2026-05-25-19: returning synced user could not find OAuth/sign-in be
 - Did not add a sign-in button on home itself. The "Home is never auth-gated" rule in CLAUDE.md stands; the footer placement keeps the recovery path discoverable without making the first decision feel account-related.
 - Lint clean and full Jest suite passes (107/107) after the change. Playwright screenshots at 375 / 390 / 640 px confirm the three-link footer fits without wrap on home and looks clean on stats.
 
+## Completed Steady And Full Relax Revisions (2026-05-26)
+
+Owner-directed rhythm adjustment, responsive to repeated Relax-too-long beta signal (T-2026-05-23-14, T-2026-05-23-18, T-2026-05-22-13).
+
+- **Steady** Relax shortened from 8s to 4s. New pattern is 4-4-6-4, cycle 18s, ~3.3 breaths/min. The phase is now a brief breath-back beat rather than the previous "long enough for a full normal breath" framing. This is the default rhythm for first-time users, so the change touches every default session.
+- **Full** Relax extended from 4s to 6s. New pattern is 6-6-10-6, cycle 28s, ~2.1 breaths/min. The shape is now more symmetrical (inhale+hold = 12s, exhale+relax = 16s) and the post-exhale beat reads as a deliberate pause rather than a short interruption.
+- `recalibrateCycles` in `src/lib/breathing.ts` auto-derives the new sessionCycles so the 3/5/7/10 minute labels stay honest:
+  - Steady: quick 10, short 17, medium 23, long 33 (was 8/14/19/27).
+  - Full: quick 6, short 11, medium 15, long 21 (was 7/12/16/23).
+- Soft (3-2-4-4) and Flow (4-0-6-2) untouched; only the two rhythms named in the request changed.
+- Tests in `src/__tests__/breathing.test.ts` and `src/__tests__/useBreathingSession.test.ts` updated for the new boundaries, cycle durations, totalCycles, and phase-window comments. All 107 still pass.
+- Authoritative docs updated: `CLAUDE.md`, `PRODUCT.md` (dropped the now-stale `4-4-6-8` reference in favor of "anxiety-sensitive paced breathing patterns"), `DESIGN.md`, `docs/ROADMAP.md`, `docs/OPEN_QUESTIONS.md`. Historical tester observations and Impeccable critiques that quoted the old durations are left intact as point-in-time records.
+
 ## Completed Footer Signed-In State And Sync Anchor (2026-05-26)
 
 Driven by project owner refinement on the sign-in footer link.
@@ -160,7 +173,7 @@ Driven by project owner refinement on the sign-in footer link.
 
 Alternate rhythm options shipped end to end:
 
-- `RHYTHMS` registry in `src/lib/breathing.ts` with four visible paces: Steady 4-4-6-8 (internal id `standard`, default), Soft 3-2-4-4 (internal id `gentle`), Full 6-6-10-4, and Flow 4-0-6-2. Per-rhythm session-cycle recalibration keeps the 3/5/7/10 minute labels honest.
+- `RHYTHMS` registry in `src/lib/breathing.ts` with four visible paces: Steady 4-4-6-4 (internal id `standard`, default; originally 4-4-6-8, revised 2026-05-26), Soft 3-2-4-4 (internal id `gentle`), Full 6-6-10-6 (originally 6-6-10-4, revised 2026-05-26), and Flow 4-0-6-2. Per-rhythm session-cycle recalibration keeps the 3/5/7/10 minute labels honest.
 - Rhythm threaded through `useBreathingSession`, `BreathingOrb`, `GameHUD`, `useAudioEngine`, and `game/page.tsx` via a locked-at-first-render `rhythmRef` pattern.
 - Session Setup rhythm picker now uses label-only pace tiles (Steady / Soft / Full / Flow); the connected helper row is human-first, and technical phase timing stays hidden by default behind `View timing` to avoid intimidating the skeptical primary user.
 - localStorage key `exhale-rhythm` plus Supabase `user_settings.rhythm` column (migration 002), with isRhythmId guard on parse.

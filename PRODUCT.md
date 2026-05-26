@@ -14,7 +14,7 @@ Design for the primary user. Don't break the experience for the secondary.
 
 ## Product Purpose
 
-Exhale is a guided breathing tool for learning paced breathing as an anxiety coping skill. It exists to make an anxiety-sensitive 4-4-6-8 breathing pattern accessible to anyone, regardless of prior experience or motivation.
+Exhale is a guided breathing tool for learning paced breathing as an anxiety coping skill. It exists to make anxiety-sensitive paced breathing patterns accessible to anyone, regardless of prior experience or motivation.
 
 Success: a first-time user completes a session without being confused, and returns voluntarily.
 

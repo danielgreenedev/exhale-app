@@ -62,9 +62,9 @@ Pulled forward from Stage 1 after five of six recent beta testers reported rhyth
 Shipped:
 
 - Four selectable paces surfaced inside Session Setup, with label-only tiles and human-first helper descriptions:
-  - **Steady** (`standard`) — 4-4-6-8, 22s cycle. Default for first-time users.
+  - **Steady** (`standard`) — 4-4-6-4, 18s cycle. Default for first-time users. (Relax shortened from 8s to 4s on 2026-05-26.)
   - **Soft** (`gentle`) — 3-2-4-4, 13s cycle. Shorter, lighter cycles.
-  - **Full** (`full`) — 6-6-10-4, 26s cycle. Slower, deeper rhythm.
+  - **Full** (`full`) — 6-6-10-6, 28s cycle. Slower, deeper rhythm. (Relax extended from 4s to 6s on 2026-05-26 for a more symmetrical shape.)
   - **Flow** (`flow`) — 4-0-6-2, 12s cycle. No hold, steady momentum.
 - Per-rhythm cycle counts recalibrated so all four minute labels stay close to their targets.
 - Rhythm threads through `useBreathingSession`, `BreathingOrb`, `GameHUD`, `useAudioEngine`, and `game/page.tsx` via a Rhythm object captured at first render.

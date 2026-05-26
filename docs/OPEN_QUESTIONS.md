@@ -687,7 +687,7 @@ Follow-up: Promoted Priority added to `docs/ROADMAP.md` and `docs/TODO.md` to de
 
 ### Should Exhale offer customizable breath rhythms?
 
-Answer: Curated presets, not free customization. Four rhythms are now available inside Session Setup as visible pace choices: Steady (internal id `standard`, 4-4-6-8), Soft (internal id `gentle`, 3-2-4-4), Full (`full`, 6-6-10-4), and Flow (`flow`, 4-0-6-2). Each persists through `exhale-rhythm` localStorage and `user_settings.rhythm` cloud column. Free per-phase customization is intentionally not exposed; the presets handle the rhythm-fit complaints captured so far without forcing the skeptical primary user to make a multi-axis decision before pressing Begin.
+Answer: Curated presets, not free customization. Four rhythms are now available inside Session Setup as visible pace choices: Steady (internal id `standard`, 4-4-6-4 as of 2026-05-26, originally 4-4-6-8), Soft (internal id `gentle`, 3-2-4-4), Full (`full`, 6-6-10-6 as of 2026-05-26, originally 6-6-10-4), and Flow (`flow`, 4-0-6-2). Each persists through `exhale-rhythm` localStorage and `user_settings.rhythm` cloud column. Free per-phase customization is intentionally not exposed; the presets handle the rhythm-fit complaints captured so far without forcing the skeptical primary user to make a multi-axis decision before pressing Begin.
 
 Date answered: 2026-05-19
 
