@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 25, 2026 (Session persistence hardening and sign-in discoverability)
+Last updated: May 26, 2026 (Footer signed-in state and sync anchor)
 
 ## Completed Rhythm Changes
 
@@ -122,6 +122,17 @@ Driven by T-2026-05-25-19: returning synced user could not find OAuth/sign-in be
 - Added a quiet `Sign In to Sync` link to `src/components/PolicyFooter.tsx`, visible on home, session complete, and stats. The footer now uses `flex-wrap` with paired Privacy/Terms in a single inline-flex group and a standalone sign-in link, so the long label never breaks mid-word at iPhone SE / iPhone 12 widths. Tracking dropped from `0.18em` to `0.14em` to fit all three labels comfortably on one row.
 - Did not add a sign-in button on home itself. The "Home is never auth-gated" rule in CLAUDE.md stands; the footer placement keeps the recovery path discoverable without making the first decision feel account-related.
 - Lint clean and full Jest suite passes (107/107) after the change. Playwright screenshots at 375 / 390 / 640 px confirm the three-link footer fits without wrap on home and looks clean on stats.
+
+## Completed Footer Signed-In State And Sync Anchor (2026-05-26)
+
+Driven by project owner refinement on the sign-in footer link.
+
+- `PolicyFooter` is now a client component that reads `useAuth()`. When the user is signed in (`ready && !isAnonymous`), the link reads `Signed In`; otherwise it reads `Sign In to Sync`. The default during the bootstrap window stays on `Sign In to Sync` so anonymous visitors (the common case) do not see a misleading flash of `Signed In`.
+- The link target now uses the fragment `/stats#sync` so signed-in users land directly on the Backup & Sync block without re-entering credentials, and anonymous users land where they can sign in. The fragment also scrolls past the practice list when the user already has history.
+- `src/app/stats/page.tsx` adds `id="sync"` and `scroll-mt-6` to the Backup & Sync block so the hash anchor scrolls cleanly without clipping under the page top padding.
+- aria-label tracks the visible label: `Open practice page; you are signed in` when signed in, `Sign in to sync practice history` otherwise.
+- PolicyFooter remains shared across home, session complete, and stats. Privacy and Terms pages do not render it.
+- Lint clean and 107/107 tests still passing after the change.
 
 ## Completed Mobile Sound Control
 

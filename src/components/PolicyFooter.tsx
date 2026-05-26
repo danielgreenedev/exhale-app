@@ -1,9 +1,22 @@
+'use client';
+
 import Link from 'next/link';
+import { useAuth } from '@/lib/auth';
 
 const linkClass =
   'inline-flex min-h-11 items-center whitespace-nowrap px-2 hover:text-still-white/78 transition-colors duration-300';
 
 export function PolicyFooter() {
+  const { ready, isAnonymous } = useAuth();
+  // Default to the sign-in label until auth is ready: anonymous is the common
+  // case, and showing "Signed In" then flipping to "Sign In to Sync" would
+  // mislead first-time visitors during the bootstrap window.
+  const signedIn = ready && !isAnonymous;
+  const syncLabel = signedIn ? 'Signed In' : 'Sign In to Sync';
+  const syncAria = signedIn
+    ? 'Open practice page; you are signed in'
+    : 'Sign in to sync practice history';
+
   return (
     <footer className="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[10px] tracking-[0.14em] uppercase font-light text-still-white/55">
       <span className="inline-flex items-center gap-x-2">
@@ -16,11 +29,11 @@ export function PolicyFooter() {
         </Link>
       </span>
       <Link
-        href="/stats"
+        href="/stats#sync"
         className={linkClass}
-        aria-label="Sign in to sync practice history"
+        aria-label={syncAria}
       >
-        Sign In to Sync
+        {syncLabel}
       </Link>
     </footer>
   );

@@ -503,7 +503,10 @@ export default function StatsPage() {
           </>
         )}
 
-        <div className={`flex flex-col gap-3 w-full border-t border-still-white/10 ${totalSessions === 0 ? 'pt-4 opacity-80' : 'pt-2'}`}>
+        <div
+          id="sync"
+          className={`flex flex-col gap-3 w-full border-t border-still-white/10 scroll-mt-6 ${totalSessions === 0 ? 'pt-4 opacity-80' : 'pt-2'}`}
+        >
           <p className="text-still-white/58 text-xs tracking-[0.15em] uppercase font-light">
             Backup & Sync
           </p>
