@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 24, 2026 (Meta browser follow-up)
+Last updated: May 25, 2026 (Sign-in discoverability after session loss)
 
 ## Purpose
 
@@ -246,6 +246,59 @@ Use these when a tester is willing to do functionality testing after at least on
 1. 
 
 ## Recent Feedback Notes
+
+### 2026-05-25, T-2026-05-25-19, AI Software Developer, Sign-In Discoverability After Session Loss
+
+#### Session
+
+- Tester ID: T-2026-05-25-19
+- Follow-up OK: Unknown
+- Source: Project owner network, AI software developer
+- Date: Reported 2026-05-25; tester likely used an earlier build before current session-handling and OAuth changes shipped
+- Environment: Production assumed
+- Device: Unknown
+- Browser: Unknown
+- Route tested: Home, attempted Practice History
+- Session length: Unknown
+- Rhythm: Unknown
+- Sound choice: Unknown
+- Circle Size: Unknown
+- Signal class: **Discoverability defect.** Returning synced user could not find the OAuth/sign-in entry point because the Practice History link is hidden until a local completed session exists. Project owner notes tester likely saw an earlier build; possible token-refresh contribution was hardened defensively this session.
+
+#### What Worked
+
+- Tester reached home and recognized the app.
+
+#### Friction
+
+- After their Supabase session had been lost (likely token refresh failure or cleared site data), the home page treated them as a first-time visitor, which hides the Practice History link.
+- With Practice History hidden, there was no visible path back to OAuth or email-code sign-in. Without knowing to navigate to `/stats` directly, the tester had no way to restore their synced history.
+
+#### Accessibility Notes
+
+- The "hide Practice History until first local session" rule was added on 2026-05-19 to reduce first-decision load (Impeccable critique 36/40), but it combines badly with the returning-synced-user case: a user who legitimately has cloud history is treated as a brand-new visitor.
+
+#### Emotional Tone
+
+- Calm / Clear / Rushed / Confusing / Overstimulating / Other: Confusing, felt locked out of own data.
+
+#### Correlation To Existing Feedback
+
+- First report of session-loss friction. No prior tester signal on this specifically.
+- Adjacent to OAuth setup completion (2026-05-20): the OAuth path works for first-time sign-in, but the post-session-loss recovery path was incomplete.
+
+#### Actionable Recommendations (implemented 2026-05-25)
+
+1. Hardened auth bootstrap and `refreshUser` handling in `src/lib/auth.tsx`: only fall back to anonymous on explicit 401/403 session invalidation; preserve cached session on transient (network/5xx) errors. This is the most plausible root cause for a "session expired" feel caused by a momentary network blip during page load.
+2. Made the Supabase client's auth config explicit in `src/lib/supabase.ts` (`persistSession`, `autoRefreshToken`, `detectSessionInUrl` all true) so persistence intent is stated rather than implied.
+3. Added a quiet `Sign In to Sync` link to the shared `PolicyFooter`, visible on home, session complete, and stats. Returning synced users always have a path to sign in regardless of local session count.
+4. Did not add a sign-in button on home itself; that would conflict with the "Home is never auth-gated" rule in CLAUDE.md. Footer placement keeps the entry point discoverable without making the first decision feel account-related.
+
+#### Open Questions
+
+1. Confirm with tester that the current build keeps them signed in across normal use without re-triggering the lockout.
+2. Whether the footer label `Sign In to Sync` reads as inviting (recovery path) or coercive (account ask) for fresh visitors. Watch for first-time tester reaction before promoting to a more prominent surface.
+3. Whether Supabase project-side refresh-token lifetime needs extending. Client-side defenses are now in place; if synced users still report drop-outs, check the JWT expiry and inactivity-timeout dashboard settings.
 
 ### 2026-05-23, T-2026-05-23-18, Pediatrician, Relax Length/Meaning And In-Session Text Readability
 

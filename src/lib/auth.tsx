@@ -1,8 +1,17 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import type { User } from '@supabase/supabase-js';
+import type { AuthError, User } from '@supabase/supabase-js';
 import { supabase } from './supabase';
+
+// Distinguish "server says this session is invalid" from "we couldn't reach
+// the server." Only the former should drop the user back to anonymous; a
+// transient network blip or 5xx should preserve the cached session so synced
+// users don't get bounced out by a flaky connection.
+function isInvalidSessionError(error: AuthError | null | undefined): boolean {
+  if (!error) return false;
+  return error.status === 401 || error.status === 403;
+}
 
 interface AuthState {
   userId: string | null;
@@ -102,8 +111,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setAuthState(snapshotUser(user));
         return;
       }
+      if (error && !isInvalidSessionError(error)) {
+        reportLocalAuthFallback('user refresh hit transient error; preserving session', error);
+        return;
+      }
     } catch (error) {
-      reportLocalAuthFallback('user refresh failed', error);
+      reportLocalAuthFallback('user refresh failed; preserving session', error);
+      return;
     }
     await setAnonymousUser();
   }, [setAnonymousUser]);
@@ -177,16 +191,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           // Server-validate the JWT so a token for a deleted user can't silently
-          // poison every subsequent write with FK violations.
+          // poison every subsequent write with FK violations. Only sign out on
+          // a real auth invalidation (401/403); transient failures keep the
+          // cached session so a momentary network blip doesn't log users out.
           const { data: { user }, error } = await supabase.auth.getUser();
           if (user && !error) {
             if (active) setAuthState(snapshotUser(user));
+            return;
+          }
+          if (error && !isInvalidSessionError(error)) {
+            reportLocalAuthFallback('bootstrap getUser hit transient error; using cached session', error);
+            if (active) setAuthState(snapshotUser(session.user));
             return;
           }
           await supabase.auth.signOut();
         }
       } catch (error) {
         reportLocalAuthFallback('auth bootstrap failed', error);
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            if (active) setAuthState(snapshotUser(session.user));
+            return;
+          }
+        } catch {
+          // fall through to anonymous
+        }
       }
       if (active) await setAnonymousUser();
     })();

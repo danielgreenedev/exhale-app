@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 24, 2026 (Impeccable follow-ups parked for beta validation)
+Last updated: May 25, 2026 (Session persistence hardening and sign-in discoverability)
 
 ## Completed Rhythm Changes
 
@@ -112,6 +112,16 @@ Last updated: May 24, 2026 (Impeccable follow-ups parked for beta validation)
 - New email sign-ins convert the current anonymous Supabase user where possible, preserving existing `breathing_sessions`, `user_settings`, and `app_events` rows under the same user id.
 - Existing email sign-ins merge local practice history into the signed-in `breathing_sessions` records and restore synced timer length, Circle Size, and sound choice through `user_settings`.
 - Google Backup & Sync is now being added as a sibling provider path, not a replacement for email code sync.
+
+## Completed Session Persistence And Sign-In Discoverability (2026-05-25)
+
+Driven by T-2026-05-25-19: returning synced user could not find OAuth/sign-in because the Practice History link is hidden until a local completed session exists, and the entry-point hint was missing.
+
+- Made the Supabase client's auth config explicit in `src/lib/supabase.ts` (`persistSession`, `autoRefreshToken`, `detectSessionInUrl` all true). These were defaults; stating them documents intent and prevents future option drift.
+- Hardened `AuthProvider` bootstrap and `refreshUser` in `src/lib/auth.tsx`: a new `isInvalidSessionError` helper limits the anonymous fallback to actual 401/403 invalidation. Transient errors (network, 5xx, thrown timeouts) now preserve the cached session so synced users do not get bounced out by a momentary connectivity blip on page load. The "deleted user FK violation" guard is preserved for the explicit-invalidation path.
+- Added a quiet `Sign In to Sync` link to `src/components/PolicyFooter.tsx`, visible on home, session complete, and stats. The footer now uses `flex-wrap` with paired Privacy/Terms in a single inline-flex group and a standalone sign-in link, so the long label never breaks mid-word at iPhone SE / iPhone 12 widths. Tracking dropped from `0.18em` to `0.14em` to fit all three labels comfortably on one row.
+- Did not add a sign-in button on home itself. The "Home is never auth-gated" rule in CLAUDE.md stands; the footer placement keeps the recovery path discoverable without making the first decision feel account-related.
+- Lint clean and full Jest suite passes (107/107) after the change. Playwright screenshots at 375 / 390 / 640 px confirm the three-link footer fits without wrap on home and looks clean on stats.
 
 ## Completed Mobile Sound Control
 
