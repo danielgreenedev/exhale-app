@@ -8,7 +8,7 @@ This document is overwritten on each handoff. The previous handoff's content doe
 
 - Branch: `master`.
 - Working tree is clean after this handoff's commit. Untracked entries are dev logs (`.next-dev.err.log`, `.next-dev.out.log`, `debug.log`, `tmp/`) that should stay out of git.
-- This session committed and pushed: auth refresh hardening and the shared `Sign In to Sync` footer link.
+- Recently committed and pushed: auth refresh hardening (3b4a031), shared sign-in footer link (3b4a031), and auth-aware label + sync anchor on the footer link (1b447bf).
 - Verification from this batch: `npm.cmd run lint` clean, `npm.cmd test -- --runInBand` 107/107 passing, Playwright screenshots at 375 / 390 / 640 px on home and stats.
 - `next-env.d.ts` may be rewritten by `next build`; restore it to the checked-in dev routes import before committing if it changes.
 
@@ -68,7 +68,7 @@ Current brand-new-user prompts live in `docs/USER_FEEDBACK.md`; key themes still
 - Whether Steady's 8-second Relax should become shorter, clearer, or replaced by a more recognizable post-exhale pause in some rhythm.
 - Whether Session Complete should show selected duration (`3 minutes complete`) instead of exact elapsed seconds.
 - Whether hiding Session Setup until after the first completed local session reduces first-use friction without frustrating customization-oriented testers.
-- Whether the new `Sign In to Sync` footer link reads as inviting for returning users or coercive for fresh visitors. T-2026-05-25-19 is the trigger tester; the next first-time tester is the validation read.
+- Whether the anonymous-state footer label `Sign In to Sync` reads as inviting for fresh visitors, and whether the signed-in `Signed In` label is recognized as a working entry point or read as a status badge. T-2026-05-25-19 is the trigger tester; next first-time and next returning-synced testers are the validation reads.
 - Which parked Impeccable follow-up, if any, is validated by the next tester: Relax clarity, active HUD distillation, Meta-webview hardening, or first-run cue/onboarding.
 
 ## Parked Questions
@@ -88,7 +88,7 @@ Current brand-new-user prompts live in `docs/USER_FEEDBACK.md`; key themes still
 - Backup & Sync framing: no profile screen, no auth-first onboarding, no required sign-in before breathing.
 - `isInvalidSessionError` in `src/lib/auth.tsx`: only fall back to anonymous on explicit 401/403, never on transient errors.
 - Explicit Supabase auth options in `src/lib/supabase.ts`: keep `persistSession`, `autoRefreshToken`, `detectSessionInUrl` stated even though they are framework defaults.
-- `Sign In to Sync` link in `PolicyFooter`: the only sign-in entry point for users whose Practice History link is hidden. Do not remove without replacement.
+- `PolicyFooter` sync link: the only sign-in entry point for users whose Practice History link is hidden. Anonymous label is `Sign In to Sync`, signed-in label is `Signed In`; both point to `/stats#sync`. Do not remove either label or the fragment without replacing the entry-point function.
 
 ## Recommended Next Step
 

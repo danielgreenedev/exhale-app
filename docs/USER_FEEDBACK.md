@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 25, 2026 (Sign-in discoverability after session loss)
+Last updated: May 26, 2026 (Footer signed-in state refinement on T-2026-05-25-19)
 
 ## Purpose
 
@@ -291,13 +291,14 @@ Use these when a tester is willing to do functionality testing after at least on
 
 1. Hardened auth bootstrap and `refreshUser` handling in `src/lib/auth.tsx`: only fall back to anonymous on explicit 401/403 session invalidation; preserve cached session on transient (network/5xx) errors. This is the most plausible root cause for a "session expired" feel caused by a momentary network blip during page load.
 2. Made the Supabase client's auth config explicit in `src/lib/supabase.ts` (`persistSession`, `autoRefreshToken`, `detectSessionInUrl` all true) so persistence intent is stated rather than implied.
-3. Added a quiet `Sign In to Sync` link to the shared `PolicyFooter`, visible on home, session complete, and stats. Returning synced users always have a path to sign in regardless of local session count.
+3. Added a quiet sign-in link to the shared `PolicyFooter`, visible on home, session complete, and stats. Returning synced users always have a path to sign in regardless of local session count.
 4. Did not add a sign-in button on home itself; that would conflict with the "Home is never auth-gated" rule in CLAUDE.md. Footer placement keeps the entry point discoverable without making the first decision feel account-related.
+5. Refined 2026-05-26: the footer link is now auth-aware. It reads `Signed In` when the user is signed in (`ready && !isAnonymous`) and `Sign In to Sync` otherwise, and both point to `/stats#sync` so signed-in users land at the Backup & Sync block without re-signing in. The Backup & Sync block on `/stats` has `id="sync"` and `scroll-mt-6` for clean fragment scrolling.
 
 #### Open Questions
 
 1. Confirm with tester that the current build keeps them signed in across normal use without re-triggering the lockout.
-2. Whether the footer label `Sign In to Sync` reads as inviting (recovery path) or coercive (account ask) for fresh visitors. Watch for first-time tester reaction before promoting to a more prominent surface.
+2. Whether the anonymous-state footer label `Sign In to Sync` reads as inviting (recovery path) or coercive (account ask) for fresh visitors, and whether the signed-in `Signed In` label is recognized as a working entry point or read as a status badge. Watch the next first-time and the next returning-synced tester.
 3. Whether Supabase project-side refresh-token lifetime needs extending. Client-side defenses are now in place; if synced users still report drop-outs, check the JWT expiry and inactivity-timeout dashboard settings.
 
 ### 2026-05-23, T-2026-05-23-18, Pediatrician, Relax Length/Meaning And In-Session Text Readability
