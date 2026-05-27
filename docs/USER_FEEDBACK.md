@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 26, 2026 (Footer signed-in state refinement on T-2026-05-25-19)
+Last updated: May 27, 2026 (T-2026-05-23-14 follow-up after rhythm and Meta-hint polish)
 
 ## Purpose
 
@@ -246,6 +246,72 @@ Use these when a tester is willing to do functionality testing after at least on
 1. 
 
 ## Recent Feedback Notes
+
+### 2026-05-27, T-2026-05-23-14, Android Follow-Up, Meta Hint, Cross-Browser Behavior, Pace Still Feels Too Fast
+
+#### Session
+
+- Tester ID: T-2026-05-23-14 (Ryan, returning tester; original entry 2026-05-23)
+- Follow-up OK: Yes (provided this follow-up unprompted)
+- Source: Same Android tester who first reported on 2026-05-23
+- Date: 2026-05-27
+- Environment: Production
+- Devices/Browsers tested in this round: (a) Facebook in-app browser on Android (Galaxy S26 Ultra), (b) Messenger in-app browser on Android, (c) Brave mobile, (d) Microsoft Edge on Windows, (e) Google Chrome on Windows
+- Route tested: Home, session, multiple session lengths
+- Session length: Multiple
+- Rhythm: Steady (default) was the focus
+- Sound choice: Not specified
+- Circle Size: Not specified; the earlier 2026-05-23 screenshot showed an oversized orb in Facebook in-app browser, see Friction
+- Signal class: **Trusted returning tester with cross-platform discipline.** Tested the same build in five environments before reporting. Strongest evidence we have for what is browser-container vs core product.
+
+#### What Worked
+
+- Meta in-app browser hint: tester confirmed it appears (in-session, not on the home screen) and is present.
+- Three-dot menu on Android Facebook and Messenger in-app browsers does expose an `Open in external browser` option. The tester could escape to a real browser.
+- Aside from fullscreen, Facebook and Brave mobile behaved largely the same for performance and core breathing function.
+- Microsoft Edge and Google Chrome on Windows: tester explicitly said the build appears to function perfectly. Multiple session lengths and multiple sections of the site tested with no formatting or layout issues.
+- Tester explicitly approved hiding Session Setup for brand-new users: "I did see the settings thing, and I think that was a wise move."
+- General visual verdict: "the site is simple and well formatted and pleasing to the eyes."
+- Tester acknowledged that some Facebook-in-app limitations are inherent to that browser container and may not be designable around.
+
+#### Friction
+
+- **Bug, Facebook in-app browser only:** "The breathing bubble is too big for the screen in Facebook mobile browser." A previous screenshot from this tester confirmed the orb visibly overflowing the visible canvas inside Facebook's in-app browser. The cause is likely Facebook's top bar compressing the visible viewport while `h-screen` / `100vh` still resolves to the un-compressed value. The orb is centered against the full height, so the bottom edge intrudes into the compressed area. Did not reproduce in Brave proper.
+- Meta browser hint copy: tester proposed `click 3 dots in top right to open in browser for enhanced sound and fullscreen`. The current copy is `Tap menu to open in browser for sound or fullscreen`. Tester also suggested making the font smaller if necessary. The "enhanced" framing is positive rather than apologetic; the "3 dots in top right" is more directive but more Android-specific.
+- Facebook in-app browser readability is worse than Brave because Facebook adds a large top bar that compresses screen height (browser-container limitation, not an app bug).
+- **Pace still feels too fast on the latest build, even on Steady (default).** "I did notice some adjustments to the timing of the breathing aspect but I still feel it's got work to do." This is on the new Steady 4-4-6-4 (revised 2026-05-26); tester is reporting it as still too fast.
+- **Relax still feels like an unnecessary interruption with no benefit.** Tester is consistent with his 2026-05-23 framing on this. Shortening Steady Relax from 8s to 4s did not resolve the objection.
+
+#### Accessibility Notes
+
+- Strong cross-browser evidence that the desktop experience is solid. The remaining issues cluster around the Facebook in-app browser and the rhythm itself.
+- The orb-overflow report is the first concrete in-app rendering bug since the 2026-05-23 round; previously the only Meta-browser issue was fullscreen, which is now handled by hide+hint.
+
+#### Emotional Tone
+
+- Calm / Clear / Rushed / Confusing / Overstimulating / Other: Mixed positive. Strong on "simple, well formatted, pleasing to the eyes." Rushed on the active rhythm. Frustrated with Relax. Pragmatic about Facebook-browser limits.
+- Notes: This tester clearly distinguishes container-bound limits from product-bound limits, which is unusual and high-credibility.
+
+#### Correlation To Existing Feedback
+
+- Pace-too-fast: this is a NEW signal direction on Steady from this tester. Previously his complaint was transition smoothness ("popped") and Relax counter-productivity. Slowness was not previously his ask. The shortened Steady (4-4-6-4) may have inadvertently pushed past his comfort window. Combine with the long-standing Full feedback and the next reasonable experiment for this tester is Full (6-6-10-6) — not a default change.
+- Relax-as-interruption: reinforces T-2026-05-23-18 and T-2026-05-22-13. Shortening Relax did not address this tester's objection — for him, the issue is the existence of Relax in a controlled-breathing rhythm, not its duration. Flow 4-0-6-2 is the closest current preset; ask if he has tried it.
+- Settings-hidden-for-first-run gate: confirmed positive from a tester who previously argued for it (T-2026-05-23-14, 2026-05-23). This validates the first-run setup-gate decision.
+- Meta browser hint reach: this tester is the first to confirm the in-session Meta-webview hint actually appears and is read. The escape path through the 3-dot menu also works on his device.
+
+#### Actionable Recommendations
+
+1. **Implemented 2026-05-27: orb-overflow fix.** `src/app/game/page.tsx` now sets `style={{ height: '100dvh' }}` on the game `main`, keeping the existing `h-screen` (`100vh`) classname as a fallback for browsers that do not understand `dvh`. On supporting browsers (Chrome ≥108, Safari ≥15.4, current Android WebView, current Facebook in-app), the main element resolves to the visible viewport height instead of the un-compressed `100vh`, so the orb (centered against the canvas) no longer falls below the browser's top bar. Smoke-tested at 412×700 and 360×640 simulated compressed viewports; orb stays centered with margin on all sides. Real-Facebook validation still owed: ask this tester to retry and confirm.
+2. **Implemented 2026-05-27: hint copy refinement.** `Tap menu to open in browser for sound or fullscreen` is now `Tap menu (top-right) for sound and fullscreen`. The positional cue is kept generic (no "3 dots" glyph reference so the copy works on iOS Meta-webviews where the menu icon may differ). Verified visually under a faked Facebook in-app user agent at 412×700.
+3. **Do not change Steady's default rhythm based on this tester alone.** His "still too fast" signal directly conflicts with T-2026-05-23-18 (pediatrician) who said she could follow the transitions and time did not need to be extended. Steady is the default for everyone; further changes need a second confirming signal. Instead, ask this tester to try Full (6-6-10-6) which is the slower preset designed for exactly this preference. If he likes Full but still hates Relax, that becomes the trigger for a conditional Full-without-Relax experiment.
+4. **Park the broader "is Relax structurally wrong for some users" question** until the Flow follow-up loop closes. Two testers (T-2026-05-23-14 and T-2026-05-23-18) now have different reactions to Relax: this tester wants it removed, the pediatrician wants it clearer. Flow already removes most of it. Wait for a Flow trial from this tester before promoting a no-Relax variant to implementation.
+
+#### Open Questions
+
+1. Has the tester tried Full (6-6-10-6) or Flow (4-0-6-2) yet, or only Steady? "Still too fast" on Steady combined with "Relax is bad" is the exact phenotype Full and Flow were designed for. If he has not tried them, the next ask is one Full session and one Flow session.
+2. What does the Facebook in-app orb-overflow look like with the small Circle Size? If the bug only appears at L/M, the safety fallback may be capping max orb radius against the available viewport. If it appears at S too, the root cause is the viewport-height computation, not orb sizing.
+3. Is the proposed Meta-browser hint copy "enhanced sound and fullscreen" actually clearer to first-time testers, or only to a returning tester who already knows what the missing capabilities are? A fresh tester read on the hint copy is the right validator.
+4. Should the Meta-webview detection also serve a one-time onboarding hint, or only the in-session hint? Currently only in-session; the tester originally expected to see it on the home screen.
 
 ### 2026-05-25, T-2026-05-25-19, AI Software Developer, Sign-In Discoverability After Session Loss
 

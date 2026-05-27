@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 26, 2026 (Steady and Full Relax durations revised)
+Last updated: May 27, 2026 (Facebook in-app orb-overflow and Meta hint copy)
 
 ## Completed Rhythm Changes
 
@@ -122,6 +122,16 @@ Driven by T-2026-05-25-19: returning synced user could not find OAuth/sign-in be
 - Added a quiet `Sign In to Sync` link to `src/components/PolicyFooter.tsx`, visible on home, session complete, and stats. The footer now uses `flex-wrap` with paired Privacy/Terms in a single inline-flex group and a standalone sign-in link, so the long label never breaks mid-word at iPhone SE / iPhone 12 widths. Tracking dropped from `0.18em` to `0.14em` to fit all three labels comfortably on one row.
 - Did not add a sign-in button on home itself. The "Home is never auth-gated" rule in CLAUDE.md stands; the footer placement keeps the recovery path discoverable without making the first decision feel account-related.
 - Lint clean and full Jest suite passes (107/107) after the change. Playwright screenshots at 375 / 390 / 640 px confirm the three-link footer fits without wrap on home and looks clean on stats.
+
+## Completed Facebook In-App Orb-Overflow And Meta Hint Copy (2026-05-27)
+
+Driven by T-2026-05-23-14 follow-up on 2026-05-27. Tester reported the breathing orb visibly oversized inside Facebook's in-app browser on Android (Galaxy S26 Ultra), and proposed a more directive Meta-webview hint.
+
+- `src/app/game/page.tsx` game `main` now uses `style={{ height: '100dvh' }}` with `h-screen` retained as the 100vh fallback. On browsers that support dynamic viewport units the main element resolves to the actual visible height, so the canvas no longer extends below Facebook's top bar. Old browsers continue to get `100vh`.
+- Meta in-app browser hint copy updated from `Tap menu to open in browser for sound or fullscreen` to `Tap menu (top-right) for sound and fullscreen`. The positional cue is kept generic; the tester's literal "3 dots in top right" is Android-specific and would not match every iOS Meta-webview build.
+- Verified locally at 412×915, 412×700, and 360×640 viewports that the orb fits without overflow; verified with a faked Facebook in-app user agent that the new hint renders in the correct location.
+- Real-Facebook validation still owed. The tester is the validator; ask him to retry on the same device and confirm the orb sits within the visible canvas now.
+- This addresses the first two Actionable Recommendations from the 2026-05-27 T-2026-05-23-14 follow-up. The pace-too-fast and Relax-as-interruption signals remain parked pending a Full and Flow trial from the same tester.
 
 ## Completed Steady And Full Relax Revisions (2026-05-26)
 

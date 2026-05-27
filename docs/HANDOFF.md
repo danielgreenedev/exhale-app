@@ -1,6 +1,6 @@
 # Codex Handoff
 
-Last updated: 2026-05-26 (Steady and Full Relax revised; footer signed-in state and sync anchor)
+Last updated: 2026-05-27 (Facebook in-app orb-overflow and Meta hint copy)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
@@ -8,11 +8,16 @@ This document is overwritten on each handoff. The previous handoff's content doe
 
 - Branch: `master`.
 - Working tree is clean after this handoff's commit. Untracked entries are dev logs (`.next-dev.err.log`, `.next-dev.out.log`, `debug.log`, `tmp/`) that should stay out of git.
-- Recently committed and pushed: auth refresh hardening (3b4a031), shared sign-in footer link (3b4a031), auth-aware label + sync anchor on the footer link (1b447bf), doc reconciliation (f850b5f), and the 2026-05-26 Steady (4-4-6-4) / Full (6-6-10-6) Relax revisions (current commit).
+- Recently committed and pushed: auth refresh hardening (3b4a031), shared sign-in footer link (3b4a031), auth-aware label + sync anchor on the footer link (1b447bf), doc reconciliation (f850b5f), 2026-05-26 Steady (4-4-6-4) / Full (6-6-10-6) Relax revisions (4837cc2), and Facebook in-app orb-overflow + Meta hint copy (current commit).
 - Verification from this batch: `npm.cmd run lint` clean, `npm.cmd test -- --runInBand` 107/107 passing, Playwright screenshots at 375 / 390 / 640 px on home and stats.
 - `next-env.d.ts` may be rewritten by `next build`; restore it to the checked-in dev routes import before committing if it changes.
 
 ## Current Batch Summary
+
+- **Facebook in-app orb-overflow fixed.** The game `main` element now uses `style={{ height: '100dvh' }}` with `h-screen` retained as the `100vh` fallback. T-2026-05-23-14 reported the breathing orb visibly oversized inside Facebook's in-app browser on Android because `100vh` resolves to the un-compressed viewport while Facebook's top bar shrinks the visible canvas. Dynamic viewport height sizes the main to the actual visible area. Old browsers without `dvh` support continue to receive `100vh`. Verified locally at three compressed viewport sizes; real-Facebook validation owed by the same tester.
+- **Meta in-app browser hint copy tightened.** `Tap menu to open in browser for sound or fullscreen` is now `Tap menu (top-right) for sound and fullscreen`. The positional cue stays generic (no "3 dots" glyph) so the copy reads on iOS Facebook/Messenger as well as Android.
+- **Pace-too-fast and Relax-as-interruption signals from T-2026-05-23-14 parked pending Full and Flow trial.** This tester says even the revised Steady (4-4-6-4) still feels too fast and Relax remains an unnecessary interruption. Steady is the default for everyone; do not change it for one tester. Full (6-6-10-6) is the slower preset designed for this preference. Ask the tester to try Full and Flow before any rhythm change.
+
 
 - **Beta feedback mode continues.** Do not start new features unless feedback clearly promotes them. Current signal is still about rhythm fit, Flow pause friction, transition clarity, audio reliability, first-time understanding of Relax, and whether the progressive/ramping ask is a true rhythm-shape need or a Relax-framing problem.
 - **Session persistence hardened for returning synced users.** `src/lib/auth.tsx` no longer signs the user out on transient errors during bootstrap or refresh. A new `isInvalidSessionError(error)` helper limits the anonymous fallback to explicit 401/403 from Supabase; network failures, 5xx, and thrown timeouts now preserve the cached session. The deleted-user FK-violation guard is preserved for the explicit-invalidation path.

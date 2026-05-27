@@ -519,7 +519,12 @@ function GameContent() {
   }
 
   return (
-    <main className="relative w-screen h-screen bg-forest-night overflow-hidden" data-exhale-game data-settled={settling ? 'false' : 'true'}>
+    <main
+      className="relative w-screen h-screen bg-forest-night overflow-hidden"
+      style={{ height: '100dvh' }}
+      data-exhale-game
+      data-settled={settling ? 'false' : 'true'}
+    >
       {/* Canvas fills the whole screen */}
       <div className="absolute inset-0">
         <BreathingOrb
@@ -674,7 +679,7 @@ function GameContent() {
           className="absolute right-5 top-20 max-w-[10.5rem] text-right text-[10px] font-light uppercase leading-snug tracking-[0.1em] text-still-white/55"
           style={{ textShadow: '0 1px 8px rgba(15,23,18,0.72)' }}
         >
-          Tap menu to open in browser for sound or fullscreen
+          Tap menu (top-right) for sound and fullscreen
         </p>
       )}
 
