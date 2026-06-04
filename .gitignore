@@ -20,3 +20,10 @@ out/
 *.pem
 npm-debug.log*
 .npm-cache/
+
+# local dev logs
+.next-dev.*.log
+debug.log
+
+# local visual QA artifacts
+tmp/
