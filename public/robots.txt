@@ -27,3 +27,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://exhale.guide/sitemap.xml
