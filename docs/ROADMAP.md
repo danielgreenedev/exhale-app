@@ -64,14 +64,14 @@ Shipped:
 - Four selectable paces surfaced inside Session Setup, with label-only tiles and human-first helper descriptions:
   - **Steady** (`standard`) — 4-4-6-4, 18s cycle. Default for first-time users. (Relax shortened from 8s to 4s on 2026-05-26.)
   - **Soft** (`gentle`) — 3-2-4-4, 13s cycle. Shorter, lighter cycles.
-  - **Full** (`full`) — 6-6-10-6, 28s cycle. Slower, deeper rhythm. (Relax extended from 4s to 6s on 2026-05-26 for a more symmetrical shape.)
+  - **Box** (`box`) — 4-4-4-4, 16s cycle. Familiar square-breathing structure with a hold after exhale. (Replaced Full on 2026-06-04 after Relax remained cognitively confusing.)
   - **Flow** (`flow`) — 4-0-6-2, 12s cycle. No hold, steady momentum.
 - Per-rhythm cycle counts recalibrated so all four minute labels stay close to their targets.
 - Rhythm threads through `useBreathingSession`, `BreathingOrb`, `GameHUD`, `useAudioEngine`, and `game/page.tsx` via a Rhythm object captured at first render.
-- Local persistence through `exhale-rhythm` localStorage key; cloud round-trip through `user_settings.rhythm` (Supabase migration 002 + 003 applied).
+- Local persistence through `exhale-rhythm` localStorage key; cloud round-trip through `user_settings.rhythm` (Supabase migrations 002-004).
 - Picking a pace updates the helper row; detailed phase timing is available behind `View timing`.
 
-The next signal worth gathering: circle back to the original five testers and ask whether one of Soft or Full fits better than Steady did, and ask Flow testers whether the remaining 2-second Relax/pause helps or interrupts the rhythm. First Flow follow-up says no-Hold helps but the pause may need to become no-pause. That tester follow-up is captured as TODO item.
+The next signal worth gathering: ask testers whether Box feels clearer than the retired Full/Relax shape, and ask Flow testers whether the remaining 2-second Relax/pause helps or interrupts the rhythm. First Flow follow-up says no-Hold helps but the pause may need to become no-pause. That tester follow-up is captured as TODO item.
 
 ## Stage 1, Ship-quality polish
 

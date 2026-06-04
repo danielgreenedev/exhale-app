@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: May 27, 2026 (Facebook in-app orb-overflow and Meta hint copy)
+Last updated: June 4, 2026 (Box replaces Full; Pixel/Facebook Large orb edge clamp)
 
 ## Completed Rhythm Changes
 
@@ -128,10 +128,23 @@ Driven by T-2026-05-25-19: returning synced user could not find OAuth/sign-in be
 Driven by T-2026-05-23-14 follow-up on 2026-05-27. Tester reported the breathing orb visibly oversized inside Facebook's in-app browser on Android (Galaxy S26 Ultra), and proposed a more directive Meta-webview hint.
 
 - `src/app/game/page.tsx` game `main` now uses `style={{ height: '100dvh' }}` with `h-screen` retained as the 100vh fallback. On browsers that support dynamic viewport units the main element resolves to the actual visible height, so the canvas no longer extends below Facebook's top bar. Old browsers continue to get `100vh`.
+- Real Pixel 9 Pro XL / Android / Facebook-app testing showed a second Large-mode issue: the outer orb ring still clipped horizontally. `src/components/BreathingOrb.tsx` now clamps the canvas max radius and guide-ring spacing against the visible canvas width, preserving Large where there is room and shrinking only enough to keep the guide ring inside the viewport.
+- A June 4 owner retest showed the first 14px simulated side gap was still too tight on the real Pixel/Facebook path, with roughly 20px clipped on each side. The clamp now keeps a 40px edge margin and compresses the minimum guide-ring gap before shrinking the core orb.
 - Meta in-app browser hint copy updated from `Tap menu to open in browser for sound or fullscreen` to `Tap menu (top-right) for sound and fullscreen`. The positional cue is kept generic; the tester's literal "3 dots in top right" is Android-specific and would not match every iOS Meta-webview build.
-- Verified locally at 412×915, 412×700, and 360×640 viewports that the orb fits without overflow; verified with a faked Facebook in-app user agent that the new hint renders in the correct location.
+- Verified locally at 393×873, 412×915, and 360×640 viewports with Large mode and a faked Facebook in-app user agent. The June 4 clamp keeps the outer guide ring 40px from each canvas edge at Pixel/Facebook widths.
 - Real-Facebook validation still owed. The tester is the validator; ask him to retry on the same device and confirm the orb sits within the visible canvas now.
-- This addresses the first two Actionable Recommendations from the 2026-05-27 T-2026-05-23-14 follow-up. The pace-too-fast and Relax-as-interruption signals remain parked pending a Full and Flow trial from the same tester.
+- This addresses the first two Actionable Recommendations from the 2026-05-27 T-2026-05-23-14 follow-up. The pace-too-fast and Relax-as-interruption signals now feed the Box and Flow follow-up loop.
+
+## Completed Box Rhythm Replacement (2026-06-04)
+
+Owner feedback promoted the Relax problem from tester preference to product-model confusion: Flow felt better, and Relax was still cognitively confusing even for the app designer. Full was replaced by Box so the structured alternate uses a familiar square-breathing shape instead of another Relax beat.
+
+- `src/lib/breathing.ts` now exposes Box (`box`) as the third rhythm: 4-4-4-4, 16s cycle, with a second `Hold` after Exhale. Full (`full`) and the older `slow` value normalize to Box for backward compatibility.
+- Session-cycle recalibration derives Box counts: quick 11, short 19, medium 26, long 38.
+- Home and game URL/localStorage handling now normalize legacy `full` and `slow` values before choosing a rhythm, so old links or saved settings open Box rather than falling back to Steady.
+- `supabase/migrations/004-rename-full-to-box.sql` updates synced `user_settings.rhythm` rows from `full`/`slow` to `box`.
+- Tests updated for Box registry shape, equal phase timing, duplicate Hold phases, legacy-id normalization, and settings compatibility.
+- Authoritative product docs updated: `CLAUDE.md`, `DESIGN.md`, `docs/ROADMAP.md`, `docs/OPEN_QUESTIONS.md`, `docs/USER_FEEDBACK.md`, and `docs/HANDOFF.md`.
 
 ## Completed Steady And Full Relax Revisions (2026-05-26)
 
@@ -183,9 +196,9 @@ Driven by project owner refinement on the sign-in footer link.
 
 Alternate rhythm options shipped end to end:
 
-- `RHYTHMS` registry in `src/lib/breathing.ts` with four visible paces: Steady 4-4-6-4 (internal id `standard`, default; originally 4-4-6-8, revised 2026-05-26), Soft 3-2-4-4 (internal id `gentle`), Full 6-6-10-6 (originally 6-6-10-4, revised 2026-05-26), and Flow 4-0-6-2. Per-rhythm session-cycle recalibration keeps the 3/5/7/10 minute labels honest.
+- `RHYTHMS` registry in `src/lib/breathing.ts` with four visible paces: Steady 4-4-6-4 (internal id `standard`, default; originally 4-4-6-8, revised 2026-05-26), Soft 3-2-4-4 (internal id `gentle`), Box 4-4-4-4 (internal id `box`, replaced Full on 2026-06-04), and Flow 4-0-6-2. Per-rhythm session-cycle recalibration keeps the 3/5/7/10 minute labels honest.
 - Rhythm threaded through `useBreathingSession`, `BreathingOrb`, `GameHUD`, `useAudioEngine`, and `game/page.tsx` via a locked-at-first-render `rhythmRef` pattern.
-- Session Setup rhythm picker now uses label-only pace tiles (Steady / Soft / Full / Flow); the connected helper row is human-first, and technical phase timing stays hidden by default behind `View timing` to avoid intimidating the skeptical primary user.
+- Session Setup rhythm picker now uses label-only pace tiles (Steady / Soft / Box / Flow); the connected helper row is human-first, and technical phase timing stays hidden by default behind `View timing` to avoid intimidating the skeptical primary user.
 - localStorage key `exhale-rhythm` plus Supabase `user_settings.rhythm` column (migration 002), with isRhythmId guard on parse.
 - Back-compat aliases (`BREATHING_PATTERN`, `CYCLE_DURATION`, `SESSION_CYCLES`) removed; all consumers read rhythm-aware data.
 - 11 new tests cover the registry shape, cycle recalibration accuracy, getPhaseAtTime boundary behavior with non-default rhythms, and the rhythm-lock invariant.
@@ -239,7 +252,7 @@ Driven by the math in the smoke-test plan and the same "stop showing the same si
 - New `getPhaseLookahead(phase)` helper in `src/lib/breathing.ts` returns `Math.min(PHASE_LOOKAHEAD_SECONDS, phase.duration * 0.25)`. Long phases keep the full 0.8s lead; short phases get capped to 25% of their own duration.
 - `useBreathingSession` (two call sites) and `BreathingOrb` updated to use the helper.
 - Concrete effects: Soft Hold 0.8s → 0.5s; Soft Inhale 0.8s → 0.75s; Flow Relax 0.8s → 0.5s; everything else unchanged.
-- 8 new smoke tests in `src/__tests__/useBreathingSession.test.ts` lock the cap behavior per rhythm/phase, including a regression guard for Full Exhale (the imperceptibility-risk phase, where the cap must not engage). 104 tests now pass.
+- Smoke tests in `src/__tests__/useBreathingSession.test.ts` lock the cap behavior per rhythm/phase, including a guard that Box Exhale keeps the full readable 0.8s lead window.
 - CLAUDE.md and DESIGN.md updated to describe the per-phase formula and the concrete values.
 
 ## Completed Policy Footer (2026-05-20)
@@ -281,7 +294,7 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 - Guardrails: no profile screen, avatars, passwords, account settings, premium gate, or auth-first onboarding as part of this task.
 - Acceptance completed: the same Supabase user shows Email and Google providers enabled, and a fresh Firefox production session restored practice history through Google sign-in. Keep email-code sync available unless follow-up testing shows it is redundant.
 
-2. Pending follow-up with rhythm-concern testers: ask the original five (T-2026-05-18-01 and T-2026-05-19-02 through -05) whether Soft or Full fits better than Steady did, and ask the four Rest/Hold-frictioned testers (T-2026-05-19-03, -05, -06, -07) whether Flow fits better than their current choice. Use the Flow follow-up questions in `docs/USER_FEEDBACK.md` so the tiny-pause question is asked consistently. Capture answers in `docs/USER_FEEDBACK.md`. Flow shipped on 2026-05-20 without the original pre-merge validation gate; this follow-up is the post-launch validation. First Flow follow-up from T-2026-05-19-08 says no-Hold helps but the 2-second pause feels too fast and interruptive; the same tester explicitly said they would take out the pause.
+2. Pending follow-up with rhythm-concern testers: ask whether Box feels clearer than the retired Full/Relax shape, and ask the four Rest/Hold-frictioned testers (T-2026-05-19-03, -05, -06, -07) whether Flow fits better than their current choice. Use the Flow/Box follow-up questions in `docs/USER_FEEDBACK.md` so the tiny-pause and post-exhale-hold questions are asked consistently. Capture answers in `docs/USER_FEEDBACK.md`. Flow shipped on 2026-05-20 without the original pre-merge validation gate; Box shipped on 2026-06-04 after the Relax confusion signal strengthened.
 
 2a. Resolved 2026-05-19: the Rest phase is now labeled `Relax` with the single-word instruction `Breathe`. The phase enum stays `rest` as the internal discriminator. `Relax` preserves imperative-verb parity with Inhale/Hold/Exhale and reads as permission rather than instruction; the one-word instruction stops the copy from competing with the phase label for attention. See `CLAUDE.md` Core Mechanic and `src/lib/breathing.ts` for the canonical statement.
 
@@ -305,7 +318,7 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 5. Pending feedback/data collection: recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
 
-6. Pending feedback/data collection: after a meaningful sample of synced sessions, review Supabase `app_events` by pace. `session_started`, `session_complete`, and `session_exited` payloads include `rhythm`, so reads can compare completion rate, return rate, and drop-off phase across Steady / Soft / Full / Flow alongside tester notes.
+6. Pending feedback/data collection: after a meaningful sample of synced sessions, review Supabase `app_events` by pace. `session_started`, `session_complete`, and `session_exited` payloads include `rhythm`, so reads can compare completion rate, return rate, and drop-off phase across Steady / Soft / Box / Flow alongside tester notes.
 
 ### Stage 1, ship-quality polish
 

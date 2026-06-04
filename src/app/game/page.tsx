@@ -16,7 +16,7 @@ import {
   RHYTHM_STORAGE_KEY,
   SessionLength,
   getRhythm,
-  isRhythmId,
+  normalizeRhythmId,
 } from '@/lib/breathing';
 import { useUserId } from '@/lib/auth';
 import { logAppEvent } from '@/lib/appEvents';
@@ -96,7 +96,8 @@ function GameContent() {
   // URL param wins so a deep-linked /game?rhythm=gentle starts in that rhythm.
   // Otherwise read whatever was last saved on this device. Falls back to standard.
   const rhythm = useMemo(() => {
-    if (isRhythmId(rhythmParam)) return RHYTHMS[rhythmParam];
+    const normalizedRhythmParam = normalizeRhythmId(rhythmParam);
+    if (normalizedRhythmParam) return RHYTHMS[normalizedRhythmParam];
     try {
       const stored = localStorage.getItem(RHYTHM_STORAGE_KEY);
       return getRhythm(stored);

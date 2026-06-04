@@ -36,6 +36,11 @@ const PARTICLE_COUNT_SMALL = 22;
 const SMALL_VIEWPORT_BREAKPOINT = 600;
 const ORB_MIN_RADIUS = 60;
 const ORB_MAX_RADIUS = 140;
+// Meta Android webviews can crop the visible CSS viewport near the native chrome.
+// Keep the outer guide ring comfortably away from the canvas edge.
+const CANVAS_EDGE_PADDING = 40;
+const GUIDE_RING_EXTRA = 56;
+const MIN_GUIDE_RING_EXTRA = 36;
 const COLOR_TRANSITION_MS = 1450;
 const ARC_FADE_MS = 950;
 const FLASH_MS = 350;
@@ -231,8 +236,14 @@ export default function BreathingOrb({
         animatedScale = phase.targetOrbScale;
       }
       const sc = orbScaleRef.current;
-      const minR = ORB_MIN_RADIUS * sc;
-      const maxR = ORB_MAX_RADIUS * sc;
+      const desiredMinR = ORB_MIN_RADIUS * sc;
+      const desiredMaxR = ORB_MAX_RADIUS * sc;
+      const availableGuideR = Math.max(
+        desiredMinR + MIN_GUIDE_RING_EXTRA,
+        Math.min(w, h) / 2 - CANVAS_EDGE_PADDING
+      );
+      const maxR = Math.min(desiredMaxR, availableGuideR - MIN_GUIDE_RING_EXTRA);
+      const minR = Math.min(desiredMinR, maxR * 0.55);
       const orbRadius = minR + (maxR - minR) * animatedScale;
 
       // Glow
@@ -296,7 +307,12 @@ export default function BreathingOrb({
       }
 
       // Session progress ring — now the only session-level progress indicator after the HUD bar was removed
-      const sessR = maxR + 38;
+      const guideExtra = Math.min(
+        GUIDE_RING_EXTRA,
+        Math.max(MIN_GUIDE_RING_EXTRA, availableGuideR - maxR)
+      );
+      const sessExtra = guideExtra >= GUIDE_RING_EXTRA ? 38 : 30;
+      const sessR = maxR + Math.min(sessExtra, guideExtra - 12);
       ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${orbLightness}%, 0.09)`;
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -312,7 +328,7 @@ export default function BreathingOrb({
       }
 
       // Outer guide ring: off-white breath rail with phase-colored progress.
-      const guideR = sessR + 18;
+      const guideR = maxR + guideExtra;
       const guidePulse = reducedMotion ? 0.14 : 0.13 + 0.04 * Math.sin(now * 0.0024);
       ctx.strokeStyle = `rgba(${CANVAS_COLORS.guideRing}, ${guidePulse})`;
       ctx.lineWidth = 2.25;

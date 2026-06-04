@@ -204,11 +204,11 @@ describe('useBreathingSession - alternate rhythm', () => {
     expect(result.current.rhythm.id).toBe('gentle');
   });
 
-  it('uses the deep rhythm cycle duration and cycle count', () => {
-    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.full));
-    expect(result.current.cycleDuration).toBe(28);
-    expect(result.current.totalCycles).toBe(11);
-    expect(result.current.rhythm.id).toBe('full');
+  it('uses the box rhythm cycle duration and cycle count', () => {
+    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.box));
+    expect(result.current.cycleDuration).toBe(16);
+    expect(result.current.totalCycles).toBe(19);
+    expect(result.current.rhythm.id).toBe('box');
   });
 
   it('respects gentle rhythm phase boundaries during a running session', () => {
@@ -239,7 +239,7 @@ describe('useBreathingSession - alternate rhythm', () => {
       { initialProps: { r: RHYTHMS.gentle } }
     );
     expect(result.current.rhythm.id).toBe('gentle');
-    rerender({ r: RHYTHMS.full });
+    rerender({ r: RHYTHMS.box });
     expect(result.current.rhythm.id).toBe('gentle');
     expect(result.current.cycleDuration).toBe(13);
   });
@@ -306,23 +306,21 @@ describe('useBreathingSession - proportional anticipation cue cap', () => {
     expect(result.current.phaseLeadProgress).toBeGreaterThan(0);
   });
 
-  // Regression guard for the imperceptibility-risk phase. Full Exhale is 10s — at 8% of phase,
-  // the 0.8s lead is already the narrowest readable window. If anyone tightens the formula
-  // (e.g., caps long phases too), the cue here would shrink further and become invisible.
-  // Full is 6-6-10-6, so Exhale runs t=12..22. At t=21.5s (0.5s before end), with the 0.8s
-  // lookahead intact, leadProgress should be (0.8 - 0.5) / 0.8 = 0.375.
-  it('Full Exhale (10s phase) keeps the full 0.8s lead — imperceptibility regression guard', () => {
-    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.full));
+  // Box Exhale is 4s, so the 0.8s lead remains the full readable window.
+  // Box is 4-4-4-4, so Exhale runs t=8..12. At t=11.5s (0.5s before end),
+  // leadProgress should be (0.8 - 0.5) / 0.8 = 0.375.
+  it('Box Exhale keeps the full 0.8s lead', () => {
+    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.box));
     act(() => { result.current.start(); });
-    advance(21500);
+    advance(11500);
     expect(result.current.currentPhase.phase).toBe('exhale');
     expect(result.current.phaseLeadProgress).toBeCloseTo(0.375, 2);
   });
 
-  it('Full Exhale lead is inactive at t=21.0s (1.0s before end, outside the 0.8s window)', () => {
-    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.full));
+  it('Box Exhale lead is inactive at t=11.0s (1.0s before end, outside the 0.8s window)', () => {
+    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.box));
     act(() => { result.current.start(); });
-    advance(21000);
+    advance(11000);
     expect(result.current.currentPhase.phase).toBe('exhale');
     expect(result.current.phaseLeadProgress).toBe(0);
   });
@@ -343,7 +341,7 @@ describe('useBreathingSession - proportional anticipation cue cap', () => {
   // for each rhythm/non-zero phase the lead is at most 25% of phase duration. Catches anyone
   // who tries to "tune" PHASE_LOOKAHEAD_SECONDS up without updating the cap.
   it('lead window never exceeds 25% of phase duration on any rhythm', () => {
-    (['standard', 'gentle', 'full', 'flow'] as const).forEach((id) => {
+    (['standard', 'gentle', 'box', 'flow'] as const).forEach((id) => {
       const rhythm = RHYTHMS[id];
       const { result } = renderHook(() => useBreathingSession('short', 0, rhythm));
       let accumulated = 0;

@@ -6,6 +6,7 @@ import {
   getRhythm,
   easeInOutCubic,
   isRhythmId,
+  normalizeRhythmId,
   PHASE_LOOKAHEAD_SECONDS,
   RHYTHMS,
 } from '@/lib/breathing';
@@ -94,8 +95,8 @@ describe('getPhaseAtTime', () => {
 });
 
 describe('RHYTHMS registry', () => {
-  it('exposes standard, gentle, full, and flow rhythms', () => {
-    expect(Object.keys(RHYTHMS).sort()).toEqual(['flow', 'full', 'gentle', 'standard']);
+  it('exposes standard, gentle, box, and flow rhythms', () => {
+    expect(Object.keys(RHYTHMS).sort()).toEqual(['box', 'flow', 'gentle', 'standard']);
   });
 
   it('standard rhythm uses the 4-4-6-4 Steady timing', () => {
@@ -113,25 +114,34 @@ describe('RHYTHMS registry', () => {
     expect(RHYTHMS.flow.cycleDuration).toBe(12);
   });
 
-  it('each rhythm has four phases in the canonical order', () => {
-    (['standard', 'gentle', 'full', 'flow'] as const).forEach((id) => {
+  it('each rhythm has four phases in the expected order', () => {
+    (['standard', 'gentle', 'flow'] as const).forEach((id) => {
       const phases = RHYTHMS[id].pattern.map((p) => p.phase);
       expect(phases).toEqual(['inhale', 'hold', 'exhale', 'rest']);
     });
+    expect(RHYTHMS.box.pattern.map((p) => p.phase)).toEqual(['inhale', 'hold', 'exhale', 'hold']);
   });
 
-  it('Inhale and Exhale always have positive durations; Hold and Relax may be zero', () => {
-    (['standard', 'gentle', 'full', 'flow'] as const).forEach((id) => {
+  it('box rhythm uses equal timing with a second Hold after Exhale', () => {
+    expect(RHYTHMS.box.pattern.map((p) => p.duration)).toEqual([4, 4, 4, 4]);
+    expect(RHYTHMS.box.cycleDuration).toBe(16);
+    expect(RHYTHMS.box.sessionCycles).toEqual({ quick: 11, short: 19, medium: 26, long: 38 });
+    expect(RHYTHMS.box.pattern[3].label).toBe('Hold');
+    expect(RHYTHMS.box.pattern[3].instruction).toBe('Hold gently after exhale');
+  });
+
+  it('Inhale and Exhale always have positive durations; Hold and final pause may be zero', () => {
+    (['standard', 'gentle', 'box', 'flow'] as const).forEach((id) => {
       const pattern = RHYTHMS[id].pattern;
       expect(pattern[0].duration).toBeGreaterThan(0); // inhale
       expect(pattern[2].duration).toBeGreaterThan(0); // exhale
       expect(pattern[1].duration).toBeGreaterThanOrEqual(0); // hold may be 0 (flow)
-      expect(pattern[3].duration).toBeGreaterThanOrEqual(0); // rest may be 0 (future rhythms)
+      expect(pattern[3].duration).toBeGreaterThanOrEqual(0); // rest/second hold may be 0 (future rhythms)
     });
   });
 
   it('each rhythm reports its true cycle duration', () => {
-    (['standard', 'gentle', 'full', 'flow'] as const).forEach((id) => {
+    (['standard', 'gentle', 'box', 'flow'] as const).forEach((id) => {
       const summed = RHYTHMS[id].pattern.reduce((acc, p) => acc + p.duration, 0);
       expect(RHYTHMS[id].cycleDuration).toBe(summed);
     });
@@ -140,10 +150,10 @@ describe('RHYTHMS registry', () => {
   it('rhythm labels and descriptions stay human-facing', () => {
     expect(RHYTHMS.standard.label).toBe('Steady');
     expect(RHYTHMS.gentle.label).toBe('Soft');
-    expect(RHYTHMS.full.label).toBe('Full');
+    expect(RHYTHMS.box.label).toBe('Box');
     expect(RHYTHMS.flow.label).toBe('Flow');
 
-    (['standard', 'gentle', 'full', 'flow'] as const).forEach((id) => {
+    (['standard', 'gentle', 'box', 'flow'] as const).forEach((id) => {
       expect(RHYTHMS[id].description).not.toContain('breaths/min');
       expect(RHYTHMS[id].description).not.toMatch(/\d-\d-\d-\d/);
     });
@@ -151,7 +161,7 @@ describe('RHYTHMS registry', () => {
 
   it('session-cycle counts keep each label within one cycle of its target duration', () => {
     const targetsSec = { quick: 180, short: 300, medium: 420, long: 600 } as const;
-    (['standard', 'gentle', 'full', 'flow'] as const).forEach((id) => {
+    (['standard', 'gentle', 'box', 'flow'] as const).forEach((id) => {
       const rhythm = RHYTHMS[id];
       (['quick', 'short', 'medium', 'long'] as const).forEach((len) => {
         const actual = rhythm.sessionCycles[len] * rhythm.cycleDuration;
@@ -166,11 +176,12 @@ describe('isRhythmId', () => {
   it('accepts the four known rhythms', () => {
     expect(isRhythmId('standard')).toBe(true);
     expect(isRhythmId('gentle')).toBe(true);
-    expect(isRhythmId('full')).toBe(true);
+    expect(isRhythmId('box')).toBe(true);
     expect(isRhythmId('flow')).toBe(true);
   });
 
   it('rejects unknown strings and non-strings', () => {
+    expect(isRhythmId('full')).toBe(false);
     expect(isRhythmId('classic')).toBe(false);
     expect(isRhythmId('')).toBe(false);
     expect(isRhythmId(null)).toBe(false);
@@ -182,7 +193,12 @@ describe('isRhythmId', () => {
 describe('getRhythm', () => {
   it('returns the requested rhythm when given a valid id', () => {
     expect(getRhythm('gentle').id).toBe('gentle');
-    expect(getRhythm('full').id).toBe('full');
+    expect(getRhythm('box').id).toBe('box');
+  });
+
+  it('maps legacy Full/Slow ids to Box', () => {
+    expect(getRhythm('full').id).toBe('box');
+    expect(getRhythm('slow').id).toBe('box');
   });
 
   it('falls back to the default rhythm for unknown or empty input', () => {
@@ -223,8 +239,8 @@ describe('getPhaseLookahead', () => {
     RHYTHMS.standard.pattern.forEach((p) => {
       expect(getPhaseLookahead(p)).toBe(PHASE_LOOKAHEAD_SECONDS);
     });
-    // Full Inhale 6s, Hold 6s, Exhale 10s, Relax 6s — also all above.
-    RHYTHMS.full.pattern.forEach((p) => {
+    // Box Inhale 4s, Hold 4s, Exhale 4s, Hold 4s - also all above.
+    RHYTHMS.box.pattern.forEach((p) => {
       expect(getPhaseLookahead(p)).toBe(PHASE_LOOKAHEAD_SECONDS);
     });
   });
@@ -249,7 +265,7 @@ describe('getPhaseLookahead', () => {
   });
 
   it('never returns a value exceeding 25% of phase duration', () => {
-    (['standard', 'gentle', 'full', 'flow'] as const).forEach((id) => {
+    (['standard', 'gentle', 'box', 'flow'] as const).forEach((id) => {
       RHYTHMS[id].pattern.forEach((p) => {
         if (p.duration > 0) {
           expect(getPhaseLookahead(p)).toBeLessThanOrEqual(p.duration * 0.25 + 1e-9);
@@ -309,15 +325,29 @@ describe('getPhaseAtTime with a non-default rhythm', () => {
     expect(getPhaseAtTime(12.99, gentle).config.phase).toBe('rest');
   });
 
-  it('uses deep pattern boundaries when passed the deep rhythm', () => {
-    // Deep is 6-6-10-6 = 28s cycle.
-    const deep = RHYTHMS.full;
-    expect(getPhaseAtTime(0, deep).config.phase).toBe('inhale');
-    expect(getPhaseAtTime(5.99, deep).config.phase).toBe('inhale');
-    expect(getPhaseAtTime(6, deep).config.phase).toBe('hold');
-    expect(getPhaseAtTime(12, deep).config.phase).toBe('exhale');
-    expect(getPhaseAtTime(22, deep).config.phase).toBe('rest');
-    expect(getPhaseAtTime(27.99, deep).config.phase).toBe('rest');
+  it('uses box pattern boundaries when passed the box rhythm', () => {
+    // Box is 4-4-4-4 = 16s cycle, with a second Hold after Exhale.
+    const box = RHYTHMS.box;
+    expect(getPhaseAtTime(0, box).config.phase).toBe('inhale');
+    expect(getPhaseAtTime(3.99, box).config.phase).toBe('inhale');
+    expect(getPhaseAtTime(4, box).config.phase).toBe('hold');
+    expect(getPhaseAtTime(8, box).config.phase).toBe('exhale');
+    expect(getPhaseAtTime(12, box).config.phase).toBe('hold');
+    expect(getPhaseAtTime(15.99, box).config.phase).toBe('hold');
+  });
+});
+
+describe('normalizeRhythmId', () => {
+  it('keeps current ids and maps legacy ids to Box', () => {
+    expect(normalizeRhythmId('standard')).toBe('standard');
+    expect(normalizeRhythmId('box')).toBe('box');
+    expect(normalizeRhythmId('full')).toBe('box');
+    expect(normalizeRhythmId('slow')).toBe('box');
+  });
+
+  it('returns null or the provided fallback for unknown values', () => {
+    expect(normalizeRhythmId('classic')).toBeNull();
+    expect(normalizeRhythmId('classic', 'gentle')).toBe('gentle');
   });
 });
 

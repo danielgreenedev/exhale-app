@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: May 27, 2026 (T-2026-05-23-14 follow-up after rhythm and Meta-hint polish)
+Last updated: June 4, 2026 (owner Box rhythm decision after Relax confusion)
 
 ## Purpose
 
@@ -95,6 +95,14 @@ Use these after someone mentions Hold, Relax, rushed transitions, interruption, 
 - Did the pause, cue, or circle movement ever feel rushed, pushy, or interruptive?
 - Would you choose Flow again, or would you pick a different pace?
 
+## Box Follow-Up Questions
+
+Use these after someone says Relax is confusing, counterproductive, or too much like an unexplained pause, then tries the Box pace:
+
+- Did Box feel clearer than the pace with Relax?
+- Did the hold after Exhale feel expected, or did it feel uncomfortable?
+- Would you choose Box, Flow, or Steady if you were actually stressed?
+
 ## Targeted Follow-Up Queue
 
 Use this as the active beta queue before promoting any new feature work. Keep the tone conversational; do not ask every question if the tester has limited time.
@@ -142,7 +150,7 @@ Priority questions:
 - When Relax appeared, did it feel like the app wanted you to hold your breath, or like it was giving you room to breathe naturally?
 - If Relax said or implied "breathe naturally" more clearly, would you still want the session to build up gradually?
 - When you said "build up to the 8 second pause," did you mean the first few cycles should be shorter and grow into the full rhythm, or that the whole session should keep escalating from short to long?
-- Did you only try the default Steady pace, or did you also try Soft, Full, or Flow?
+- Did you only try the default Steady pace, or did you also try Soft, Box, or Flow?
 
 Decision guardrail: do not implement longer Settling In, progressive/ramping rhythms, or a Relax rename from this signal alone. Use the answers to decide whether the next experiment is first-cycle Relax clarity, a pre-start sequence preview, a longer/active settle-in shape, or a scoped ramp concept.
 
@@ -166,7 +174,7 @@ Ask T-2026-05-19-03, T-2026-05-19-05, T-2026-05-19-06, and T-2026-05-19-07 to tr
 
 Priority questions:
 
-- Did Flow feel smoother than Steady, Soft, or Full?
+- Did Flow feel smoother than Steady, Soft, or Box?
 - Did removing Hold help?
 - Did the tiny pause after Exhale help you reset, or would Flow feel better as inhale/exhale only with no pause at all?
 - Did the pause, cue, or circle movement ever feel rushed, pushy, or interruptive?
@@ -178,12 +186,12 @@ Decision guardrail: if one independent tester repeats T-2026-05-19-08's "take ou
 
 Goal: learn whether the existing four paces already cover the most important comfort needs.
 
-Ask T-2026-05-18-01 and T-2026-05-19-02 through T-2026-05-19-05 to compare Steady with Soft and/or Full if they are willing.
+Ask T-2026-05-18-01 and T-2026-05-19-02 through T-2026-05-19-05 to compare Steady with Soft and/or Box if they are willing.
 
 Priority questions:
 
 - Did Soft feel easier, too fast, or better matched to your natural breathing?
-- Did Full feel useful, too demanding, or only useful when stressed?
+- Did Box feel useful, too structured, or clearer than the pace with Relax?
 - Did any rhythm make you gasp, catch up, strain, or feel pressure to perform?
 - Which rhythm would you choose if you were actually stressed or tired?
 - Would more explanation before the first cycle have helped, or was the rhythm itself the issue?
@@ -247,6 +255,37 @@ Use these when a tester is willing to do functionality testing after at least on
 
 ## Recent Feedback Notes
 
+### 2026-06-04, Owner Product Feedback, Replace Full With Box
+
+#### Session
+
+- Tester ID: Owner / app designer
+- Follow-up OK: Yes
+- Source: Product owner reflection after Flow/Relax beta feedback
+- Date: 2026-06-04
+- Environment: Local/product review
+- Route tested: Session rhythm experience
+- Rhythm: Flow felt better; Full proposed for replacement
+
+#### Friction
+
+- Relax remains cognitively confusing even for the app designer. This is a stronger signal than a single tester preference because the person who designed the model still has to interpret what Relax asks the body to do.
+- Flow feels better, which reinforces that reducing or clarifying the post-exhale beat improves the experience.
+- A post-exhale Hold is easier to anticipate because the user is already prepared for a clear hold cue.
+- The remaining uncertainty is personal preference versus broader usability, but the accumulated tester feedback now supports an experiment with a familiar structured preset.
+
+#### Actionable Recommendations
+
+1. **Implemented 2026-06-04: replace Full with Box.** Box uses 4-4-4-4 and labels the fourth beat as Hold after Exhale, avoiding another Relax beat.
+2. Keep Steady as the default for now. This change replaces the secondary Full preset, not the first-run rhythm.
+3. Ask the next rhythm-sensitive tester whether Box feels clearer than Full/Relax, and whether they would choose Box, Flow, or Steady when actually stressed.
+
+#### Open Questions
+
+1. Does Box feel clearer than the retired Full/Relax shape?
+2. Does the post-exhale Hold feel calm and expected, or too restrictive for anxious users?
+3. Does Flow still feel better than Box for people who dislike pauses entirely?
+
 ### 2026-05-27, T-2026-05-23-14, Android Follow-Up, Meta Hint, Cross-Browser Behavior, Pace Still Feels Too Fast
 
 #### Session
@@ -294,21 +333,27 @@ Use these when a tester is willing to do functionality testing after at least on
 
 #### Correlation To Existing Feedback
 
-- Pace-too-fast: this is a NEW signal direction on Steady from this tester. Previously his complaint was transition smoothness ("popped") and Relax counter-productivity. Slowness was not previously his ask. The shortened Steady (4-4-6-4) may have inadvertently pushed past his comfort window. Combine with the long-standing Full feedback and the next reasonable experiment for this tester is Full (6-6-10-6) — not a default change.
+- Pace-too-fast: this is a NEW signal direction on Steady from this tester. Previously his complaint was transition smoothness ("popped") and Relax counter-productivity. Slowness was not previously his ask. The shortened Steady (4-4-6-4) may have inadvertently pushed past his comfort window. After the 2026-06-04 owner signal, the next reasonable experiment for this tester is Box for structured clarity and Flow for low-interruption breathing — not a default change.
 - Relax-as-interruption: reinforces T-2026-05-23-18 and T-2026-05-22-13. Shortening Relax did not address this tester's objection — for him, the issue is the existence of Relax in a controlled-breathing rhythm, not its duration. Flow 4-0-6-2 is the closest current preset; ask if he has tried it.
 - Settings-hidden-for-first-run gate: confirmed positive from a tester who previously argued for it (T-2026-05-23-14, 2026-05-23). This validates the first-run setup-gate decision.
 - Meta browser hint reach: this tester is the first to confirm the in-session Meta-webview hint actually appears and is read. The escape path through the 3-dot menu also works on his device.
 
 #### Actionable Recommendations
 
+2026-05-27 owner retest note: the first `100dvh` fix solved the vertical Facebook webview issue but not Large mode's horizontal ring clipping on Pixel 9 Pro XL / Android / Facebook app. `src/components/BreathingOrb.tsx` now also clamps the Large canvas radius and guide-ring spacing against the visible canvas width. Local verification at 393x873, 412x915, and 360x640 with Large mode and a faked Facebook in-app user agent left a 14px side gap at Pixel/Facebook widths. Ask the owner/tester to retry the same real Facebook path.
+
+2026-06-04 owner retest note: real Facebook Android on Pixel 9 Pro XL still clipped Large mode by about 20px on the left and right after the 14px clamp. `src/components/BreathingOrb.tsx` now uses a 40px canvas edge margin and compresses the minimum guide-ring gap before shrinking the core orb. Local verification confirmed the simulated Facebook/Pixel path leaves a 40px side gap.
+
 1. **Implemented 2026-05-27: orb-overflow fix.** `src/app/game/page.tsx` now sets `style={{ height: '100dvh' }}` on the game `main`, keeping the existing `h-screen` (`100vh`) classname as a fallback for browsers that do not understand `dvh`. On supporting browsers (Chrome ≥108, Safari ≥15.4, current Android WebView, current Facebook in-app), the main element resolves to the visible viewport height instead of the un-compressed `100vh`, so the orb (centered against the canvas) no longer falls below the browser's top bar. Smoke-tested at 412×700 and 360×640 simulated compressed viewports; orb stays centered with margin on all sides. Real-Facebook validation still owed: ask this tester to retry and confirm.
 2. **Implemented 2026-05-27: hint copy refinement.** `Tap menu to open in browser for sound or fullscreen` is now `Tap menu (top-right) for sound and fullscreen`. The positional cue is kept generic (no "3 dots" glyph reference so the copy works on iOS Meta-webviews where the menu icon may differ). Verified visually under a faked Facebook in-app user agent at 412×700.
-3. **Do not change Steady's default rhythm based on this tester alone.** His "still too fast" signal directly conflicts with T-2026-05-23-18 (pediatrician) who said she could follow the transitions and time did not need to be extended. Steady is the default for everyone; further changes need a second confirming signal. Instead, ask this tester to try Full (6-6-10-6) which is the slower preset designed for exactly this preference. If he likes Full but still hates Relax, that becomes the trigger for a conditional Full-without-Relax experiment.
+3. **Do not change Steady's default rhythm based on this tester alone.** His "still too fast" signal directly conflicts with T-2026-05-23-18 (pediatrician) who said she could follow the transitions and time did not need to be extended. Steady is the default for everyone; further changes need a second confirming signal. Instead, ask this tester to try Box and Flow: Box tests whether a clear post-exhale Hold solves Relax confusion, while Flow tests whether he wants fewer pauses entirely.
 4. **Park the broader "is Relax structurally wrong for some users" question** until the Flow follow-up loop closes. Two testers (T-2026-05-23-14 and T-2026-05-23-18) now have different reactions to Relax: this tester wants it removed, the pediatrician wants it clearer. Flow already removes most of it. Wait for a Flow trial from this tester before promoting a no-Relax variant to implementation.
 
 #### Open Questions
 
-1. Has the tester tried Full (6-6-10-6) or Flow (4-0-6-2) yet, or only Steady? "Still too fast" on Steady combined with "Relax is bad" is the exact phenotype Full and Flow were designed for. If he has not tried them, the next ask is one Full session and one Flow session.
+0. Does Large Circle Size now fit on the same Pixel 9 Pro XL / Android / Facebook-app path, or does the native Facebook header still compress the webview differently from the simulated viewport?
+
+1. Has the tester tried Box (4-4-4-4) or Flow (4-0-6-2) yet, or only Steady? "Still too fast" on Steady combined with "Relax is bad" is the exact phenotype Box and Flow are meant to separate. If he has not tried them, the next ask is one Box session and one Flow session.
 2. What does the Facebook in-app orb-overflow look like with the small Circle Size? If the bug only appears at L/M, the safety fallback may be capping max orb radius against the available viewport. If it appears at S too, the root cause is the viewport-height computation, not orb sizing.
 3. Is the proposed Meta-browser hint copy "enhanced sound and fullscreen" actually clearer to first-time testers, or only to a returning tester who already knows what the missing capabilities are? A fresh tester read on the hint copy is the right validator.
 4. Should the Meta-webview detection also serve a one-time onboarding hint, or only the in-session hint? Currently only in-session; the tester originally expected to see it on the home screen.
@@ -580,7 +625,7 @@ Use these when a tester is willing to do functionality testing after at least on
 #### Open Questions
 
 1. Is "5 breaths" of Settling In a literal ask, or a way of saying "give me a real pre-session settle"? Follow-up: would something between 15-25 seconds have felt sufficient?
-2. Did the tester try only Steady, or also Soft / Full / Flow? The "8 second pause" wording maps cleanly to Steady's 8s Relax but could overlap with Full's perception of duration.
+2. Did the tester try only Steady, or also Soft / Box / Flow? The "8 second pause" wording maps cleanly to Steady's old 8s Relax; Box now tests whether a clear post-exhale Hold resolves that confusion.
 3. Would a one-time, first-session-only "What's about to happen" preview reduce both Settling-In-too-short and Relax-unclear signals at once, without becoming an instructional onboarding gate?
 4. Does the clinical-observer pattern (knows breathwork deeply, seeing this specific guided flow for the first time) call for different copy than a true first-time-breather pattern, or do both populations want the same clarifications?
 

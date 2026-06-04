@@ -2,7 +2,7 @@ import { PHASE_COLORS } from '@/lib/colors';
 
 export type BreathingPhase = 'inhale' | 'hold' | 'exhale' | 'rest';
 export type SessionLength = 'quick' | 'short' | 'medium' | 'long';
-export type RhythmId = 'standard' | 'gentle' | 'full' | 'flow';
+export type RhythmId = 'standard' | 'gentle' | 'box' | 'flow';
 
 export const DEFAULT_SESSION_LENGTH: SessionLength = 'quick';
 export const DEFAULT_ORB_SCALE = 1;
@@ -30,10 +30,9 @@ export interface Rhythm {
   sessionCycles: Record<SessionLength, number>;
 }
 
-// All rhythms share the same per-phase identity (label, instruction, color, target orb scale)
-// and differ only in per-phase duration. The instructions are intentionally permissive across
-// rhythms; the "Hold gently, keep it easy" copy was softened after iPhone tester feedback and
-// stays unchanged here.
+// Most rhythms share the same per-phase identity (label, instruction, color, target orb scale)
+// and differ only in per-phase duration. Box overrides the fourth phase so the post-exhale
+// beat is a recognizable hold instead of the ambiguous Relax phase.
 const BASE_PHASES: Omit<PhaseConfig, 'duration'>[] = [
   {
     phase: 'inhale',
@@ -60,15 +59,28 @@ const BASE_PHASES: Omit<PhaseConfig, 'duration'>[] = [
     glowColor: PHASE_COLORS.exhale.glowColor,
   },
   {
-    // The phase enum stays 'rest' as the canonical discriminator across rhythm presets.
-    // "Relax" keeps grammatical parity with the other labels; the instruction carries
-    // the clarification beta testers needed so it cannot be mistaken for a pause.
+    // Non-box rhythms keep a distinct Relax phase; Box overrides this beat with
+    // a second Hold so the pattern matches familiar square-breathing expectations.
     phase: 'rest',
     label: 'Relax',
     instruction: 'Breathe naturally',
     targetOrbScale: 0.45,
     color: PHASE_COLORS.rest.color,
     glowColor: PHASE_COLORS.rest.glowColor,
+  },
+];
+
+const BOX_PHASES: Omit<PhaseConfig, 'duration'>[] = [
+  BASE_PHASES[0],
+  BASE_PHASES[1],
+  BASE_PHASES[2],
+  {
+    phase: 'hold',
+    label: 'Hold',
+    instruction: 'Hold gently after exhale',
+    targetOrbScale: 0.45,
+    color: PHASE_COLORS.hold.color,
+    glowColor: PHASE_COLORS.hold.glowColor,
   },
 ];
 
@@ -81,8 +93,11 @@ const SESSION_LENGTH_TARGETS: Record<SessionLength, number> = {
   long: 600,    // ~10 min
 };
 
-function buildPattern(durations: [number, number, number, number]): PhaseConfig[] {
-  return BASE_PHASES.map((base, i) => ({ ...base, duration: durations[i] }));
+function buildPattern(
+  durations: [number, number, number, number],
+  phases: Omit<PhaseConfig, 'duration'>[] = BASE_PHASES
+): PhaseConfig[] {
+  return phases.map((base, i) => ({ ...base, duration: durations[i] }));
 }
 
 function sumDurations(pattern: PhaseConfig[]): number {
@@ -103,9 +118,10 @@ function buildRhythm(
   label: string,
   summary: string,
   description: string,
-  durations: [number, number, number, number]
+  durations: [number, number, number, number],
+  phases?: Omit<PhaseConfig, 'duration'>[]
 ): Rhythm {
-  const pattern = buildPattern(durations);
+  const pattern = buildPattern(durations, phases);
   const cycleDuration = sumDurations(pattern);
   return {
     id,
@@ -133,12 +149,13 @@ export const RHYTHMS: Record<RhythmId, Rhythm> = {
     'Shorter, lighter cycles for easier breathing.',
     [3, 2, 4, 4]
   ),
-  full: buildRhythm(
-    'full',
-    'Full',
-    'Deep',
-    'A slower, deeper rhythm with longer breaths.',
-    [6, 6, 10, 6]
+  box: buildRhythm(
+    'box',
+    'Box',
+    'Structured',
+    'Equal counts with a clear hold after exhale.',
+    [4, 4, 4, 4],
+    BOX_PHASES
   ),
   flow: buildRhythm(
     'flow',
@@ -150,11 +167,19 @@ export const RHYTHMS: Record<RhythmId, Rhythm> = {
 };
 
 export function isRhythmId(value: unknown): value is RhythmId {
-  return value === 'standard' || value === 'gentle' || value === 'full' || value === 'flow';
+  return value === 'standard' || value === 'gentle' || value === 'box' || value === 'flow';
+}
+
+export function normalizeRhythmId(value: unknown): RhythmId | null;
+export function normalizeRhythmId(value: unknown, fallback: RhythmId): RhythmId;
+export function normalizeRhythmId(value: unknown, fallback: RhythmId | null = null): RhythmId | null {
+  if (isRhythmId(value)) return value;
+  if (value === 'full' || value === 'slow') return 'box';
+  return fallback;
 }
 
 export function getRhythm(id: RhythmId | string | null | undefined): Rhythm {
-  return isRhythmId(id) ? RHYTHMS[id] : RHYTHMS[DEFAULT_RHYTHM];
+  return RHYTHMS[normalizeRhythmId(id, DEFAULT_RHYTHM)];
 }
 
 export function getPhaseAtTime(

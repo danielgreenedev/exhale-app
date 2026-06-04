@@ -8,6 +8,7 @@ import {
   RhythmId,
   SessionLength,
   isRhythmId,
+  normalizeRhythmId,
 } from '@/lib/breathing';
 import {
   DEFAULT_SOUND_PALETTE,
@@ -64,7 +65,7 @@ export function readLocalPracticeSettings(
     orbScale,
     soundPalette: isSoundPaletteId(storedSound) ? storedSound : DEFAULT_SOUND_PALETTE,
     sessionLength: isSessionLengthValue(storedLength) ? storedLength : fallbackLength,
-    rhythm: isRhythmId(storedRhythm) ? storedRhythm : fallbackRhythm,
+    rhythm: normalizeRhythmId(storedRhythm, fallbackRhythm),
   };
 }
 
@@ -90,7 +91,7 @@ function normalizeCloudSettings(row: CloudSettingsRow): PracticeSettings {
     orbScale: typeof row.orb_scale === 'number' ? row.orb_scale : DEFAULT_ORB_SCALE,
     soundPalette: isSoundPaletteId(row.sound_palette) ? row.sound_palette : DEFAULT_SOUND_PALETTE,
     sessionLength: isSessionLengthValue(row.session_length) ? row.session_length : DEFAULT_SESSION_LENGTH,
-    rhythm: isRhythmId(row.rhythm) ? row.rhythm : DEFAULT_RHYTHM,
+    rhythm: normalizeRhythmId(row.rhythm, DEFAULT_RHYTHM),
   };
 }
 

@@ -402,16 +402,16 @@ After a 3-minute session, would "3 minutes complete" feel clearer than showing t
 Do you care about the exact seconds, or only that the session matched the time you picked?
 ```
 
-### Does Full need clearer state-specific framing?
+### Does Box resolve the retired Full/Relax confusion?
 
-Context: T-2026-05-19-08 tried Quick / Full / Small / Warm while at resting heart rate and found the 10-second Exhale difficult, but also said Full could be useful when someone needs focused help slowing breath from panic. They used the Relax phase as a recovery breath after the long exhale.
+Context: T-2026-05-19-08 tried Quick / Full / Small / Warm while at resting heart rate and found the 10-second Exhale difficult, but also said Full could be useful when someone needs focused help slowing breath from panic. Later Relax feedback from multiple testers, plus the app designer's own reaction on 2026-06-04, showed that the post-exhale Relax phase was still cognitively confusing. Full was replaced by Box (`box`, 4-4-4-4) so the fourth beat is an expected Hold after Exhale.
 
-Current answer: Open, but do not change the rhythm yet. Full may be doing its intended job as a deeper, more demanding option rather than a resting-baseline default. Keep it secondary, watch whether users choose it intentionally, and ask whether it feels useful during actual stress rather than only at rest.
+Current answer: Full is retired. Validate whether Box feels clearer than Full/Relax and whether it earns a permanent place as the structured alternate.
 
 Follow-up:
 
 ```text
-When you chose Full, did the longer exhale feel helpful, too demanding, or only useful in a more stressed state?
+Does Box feel clearer than Full/Relax, especially the hold after exhale?
 ```
 
 #### Flow rhythm design sketch (2026-05-19)
@@ -447,7 +447,7 @@ Code implications (for Codex; no implementation in this sketch):
 What this does NOT do:
 
 - Does not introduce free per-phase customization. Decision-cost stays bounded to four named presets.
-- Does not change the underlying Steady (`standard`), Soft (`gentle`), or Full patterns. Default first-time experience is unchanged.
+- At the time, this did not change the underlying Steady (`standard`), Soft (`gentle`), or Full patterns. Current state after 2026-06-04: Full is retired and Box (`box`) occupies that slot. Default first-time experience is still unchanged.
 - Does not fully address T-2026-05-19-06's exhale-to-inhale ratio concern. Flow's 6:4 ratio is the same as Steady's; only 4-0-5-3 would directly address that. If the ratio concern persists after Flow lands with the other three testers, treat it as a separate question.
 
 Validation gate before shipping (recorded so the bar is explicit, not retroactive):
@@ -460,7 +460,7 @@ Open subquestions parked for after the sketch lands:
 
 - Should Flow have distinct phase colors, or inherit existing ones? Default: inherit. Phase identity is consistent across rhythms and Flow does not warrant breaking that.
 - Does the anticipation cue audio still feel right at a 12s cycle with the abrupt Exhale-to-Relax handoff? First Flow follow-up signal says the "push" felt rushed and interruptive during the pause. The proportional cap is already live, so if the signal repeats, test removing Flow's Relax phase before adding more cue complexity.
-- Does the Flow rhythm helper's `Continuous` summary read well alongside Soft's `Accessible` and Full's `Deep`? Earlier alternatives were `Open`, `Light`, `Steady`, and `Free`; revisit only if tester language suggests the current label is confusing. The compact rhythm tiles are now label-only, so this is helper/aria copy rather than visible tile copy.
+- Does the Flow rhythm helper's `Continuous` summary read well alongside Soft's `Accessible` and Box's `Structured`? Earlier alternatives were `Open`, `Light`, `Steady`, and `Free`; revisit only if tester language suggests the current label is confusing. The compact rhythm tiles are now label-only, so this is helper/aria copy rather than visible tile copy.
 
 Constraints to note for implementation:
 
@@ -687,13 +687,13 @@ Follow-up: Promoted Priority added to `docs/ROADMAP.md` and `docs/TODO.md` to de
 
 ### Should Exhale offer customizable breath rhythms?
 
-Answer: Curated presets, not free customization. Four rhythms are now available inside Session Setup as visible pace choices: Steady (internal id `standard`, 4-4-6-4 as of 2026-05-26, originally 4-4-6-8), Soft (internal id `gentle`, 3-2-4-4), Full (`full`, 6-6-10-6 as of 2026-05-26, originally 6-6-10-4), and Flow (`flow`, 4-0-6-2). Each persists through `exhale-rhythm` localStorage and `user_settings.rhythm` cloud column. Free per-phase customization is intentionally not exposed; the presets handle the rhythm-fit complaints captured so far without forcing the skeptical primary user to make a multi-axis decision before pressing Begin.
+Answer: Curated presets, not free customization. Four rhythms are now available inside Session Setup as visible pace choices: Steady (internal id `standard`, 4-4-6-4 as of 2026-05-26, originally 4-4-6-8), Soft (internal id `gentle`, 3-2-4-4), Box (`box`, 4-4-4-4, replacing Full on 2026-06-04), and Flow (`flow`, 4-0-6-2). Each persists through `exhale-rhythm` localStorage and `user_settings.rhythm` cloud column; legacy `full` and `slow` values normalize to `box`. Free per-phase customization is intentionally not exposed; the presets handle the rhythm-fit complaints captured so far without forcing the skeptical primary user to make a multi-axis decision before pressing Begin.
 
 Date answered: 2026-05-19
 
 Evidence: Promoted Priority work shipped end to end (`docs/ROADMAP.md`, `docs/TODO.md` Completed Promoted Priority section). Original rhythm-fit signals from `docs/USER_FEEDBACK.md` entries T-2026-05-18-01 through T-2026-05-19-05.
 
-Follow-up: Beta-test the three presets with the original five rhythm-concern testers (TODO Stage 0 item 2). If complaints persist beyond what the presets cover, revisit free customization. Otherwise treat free customization as deliberately deferred.
+Follow-up: Beta-test Box and Flow against the Relax-confusion testers. If complaints persist beyond what the presets cover, revisit free customization. Otherwise treat free customization as deliberately deferred.
 
 ### Template
 

@@ -11,7 +11,7 @@ import {
   RHYTHM_STORAGE_KEY,
   RhythmId,
   SessionLength,
-  isRhythmId,
+  normalizeRhythmId,
 } from '@/lib/breathing';
 import { useAudioEngine } from '@/hooks/useAudioEngine';
 import {
@@ -119,8 +119,9 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const urlLength = searchParams.get('length');
   const urlRhythm = searchParams.get('rhythm');
+  const urlRhythmId = normalizeRhythmId(urlRhythm);
   const initialLength: SessionLength = isSessionLength(urlLength) ? urlLength : DEFAULT_SESSION_LENGTH;
-  const initialRhythm: RhythmId = isRhythmId(urlRhythm) ? urlRhythm : DEFAULT_RHYTHM;
+  const initialRhythm: RhythmId = urlRhythmId ?? DEFAULT_RHYTHM;
 
   const [selectedLength, setSelectedLength] = useState<SessionLength>(initialLength);
   const [selectedRhythm, setSelectedRhythm] = useState<RhythmId>(initialRhythm);
@@ -235,7 +236,7 @@ function HomeContent() {
       if (!isSessionLength(urlLength)) {
         setSelectedLength(settings.sessionLength);
       }
-      if (!isRhythmId(urlRhythm)) {
+      if (!urlRhythmId) {
         setSelectedRhythm(settings.rhythm);
       }
       const localStats = readStats();
@@ -262,7 +263,7 @@ function HomeContent() {
         setOrbScaleState(settings.orbScale);
         setSoundPaletteState(settings.soundPalette);
         if (!isSessionLength(urlLength)) setSelectedLength(settings.sessionLength);
-        if (!isRhythmId(urlRhythm)) setSelectedRhythm(settings.rhythm);
+        if (!urlRhythmId) setSelectedRhythm(settings.rhythm);
         if (error) {
           console.error('[supabase] user_settings sync failed:', error);
         }
@@ -534,11 +535,11 @@ function HomeContent() {
 
                   {showSequenceTiming && (
                     <div id="sequence-timing" className="pt-1">
-                      {describedRhythm.pattern.map((phase) => {
+                      {describedRhythm.pattern.map((phase, index) => {
                         const mutedPhase = describedRhythm.id === 'flow' && phase.phase === 'hold';
                         return (
                           <div
-                            key={phase.phase}
+                            key={`${phase.phase}-${index}`}
                             className={`grid grid-cols-[auto_1fr_auto] items-center gap-3 py-2.5 border-b border-still-white/8 last:border-b-0 transition-opacity duration-300 ${mutedPhase ? 'opacity-45' : 'opacity-100'}`}
                           >
                             <div
