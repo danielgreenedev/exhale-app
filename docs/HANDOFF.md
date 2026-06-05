@@ -1,26 +1,26 @@
 # Codex Handoff
 
-Last updated: 2026-06-04 (Box replaces Full; Pixel/Facebook Large orb edge clamp)
+Last updated: 2026-06-05 (search crawler hardening and beta prompt refresh)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
 ## Branch State
 
-- Branch: `master`. Working tree has uncommitted source and doc updates for the Pixel/Facebook Large orb clamp and the Full-to-Box rhythm replacement. Untracked dev logs (`.next-dev.err.log`, `.next-dev.out.log`, `debug.log`, `tmp/`) should stay out of git.
-- Recent commit history (newest first):
+- Branch: `master`. Working tree should be clean after the current SEO/docs pass is committed and pushed.
+- Recent commit history before this pass:
+  - `5d86e5b` - Bing site verification file and local artifact ignore rules.
+  - `c120dbe` - Static sitemap route plus `robots.txt` sitemap declaration.
+  - `06ec5a9` - Full rhythm replaced by Box.
+  - `743e510` - Handoff rewrite for the prior Facebook in-app browser pass.
   - `5f45fb5` - Orb-overflow fix in Facebook in-app browser; Meta hint copy tightened.
-  - `4837cc2` - Steady (4-4-6-4) and Full (6-6-10-6) Relax revisions.
-  - `f850b5f` - Doc reconciliation for the auth-aware footer label.
-  - `1b447bf` - Auth-aware `Signed In` / `Sign In to Sync` label on the footer, plus `/stats#sync` anchor.
-  - `3b4a031` - Auth refresh hardening and shared sign-in footer link.
 - Verification standard: `npm.cmd run lint`, `npm.cmd test -- --runInBand`, and `npm.cmd run build`. Restore `next-env.d.ts` to the checked-in dev-routes import if `next build` rewrites it.
 
 ## What Changed Most Recently
 
-- **Large orb clamp tightened (`src/components/BreathingOrb.tsx`).** Real Pixel 9 Pro XL / Android / Facebook-app testing still clipped Large mode by about 20px per side after the first 14px simulated side gap. The orb now keeps a 40px canvas edge margin and compresses minimum guide-ring spacing before shrinking the core orb. Local faked-Facebook checks at 393x873, 412x915, and 360x640 confirmed a 40px side gap.
-- **Full replaced by Box (`src/lib/breathing.ts`).** Owner feedback promoted Relax confusion from tester preference to product-model issue. Current visible paces are Steady, Soft, Box, Flow. Box is 4-4-4-4 (cycle 16s) and uses a second Hold after Exhale instead of Relax.
-- **Legacy rhythm compatibility.** `normalizeRhythmId()` maps saved `full` and older `slow` values to `box`. Home/game URL handling and local/cloud settings sync use this normalization. `supabase/migrations/004-rename-full-to-box.sql` updates existing synced rows.
-- **Docs updated.** `CLAUDE.md`, `DESIGN.md`, `docs/TODO.md`, `docs/ROADMAP.md`, `docs/OPEN_QUESTIONS.md`, and `docs/USER_FEEDBACK.md` now describe Box as the current structured preset.
+- **Search crawler coverage.** `src/app/sitemap.ts` now serves `/sitemap.xml` for `/`, `/privacy`, and `/terms`; `public/robots.txt` advertises `Sitemap: https://exhale.guide/sitemap.xml`.
+- **Bing verification.** `public/BingSiteAuth.xml` is deployed at `/BingSiteAuth.xml`. The owner reports Google and Bing are now verified; Bing URL Inspection shows `https://exhale.guide` indexed successfully.
+- **Home H1 hardening.** Bing flagged `H1 tag missing`. The visible app already renders `<h1>Exhale</h1>` after client hydration, but the static HTML for `/` was bailing out to client rendering because the home page reads `useSearchParams`. `HomeFallback` now gives the static HTML a crawler-visible Exhale H1 while preserving the hydrated app UI.
+- **Crawler caveat.** Spoofed `bingbot` command-line requests can still hit Vercel's challenge response. Since real Bing verification/indexing is working, treat this as monitor-only. If Bing or Google inspection later fails to fetch the live page, use Vercel Firewall / Verified Bots allow rules rather than changing app markup.
 
 ## Durable Invariants
 
@@ -39,14 +39,16 @@ Next highest-leverage validation asks:
 
 1. **Pixel/Facebook owner retest:** in Facebook Android on Pixel 9 Pro XL, Circle Size Large, confirm whether the orb and outer guide ring now fit fully without left/right clipping.
 2. **Box vs Flow rhythm check:** after one Box session and one Flow session, ask whether Box's post-exhale Hold feels clearer than Relax, or whether Flow feels better because it minimizes pauses.
-3. **iPhone Meta-webview tester:** open Exhale from Facebook on iPhone and verify orb fit, Meta hint readability, and whether an external browser option exists.
+3. **Meta-browser sound/capability check:** in Facebook or Messenger in-app browsers, note whether sound works, whether the menu hint is understandable, and whether opening in the normal browser changes behavior.
+4. **HUD readability check:** confirm whether phase text and transitions feel readable and smooth after the dimmer-orb/crossfade pass.
 
-Keep Steady default changes, no-pause Flow variants, voice guidance, and parked Impeccable follow-ups behind one more validation pass.
+Keep Steady default changes, no-pause Flow variants, voice guidance, Garden skin, Android TWA, and parked Impeccable follow-ups behind one more validation pass.
 
 ## Do Not Revert / Preserve
 
 - `nextPhase`, `phaseLeadProgress`, and `getPhaseLookahead`.
 - Local-only Supabase auth bypass on localhost unless deliberately testing sync.
 - Vercel firewall and `robots.txt` crawler allowances for social preview bots.
+- Sitemap and Bing verification files unless search-console ownership is intentionally changed.
 - Backup & Sync framing: no profile screen, no auth-first onboarding, no required sign-in before breathing.
 - `PolicyFooter` sync-link role as the recovery path when Practice History is hidden.

@@ -182,6 +182,9 @@ Driven by project owner refinement on the sign-in footer link.
 - Static 1200x630 social preview image at `public/og-image.png` using the Still Water aesthetic (orb with rings, wordmark, subtle `Begin` cue).
 - The earlier dynamic `src/app/opengraph-image.tsx` route was removed because Next's file-based metadata route auto-injected `/opengraph-image?...` as `og:image`, overriding the configured static URL.
 - `public/robots.txt` explicitly allows Meta and Facebook crawlers, Twitterbot, LinkedInBot, Slackbot, and general traffic.
+- `src/app/sitemap.ts` serves `/sitemap.xml` for the home, privacy, and terms pages, and `public/robots.txt` advertises the sitemap URL.
+- `public/BingSiteAuth.xml` supports Bing Webmaster Tools verification. The owner reports Google and Bing verification complete; Bing URL Inspection shows the home URL indexed successfully.
+- The home page now has a static Suspense fallback with an Exhale H1 so crawlers see an H1 before client hydration. This addresses Bing's `H1 tag missing` warning without changing the hydrated home UI.
 - Vercel firewall: custom Facebook crawler bypass rule plus system bypass rules for observed Meta IP ranges (104.210.140.0/24, 173.252.82.0/24, 173.252.87.0/24, 57.141.18.0/24, 69.63.184.0/24).
 - Verified live: 200 responses for `/`, `/robots.txt`, and `/og-image.png`; correct OG meta tags in rendered HTML; Facebook crawler user-agent receives 200 from outside Meta.
 - Troubleshooting walkthrough kept in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md` for future resume.
@@ -420,4 +423,4 @@ Stage 2 comes after the Stage 0 and Stage 1 work above.
 
 ## Recommended Next Move
 
-Continue beta feedback collection. The best next step is validation, not another rhythm rewrite or Impeccable command run: use the Next Tester Prompt in `docs/USER_FEEDBACK.md`, and ask T-2026-05-23-14 and T-2026-05-23-18 whether the new HUD readability, phase crossfade, completion copy, first-run cue, setup gate, and Facebook-preview hint solve the reported friction. Keep Relax-duration changes, setup gating changes, voice guidance, and the parked Impeccable follow-ups behind one more validation pass.
+Continue beta feedback collection. The best next step is validation, not another rhythm rewrite or Impeccable command run: use the Next Tester Prompt in `docs/USER_FEEDBACK.md`, and ask whether the Pixel/Facebook Large orb clamp, Box vs Flow rhythm choices, Meta-browser sound behavior, and HUD readability/crossfade pass solve the current friction. Keep no-pause Flow, voice guidance, Garden skin, Android TWA, and parked Impeccable follow-ups behind one more validation pass.

@@ -715,8 +715,36 @@ function HomeContent() {
 
 export default function HomePage() {
   return (
-    <Suspense>
+    <Suspense fallback={<HomeFallback />}>
       <HomeContent />
     </Suspense>
+  );
+}
+
+function HomeFallback() {
+  return (
+    <main className="min-h-screen bg-forest-night flex flex-col items-center px-4 sm:px-6 text-still-white">
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: SURFACE_GLOWS.home }}
+      />
+
+      <div className="relative z-10 flex w-full max-w-[18rem] flex-col items-center gap-4 py-8 sm:max-w-sm sm:py-12">
+        <div className="flex flex-col items-center gap-3.5">
+          <div className="h-28 sm:h-32 flex items-center justify-center" aria-hidden="true">
+            <OrbMark size="home" ring scale={DEFAULT_ORB_SCALE} />
+          </div>
+
+          <div className="flex flex-col items-center gap-1.5">
+            <h1 className="text-4xl sm:text-5xl font-extralight tracking-[0.25em] sm:tracking-[0.38em] uppercase text-still-white/90">
+              Exhale
+            </h1>
+            <p className="text-still-white/72 text-sm tracking-[0.04em] font-light text-center">
+              Guided breathing for a calmer mind
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }

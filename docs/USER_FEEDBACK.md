@@ -38,18 +38,18 @@ Send a short, open prompt so feedback stays practical:
 
 ## Next Tester Prompt
 
-Use this for the next clean beta pass after the May 23 HUD/readability, phase-crossfade, completion-copy, Meta-browser, and first-session setup-gate polish:
+Use this for the next clean beta pass after the Box rhythm replacement, Pixel/Facebook Large-orb clamp, HUD readability pass, and search crawler cleanup:
 
 ```text
 Could you try the default 3-minute session first, without opening any settings?
 
 I am especially curious about four things:
-- Did Relax make sense, or did it interrupt the rhythm?
-- Was the phase text easy to read over the circle?
-- Did phase changes feel smooth or jarring?
-- Did you miss having settings before the first run, or was it better to start with fewer choices?
+- If you are in Facebook or Messenger, does the circle fit fully on screen without the sides clipping?
+- Is the phase text easy to read, and do the phase changes feel smooth enough?
+- If you try Box and Flow, which feels clearer or calmer: Box's hold-after-exhale, or Flow's fewer pauses?
+- Does sound work in Facebook/Messenger, and does it work differently after opening the same link in your normal browser?
 
-After that, if you want, try another session or look around and tell me anything that felt confusing, too quiet, too bright, hard to follow, or worth changing first.
+After that, tell me what worked, what felt off, and the one thing you would change first.
 ```
 
 ## Meta In-App Browser Follow-Up
