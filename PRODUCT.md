@@ -42,7 +42,7 @@ Emotional goal: the user should feel held, not guided. The orb teaches through m
 3. **Silence is a feature.** Empty states, pauses, and minimal copy are not gaps; they are the product.
 4. **History is optional.** Stats exist for users who want them. They are never surfaced as a primary motivation or a source of pressure. Never on the critical path to breathing.
 5. **Every screen feels like the same app.** The emerald orb mark anchors home and stats. Color, type, and spacing are consistent. The amber shift on session complete is the only intentional deviation.
-6. **Sync is optional.** Email sync exists only inside Practice History, only after the user chooses it, and only to carry history and preferences between devices. It includes practice history, timer length, Circle Size, and sound choice. It must never appear before a first session or become a condition for breathing.
+6. **Sign-in is optional.** Google sign-in exists only to carry history and preferences between devices. It includes practice history, timer length, Circle Size, sound choice, and rhythm. It must never become a condition for breathing.
 
 ## Emotional Arc
 
@@ -72,7 +72,7 @@ These are decisions made and should not be revisited without strong cause:
 - Deployment source: GitHub `master`.
 - Preview branch: GitHub `preview`, deployed by Vercel as a pre-production branch.
 - Public domain: `https://exhale.guide`.
-- Optional sync depends on Supabase email OTP codes. The Magic Link and Change Email Address templates should visibly include `{{ .Token }}` instead of link-only copy.
+- Optional sign-in depends on Supabase Auth with Google as the visible provider. Legacy email-code templates may remain configured for older accounts, but email code is no longer offered as the normal sign-in path.
 - Supabase tables currently used: `breathing_sessions`, `user_settings`, and `app_events`.
 
 ## Beta Handoff

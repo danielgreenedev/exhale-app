@@ -207,7 +207,7 @@ Use this only if someone says phase changes felt weird, hard to follow, pushy, o
 Use these when a tester is willing to do functionality testing after at least one breathing session:
 
 - After one session, open Practice History. Did the session count and history look right?
-- Try Backup & Sync with Google or email code, whichever feels comfortable.
+- Try Sign In With Google if you want to check history across devices.
 - Check the same synced history on phone and computer, or in a second browser.
 - Did practice history, timer length, circle size, background sound, and pace carry over correctly?
 - If anything breaks, send a screenshot or copy any visible console error text from Chrome DevTools.
@@ -1263,7 +1263,7 @@ I think the hardest part for me was the hold and the slower exhale then a short 
 
 - Does Practice History clearly explain what sync includes?
 - Is the privacy reassurance clear without using account-heavy language?
-- Does cross-device history feel reliable after confirming an email code?
+- Does cross-device history feel reliable after Google sign-in?
 
 ## Synthesis Format
 

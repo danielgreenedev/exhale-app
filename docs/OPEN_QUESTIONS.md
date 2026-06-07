@@ -528,28 +528,28 @@ Context: `PRODUCT.md` says history is optional and never a source of pressure. C
 
 Current answer: Open.
 
-### Is optional Backup & Sync quiet enough?
+### Is optional Sign In quiet enough?
 
-Context: Backup & Sync belongs only inside Practice History and must not make Exhale feel account-gated. This now covers both email-code sync and the promoted Google OAuth path.
+Context: Sign In belongs only in the footer and Practice, and must not make Exhale feel account-gated. As of 2026-06-07, the visible path is Google-only. Fresh anonymous visitors with no local history can start Google directly from the footer; anonymous visitors with local history are routed to Practice first so they can see what will be connected.
 
 Current answer: Open.
 
 ### Could OAuth (Google / Apple Sign-In) be lower-friction than email OTP for Practice History sync?
 
-Context: Practice History sync currently uses email-code OTP. That requires the user to leave Exhale, open their email app, find the code, switch back, and paste it. OAuth providers offer a one-tap consent flow when the device is already signed into Google or Apple. For users who have already decided to sync (inside Practice History), OAuth is plausibly a strict friction reduction over OTP. This is a different question from "should Exhale have a fuller account system" below: the framing is friction-reduction within the existing optional sync gate, not adding a new account surface to the app.
+Context: Practice History sync previously used email-code OTP. That required the user to leave Exhale, open their email app, find the code, switch back, and paste it. OAuth providers offer a lower-friction consent flow when the device is already signed into Google or Apple. For users who have decided to track history across devices, OAuth is a strict simplification over OTP. This is different from "should Exhale have a fuller account system" below: the framing is friction reduction inside an optional persistence path, not adding a profile surface to the app.
 
-Current answer: **Resolved and completed in Stage 0 on 2026-05-20.** Google OAuth is now an optional Backup & Sync path inside Practice History alongside the existing email-code flow. Anonymous-first stays the default; the home screen does not change; breathing never requires sign-in. App-side wiring, Supabase/Google provider setup, manual linking, local smoke testing, production redirect smoke testing, email-code-to-Google linking, and Firefox production restore testing are complete. Supabase shows Email and Google attached to the same user, and a fresh Firefox production session restored synced Practice History through `Continue with Google`. Apple Sign-In remains a later candidate because it is privacy-aligned but adds Apple Developer/provider overhead.
+Current answer: **Resolved and completed in Stage 0 on 2026-05-20; simplified on 2026-06-07.** Google OAuth is now the single visible sign-in path for tracking history across devices. Anonymous-first stays the default; breathing never requires sign-in. If a fresh anonymous visitor with no local history clicks footer Sign In, Exhale starts Google directly. If an anonymous visitor has local history, Exhale opens Practice first and shows the local history plus a `Sign In With Google` button. App-side wiring, Supabase/Google provider setup, manual linking, local smoke testing, production redirect smoke testing, email-code-to-Google linking, and Firefox production restore testing are complete. Supabase shows Email and Google attached to the same user, and a fresh Firefox production session restored synced Practice History through Google sign-in. Apple Sign-In remains a later candidate because it is privacy-aligned but adds Apple Developer/provider overhead.
 
 Why this moved up:
 
-- Product reliability: OAuth can make cross-device persistence more reliable and less brittle than email-code switching for users who already want sync.
+- Product reliability: OAuth makes cross-device persistence more reliable and less brittle than email-code switching for users who already want history across devices.
 - Developer feedback: Shawn Beck recommended proper OAuth on Practice History so users can persist their data more reliably.
 - Future optionality: a stable provider-backed identity creates a cleaner path if premium subscriptions ever become relevant, while monetization remains conditional and deferred.
 - Portfolio value: implementing this as privacy-first optional account linking is a strong resume/GitHub signal because it demonstrates auth architecture without sacrificing product philosophy.
 
 Tradeoffs worth naming before building:
 
-- A "Sign in with Google" button reads as more account-gated than a text email field even when both gate the same Supabase identity. This sits slightly against the anonymous-first brand signal, even if the button only appears inside Practice History.
+- A "Sign In With Google" button can read as account-gated if it appears too early or too loudly. This sits slightly against the anonymous-first brand signal, so the footer stays quiet and Begin remains the primary action.
 - OAuth introduces Google (and eventually Apple) as third-party dependencies for synced users. Non-synced users are unaffected.
 - Apple Sign-In adds review/policy overhead and a separate provider config. Defensible to defer until a tester actually asks for it.
 - Implementation cost is low: Supabase supports both providers natively, and the current anonymous-to-email sync flow already converts anonymous identities; OAuth follows the same identity-linking stance when possible.
@@ -557,32 +557,32 @@ Tradeoffs worth naming before building:
 Implementation stance shipped:
 
 - Use Supabase Auth provider support, not manual OAuth handshakes.
-- Use normal Google sign-in from idle/anonymous states, because fresh browsers receive anonymous Supabase sessions by default. Use `linkIdentity()` only from the synced email-code `Link Google` state when the provider is not attached yet.
+- Use normal Google sign-in from idle/anonymous states, because fresh browsers receive anonymous Supabase sessions by default. Use `linkIdentity()` only as a legacy bridge from an already signed-in email-code user state when the provider is not attached yet.
 - Add Google first, then evaluate Apple later.
-- Treat OAuth as "Backup & Sync" or "Save across devices," not as a profile/account feature.
+- Treat OAuth as history across devices, not as a profile/account feature.
 - Preserve and merge existing local/anonymous data when a provider is linked.
-- Keep email-code sync available unless it becomes clearly redundant after testing.
+- Hide email-code sign-in from the normal UI. Keep only enough legacy support to avoid stranding older email-code users.
 - Keep `/privacy` and `/terms` aligned with the optional provider path so they describe provider sign-in, exact synced data, third-party involvement, deletion/request paths, and the anonymous-first promise.
 
 Related: the existing "fuller account system" question below addresses a different concern (account management surface area, not friction reduction within an existing optional gate).
 
 ### Would a fuller account system ever create enough value to justify the added friction?
 
-Context: Exhale currently uses anonymous Supabase identity by default and optional email-code sync only inside Practice History. `PRODUCT.md` and `DESIGN.md` both protect the anonymous-first promise: no required account, login, profile, onboarding gate, or sync prompt before breathing. Any fuller auth model, such as password login, OAuth, profiles, account settings, or persistent account management, would need a clear user benefit that optional email sync cannot provide.
+Context: Exhale currently uses anonymous Supabase identity by default and optional Google sign-in for history across devices. `PRODUCT.md` and `DESIGN.md` both protect the anonymous-first promise: no required account, login, profile, onboarding gate, or sync prompt before breathing. Any fuller auth model, such as password login, profiles, account settings, or persistent account management, would need a clear user benefit that optional Google sign-in cannot provide.
 
-Current answer: Still no fuller account system. Optional Google OAuth for Practice History Backup & Sync has shipped, but that does not authorize profiles, account settings, passwords, avatars, required login, or auth-first onboarding.
+Current answer: Still no fuller account system. Optional Google sign-in has shipped, but that does not authorize profiles, account settings, passwords, avatars, required login, or auth-first onboarding.
 
 Possible reasons to revisit:
 
 - Testers explicitly ask for stronger account recovery or account management.
-- Cross-device sync feels unreliable or confusing with email-code sign-in alone.
+- Cross-device history feels unreliable or confusing with Google sign-in alone.
 - Deletion, data export, privacy controls, or trust needs become hard to support without account settings.
 - A future therapist, group, or organizational use case requires managed identities.
 
 Default stance:
 
 ```text
-Do not add a fuller account surface beyond optional Practice History Backup & Sync unless beta feedback shows the value outweighs the extra friction.
+Do not add a fuller account surface beyond optional Google sign-in unless beta feedback shows the value outweighs the extra friction.
 ```
 
 ## Accessibility
@@ -623,7 +623,7 @@ Future options:
 
 - Keep email deletion during beta.
 - Add in-app deletion inside Practice History.
-- Add a self-serve deletion confirmation flow after Backup & Sync.
+- Add a self-serve deletion confirmation flow after Google sign-in.
 
 ## Strategy
 

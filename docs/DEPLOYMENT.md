@@ -14,7 +14,7 @@ Exhale uses Vercel for hosting, Supabase for data, and GitHub as the deployment 
 2. Commit the change on a working branch.
 3. Push to `preview`.
 4. Test the Vercel preview URL on desktop and mobile if preview access is open.
-5. For sync changes, test the full two-device Backup & Sync flow on the preview URL.
+5. For sign-in changes, test the full two-device Google sign-in flow on the preview URL.
 6. Merge or cherry-pick the tested commit to `master`.
 7. Push `master` to deploy `https://exhale.guide`.
 8. Confirm the GitHub/Vercel deployment status is successful.
@@ -26,8 +26,7 @@ Exhale uses Vercel for hosting, Supabase for data, and GitHub as the deployment 
 - `npm.cmd run build`
 - Home page starts a session.
 - Game page shows Settling In, the orb canvas, phase transitions, and sound behavior.
-- Practice History shows stats and optional Backup & Sync.
-- Email sync verifies with a 6-digit email code.
+- Practice History shows stats and optional Google sign-in.
 - Google sync opens the provider flow and returns to Practice History.
 - A second device sees synced practice history, timer length, Circle Size, sound choice, and rhythm.
 
@@ -63,26 +62,26 @@ Supabase stores:
 - `user_settings`: timer length, Circle Size, sound choice, and rhythm.
 - `app_events`: timer selections, session starts, early exits, and completions for synced users. Session start, completion, and exit payloads include `rhythm` so Supabase reads can compare completion and drop-off by pace.
 
-## Email Auth Delivery
+## Legacy Email Auth Delivery
 
-Exhale uses Supabase Auth email OTP for optional Practice History Backup & Sync. Production auth email should use Resend with a dedicated auth sending subdomain:
+Exhale no longer offers email-code sign-in as the visible user path. Keep the Supabase Auth email OTP setup available only as a legacy/recovery bridge for older email-code accounts or in-progress email-change states. Production auth email uses Resend with a dedicated auth sending subdomain:
 
 - Sending domain: `auth.exhale.guide`
 - From address: `Exhale <no-reply@auth.exhale.guide>`
 - Provider: Resend via Supabase Auth custom SMTP
 - SMTP settings: host `smtp.resend.com`, port `465`, username `resend`, password stored only in Supabase as the Resend API key
 - Rationale: keep authentication email reputation separate from the main `exhale.guide` website domain and any future general-contact or marketing email. This follows Supabase's recommendation to avoid mixing auth and marketing email domains.
-- Status: configured 2026-05-21; validate by requesting a Backup & Sync email code from production and confirming delivery plus code verification.
+- Status: configured 2026-05-21; do not include email-code verification in normal smoke tests unless deliberately testing a legacy account.
 
 ## Google OAuth Setup
 
-Google OAuth is an optional Backup & Sync provider inside Practice History. Exhale should still work anonymously without it.
+Google OAuth is the visible Sign In provider for tracking history across devices. Exhale should still work anonymously without it.
 
 In Supabase:
 
 - Enable the Google provider in Auth Providers.
 - Add the Google client ID and client secret from Google Cloud.
-- Enable manual identity linking so an existing email-code synced user can attach Google from the `Link Google` state.
+- Enable manual identity linking so an existing legacy email-code user can attach Google if a recovery flow needs it.
 - Add redirect URLs for each environment that will test OAuth:
   - `https://exhale.guide/stats`
   - `http://localhost:3000/stats`
@@ -109,12 +108,12 @@ localStorage.setItem('exhale-enable-local-supabase', '1')
 
 Then reload `http://localhost:3000`.
 
-If an email-code synced user tries Google with the same email before Google is
+If a legacy email-code user tries Google with the same email before Google is
 attached, Supabase can return "A user with this email address has already been
-registered." Sign in with the email-code identity first, then use the synced
-Backup & Sync state to `Link Google`. From idle or anonymous browsers, the app
-should use normal Google sign-in; `linkIdentity()` is reserved for the synced
-email-code state.
+registered." That user needs a one-time recovery/linking path before Google can
+become their normal sign-in. From idle or anonymous browsers, the app should use
+normal Google sign-in; `linkIdentity()` is reserved for legacy signed-in
+email-code states.
 
 The Supabase email templates for sync should visibly include the OTP token:
 

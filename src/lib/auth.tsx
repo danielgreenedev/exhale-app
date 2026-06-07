@@ -139,7 +139,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const startGoogleBackupSync = useCallback(async (): Promise<{ error?: string }> => {
     if (shouldUseLocalOnlyAuth()) {
       return {
-        error: 'Google Backup & Sync needs Supabase auth enabled for local testing. Set exhale-enable-local-supabase to 1 and reload.',
+        error: 'Google sign-in needs Supabase auth enabled for local testing. Set exhale-enable-local-supabase to 1 and reload.',
       };
     }
 
@@ -170,8 +170,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return {};
     } catch (error) {
-      reportLocalAuthFallback('google backup sync failed', error);
-      return { error: 'Google Backup & Sync could not start. Please try again.' };
+      reportLocalAuthFallback('google sign-in failed', error);
+      return { error: 'Google sign-in could not start. Please try again.' };
     }
   }, []);
 

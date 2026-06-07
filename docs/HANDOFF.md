@@ -1,6 +1,6 @@
 # Codex Handoff
 
-Last updated: 2026-06-05 (search crawler hardening and beta prompt refresh)
+Last updated: 2026-06-07 (Google-only sign-in simplification)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
@@ -29,9 +29,9 @@ This document is overwritten on each handoff. The previous handoff's content doe
 - **Rhythm lock.** `rhythmRef` locking in session/audio/orb code is intentional. Rhythm is fixed at session start.
 - **Meta webview layout.** Game `main` keeps `100dvh` inline style with `h-screen` fallback, and `BreathingOrb` keeps the width-aware radius clamp. Removing either side risks regressing Facebook in-app browser layout.
 - **Cue hierarchy.** Center orb is the primary timing object. Outer guide ring and incoming-color lead stay quiet support.
-- **Auth/sync.** Anonymous local use remains default. Backup & Sync is optional and framed as persistence, not an account gate.
+- **Auth/sync.** Anonymous local use remains default. Sign In is optional, Google-only in the visible UI, and framed as history across devices rather than an account gate.
 - **Supabase auth.** Only fall back to anonymous on explicit 401/403. Transient errors preserve cached sessions.
-- **Footer sync link.** Anonymous label `Sign In to Sync`, signed-in label `Signed In`; both target `/stats#sync`.
+- **Footer sign-in link.** Anonymous label `Sign In`, signed-in label `Signed In`. Anonymous visitors with no local practice history start Google sign-in directly; anonymous visitors with local history go to `/stats#sync` first.
 
 ## Feedback Mode
 
@@ -50,5 +50,5 @@ Keep Steady default changes, no-pause Flow variants, voice guidance, Garden skin
 - Local-only Supabase auth bypass on localhost unless deliberately testing sync.
 - Vercel firewall and `robots.txt` crawler allowances for social preview bots.
 - Sitemap and Bing verification files unless search-console ownership is intentionally changed.
-- Backup & Sync framing: no profile screen, no auth-first onboarding, no required sign-in before breathing.
-- `PolicyFooter` sync-link role as the recovery path when Practice History is hidden.
+- Sign In framing: no profile screen, no auth-first onboarding, no required sign-in before breathing.
+- `PolicyFooter` sign-in role as the recovery path when Practice History is hidden.

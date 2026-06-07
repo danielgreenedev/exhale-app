@@ -24,7 +24,7 @@ export default function TermsPage() {
               Terms
             </h1>
             <p className="text-still-white/58 text-xs tracking-[0.05em] font-light">
-              Last updated May 20, 2026
+              Last updated June 7, 2026
             </p>
           </div>
         </header>
@@ -71,19 +71,19 @@ export default function TermsPage() {
           </ul>
         </Section>
 
-        <Section title="Optional Backup & Sync">
+        <Section title="Optional Google sign-in">
           <p>
-            Exhale can be used anonymously. Backup & Sync is optional and exists only to
-            help you keep practice history and settings across devices.
+            Exhale can be used anonymously. Google sign-in is optional and exists only
+            to help you keep practice history and settings across devices.
           </p>
           <p className="mt-3">
-            If you choose email code sync or Google sign-in, Supabase and the selected
-            provider are used to maintain your session and connect your practice data to
-            the same identity on another device. You are responsible for access to any
-            email or provider account you use for sync.
+            If you choose Google sign-in, Google and Supabase are used to maintain your
+            session and connect your practice data to the same identity on another
+            device. You are responsible for access to the Google account you use for
+            Exhale.
           </p>
           <p className="mt-3">
-            Backup & Sync is provided on the same best-effort basis as the rest of
+            Google sign-in is provided on the same best-effort basis as the rest of
             Exhale. It is not required to start or complete a breathing session.
           </p>
         </Section>

@@ -5,7 +5,7 @@ import { OrbMark } from '@/components/OrbMark';
 
 export const metadata: Metadata = {
   title: 'Privacy, Exhale',
-  description: 'How Exhale handles your data, sessions, and optional Backup & Sync.',
+  description: 'How Exhale handles your data, sessions, and optional Google sign-in.',
 };
 
 export default function PrivacyPage() {
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
               Privacy
             </h1>
             <p className="text-still-white/58 text-xs tracking-[0.05em] font-light">
-              Last updated May 20, 2026
+              Last updated June 7, 2026
             </p>
           </div>
         </header>
@@ -61,17 +61,13 @@ export default function PrivacyPage() {
           </p>
         </Section>
 
-        <Section title="Optional Backup & Sync">
+        <Section title="Optional Google sign-in">
           <p>
-            If you choose Backup & Sync on the Practice screen, Exhale can link your
-            practice to either an email code or Google sign-in. This is optional. You can
-            keep using Exhale without any sign-in.
+            If you choose Sign In on the Practice screen, Exhale can link your
+            practice to Google. This is optional. You can keep using Exhale without
+            any sign-in.
           </p>
           <ul className="list-disc pl-5 mt-3 space-y-1.5 marker:text-still-white/35">
-            <li>
-              With email code sync, your email is stored so Exhale can send 6-digit
-              sign-in codes.
-            </li>
             <li>
               With Google sync, Google and Supabase handle the sign-in flow. Exhale uses
               the resulting identity only to keep your practice available across devices.
@@ -81,8 +77,8 @@ export default function PrivacyPage() {
               are saved to the Exhale backend and restored on other devices you sign into.
             </li>
             <li>
-              No marketing email is sent. Email is only used for Backup & Sync and
-              deletion requests.
+              No marketing email is sent. Your Google email is used only for sign-in,
+              account support, and deletion requests.
             </li>
           </ul>
         </Section>
@@ -102,13 +98,13 @@ export default function PrivacyPage() {
             Exhale does not use advertising, third-party analytics, social trackers,
             browser fingerprinting, push notifications, or location data. There are no
             third-party scripts on the breathing pages. Google is only involved if you
-            choose Google for Backup & Sync.
+            choose Google sign-in.
           </p>
         </Section>
 
         <Section title="How data is stored">
           <p>
-            Practice history, settings, and usage counts (when you have Backup & Sync
+            Practice history, settings, and usage counts (when you have Google sign-in
             turned on) are stored on Supabase, with access controls so that only your
             identity can read or write your records. Local-only data stays on your device.
           </p>
@@ -119,9 +115,9 @@ export default function PrivacyPage() {
             To delete data on this device, clear your browser storage for exhale.guide.
           </p>
           <p className="mt-3">
-            To delete cloud data after Backup & Sync, email djgreene@gmail.com from the
-            address you synced with, or include the Google email you used for sync, and
-            request deletion. Your records will be removed from the Exhale backend.
+            To delete cloud data after Google sign-in, email djgreene@gmail.com from
+            the Google email you used for Exhale and request deletion. Your records
+            will be removed from the Exhale backend.
           </p>
         </Section>
 

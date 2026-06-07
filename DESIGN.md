@@ -262,15 +262,15 @@ Session Setup is the single push-down disclosure below Begin and Resume, shown o
 
 Flat list — no cards, no side borders. Each row: `border-b border-white/6`, `py-5`, label in label style at 35% white, value in headline style at 80% white. The asymmetry (tiny label, large value) creates hierarchy without structural chrome.
 
-### Optional Backup & Sync
+### Optional Sign In
 
-Backup & Sync belongs only on the Practice screen, below the reflective history content. It is an optional recovery and continuity affordance, not an account system. It syncs practice history, timer length, Circle Size, sound choice, and rhythm.
+Sign In belongs only in the footer and on the Practice screen, below the reflective history content. It is an optional continuity affordance, not a requirement before breathing. It syncs practice history, timer length, Circle Size, sound choice, and rhythm.
 
-The default path remains anonymous local use. Backup & Sync may offer email-code sync plus OAuth provider buttons, starting with Google, but those controls must appear only after the user has reached Practice History and shown interest in persistence. Provider button text such as "Continue with Google" is acceptable because it is required for recognizability; the surrounding product copy should still say "Backup & Sync" or "Save across devices," not "create an account" or "log in to Exhale."
+The default path remains anonymous local use. If an anonymous visitor has no local practice history and clicks `Sign In` in the footer, start Google sign-in directly so Exhale can create the cloud connection without an empty intermediate screen. If an anonymous visitor already has local practice history, the footer opens Practice first so they can see the history that will be connected. The Practice action reads `Sign In With Google`, with supporting copy: "Sign in to track your history across all devices."
 
-The privacy reassurance is: "Only these sync: practice history, timer length, circle size, sound choice, and rhythm." Do not use avatars, profile language, account settings, resend loops, premium-gate framing, or anything that makes breathing feel gated.
+Do not show email-code sign-in as a normal option. Legacy email-code verification can remain as a recovery bridge for older in-progress states, but the visible path is Google-only. Do not use avatars, profile language, account settings, resend loops, premium-gate framing, or anything that makes breathing feel gated.
 
-OAuth releases must keep `/privacy` and `/terms` current in the same change. They should explain the optional provider path in plain language, name what syncs, note third-party provider involvement, preserve the anonymous-first promise, and avoid legalistic language that makes Backup & Sync feel mandatory.
+OAuth releases must keep `/privacy` and `/terms` current in the same change. They should explain the optional provider path in plain language, name what syncs, note third-party provider involvement, preserve the anonymous-first promise, and avoid legalistic language that makes Sign In feel mandatory.
 
 Cloud writes for settings are debounced (~400ms trailing) so rapid clicks through Circle Size or Sound options collapse into a single Supabase upsert. localStorage writes stay immediate so the local UI reflects the choice without waiting on a round trip.
 
@@ -288,7 +288,7 @@ Cloud writes for settings are debounced (~400ms trailing) so rapid clicks throug
 - **Do** keep all button text at `font-light` (300) or lighter, uppercase, with tracking `≥0.18em`. The Begin button is the one sanctioned exception, using semibold 600 at tracking 0.20em (see Begin (Primary)).
 - **Do** respect `prefers-reduced-motion`: skip the orb breathe animation and canvas particle system entirely when the OS requests it.
 - **Do** surface stats and practice history as optional, secondary navigation. Never on the critical path to breathing.
-- **Do** keep Backup & Sync optional, quiet, and confined to Practice History. It is for carrying history across devices, not for onboarding.
+- **Do** keep Sign In optional and quiet. It is for carrying history across devices, not for onboarding.
 - **Do** place session controls (Pause, Exit) in the bottom corners of the session screen — the thumb zone on all phone sizes.
 - **Do** give every orb mark (home, stats, complete) its outer ring at `inset -12px` to `inset -14px`, colored to match the orb's accent at low opacity (emerald for home/stats, amber for complete).
 
@@ -302,6 +302,6 @@ Cloud writes for settings are debounced (~400ms trailing) so rapid clicks throug
 - **Don't** use `italic` anywhere in the interface. There is no italic role in this system. Emphasis is conveyed via opacity, not decoration.
 - **Don't** design like Headspace or Calm — no onboarding carousels, no premium gate framing, no illustrated brand characters, no teacher voices.
 - **Don't** design like a fitness app — no streak counters as pressure, no achievement popups, no guilt mechanics.
-- **Don't** require an account, login, OAuth, or cloud sync before breathing. Optional Backup & Sync must never block first use.
+- **Don't** require an account, login, OAuth, or cloud sync before breathing. Optional Sign In must never block first use.
 - **Don't** add push notifications, sharing features, or social comparisons. The experience is private and self-contained.
 - **Don't** use audio files. All sound is synthesized via Web Audio API. Zero load time is part of the low-friction promise.

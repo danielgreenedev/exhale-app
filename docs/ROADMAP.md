@@ -1,6 +1,6 @@
 # Exhale Roadmap
 
-Last updated: May 23, 2026
+Last updated: June 7, 2026
 
 Exhale is organized around learning gates, not feature batches. Each stage carries one question: do we have enough signal to invest in the next stage? Engineering effort follows validation.
 
@@ -16,21 +16,21 @@ Confirm the premise: does the right kind of person find this useful?
 - Note: Facebook link-preview scraping still has a 403/parser issue despite verified app-side Open Graph metadata. Treat it as non-blocking unless Facebook sharing becomes important to beta acquisition.
 - Recruit roughly 10 to 20 testers from the target audience (people who do not normally use self-care apps).
 - Watch Supabase `app_events` for completion rate, return rate, and drop-off phase.
-- Current build-quality investment: optional OAuth-backed Backup & Sync is complete; continue validating beta feedback and retention signal.
+- Current build-quality investment: optional Google sign-in for history across devices is complete; continue validating beta feedback and retention signal.
 - Decide if real retention signal exists before investing more engineering.
 
 Gate: roughly ten testers, mostly target-audience, with at least one signal of return use.
 
-## Promoted Priority, Optional OAuth Backup & Sync (complete 2026-05-20)
+## Promoted Priority, Optional Google Sign In (complete 2026-05-20, simplified 2026-06-07)
 
 Pulled into the current phase for two reasons: product reliability and portfolio polish.
 
 Product framing:
 
-- Exhale still starts anonymous and local-first. No authentication before breathing, no account gate on the home screen, and no OAuth prompt during first use.
-- Practice History already contains optional email-code sync. OAuth is an additional Backup & Sync path for users who have already chosen persistence.
+- Exhale still starts anonymous and local-first. No authentication before breathing and no OAuth prompt before first use.
+- Google sign-in is the visible path for users who want history across devices. Email-code sign-in is hidden from the normal UI and retained only as a legacy/recovery bridge.
 - The goal is reliable cross-device continuity for practice history, timer length, Circle Size, sound choice, and rhythm.
-- The feature should be presented as "Backup & Sync" or "Save across devices," not as a profile, social account, or onboarding step.
+- The feature should be presented as "Sign In" with a practical history-across-devices description, not as a profile, social account, or onboarding step.
 
 Technical/product rationale:
 
@@ -48,12 +48,12 @@ Risks to guard:
 
 Success shape:
 
-- Complete: Practice History offers email-code sync and Google OAuth as quiet sibling options.
-- Complete: existing anonymous/local data is preserved and merged when a user starts Backup & Sync.
+- Complete: Practice History offers Google sign-in as the single visible sign-in option.
+- Complete: existing anonymous/local data is preserved and merged when a user signs in.
 - Complete: privacy copy states what syncs and makes clear that breathing remains usable without any sign-in.
 - Complete: `/privacy` and `/terms` explain optional OAuth provider involvement and the anonymous-first philosophy in plain language.
-- Complete: implementation uses Supabase Auth provider support rather than custom OAuth handshakes. App-side wiring uses normal Google sign-in from idle/anonymous states, and reserves `linkIdentity()` for the synced email-code `Link Google` state. Existing email-code users can link Google from the synced Backup & Sync state when Google is not attached yet.
-- Validation complete: Supabase shows Email and Google attached to the same user, and Firefox on production restored synced practice history through `Continue with Google`.
+- Complete: implementation uses Supabase Auth provider support rather than custom OAuth handshakes. App-side wiring uses normal Google sign-in from idle/anonymous states, and reserves `linkIdentity()` for legacy signed-in email-code users.
+- Validation complete: Supabase shows Email and Google attached to the same user, and Firefox on production restored synced practice history through Google sign-in.
 
 ## Promoted Priority, Alternate Rhythm Options (complete 2026-05-19)
 
@@ -95,10 +95,11 @@ Reach beyond direct URL sharing.
 - PWA "Add to Home Screen" prompt or hint on iOS; no native shell.
 - iOS Store via Capacitor is deferred. The cost (Apple Developer $99/yr, plus 2 to 4 weeks of native shell work, plus Apple's strict health-app review) is too high for a free tool when PWA on iOS already covers most of the experience. Revisit only if reception clearly justifies it.
 
-## Stage 3, Monetization (conditional)
+## Stage 3, Operations And Monetization (conditional)
 
 Only if Stage 0 and Stage 1 reception data justifies. Always preserve a fully featured free version.
 
+- Small private admin/support panel, only when Supabase Dashboard plus docs stop being enough. Preferred first version: a custom protected Next.js route backed by Supabase, not Payload. First useful scope: synced-user deletion/support lookup, beta/tester event review, retention/drop-off summaries, and lightweight content management if completion quotes or themes become hard to maintain manually. Revisit Payload only if CMS-style editing grows beyond what a small custom panel should own.
 - Donation page (Stripe link, lowest friction).
 - Theme-pack purchase option; the warmer skin work in Stage 1 unlocks this.
 - B2B or therapist licensing, only if a clear customer surfaces.

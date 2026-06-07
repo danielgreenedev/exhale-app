@@ -45,7 +45,7 @@ The center orb is the primary timing object. Keep the outer guide ring and incom
 - `src/hooks/useSessionStats.ts` — localStorage + Supabase session persistence
 - `src/lib/breathing.ts` — RHYTHMS registry, phase configs, session lengths, easing math
 - `src/lib/sound.ts` — sound palette labels and storage IDs
-- `src/lib/auth.tsx` — anonymous-first auth with optional Backup & Sync upgrade
+- `src/lib/auth.tsx` — anonymous-first auth with optional Google sign-in
 - `src/lib/supabase.ts` — browser Supabase client singleton
 - `src/lib/settingsSync.ts` — local/cloud round-trip for orb scale, sound, session length, rhythm
 - `src/lib/sessionSync.ts` — local/cloud session merge helpers (dedup-aware)
@@ -96,7 +96,7 @@ Do not reuse these keys for new features:
 
 ## Supabase Data
 
-Supabase is optional from the user's point of view and only appears through Practice History Backup & Sync. The shipped direction is email-code sync plus optional Google OAuth via Supabase Auth, while preserving anonymous local use as the default. Google Backup & Sync should use `signInWithOAuth()` from idle/anonymous states, because new browsers get anonymous Supabase sessions by default. Use `linkIdentity()` only from a real synced email-code user state, where the UI shows `Link Google`.
+Supabase is optional from the user's point of view and appears through Sign In for history across devices. The visible path is Google OAuth via Supabase Auth, while preserving anonymous local use as the default. Footer `Sign In` starts Google directly for anonymous visitors with no local practice history; if local history exists, it opens Practice first so the user can see what will be connected. Google sign-in should use `signInWithOAuth()` from idle/anonymous states, because new browsers get anonymous Supabase sessions by default. Use `linkIdentity()` only as a legacy bridge from an already signed-in email-code user state.
 
 | Table | Purpose |
 |-------|---------|
@@ -112,7 +112,7 @@ Local development on `localhost` / `127.0.0.1` uses local-only auth by default s
 These are intentional — don't undo them without understanding the rationale:
 
 - **No user input during a session** — fully guided, not hold-to-breathe. Reduces intimidation for first-timers who don't know when to inhale.
-- **Anonymous by default, Backup & Sync by choice** — users can breathe and keep local history without signing in. Practice History may offer email-code sync and Google OAuth as optional persistence paths, but the home screen and session flow must never become auth-gated.
+- **Anonymous by default, Sign In by choice** — users can breathe and keep local history without signing in. The visible sign-in path is Google-only and exists to track history across devices; the session flow must never become auth-gated.
 - **Abstract orb** — chosen over thematic visuals (ocean, lantern, mandala). More universal, less culturally loaded, works for any user.
 - **Selectable pace (Steady / Soft / Box / Flow)** — Steady and Soft cover the default/accessibility path. Box replaced Full on 2026-06-04 after Relax remained cognitively confusing even to the app designer; its post-exhale hold is familiar and explicit. Flow remains the smoother low-interruption option. Default stays Steady 4-4-6-4. Alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
 - **Fourth phase handling** — Steady, Soft, and Flow use `Relax` with `Breathe naturally`; Box uses a second `Hold` after exhale. Do not reintroduce ambiguous post-exhale copy without fresh beta evidence.

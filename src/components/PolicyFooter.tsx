@@ -1,21 +1,44 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import type { MouseEvent } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { readStats } from '@/hooks/useSessionStats';
 
 const linkClass =
   'inline-flex min-h-11 items-center whitespace-nowrap px-2 hover:text-still-white/78 transition-colors duration-300';
 
 export function PolicyFooter() {
-  const { ready, isAnonymous } = useAuth();
-  // Default to the sign-in label until auth is ready: anonymous is the common
-  // case, and showing "Signed In" then flipping to "Sign In to Sync" would
-  // mislead first-time visitors during the bootstrap window.
+  const { ready, isAnonymous, startGoogleBackupSync } = useAuth();
+  const router = useRouter();
+  const [hasPracticeHistory, setHasPracticeHistory] = useState<boolean | null>(null);
+  const [openingGoogle, setOpeningGoogle] = useState(false);
+
+  useEffect(() => {
+    setHasPracticeHistory(readStats().sessions.length > 0);
+  }, []);
+
+  const handleSignInClick = async (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!ready || !isAnonymous || hasPracticeHistory !== false) return;
+
+    event.preventDefault();
+    setOpeningGoogle(true);
+    const { error } = await startGoogleBackupSync();
+    if (error) {
+      router.push(`/stats?error=${encodeURIComponent(error)}#sync`);
+      setOpeningGoogle(false);
+    }
+  };
+
   const signedIn = ready && !isAnonymous;
-  const syncLabel = signedIn ? 'Signed In' : 'Sign In to Sync';
+  const syncLabel = signedIn ? 'Signed In' : openingGoogle ? 'Opening Google...' : 'Sign In';
   const syncAria = signedIn
     ? 'Open practice page; you are signed in'
-    : 'Sign in to sync practice history';
+    : hasPracticeHistory
+      ? 'Open practice page to sign in with Google'
+      : 'Sign in with Google';
 
   return (
     <footer className="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[10px] tracking-[0.14em] uppercase font-light text-still-white/55">
@@ -32,6 +55,7 @@ export function PolicyFooter() {
         href="/stats#sync"
         className={linkClass}
         aria-label={syncAria}
+        onClick={handleSignInClick}
       >
         {syncLabel}
       </Link>

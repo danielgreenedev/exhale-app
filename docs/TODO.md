@@ -123,6 +123,17 @@ Driven by T-2026-05-25-19: returning synced user could not find OAuth/sign-in be
 - Did not add a sign-in button on home itself. The "Home is never auth-gated" rule in CLAUDE.md stands; the footer placement keeps the recovery path discoverable without making the first decision feel account-related.
 - Lint clean and full Jest suite passes (107/107) after the change. Playwright screenshots at 375 / 390 / 640 px confirm the three-link footer fits without wrap on home and looks clean on stats.
 
+## Completed Google-Only Sign-In Simplification (2026-06-07)
+
+Driven by owner direction after reviewing Shawn Beck's auth recommendation.
+
+- The visible Practice sign-in path is now Google-only. The email-code form is removed from the normal UI; the code-entry state remains only as a legacy bridge if an older email-code confirmation is already pending.
+- The Practice section label changed from `Backup & Sync` to `Sign In`.
+- The main sign-in copy is now `Sign in to track your history across all devices.`
+- The Google action now reads `Sign In With Google` instead of `Continue with Google`.
+- The shared footer now reads `Sign In` for anonymous users and `Signed In` for signed-in users. If an anonymous visitor has no local practice history, footer Sign In starts Google directly. If local history exists, it opens Practice first so the user can see the history before connecting it.
+- Privacy, terms, product, design, roadmap, deployment, and handoff docs were updated to reflect Google sign-in as the visible path while preserving anonymous-first use.
+
 ## Completed Facebook In-App Orb-Overflow And Meta Hint Copy (2026-05-27)
 
 Driven by T-2026-05-23-14 follow-up on 2026-05-27. Tester reported the breathing orb visibly oversized inside Facebook's in-app browser on Android (Galaxy S26 Ultra), and proposed a more directive Meta-webview hint.
