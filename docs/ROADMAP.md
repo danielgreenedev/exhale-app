@@ -81,7 +81,7 @@ Make Exhale feel like a "v1 you would link publicly."
 - Discoverability: Open Graph tags, social card image, meta description, friendly page title; consider a small landing-screen treatment on the home page.
 - Privacy policy page and terms of use page; footer links from main pages.
 - Color contrast audit on text at low opacity (white/28 to 38 against forest-night).
-- In-session HUD readability audit by phase color: title/instruction text must remain readable over Inhale, Hold, Exhale, and Relax circles without becoming glaring. Recent feedback says brighter text can still fail if it sits over the wrong phase color.
+- In-session HUD readability audit by phase color: title/instruction text must remain readable over Inhale, Hold, Exhale, and Relax circles without becoming glaring. June 8 low-vision phone feedback promoted this from polish to accessibility. Default HUD text hardening is shipped; still validate whether optional High Visual Contrast / Large Text is needed.
 - Accessibility candidates, after targeted validation:
   - **High Visual Contrast**: optional visual mode that makes phase colors and cues easier to tell apart for colorblind users, low-vision users, and first-time users who cannot distinguish phase changes quickly enough. Prefer stronger color separation plus non-color cue differences over a generic "colorblind mode" label.
   - **Voice Cues**: optional Audio setting that speaks only phase names (`Inhale`, `Hold`, `Exhale`, `Relax`) for blind users, screen-reader users, or testers who need non-visual guidance. Keep off by default and separate from background sound. Validate human-recorded or very neutral voice treatment before shipping; beta feedback now includes explicit concern that an obviously AI voice could hurt trust.

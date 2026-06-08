@@ -27,7 +27,7 @@ The fourth phase is usually labeled `Relax` (not `Rest`) with instruction `Breat
 
 Phase transitions have anticipatory support because beta feedback showed that exact boundary changes can take a beat to process. In the final 0.8s of each phase (or 25% of phase duration on short phases — whichever is smaller), the guide ring around the orb picks up the next phase's color and a quiet pre-cue tone plays when sound is on. The cap is set by `getPhaseLookahead(phase)` in `src/lib/breathing.ts`; the ceiling `PHASE_LOOKAHEAD_SECONDS = 0.8` is what most phases use, but Soft's 2s Hold, Soft's 3s Inhale, and Flow's 2s Relax all get a proportionally shorter lead so the cue does not occupy 40% of the phase. No textual HUD cue is shown; an earlier attempt at a `Next [phase]` label competed with the central phase label and countdown for attention, so it was removed.
 
-The active phase label and the Settling In label intentionally share the same semibold, shadowed treatment for legibility over the moving orb. The instruction line below the phase label is compact, brighter than decorative UI text, and shadowed for older/low-vision mobile users.
+The active phase label and the Settling In label intentionally share the same semibold, shadowed treatment for legibility over the moving orb. The instruction line below the phase label remains visible throughout the session, is brighter than decorative UI text, and is shadowed for older/low-vision mobile users.
 
 The center orb is the primary timing object. Keep the outer guide ring and incoming-color lead visibly softer than the orb; graphic-designer feedback showed that a brighter line can feel like the user is already behind because it starts before the orb changes.
 
@@ -122,7 +122,7 @@ These are intentional — don't undo them without understanding the rationale:
 - **Session resume (60s window)** — exiting a session shows an exit guard; sessionStorage holds state for 60s so accidental exits don't lose progress.
 - **Resume directly below Begin** — when a resumable session exists, the continuation action sits next to the primary start action before Session Setup.
 - **Session Setup disclosure** — one quiet drawer below Begin/Resume contains the sequence, Circle Size, and Sound for everyone. There is no completed-session rule for hiding controls.
-- **No phase instruction after cycle 2** — the HUD instruction fades; the orb has already taught the pattern by then.
+- **Persistent phase instruction** — the HUD instruction remains visible after cycle 2. Low-vision phone feedback showed that hiding the instruction can make the session visually unusable even when the user can otherwise use a phone.
 
 ## Accessibility Baseline (Already Built)
 

@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: June 4, 2026 (Box replaces Full; Pixel/Facebook Large orb edge clamp)
+Last updated: June 8, 2026 (older low-vision HUD readability hardening)
 
 ## Completed Rhythm Changes
 
@@ -33,6 +33,16 @@ Last updated: June 4, 2026 (Box replaces Full; Pixel/Facebook Large orb edge cla
 - Verified the changes with mobile Playwright checks for running session, phase transition, Facebook-preview behavior, and completion copy.
 - May 24 pre-tester smoke passed: fresh local visitor sees time choices, Begin, and first-cycle cue without Session Setup; the session reaches Settling In, Inhale, Hold, Exhale, and Relax with `Breathe naturally`; completion shows `3 minutes complete`; returning home after completion reveals `Adjust next session`.
 - May 24 `/impeccable critique` scored the first-run flow 31/40. Recommended Impeccable follow-ups are intentionally parked until the next beta test produces signal: `/impeccable clarify Relax phase`, `/impeccable distill active session HUD`, `/impeccable harden Meta in-app browser state`, and `/impeccable onboard first-run cue`.
+
+## Completed Older Low-Vision HUD Readability Hardening (2026-06-08)
+
+Driven by T-2026-06-08-20: an older low-vision phone tester could not read any instruction words on the active-session graphics, despite being able to use a phone for calls and read large-print Kindle books on an iPad.
+
+- `src/components/GameHUD.tsx` now keeps the instruction sentence visible after cycle 2 instead of fading it to zero.
+- Phase labels are larger on mobile, semibold, higher opacity, and use lower letter spacing so words are easier to parse.
+- Instruction text is larger, higher opacity, and uses lower tracking while preserving the quiet tone.
+- The local dark halo behind the HUD text is stronger and slightly wider, improving separation from bright phase colors without introducing a visible card.
+- Follow-up owed: ask the same tester to retry the same phone if possible. If the words are still unreadable, promote optional High Visual Contrast / Large Text mode or voice cues from candidate to implementation.
 
 ## Completed Marketing/Accessibility Mobile Polish
 
@@ -434,4 +444,4 @@ Stage 2 comes after the Stage 0 and Stage 1 work above.
 
 ## Recommended Next Move
 
-Continue beta feedback collection. The best next step is validation, not another rhythm rewrite or Impeccable command run: use the Next Tester Prompt in `docs/USER_FEEDBACK.md`, and ask whether the Pixel/Facebook Large orb clamp, Box vs Flow rhythm choices, Meta-browser sound behavior, and HUD readability/crossfade pass solve the current friction. Keep no-pause Flow, voice guidance, Garden skin, Android TWA, and parked Impeccable follow-ups behind one more validation pass.
+Continue beta feedback collection. The best next step is validation, not another rhythm rewrite or Impeccable command run: use the Next Tester Prompt in `docs/USER_FEEDBACK.md`, and ask whether the Pixel/Facebook Large orb clamp, Box vs Flow rhythm choices, Meta-browser sound behavior, low-vision HUD readability hardening, and HUD crossfade pass solve the current friction. Keep no-pause Flow, voice guidance, Garden skin, Android TWA, and parked Impeccable follow-ups behind one more validation pass.

@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: June 4, 2026 (owner Box rhythm decision after Relax confusion)
+Last updated: June 8, 2026 (older low-vision phone readability feedback)
 
 ## Purpose
 
@@ -254,6 +254,43 @@ Use these when a tester is willing to do functionality testing after at least on
 1. 
 
 ## Recent Feedback Notes
+
+### 2026-06-08, T-2026-06-08-20, Older Low-Vision Phone Readability
+
+#### Session
+
+- Tester ID: T-2026-06-08-20
+- Follow-up OK: Unknown
+- Source: Older family tester, age 97, with declining vision and glasses
+- Date: 2026-06-08
+- Environment: Production
+- Device: Phone
+- Browser: Unknown
+- Route tested: Active session
+- Signal class: **High-impact accessibility signal.** This is an edge case by population size, but it catches a plausible phone use case: a person who can use phone calls and read large-print Kindle books on an iPad could not read Exhale's active-session words.
+
+#### Friction
+
+- Tester could not read any instruction words on the graphics.
+- The issue occurred on a phone, where text is smallest and the phase label/instruction sits over the animated orb.
+- This suggests the current HUD treatment can fail for low-vision users even if they can use other common phone functions.
+
+#### Accessibility Notes
+
+- This is not solved by assuming audio is available. Sound can be off, unavailable, too quiet, or blocked by mobile/browser behavior.
+- The active session must remain usable visually for people who need larger, clearer text.
+
+#### Actionable Recommendations
+
+1. **Implemented 2026-06-08: default HUD readability hardening.** Keep the instruction visible after cycle 2 instead of fading it to zero, increase mobile phase/instruction size, restore semibold phase labels, reduce letter spacing, strengthen the dark local text halo, and keep the treatment centered over the orb.
+2. Ask the same tester, if possible, whether the active-session words are now readable on the same phone.
+3. Keep optional High Visual Contrast / Large Text mode on the roadmap if default hardening is not enough.
+
+#### Open Questions
+
+1. Can the tester read the phase label (`Inhale`, `Hold`, `Exhale`, `Relax`) after the June 8 hardening?
+2. Can the tester read the full instruction sentence, or only the one-word phase label?
+3. Would voice cues be needed for low-vision phone use, or does larger/persistent visual text cover this case?
 
 ### 2026-06-04, Owner Product Feedback, Replace Full With Box
 

@@ -1,6 +1,6 @@
 # Exhale Open Questions
 
-Last updated: May 23, 2026 (pediatrician Relax and HUD readability feedback added)
+Last updated: June 8, 2026 (older low-vision HUD readability feedback added)
 
 Use this as a living parking lot for product, validation, trust, accessibility, and strategy questions that are not ready to become implementation tasks. As questions are answered, add the answer, date, evidence, and any resulting TODO/doc updates.
 
@@ -217,7 +217,9 @@ Could you follow the timing, but still found the text hard to read?
 
 Context: The phase label and instruction sit over the animated phase circle. Earlier feedback raised phase-color distinctness; T-2026-05-23-18 added a more specific accessibility concern: the overlaid title/instruction text felt too bright and still did not contrast well enough with the phase circle, making it hard to read.
 
-Current answer: Partially addressed in the beta polish pass, still awaiting tester validation. Do not solve with "make the text brighter." A local visual comparison found dark text with a light shadow helpful only on the brightest orb center and fragile around darker edges. The accepted first pass keeps light text, lowers HUD intensity, adds a local text halo, and reduces orb brightness/glow/pulse so the text and canvas no longer compete as strongly.
+2026-06-08 update: T-2026-06-08-20, an older low-vision phone tester, could not read any instruction words on the active-session graphics. This is a stronger accessibility signal than the earlier phase-color concern because the active session becomes visually unusable even though the tester can use phone calls and read large-print Kindle books on an iPad.
+
+Current answer: Partially addressed, still awaiting same-device validation. Do not solve with "make the text brighter" alone. A local visual comparison found dark text with a light shadow helpful only on the brightest orb center and fragile around darker edges. The accepted direction keeps light text, reduces orb competition, and uses a local text halo. The June 8 hardening makes the phase label larger, semibold, higher opacity, and lower-tracking; keeps the instruction sentence visible after cycle 2; enlarges the instruction text; and strengthens the local text halo. If that is still not enough, promote optional High Visual Contrast / Large Text mode or voice cues from candidate to implementation.
 
 Possible approaches:
 
@@ -225,6 +227,7 @@ Possible approaches:
 - Add a very subtle local text scrim or contrast layer that does not read as a card.
 - Tune phase-specific text color/shadow so Hold/Relax do not wash out against amber/pink fills.
 - Reduce title brightness while improving edge contrast, since the tester perceived both glare and poor legibility.
+- Add an optional High Visual Contrast / Large Text mode if the default HUD hardening still fails low-vision phone testing.
 - Validate at mobile brightness settings, especially on OLED Android and iPhone screens.
 
 Follow-up prompts:
@@ -239,6 +242,10 @@ Was the text hard to read because it was too bright, too soft/blurry, too close 
 
 ```text
 Would moving the text slightly above the circle make the phase easier to read, or would it feel less calm?
+```
+
+```text
+Could you read the phase word itself, the longer instruction sentence, both, or neither?
 ```
 
 ### Is audio reliable enough inside Facebook's in-app browser?

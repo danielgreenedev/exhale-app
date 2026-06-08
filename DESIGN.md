@@ -227,7 +227,7 @@ Phase changes should feel like a handoff rather than a switch. The HUD keeps the
 
 ### Session HUD Legibility
 
-The active phase label and Settling In label use semibold 600 with a dark text shadow because they sit directly on the canvas orb and must read on bright phase colors. The instruction line below the phase label is compact and higher contrast than decorative UI text; it also uses a dark text shadow. This is a legibility exception to the otherwise flat, no-shadow UI rule: the shadow belongs to text over moving canvas light, not to structural elevation.
+The active phase label and Settling In label use semibold 600 with a dark text shadow because they sit directly on the canvas orb and must read on bright phase colors. On phones, phase labels use lower tracking than ordinary uppercase labels so older and low-vision users can parse the word shape. The instruction line below the phase label stays visible throughout the session instead of disappearing after the first cycles; the orb may teach the motion, but some users still need the words. This is a legibility exception to the otherwise flat, no-shadow UI rule: the shadow and local halo belong to text over moving canvas light, not to structural elevation.
 
 ### Rhythm
 
