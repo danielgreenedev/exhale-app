@@ -26,10 +26,10 @@ typography:
     letterSpacing: "0.3em"
   title:
     fontFamily: "Inter, system-ui, sans-serif"
-    fontSize: "1.875rem"
+    fontSize: "2.75rem"
     fontWeight: 600
-    lineHeight: 1.2
-    letterSpacing: "0.3em"
+    lineHeight: 1
+    letterSpacing: "0.12em"
   body:
     fontFamily: "Inter, system-ui, sans-serif"
     fontSize: "0.875rem"
@@ -60,13 +60,13 @@ spacing:
   xl: "24px"
 components:
   button-begin:
-    backgroundColor: "#34d399"
-    textColor: "#0f1712"
+    backgroundColor: "{colors.emerald-pulse}"
+    textColor: "{colors.forest-night}"
     rounded: "{rounded.card}"
     padding: "20px 24px"
   button-begin-hover:
     backgroundColor: "#a7f3d0"
-    textColor: "#0f1712"
+    textColor: "{colors.forest-night}"
     rounded: "{rounded.card}"
     padding: "20px 24px"
   button-ghost:
@@ -121,6 +121,7 @@ This system explicitly rejects the language of productivity apps (progress bars 
 - Motion that follows breath rhythm; nothing decorates for its own sake
 - Flat surfaces, no shadows — depth via glow and opacity, never elevation
 - Session controls in the thumb zone (bottom corners); the top screen belongs to passive status
+- Low-vision readability is part of calm: active-session words must remain readable on phones without becoming a modal, card, or interruption
 
 ## 2. Colors: The Still Water Palette
 
@@ -161,13 +162,13 @@ These shift the entire canvas (orb, glow, progress rings, particles) with each b
 
 - **Display** (extralight 200, 2.25rem, tracking 0.25em, uppercase): The "Exhale" wordmark on the home screen. One instance per app.
 - **Headline** (extralight 200, 1.875rem, tracking 0.3em, uppercase): Screen titles — "Practice", "Complete". Airy and formal.
-- **Title** (semibold 600, 1.875rem, tracking 0.3em, uppercase): The active phase label during a session — "Inhale", "Hold", "Exhale", "Relax". Settling In uses the same treatment because it functions as the pre-session state label. Together with the Begin button label, these are the only semibold uses in the system. Their weight is earned: they are the only instructions the user needs.
+- **Title** (semibold 600, 2.75rem mobile / 3rem desktop, tracking 0.12em mobile, uppercase): The active phase label during a session — "Inhale", "Hold", "Exhale", "Relax". Beginning in uses the same treatment because it functions as the pre-session state label. Together with the Begin button label, these are the only semibold uses in the system. Their weight is earned: they are the only instructions the user needs.
 - **Body** (light 300, 0.875rem, tracking 0.04em): Taglines, descriptions, session complete quotes. Sentence case. 55–72% white. Body copy uses only subtle tracking; wide spacing is reserved for uppercase labels and controls.
 - **Label** (light 300, 0.75rem, tracking 0.18–0.28em, uppercase): Most button text, metadata, and stat labels. Secondary actions sit at 0.18em. The Begin button is the one sanctioned exception, using semibold 600 at tracking 0.20em for legibility against the emerald fill; see Begin (Primary) below.
 - **Timer** (thin 100, 3.75rem, tabular-nums): The countdown during a session. Uses `font-variant-numeric: tabular-nums` to prevent layout shift as numbers change.
 
 ### Named Rules
-**The Weight Ceiling Rule.** Semibold (600) is reserved for the active phase label, the Settling In pre-session label, and the Begin button label. Every other element uses 100, 200, or 300. Adding bold text anywhere else breaks the hierarchy. `font-normal` (400) is also prohibited — it sits in no-man's-land between the permitted weights. The Begin exception exists because the primary action pairs Forest Night text with an Emerald Pulse fill, which is a lower-contrast pairing than any other text in the system (everything else sits on the dark ground). No other surface pairs text with a saturated brand color, so the exception does not generalize.
+**The Weight Ceiling Rule.** Semibold (600) is reserved for the active phase label, the Beginning in pre-session label, and the Begin button label. Every other element uses 100, 200, or 300. Adding bold text anywhere else breaks the hierarchy. `font-normal` (400) is also prohibited — it sits in no-man's-land between the permitted weights. The Begin exception exists because the primary action pairs Forest Night text with an Emerald Pulse fill, which is a lower-contrast pairing than any other text in the system (everything else sits on the dark ground). No other surface pairs text with a saturated brand color, so the exception does not generalize.
 
 **The Uppercase Contract.** Uppercase is for labels and controls only — things the user acts on or reads quickly. Copy (taglines, instructions, quotes) is always sentence case. Never all-caps a full sentence of human-facing copy.
 
@@ -208,7 +209,7 @@ The brand mark and the product itself. Three contexts:
 
 ### Breathing Rhythm
 
-The default Steady rhythm is 4-4-6-4: Inhale 4 seconds, Hold 4 seconds, Exhale 6 seconds, Relax 4 seconds (phase enum `rest`). Relax is a short breath-back beat that lets the user take a natural inhale before the next guided cycle; "Relax" labels the phase rather than "Rest" because the body wants to inhale during this window, not hold still. Steady Relax was shortened from 8 seconds to 4 seconds on 2026-05-26 after multiple beta testers reported the longer pause felt too long and counterproductive (T-2026-05-23-14, T-2026-05-23-18 among others). On 2026-06-04, Full was replaced with Box after Relax remained cognitively confusing; Box uses a second Hold after Exhale so the fourth beat is expected. The pre-session Settling In state lasts 8 seconds and is skipped when resuming a session. Soft, Box, and Flow presets reshape the per-phase durations; see the Rhythm component spec.
+The default Steady rhythm is 4-4-6-4: Inhale 4 seconds, Hold 4 seconds, Exhale 6 seconds, Relax 4 seconds (phase enum `rest`). Relax is a short breath-back beat that lets the user take a natural inhale before the next guided cycle; "Relax" labels the phase rather than "Rest" because the body wants to inhale during this window, not hold still. Steady Relax was shortened from 8 seconds to 4 seconds on 2026-05-26 after multiple beta testers reported the longer pause felt too long and counterproductive (T-2026-05-23-14, T-2026-05-23-18 among others). On 2026-06-04, Full was replaced with Box after Relax remained cognitively confusing; Box uses a second Hold after Exhale so the fourth beat is expected. The pre-session Beginning in state lasts 4 seconds, shows a countdown with a subtle progress ring, and is skipped when resuming a session or tapping Breathe Again from completion. Soft, Box, and Flow presets reshape the per-phase durations; see the Rhythm component spec.
 
 ### Anticipatory Phase Cue
 
@@ -227,11 +228,13 @@ Phase changes should feel like a handoff rather than a switch. The HUD keeps the
 
 ### Session HUD Legibility
 
-The active phase label and Settling In label use semibold 600 with a dark text shadow because they sit directly on the canvas orb and must read on bright phase colors. On phones, phase labels use lower tracking than ordinary uppercase labels so older and low-vision users can parse the word shape. The instruction line below the phase label stays visible throughout the session instead of disappearing after the first cycles; the orb may teach the motion, but some users still need the words. This is a legibility exception to the otherwise flat, no-shadow UI rule: the shadow and local halo belong to text over moving canvas light, not to structural elevation.
+The active phase label and Beginning in label use semibold 600 with a dark text shadow because they sit directly on the canvas orb and must read on bright phase colors. On phones, phase labels use lower tracking than ordinary uppercase labels so older and low-vision users can parse the word shape. The active label is 2.75rem on mobile, 3rem on desktop, and stays at 90-96% Still White opacity.
+
+Visible session instruction is phase-only: `Inhale`, `Hold`, `Exhale`, `Relax`, plus the countdown. Do not place a sentence instruction over the orb. The timer is large enough to read from a phone at arm's length and never fades below a faint-but-visible state. A local forest-night contrast backplate sits behind the phase word and timer. In `prefers-contrast: more`, the canvas removes ambient washes, particle texture, and soft halos while strengthening the orb rim, guide ring, phase label, and countdown.
 
 ### Rhythm
 
-The breathing pattern itself is selectable inside the `Sequence` tab of Session Setup under the label `Choose your pace`. Four options:
+The breathing pattern itself is selectable inside the `Sequence` tab of Session Setup under the label `Pace`. Four options:
 
 - **Steady** (`standard`, `Balanced`) — 4-4-6-4, 18s cycle. Default for first-time users.
 - **Soft** (`gentle`, `Accessible`) — 3-2-4-4, 13s cycle. Shorter, lighter cycles for easier breathing.
@@ -242,7 +245,7 @@ Each tile shows only the pace name (uppercase 10px tracking-0.02em): `Steady`, `
 
 Rhythm uses the same quiet emerald selected-state language as Time, Circle Size, and Sound. Default is `Steady` (stored as internal id `standard`). The choice persists through `exhale-rhythm` in localStorage and `user_settings.rhythm` in Supabase; legacy `full` and `slow` values normalize to `box`. Rhythm cannot change mid-session; the picker is read once at session start and the resulting pattern drives the orb timing, audio cue ramps, and HUD time-remaining calculation. Switching rhythm requires returning to the home screen and starting a new session.
 
-Sequence descriptions appear in the connected helper row below the tiles so desktop hover, keyboard focus, and mobile taps all expose the same context without relying on native title tooltips. Helper copy is human-first and non-technical: pace name plus one short descriptive sentence. The technical phase list is hidden by default behind a quiet secondary `View timing` button with a disclosure caret; when opened, the vertical phase preview follows the same hover/focus/selection state so the right-side phase times update while a user previews a sequence. Flow's zero-duration Hold row is slightly muted to show that Hold stays in the canonical sequence shape but does not take time.
+Sequence descriptions appear in the connected helper row below the tiles so desktop hover, keyboard focus, and mobile taps all expose the same context without relying on native title tooltips. Helper copy is human-first and non-technical: pace name plus one short descriptive sentence. The technical phase list is hidden by default behind a quiet secondary `Show pattern` button with a disclosure caret; when opened, the vertical phase preview follows the same hover/focus/selection state so the phase times update while a user previews a sequence. Flow's zero-duration Hold row is slightly muted to show that Hold stays in the canonical sequence shape but does not take time.
 
 ### Background Sound Palettes
 
@@ -256,11 +259,13 @@ Circle Size lives in the `Visual` tab and uses compact S/M/L radio controls. New
 
 ### Session Setup Disclosure
 
-Session Setup is the single push-down disclosure below Begin and Resume, shown only after the visitor has completed at least one local session. First-visit users see exactly one decision (length) and one action (Begin); after completion, the disclosure label becomes `Adjust next session`. The gate is local and anonymous, based on `exhale-stats`; if localStorage is unavailable, show setup rather than trapping the user in defaults. Session Setup contains a three-part segmented tab row: `Sequence`, `Visual`, and `Audio`. Sequence contains the four label-only pace options plus a connected helper row; the local section label says `Choose your pace` so it instructs rather than repeats the tab name. Detailed phase timing is hidden by default behind a secondary `View timing` button. Visual contains Circle Size. Audio contains Off plus the four sound textures. Practice History stays outside Session Setup because it is navigation, not a preference, and is shown only after at least one completed session.
+Session Setup is the single push-down disclosure below Begin and Resume, shown only after the visitor has completed at least one local session. First-visit users see exactly one decision (length) and one action (Begin); after completion, the disclosure label becomes `Adjust next session`. The gate is local and anonymous, based on `exhale-stats`; if localStorage is unavailable, show setup rather than trapping the user in defaults. Session Setup contains a three-part segmented tab row: `Sequence`, `Visual`, and `Audio`. Sequence contains the four label-only pace options plus a connected helper row; the local section label says `Pace`. Detailed phase timing is hidden by default behind a secondary `Show pattern` button. Visual contains Circle Size. Audio contains Off plus the four sound textures. Practice History stays outside Session Setup because it is navigation, not a preference, and is shown only after at least one completed session.
 
 ### Stats Rows
 
-Flat list — no cards, no side borders. Each row: `border-b border-white/6`, `py-5`, label in label style at 35% white, value in headline style at 80% white. The asymmetry (tiny label, large value) creates hierarchy without structural chrome.
+Flat list, no cards, no side borders. Each row: `border-b border-still-white/10`, `py-5`, label in label style at 58% white, value in headline style at 86% white. The asymmetry (tiny label, large value) creates hierarchy without structural chrome.
+
+Practice history is pure reflection. Show only `Sessions`, `Total time`, `Days practiced`, and `Recent sessions`. Do not show weekly counts, streaks, milestones, badges, future targets, unearned markers, or any progress frame that nudges the user to maintain a pattern.
 
 ### Optional Sign In
 
@@ -274,9 +279,9 @@ OAuth releases must keep `/privacy` and `/terms` current in the same change. The
 
 Cloud writes for settings are debounced (~400ms trailing) so rapid clicks through Circle Size or Sound options collapse into a single Supabase upsert. localStorage writes stay immediate so the local UI reflects the choice without waiting on a round trip.
 
-### Milestone Badges
+### Future Admin/Support Panel
 
-`48x48px rounded-2xl`. Unearned: white at 3% background, white at 7% border. Earned: emerald at 12% background, emerald at 30% border, emerald icon at 85%. Transition: 300ms ease-all. These are reflective markers, not achievement prompts — they should never be accompanied by fanfare.
+If the roadmap's admin/support panel is built, it should feel like a quiet operations surface, not a new branded destination. Use the same forest-night ground, Still White hierarchy, restrained emerald selected state, and flat list/table language. Keep density higher than the breathing app where support tasks require scanning, but do not introduce a SaaS dashboard aesthetic, hero metrics, bright charts, card grids, avatars, or account-management theater. The first version should be a protected Next.js route backed by Supabase; design for support lookup, deletion confirmation, beta event review, retention/drop-off summaries, and lightweight quote/theme maintenance.
 
 ## 6. Do's and Don'ts
 
@@ -289,6 +294,7 @@ Cloud writes for settings are debounced (~400ms trailing) so rapid clicks throug
 - **Do** respect `prefers-reduced-motion`: skip the orb breathe animation and canvas particle system entirely when the OS requests it.
 - **Do** surface stats and practice history as optional, secondary navigation. Never on the critical path to breathing.
 - **Do** keep Sign In optional and quiet. It is for carrying history across devices, not for onboarding.
+- **Do** keep active-session phase and instruction text readable for older and low-vision phone users. Use size, lower tracking, dark edge contrast, and a local halo before adding louder UI.
 - **Do** place session controls (Pause, Exit) in the bottom corners of the session screen — the thumb zone on all phone sizes.
 - **Do** give every orb mark (home, stats, complete) its outer ring at `inset -12px` to `inset -14px`, colored to match the orb's accent at low opacity (emerald for home/stats, amber for complete).
 
@@ -303,5 +309,7 @@ Cloud writes for settings are debounced (~400ms trailing) so rapid clicks throug
 - **Don't** design like Headspace or Calm — no onboarding carousels, no premium gate framing, no illustrated brand characters, no teacher voices.
 - **Don't** design like a fitness app — no streak counters as pressure, no achievement popups, no guilt mechanics.
 - **Don't** require an account, login, OAuth, or cloud sync before breathing. Optional Sign In must never block first use.
+- **Don't** build a full account surface around Google sign-in. No profile screen, avatar, password flow, account settings, or auth-first navigation.
+- **Don't** make a future admin panel look like generic SaaS. No hero metrics, bright chart walls, nested cards, or decorative dashboard chrome.
 - **Don't** add push notifications, sharing features, or social comparisons. The experience is private and self-contained.
 - **Don't** use audio files. All sound is synthesized via Web Audio API. Zero load time is part of the low-friction promise.

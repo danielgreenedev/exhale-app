@@ -28,7 +28,8 @@ import {
 } from '@/lib/sound';
 
 const RESUME_KEY = 'exhale-resume';
-const SETTLE_DURATION_MS = 8000;
+const SETTLE_DURATION_SECONDS = 4;
+const SETTLE_DURATION_MS = SETTLE_DURATION_SECONDS * 1000;
 const SILENT_MODE_HINT_MS = 5000;
 
 function shouldOfferSilentModeHint() {
@@ -89,6 +90,7 @@ function GameContent() {
   const lengthParam = (searchParams.get('length') ?? DEFAULT_SESSION_LENGTH) as SessionLength;
   const initialElapsed = Math.max(0, parseFloat(searchParams.get('resume') ?? '0') || 0);
   const isFirstVisit = searchParams.get('first') === '1';
+  const skipSettle = searchParams.get('skipSettle') === '1';
   const orbParam = parseFloat(searchParams.get('orb') ?? '');
   const soundParam = searchParams.get('sound');
   const rhythmParam = searchParams.get('rhythm');
@@ -157,8 +159,10 @@ function GameContent() {
   const [audioActive, setAudioActive] = useState(false);
   const [showAudioPrompt, setShowAudioPrompt] = useState(false);
   const [showExitGuard, setShowExitGuard] = useState(false);
-  // Settling: count-in before first breath. Skipped when resuming.
-  const [settling, setSettling] = useState(initialElapsed === 0);
+  // Beginning in: count-in before first breath. Skipped when resuming or restarting.
+  const [settling, setSettling] = useState(initialElapsed === 0 && !skipSettle);
+  const [settleStartedAt, setSettleStartedAt] = useState<number | null>(null);
+  const [settleNow, setSettleNow] = useState(0);
   const [sessionSaveError, setSessionSaveError] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fullscreenSupported, setFullscreenSupported] = useState(false);
@@ -176,6 +180,15 @@ function GameContent() {
   const exitGuardRef = useRef<HTMLDivElement>(null);
   const exitGuardResumeRef = useRef<HTMLButtonElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
+
+  const settleElapsedMs = settling && settleStartedAt !== null
+    ? Math.min(SETTLE_DURATION_MS, Math.max(0, settleNow - settleStartedAt))
+    : 0;
+  const settleProgress = Math.min(1, settleElapsedMs / SETTLE_DURATION_MS);
+  const settleSecondsRemaining = Math.max(
+    1,
+    Math.ceil((SETTLE_DURATION_MS - settleElapsedMs) / 1000)
+  );
 
   const showSilentModeHintBriefly = useCallback(() => {
     setShowSilentModeHint(true);
@@ -255,11 +268,17 @@ function GameContent() {
   const startGuidedSession = useCallback(() => {
     clearSettleTimer();
     setSettling(false);
+    setSettleStartedAt(null);
+    setSettleNow(Date.now());
     start();
   }, [clearSettleTimer, start]);
 
   const scheduleGuidedStart = useCallback(() => {
     clearSettleTimer();
+    const now = Date.now();
+    setSettling(true);
+    setSettleStartedAt(now);
+    setSettleNow(now);
     settleTimerRef.current = window.setTimeout(startGuidedSession, SETTLE_DURATION_MS);
   }, [clearSettleTimer, startGuidedSession]);
 
@@ -278,17 +297,26 @@ function GameContent() {
     clearResumeState();
   }, []);
 
+  useEffect(() => {
+    if (!settling || settleStartedAt === null || showExitGuard) return;
+
+    const interval = window.setInterval(() => setSettleNow(Date.now()), 100);
+    return () => window.clearInterval(interval);
+  }, [settling, settleStartedAt, showExitGuard]);
+
   // Count-in settle, then start session
   useEffect(() => {
-    if (initialElapsed > 0) {
+    if (initialElapsed > 0 || skipSettle) {
       // Resuming — start immediately, no settle
       setSettling(false);
+      setSettleStartedAt(null);
+      setSettleNow(Date.now());
       start();
       return;
     }
     scheduleGuidedStart();
     return clearSettleTimer;
-  }, [clearSettleTimer, initialElapsed, scheduleGuidedStart, start]);
+  }, [clearSettleTimer, initialElapsed, scheduleGuidedStart, skipSettle, start]);
 
   // Start audio on first user interaction (autoplay policy)
   useEffect(() => {
@@ -507,13 +535,46 @@ function GameContent() {
     setShowExitGuard(true);
   };
 
+  const settleRingBackground = `conic-gradient(rgba(52,211,153,0.36) ${settleProgress * 360}deg, rgba(245,245,242,0.12) 0deg)`;
+
+  const restartWithoutSettle = () => {
+    clearSettleTimer();
+    clearResumeState();
+    stopAmbient(0);
+
+    if (silentHintTimerRef.current !== null) {
+      window.clearTimeout(silentHintTimerRef.current);
+      silentHintTimerRef.current = null;
+    }
+
+    sessionSavedRef.current = false;
+    sessionStartedEventRef.current = false;
+    prevPhaseIndexRef.current = -1;
+    anticipationCueRef.current = -1;
+    audioStartedRef.current = false;
+    silentModeHintShownRef.current = false;
+
+    setSessionSaveError(false);
+    setShowAudioPrompt(false);
+    setShowSilentModeHint(false);
+    setShowExitGuard(false);
+    setAudioActive(false);
+    setSettling(false);
+    setSettleStartedAt(null);
+    setSettleNow(Date.now());
+
+    reset();
+    start();
+    void beginAudio();
+  };
+
   if (sessionState === 'complete') {
     return (
       <SessionComplete
         totalCycles={totalCycles}
         sessionLength={lengthParam}
         storageNote={sessionSaveError}
-        onRestart={() => router.push(`/?length=${lengthParam}`)}
+        onRestart={restartWithoutSettle}
         onMenu={() => router.push('/')}
       />
     );
@@ -555,22 +616,40 @@ function GameContent() {
           <div className="pt-8 w-full flex items-start justify-center relative" aria-hidden="true">
             <p className="invisible text-sm tracking-[0.2em] uppercase font-light">Breath 1 of 1</p>
           </div>
-          <div className="flex w-full max-w-[calc(100vw-2rem)] translate-y-[clamp(46px,12vh,100px)] flex-col items-center gap-1.5 px-4 landscape:translate-y-[clamp(28px,7vh,56px)]">
+          <div className="flex w-full max-w-[calc(100vw-2rem)] translate-y-[clamp(42px,11vh,88px)] flex-col items-center gap-3 px-4 landscape:translate-y-[clamp(24px,6vh,48px)]">
             <p
-              className="exhale-settle-title text-center text-3xl font-semibold tracking-[0.3em] uppercase text-still-white"
+              className="exhale-settle-title text-center text-xl font-semibold tracking-[0.18em] uppercase text-still-white sm:text-2xl"
               style={{ textShadow: '0 2px 16px rgba(15,23,18,0.85), 0 1px 4px rgba(15,23,18,0.9)' }}
             >
-              Settling in
+              Beginning in
             </p>
+            <div
+              className="exhale-settle-ring relative flex h-28 w-28 items-center justify-center rounded-full"
+              role="timer"
+              aria-label={`Beginning in ${settleSecondsRemaining} ${settleSecondsRemaining === 1 ? 'second' : 'seconds'}`}
+            >
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: settleRingBackground,
+                  WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px))',
+                  mask: 'radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px))',
+                }}
+                aria-hidden="true"
+              />
+              <span
+                className="relative text-7xl font-thin leading-none tabular-nums text-still-white/92"
+                style={{ textShadow: '0 1px 2px rgba(8,14,10,0.98), 0 4px 18px rgba(8,14,10,0.9)' }}
+              >
+                {settleSecondsRemaining}
+              </span>
+            </div>
             <p
-              className="exhale-settle-subtitle min-h-8 max-w-[27rem] px-1 text-center text-sm font-light leading-snug tracking-[0.04em] text-still-white"
+              className="exhale-settle-subtitle min-h-8 max-w-[27rem] px-1 text-center text-sm font-light leading-snug tracking-[0.04em] text-still-white/78"
               style={{ textShadow: '0 2px 14px rgba(15,23,18,0.92), 0 1px 4px rgba(15,23,18,0.9)' }}
             >
               Breathe normally
             </p>
-            <div className="invisible mt-0 text-6xl font-thin tabular-nums text-still-white/92" aria-hidden="true">
-              4
-            </div>
           </div>
           <div className="pb-[calc(7rem+env(safe-area-inset-bottom))] flex flex-col items-center gap-1.5">
             <p

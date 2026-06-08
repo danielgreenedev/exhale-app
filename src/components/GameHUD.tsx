@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { DEFAULT_RHYTHM, PhaseConfig, RHYTHMS, Rhythm } from '@/lib/breathing';
 
 const PHASE_FADE_MS = 960;
-const phaseLabelShadow = '0 1px 2px rgba(8,14,10,1), 0 5px 20px rgba(8,14,10,0.92), 0 0 30px rgba(8,14,10,0.58)';
-const instructionShadow = '0 1px 2px rgba(8,14,10,0.98), 0 4px 18px rgba(8,14,10,0.88), 0 0 26px rgba(8,14,10,0.54)';
+const phaseLabelShadow = '0 1px 2px rgba(8,14,10,1), 0 4px 14px rgba(8,14,10,1), 0 0 28px rgba(8,14,10,0.78)';
 
 interface Props {
   currentPhase: PhaseConfig;
@@ -39,10 +38,9 @@ export default function GameHUD({
     return () => window.clearTimeout(timeout);
   }, [currentPhase]);
 
-  const labelOpacity = settled ? 0.84 : 0.92;
-  const instructionOpacity = settled ? 0.62 : 0.84;
+  const labelOpacity = settled ? 0.9 : 0.96;
   const timerIsLoadBearing = currentPhase.phase === 'hold' || currentPhase.phase === 'rest';
-  const timerOpacity = !settled ? 0.78 : timerIsLoadBearing ? 0.56 : 0.14;
+  const timerOpacity = !settled ? 0.88 : timerIsLoadBearing ? 0.76 : 0.34;
 
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-between pointer-events-none select-none">
@@ -58,18 +56,18 @@ export default function GameHUD({
         </p>
       </div>
 
-      {/* Center: phase label + instruction + countdown, floating over the orb */}
+      {/* Center: phase label + countdown, floating over the orb */}
       {!centerHidden && (
         <div className="flex w-full max-w-[calc(100vw-2rem)] flex-col items-center gap-0 translate-y-[clamp(46px,12vh,100px)] landscape:translate-y-[clamp(28px,7vh,56px)]">
-          <div className="relative flex w-full flex-col items-center gap-1.5 px-4">
+          <div className="relative flex w-full flex-col items-center gap-3 px-4">
             <div
-              className="pointer-events-none absolute left-1/2 top-1/2 h-40 w-[min(25rem,92vw)] -translate-x-1/2 -translate-y-[57%] rounded-full bg-forest-night/40 blur-2xl"
+              className="exhale-hud-backplate pointer-events-none absolute left-1/2 top-1/2 h-44 w-[min(24rem,88vw)] -translate-x-1/2 -translate-y-[52%] rounded-full bg-forest-night/42 blur-2xl"
               aria-hidden="true"
             />
-            <div className="relative h-11 w-full min-w-0 flex items-center justify-center">
+            <div className="relative flex h-16 w-full min-w-0 items-center justify-center">
               {previousPhase && (
                 <h2
-                  className="exhale-phase-out absolute inset-x-0 text-center text-[2rem] font-semibold leading-none tracking-[0.16em] text-still-white/92 uppercase sm:text-4xl"
+                  className="exhale-phase-label exhale-phase-out absolute inset-x-0 text-center text-[2.75rem] font-semibold leading-none tracking-[0.12em] text-still-white/95 uppercase sm:text-5xl"
                   style={{
                     ['--phase-opacity' as string]: labelOpacity,
                     textShadow: phaseLabelShadow,
@@ -81,57 +79,32 @@ export default function GameHUD({
                 </h2>
               )}
               <h2
-                className={`absolute inset-x-0 text-center text-[2rem] font-semibold leading-none tracking-[0.16em] text-still-white/92 uppercase sm:text-4xl ${previousPhase ? 'exhale-phase-in' : ''}`}
+                className={`exhale-phase-label absolute inset-x-0 text-center text-[2.75rem] font-semibold leading-none tracking-[0.12em] text-still-white/95 uppercase sm:text-5xl ${previousPhase ? 'exhale-phase-in' : ''}`}
                 style={{
                   ['--phase-opacity' as string]: labelOpacity,
                   textShadow: phaseLabelShadow,
                   opacity: labelOpacity,
                 }}
                 aria-live="polite"
+                aria-label={`${currentPhase.label}. ${currentPhase.instruction}`}
               >
                 {currentPhase.label}
               </h2>
             </div>
 
-            <div className="relative flex min-h-12 w-full max-w-[18rem] items-center justify-center sm:max-w-[28rem]">
-              {previousPhase && (
-                <p
-                  className="exhale-phase-out absolute inset-x-0 px-1 text-center text-base font-light leading-snug tracking-[0.02em] text-still-white/86"
-                  style={{
-                    ['--phase-opacity' as string]: instructionOpacity,
-                    textShadow: instructionShadow,
-                    opacity: instructionOpacity,
-                  }}
-                  aria-hidden="true"
-                >
-                  {previousPhase.instruction}
-                </p>
-              )}
-              <p
-                className={`absolute inset-x-0 px-1 text-center text-base font-light leading-snug tracking-[0.02em] text-still-white/86 ${previousPhase ? 'exhale-phase-in' : ''}`}
-                style={{
-                  ['--phase-opacity' as string]: instructionOpacity,
-                  textShadow: instructionShadow,
-                  opacity: instructionOpacity,
-                }}
-              >
-                {currentPhase.instruction}
-              </p>
+            <div
+              className="exhale-phase-timer mt-0 text-7xl font-thin leading-none tabular-nums text-still-white/90 sm:text-8xl"
+              style={{
+                textShadow: '0 1px 2px rgba(8,14,10,0.98), 0 4px 18px rgba(8,14,10,0.96), 0 0 24px rgba(8,14,10,0.62)',
+                opacity: timerOpacity,
+                transition: 'opacity 700ms ease',
+              }}
+              role="timer"
+              aria-label={`${timeRemaining} seconds remaining`}
+            >
+              {timeRemaining}
             </div>
-
-          <div
-            className="text-6xl font-thin tabular-nums text-still-white/86 mt-0"
-            style={{
-              textShadow: '0 2px 20px rgba(15,23,18,0.9)',
-              opacity: timerOpacity,
-              transition: 'opacity 700ms ease',
-            }}
-            role="timer"
-            aria-label={`${timeRemaining} seconds remaining`}
-          >
-            {timeRemaining}
           </div>
-        </div>
         </div>
       )}
 

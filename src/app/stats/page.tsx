@@ -289,7 +289,7 @@ export default function StatsPage() {
     setBusy(false);
   };
 
-  const { totalSessions, totalMinutes, thisWeek, streak, totalDays } = computeStats(sessions);
+  const { totalSessions, totalMinutes, totalDays } = computeStats(sessions);
   const hours = Math.floor(totalMinutes / 60);
   const mins = totalMinutes % 60;
   const timeLabel = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
@@ -335,10 +335,8 @@ export default function StatsPage() {
             <div className="flex flex-col gap-0 w-full">
               {[
                 { label: 'Sessions', value: String(totalSessions) },
-                { label: 'This week', value: String(thisWeek) },
                 { label: 'Total time', value: timeLabel },
                 { label: 'Days practiced', value: String(totalDays) },
-                { label: 'Day streak', value: String(streak) },
               ].map(({ label, value }) => (
                 <div
                   key={label}
@@ -350,69 +348,6 @@ export default function StatsPage() {
                   <span className="text-2xl font-extralight text-still-white/86">{value}</span>
                 </div>
               ))}
-            </div>
-
-            <div className="flex flex-col gap-4 w-full">
-              <p className="text-still-white/52 text-xs tracking-[0.15em] uppercase font-light">
-                Milestones
-              </p>
-              <div className="grid grid-cols-4 gap-3" role="list" aria-label="Practice milestones">
-                {[25, 50, 75, 100].map((milestone) => {
-                  const earned = totalSessions >= milestone;
-                  return (
-                    <div
-                      key={milestone}
-                      className="flex flex-col items-center gap-2"
-                      role="listitem"
-                      aria-label={earned ? `${milestone} sessions milestone achieved` : `${milestone} sessions milestone not yet reached`}
-                    >
-                      <div
-                        className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300"
-                        style={{
-                          background: earned ? 'rgba(52,211,153,0.12)' : 'rgba(245,245,242,0.03)',
-                          border: earned ? '1px solid rgba(52,211,153,0.30)' : '1px solid rgba(245,245,242,0.07)',
-                        }}
-                        aria-hidden="true"
-                      >
-                        {earned ? (
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 20 20"
-                            fill="none"
-                            stroke="rgba(93,177,132,0.88)"
-                            strokeWidth="2.2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden="true"
-                          >
-                            <polyline points="4 10 8 14 16 6" />
-                          </svg>
-                        ) : (
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            style={{ color: 'rgba(245,245,242,0.12)' }}
-                            aria-hidden="true"
-                          >
-                            <rect x="8.5" y="2" width="3" height="16" rx="1.5" />
-                            <rect x="2" y="8.5" width="16" height="3" rx="1.5" />
-                          </svg>
-                        )}
-                      </div>
-                      <span
-                        aria-hidden="true"
-                        className="text-xs tracking-widest font-light"
-                        style={{ color: earned ? 'rgba(93,177,132,0.82)' : 'rgba(245,245,242,0.62)' }}
-                      >
-                        {milestone}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
 
             <div className="flex flex-col gap-0 w-full">

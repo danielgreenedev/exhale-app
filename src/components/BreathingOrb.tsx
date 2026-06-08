@@ -133,6 +133,7 @@ export default function BreathingOrb({
     const ctx = canvas.getContext('2d')!;
     let frameTime = performance.now();
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const highContrastQuery = window.matchMedia('(prefers-contrast: more)');
 
     const resize = () => {
       const dpr = window.devicePixelRatio || 1;
@@ -147,6 +148,7 @@ export default function BreathingOrb({
     window.addEventListener('resize', resize);
 
     const draw = (now: number) => {
+      const highContrast = highContrastQuery.matches;
       const dt = Math.min(now - frameTime, 50); // cap at 50ms to avoid jumps
       frameTime = now;
 
@@ -180,18 +182,22 @@ export default function BreathingOrb({
       ctx.fillRect(0, 0, w, h);
 
       // Warm forest glow — matches home screen
-      const forestGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.65);
-      forestGlow.addColorStop(0, CANVAS_COLORS.forestGlow);
-      forestGlow.addColorStop(1, CANVAS_COLORS.transparent);
-      ctx.fillStyle = forestGlow;
-      ctx.fillRect(0, 0, w, h);
+      if (!highContrast) {
+        const forestGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.65);
+        forestGlow.addColorStop(0, CANVAS_COLORS.forestGlow);
+        forestGlow.addColorStop(1, CANVAS_COLORS.transparent);
+        ctx.fillStyle = forestGlow;
+        ctx.fillRect(0, 0, w, h);
+      }
 
       // Soft vignette — keeps edges comfortable without a dark tunnel
-      const vig = ctx.createRadialGradient(cx, cy, h * 0.2, cx, cy, h * 0.9);
-      vig.addColorStop(0, CANVAS_COLORS.transparent);
-      vig.addColorStop(1, CANVAS_COLORS.edgeVignette);
-      ctx.fillStyle = vig;
-      ctx.fillRect(0, 0, w, h);
+      if (!highContrast) {
+        const vig = ctx.createRadialGradient(cx, cy, h * 0.2, cx, cy, h * 0.9);
+        vig.addColorStop(0, CANVAS_COLORS.transparent);
+        vig.addColorStop(1, CANVAS_COLORS.edgeVignette);
+        ctx.fillStyle = vig;
+        ctx.fillRect(0, 0, w, h);
+      }
 
       // Advance color transition
       if (colorTRef.current < 1) {
@@ -207,15 +213,17 @@ export default function BreathingOrb({
         targetColorRef.current,
         easeInOutCubic(colorTRef.current)
       );
-      const orbLightness = Math.max(10, bl + ORB_LIGHTNESS_OFFSET);
+      const orbLightness = Math.max(highContrast ? 16 : 10, bl + (highContrast ? -14 : ORB_LIGHTNESS_OFFSET));
       const leadEase = easeInOutCubic(phaseLeadProgress);
 
       // Subtle phase-reactive background wash — ties the space to the orb color
-      const phaseBg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.5);
-      phaseBg.addColorStop(0, `hsla(${bh}, ${bs}%, ${Math.max(orbLightness - 14, 8)}%, 0.045)`);
-      phaseBg.addColorStop(1, 'transparent');
-      ctx.fillStyle = phaseBg;
-      ctx.fillRect(0, 0, w, h);
+      if (!highContrast) {
+        const phaseBg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.5);
+        phaseBg.addColorStop(0, `hsla(${bh}, ${bs}%, ${Math.max(orbLightness - 14, 8)}%, 0.045)`);
+        phaseBg.addColorStop(1, 'transparent');
+        ctx.fillStyle = phaseBg;
+        ctx.fillRect(0, 0, w, h);
+      }
 
       // Orb size — smoothly animated through phaseProgress
       // inhale: grow 0.45→1.0, exhale: shrink 1.0→0.45, hold/rest: maintain
@@ -247,12 +255,18 @@ export default function BreathingOrb({
       const orbRadius = minR + (maxR - minR) * animatedScale;
 
       // Glow
-      [
-        { r: orbRadius * 3.2, a: 0.024 },
-        { r: orbRadius * 2.1, a: 0.044 },
-        { r: orbRadius * 1.5, a: 0.082 },
-        { r: orbRadius * 1.18, a: 0.15 },
-      ].forEach(({ r, a }) => {
+      const glowLayers = highContrast
+        ? [
+            { r: orbRadius * 1.55, a: 0.07 },
+            { r: orbRadius * 1.15, a: 0.13 },
+          ]
+        : [
+            { r: orbRadius * 3.2, a: 0.024 },
+            { r: orbRadius * 2.1, a: 0.044 },
+            { r: orbRadius * 1.5, a: 0.082 },
+            { r: orbRadius * 1.18, a: 0.15 },
+          ];
+      glowLayers.forEach(({ r, a }) => {
         const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
         g.addColorStop(0, `hsla(${bh}, ${bs}%, ${orbLightness}%, ${a})`);
         g.addColorStop(1, 'transparent');
@@ -276,8 +290,8 @@ export default function BreathingOrb({
       ctx.fill();
 
       // Rim highlight
-      ctx.strokeStyle = `hsla(${bh}, ${Math.min(bs + 20, 100)}%, ${Math.min(orbLightness + 22, 92)}%, 0.36)`;
-      ctx.lineWidth = 1.75;
+      ctx.strokeStyle = `hsla(${bh}, ${Math.min(bs + 20, 100)}%, ${Math.min(orbLightness + 22, 92)}%, ${highContrast ? 0.56 : 0.36})`;
+      ctx.lineWidth = highContrast ? 2.4 : 1.75;
       ctx.beginPath();
       ctx.arc(cx, cy, orbRadius, 0, Math.PI * 2);
       ctx.stroke();
@@ -287,7 +301,7 @@ export default function BreathingOrb({
         flashRef.current.t = Math.min(1, flashRef.current.t + dt / FLASH_MS);
         const ft = flashRef.current.t;
 
-        if (!reducedMotion) {
+        if (!reducedMotion && !highContrast) {
           const easedT = 1 - Math.pow(1 - ft, 3);
           const [fh, fs, fl] = targetColorRef.current;
           const flashRingR = orbRadius * (1.05 + easedT * 1.6);
@@ -313,15 +327,15 @@ export default function BreathingOrb({
       );
       const sessExtra = guideExtra >= GUIDE_RING_EXTRA ? 38 : 30;
       const sessR = maxR + Math.min(sessExtra, guideExtra - 12);
-      ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${orbLightness}%, 0.09)`;
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${orbLightness}%, ${highContrast ? 0.18 : 0.09})`;
+      ctx.lineWidth = highContrast ? 2.6 : 2;
       ctx.beginPath();
       ctx.arc(cx, cy, sessR, 0, Math.PI * 2);
       ctx.stroke();
 
       if (sp > 0) {
-        ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${orbLightness}%, 0.32)`;
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = `hsla(${bh}, ${bs}%, ${orbLightness}%, ${highContrast ? 0.52 : 0.32})`;
+        ctx.lineWidth = highContrast ? 2.9 : 2;
         ctx.beginPath();
         ctx.arc(cx, cy, sessR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * sp);
         ctx.stroke();
@@ -329,29 +343,31 @@ export default function BreathingOrb({
 
       // Outer guide ring: off-white breath rail with phase-colored progress.
       const guideR = maxR + guideExtra;
-      const guidePulse = reducedMotion ? 0.14 : 0.13 + 0.04 * Math.sin(now * 0.0024);
+      const guidePulse = highContrast
+        ? 0.32
+        : reducedMotion ? 0.14 : 0.13 + 0.04 * Math.sin(now * 0.0024);
       ctx.strokeStyle = `rgba(${CANVAS_COLORS.guideRing}, ${guidePulse})`;
-      ctx.lineWidth = 2.25;
+      ctx.lineWidth = highContrast ? 3.1 : 2.25;
       ctx.lineCap = 'round';
       ctx.beginPath();
       ctx.arc(cx, cy, guideR, 0, Math.PI * 2);
       ctx.stroke();
 
       const guideIncomingOpacity = outgoingArcRef.current
-        ? 0.2 + 0.18 * easeInOutCubic(outgoingArcTRef.current)
-        : 0.38;
+        ? (highContrast ? 0.34 : 0.2) + (highContrast ? 0.22 : 0.18) * easeInOutCubic(outgoingArcTRef.current)
+        : highContrast ? 0.58 : 0.38;
       const guideSaturation = Math.max(18, Math.round(bs * 0.68));
       ctx.strokeStyle = `hsla(${bh}, ${guideSaturation}%, ${Math.min(orbLightness + 2, 82)}%, ${guideIncomingOpacity})`;
-      ctx.lineWidth = 2.75;
+      ctx.lineWidth = highContrast ? 3.5 : 2.75;
       ctx.beginPath();
       ctx.arc(cx, cy, guideR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * pp);
       ctx.stroke();
 
       if (outgoingArcRef.current) {
         const [oh, os, ol] = outgoingArcRef.current.color;
-        const oldOpacity = 0.24 * (1 - easeInOutCubic(outgoingArcTRef.current));
+        const oldOpacity = (highContrast ? 0.34 : 0.24) * (1 - easeInOutCubic(outgoingArcTRef.current));
         ctx.strokeStyle = `hsla(${oh}, ${Math.max(18, Math.round(os * 0.68))}%, ${Math.min(ol - 4, 82)}%, ${oldOpacity})`;
-        ctx.lineWidth = 2.25;
+        ctx.lineWidth = highContrast ? 2.8 : 2.25;
         ctx.beginPath();
         ctx.arc(cx, cy, guideR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * outgoingArcRef.current.progress);
         ctx.stroke();
@@ -360,26 +376,28 @@ export default function BreathingOrb({
       if (phaseLeadProgress > 0) {
         const [nh, ns, nl] = nextColor;
         const currentAngle = -Math.PI / 2 + Math.PI * 2 * pp;
-        const nextOpacity = 0.06 + 0.2 * leadEase;
+        const nextOpacity = (highContrast ? 0.12 : 0.06) + (highContrast ? 0.26 : 0.2) * leadEase;
         ctx.strokeStyle = `hsla(${nh}, ${Math.max(18, Math.round(ns * 0.64))}%, ${Math.min(nl - 4, 82)}%, ${nextOpacity})`;
-        ctx.lineWidth = 3.1;
+        ctx.lineWidth = highContrast ? 3.6 : 3.1;
         ctx.lineCap = 'round';
         ctx.beginPath();
         ctx.arc(cx, cy, guideR, currentAngle, Math.PI * 1.5);
         ctx.stroke();
 
-        const guideHalo = ctx.createRadialGradient(cx, cy, guideR - 8, cx, cy, guideR + 22);
-        guideHalo.addColorStop(0, 'transparent');
-        guideHalo.addColorStop(0.58, `hsla(${nh}, ${Math.max(18, Math.round(ns * 0.64))}%, ${Math.max(nl - 6, 10)}%, ${0.014 * leadEase})`);
-        guideHalo.addColorStop(1, 'transparent');
-        ctx.fillStyle = guideHalo;
-        ctx.beginPath();
-        ctx.arc(cx, cy, guideR + 22, 0, Math.PI * 2);
-        ctx.fill();
+        if (!highContrast) {
+          const guideHalo = ctx.createRadialGradient(cx, cy, guideR - 8, cx, cy, guideR + 22);
+          guideHalo.addColorStop(0, 'transparent');
+          guideHalo.addColorStop(0.58, `hsla(${nh}, ${Math.max(18, Math.round(ns * 0.64))}%, ${Math.max(nl - 6, 10)}%, ${0.014 * leadEase})`);
+          guideHalo.addColorStop(1, 'transparent');
+          ctx.fillStyle = guideHalo;
+          ctx.beginPath();
+          ctx.arc(cx, cy, guideR + 22, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
 
-      // Particles (skipped when prefers-reduced-motion)
-      if (reducedMotion) {
+      // Particles are skipped when motion is reduced or contrast is increased.
+      if (reducedMotion || highContrast) {
         rafRef.current = requestAnimationFrame(draw);
         return;
       }

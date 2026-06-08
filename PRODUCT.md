@@ -20,6 +20,8 @@ Success: a first-time user completes a session without being confused, and retur
 
 No required account, no onboarding gate, no premium framing. The product should be ready to use in two taps from landing.
 
+Exhale is free by default. Monetization is conditional, deferred, and must never reduce the usefulness of the free breathing tool.
+
 ## Brand Personality
 
 Quiet, warm, accessible.
@@ -63,6 +65,7 @@ These are decisions made and should not be revisited without strong cause:
 - No hold-to-breathe interaction during sessions: the orb guides, the user follows
 - No mascot, named persona, or illustrated character
 - No required account, required login, or sync prompt before breathing
+- No profile surface, avatar, password account flow, or auth-first navigation unless future feedback proves optional Google sign-in is insufficient
 - No paywall or premium tier framing in UI copy
 
 ## Infrastructure
@@ -73,7 +76,18 @@ These are decisions made and should not be revisited without strong cause:
 - Preview branch: GitHub `preview`, deployed by Vercel as a pre-production branch.
 - Public domain: `https://exhale.guide`.
 - Optional sign-in depends on Supabase Auth with Google as the visible provider. Legacy email-code templates may remain configured for older accounts, but email code is no longer offered as the normal sign-in path.
-- Supabase tables currently used: `breathing_sessions`, `user_settings`, and `app_events`.
+- Auth email, when needed for legacy/recovery states, runs through Supabase Auth custom SMTP. Do not introduce marketing email into the breathing product surface.
+- Supabase tables currently used: `breathing_sessions`, `user_settings`, `app_events`, and `quotes`.
+
+## Roadmap Posture
+
+The roadmap is evidence-gated. Stage 0 is still validation: recruit roughly 10 to 20 testers from the target audience, watch completion/return/drop-off signal, and avoid broad feature expansion until retention signal is real.
+
+Stage 1 is ship-quality polish: accessibility, discoverability, privacy/terms, theme polish, and beta-driven refinements. The Garden skin and High Visual Contrast / Large Text or voice cues are candidates, not defaults.
+
+Stage 2 is distribution: Android Trusted Web Activity after polish and discoverability work; iOS remains a PWA-first path unless reception justifies native App Store cost.
+
+Stage 3 is conditional operations and monetization. If a small admin/support panel becomes necessary, the preferred first version is a protected Next.js route backed by Supabase, not Payload. First useful scope: synced-user deletion/support lookup, beta/tester event review, retention/drop-off summaries, and lightweight content management for quotes or themes. Revisit Payload only if CMS-style editing grows beyond what a small custom panel should own.
 
 ## Beta Handoff
 
@@ -90,8 +104,10 @@ Already implemented:
 - `role="timer"` on countdown, `role="progressbar"` on session bar
 - Radio group keyboard navigation (arrow keys) on session picker
 - All interactive elements have `aria-label`
+- Low-vision HUD hardening: larger mobile phase labels, no visible sentence overlay on the orb, stronger timer contrast, stronger dark text edge, a local contrast backplate, and `prefers-contrast: more` canvas simplification
 
 Known gaps:
-- Color contrast: some UI text at reduced opacity (white/28–38) may fall below 4.5:1 against #0f1712; has not been formally audited
+- Color contrast: some decorative or secondary UI text at reduced opacity may fall below 4.5:1 against #0f1712; content text should stay at 55% Still White or stronger
 - Canvas content (orb, phase rings, particles) is not accessible to screen readers; the phase label ARIA live region is the accessible equivalent
 - Session resume window (60s) has no extension mechanism for users who need more time
+- Same-device validation is still owed for the 97-year-old low-vision phone tester. If the default HUD hardening is not enough, promote optional High Visual Contrast / Large Text mode or voice cues from candidate to implementation
