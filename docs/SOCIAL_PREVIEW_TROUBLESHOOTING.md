@@ -1,6 +1,6 @@
 # Social Preview Troubleshooting
 
-Last updated: May 20, 2026 (Discord and Telegram crawler challenges resolved)
+Last updated: June 9, 2026 (Google Messages image cache-bust)
 
 This note documents social/Open Graph preview troubleshooting done for `https://exhale.guide`.
 
@@ -9,6 +9,10 @@ This note documents social/Open Graph preview troubleshooting done for `https://
 Resolved 2026-05-19 for Facebook. The Facebook preview now renders correctly for `exhale.guide` on shared posts. The Sharing Debugger 403 / parser issue cleared on its own once Meta's cache aged out; no further app-side or infrastructure change was needed beyond the work captured below. The earlier working conclusion (Meta-side parser/cache state, not an Exhale-side issue) held up.
 
 Resolved 2026-05-20 for Discord and Telegram. Both platforms showed no link preview even though the OG metadata and image were valid. Vercel Firewall live view showed crawler traffic from `Discordbot` and `TelegramBot (like TwitterBot)` being challenged. After adding Telegram to `robots.txt` and allowing the Discord/Telegram crawler user agents through Vercel Firewall, previews worked on both platforms.
+
+Observed 2026-06-08 for Google Messages on a Pixel 9 Pro XL running the latest full public Pixel Android release. The preview renders as a compact title/domain card with no image. Google's crawler documentation lists `GoogleMessages` as the user agent for Google Messages link previews. Spoofed `GoogleMessages` requests to both `/` and `/og-image.png` returned `429 Too Many Requests` with `X-Vercel-Mitigated: challenge`, so the likely cause is Vercel challenging the fetcher before it can parse the OG metadata or retrieve the image.
+
+Updated 2026-06-09: after adding the Vercel bypass rule, spoofed `GoogleMessages` requests returned `200 OK` for both `/` and `/og-image.png`, and Google Messages showed preview text but still no image. Because the OG image URL was the same URL that previously returned a Vercel challenge, `src/app/layout.tsx` now points previews at `/og-image-v2.png` to force a fresh image fetch instead of reusing a failed image cache entry.
 
 Keep this document as a reference playbook in case a future domain change, OG image swap, or Garden-skin update triggers similar cache symptoms. The Vercel firewall bypass rules and `robots.txt` allowances should not be reverted; they cost nothing to keep and prevent regressions if social platforms change crawler IPs again.
 
@@ -61,6 +65,14 @@ https://exhale.guide/og-image.png
 
 The image is a 1200x630 PNG using Exhale's Still Water design language. It includes a subtle ghost-style `Begin` cue instead of a feature list or hard-selling call to action.
 
+After the 2026-06-09 Google Messages cache-bust, Open Graph and Twitter metadata point at:
+
+```text
+https://exhale.guide/og-image-v2.png
+```
+
+The original `/og-image.png` remains in `public/` as a stable legacy asset.
+
 The original `src/app/opengraph-image.tsx` route was removed because Next's file-based metadata route auto-injected `/opengraph-image?...` as `og:image`, overriding the manually configured static image URL.
 
 ### Robots allowlist
@@ -95,9 +107,44 @@ Allow: /
 User-agent: TelegramBot
 Allow: /
 
+User-agent: GoogleMessages
+Allow: /
+
 User-agent: *
 Allow: /
 ```
+
+### Google Messages Image Missing
+
+Observed 2026-06-08:
+
+- Google Messages generated a preview with title and domain, but no image.
+- Google documents `GoogleMessages` as the user agent used to generate link previews for URLs sent in chat messages.
+- Crawler-shaped requests returned `429 Too Many Requests` for `/` and `/og-image.png`.
+- Response headers included `X-Vercel-Mitigated: challenge`.
+
+Conclusion:
+
+```text
+When Google Messages shows only a title/domain card, valid OG metadata is not enough. If Vercel challenges GoogleMessages, the fetcher may fail to retrieve the static preview image and fall back to a minimal card.
+```
+
+Fix to apply in Vercel Firewall:
+
+```text
+IF User Agent contains GoogleMessages
+THEN Bypass
+```
+
+Place this rule with the existing social-preview crawler bypasses. After publishing, send a cache-busted URL in a new message, for example:
+
+```text
+https://exhale.guide/?gm_preview=YYYYMMDD
+```
+
+If the custom bypass rule matches but Vercel system DDoS mitigation still challenges the request, inspect live Firewall traffic for the actual Google Messages request and add a System Bypass Rule for the exact observed IP or CIDR scoped to `exhale.guide`. Verify the request is actually from Google first; Google user agents can be spoofed, and Google publishes user-triggered fetcher IP ranges plus reverse-DNS guidance.
+
+If `GoogleMessages` receives `200 OK` for both the page and the image but Messages still omits the image, rotate the OG image URL again, for example from `/og-image-v2.png` to `/og-image-v3.png`, then deploy and test with a brand-new page URL query. This avoids a stale failed-image cache tied to the image URL itself.
 
 ## Discord and Telegram No-Preview Resolution
 

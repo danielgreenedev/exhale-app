@@ -25,6 +25,9 @@ Allow: /
 User-agent: TelegramBot
 Allow: /
 
+User-agent: GoogleMessages
+Allow: /
+
 User-agent: *
 Allow: /
 
