@@ -2,10 +2,29 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { SURFACE_GLOWS } from '@/lib/colors';
 import { OrbMark } from '@/components/OrbMark';
+import { SITE_NAME, canonicalUrl } from '@/lib/seo';
+
+const title = 'Terms of Use, Exhale';
+const description = 'Terms for using Exhale, a free guided breathing tool with optional Google sign-in for practice history.';
 
 export const metadata: Metadata = {
-  title: 'Terms, Exhale',
-  description: 'Terms of use for Exhale, a free guided breathing tool.',
+  title,
+  description,
+  alternates: {
+    canonical: canonicalUrl('/terms'),
+  },
+  openGraph: {
+    title,
+    description,
+    url: canonicalUrl('/terms'),
+    siteName: SITE_NAME,
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title,
+    description,
+  },
 };
 
 export default function TermsPage() {

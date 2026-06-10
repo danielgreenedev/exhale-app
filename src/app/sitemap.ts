@@ -1,26 +1,29 @@
 import type { MetadataRoute } from 'next';
+import { canonicalUrl } from '@/lib/seo';
 
-const baseUrl = 'https://exhale.guide';
+const LAST_MODIFIED = {
+  home: new Date('2026-06-10'),
+  privacy: new Date('2026-06-07'),
+  terms: new Date('2026-06-07'),
+};
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date();
-
   return [
     {
-      url: `${baseUrl}/`,
-      lastModified,
+      url: canonicalUrl('/'),
+      lastModified: LAST_MODIFIED.home,
       changeFrequency: 'monthly',
       priority: 1,
     },
     {
-      url: `${baseUrl}/privacy`,
-      lastModified,
+      url: canonicalUrl('/privacy'),
+      lastModified: LAST_MODIFIED.privacy,
       changeFrequency: 'yearly',
       priority: 0.3,
     },
     {
-      url: `${baseUrl}/terms`,
-      lastModified,
+      url: canonicalUrl('/terms'),
+      lastModified: LAST_MODIFIED.terms,
       changeFrequency: 'yearly',
       priority: 0.3,
     },

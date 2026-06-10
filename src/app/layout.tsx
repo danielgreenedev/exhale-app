@@ -2,22 +2,33 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
+import {
+  HOME_DESCRIPTION,
+  HOME_TITLE,
+  SITE_NAME,
+  SITE_URL,
+  SOCIAL_IMAGE,
+  canonicalUrl,
+  siteJsonLd,
+} from '@/lib/seo';
 
 const inter = Inter({ subsets: ['latin'], weight: ['100', '200', '300', '600'] });
-const socialImage = '/og-image-v2.png';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://exhale.guide'),
-  title: 'Exhale, a Quiet Guided Breathing Tool for Calmer Moments',
-  description: 'A quiet, free breathing tool with gentle pacing, optional rhythms, and soft sound for stressful moments. No account required.',
+  metadataBase: new URL(SITE_URL),
+  title: HOME_TITLE,
+  description: HOME_DESCRIPTION,
+  alternates: {
+    canonical: canonicalUrl('/'),
+  },
   openGraph: {
-    title: 'Exhale, a Quiet Guided Breathing Tool for Calmer Moments',
-    description: 'A quiet, free breathing tool with gentle pacing, optional rhythms, and soft sound for stressful moments. No account required.',
-    url: 'https://exhale.guide/',
-    siteName: 'Exhale',
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    url: canonicalUrl('/'),
+    siteName: SITE_NAME,
     images: [
       {
-        url: socialImage,
+        url: SOCIAL_IMAGE,
         width: 1200,
         height: 630,
         type: 'image/png',
@@ -29,9 +40,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Exhale, a Quiet Guided Breathing Tool for Calmer Moments',
-    description: 'A quiet, free breathing tool with gentle pacing, optional rhythms, and soft sound for stressful moments. No account required.',
-    images: [socialImage],
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    images: [SOCIAL_IMAGE],
   },
 };
 
@@ -39,6 +50,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased bg-forest-night text-still-white`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
+        />
         <AuthProvider>
           {children}
         </AuthProvider>

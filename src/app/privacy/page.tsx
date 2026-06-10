@@ -2,10 +2,29 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { SURFACE_GLOWS } from '@/lib/colors';
 import { OrbMark } from '@/components/OrbMark';
+import { SITE_NAME, canonicalUrl } from '@/lib/seo';
+
+const title = 'Privacy Policy, Exhale';
+const description = 'How Exhale handles local practice data, optional Google sign-in, synced settings, and deletion requests.';
 
 export const metadata: Metadata = {
-  title: 'Privacy, Exhale',
-  description: 'How Exhale handles your data, sessions, and optional Google sign-in.',
+  title,
+  description,
+  alternates: {
+    canonical: canonicalUrl('/privacy'),
+  },
+  openGraph: {
+    title,
+    description,
+    url: canonicalUrl('/privacy'),
+    siteName: SITE_NAME,
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title,
+    description,
+  },
 };
 
 export default function PrivacyPage() {
