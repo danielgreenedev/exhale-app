@@ -29,6 +29,7 @@ export const metadata: Metadata = {
     images: [
       {
         url: SOCIAL_IMAGE,
+        secureUrl: SOCIAL_IMAGE,
         width: 1200,
         height: 630,
         type: 'image/png',
@@ -42,7 +43,16 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: HOME_TITLE,
     description: HOME_DESCRIPTION,
-    images: [SOCIAL_IMAGE],
+    images: [
+      {
+        url: SOCIAL_IMAGE,
+        secureUrl: SOCIAL_IMAGE,
+        width: 1200,
+        height: 630,
+        type: 'image/png',
+        alt: 'Exhale, a quiet guided breathing tool for calmer moments',
+      },
+    ],
   },
 };
 

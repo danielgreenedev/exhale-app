@@ -1,6 +1,7 @@
 export const SITE_URL = 'https://exhale.guide';
 export const SITE_NAME = 'Exhale';
-export const SOCIAL_IMAGE = '/og-image-v2.png';
+export const SOCIAL_IMAGE_PATH = '/og-image-v3.png';
+export const SOCIAL_IMAGE = new URL(SOCIAL_IMAGE_PATH, SITE_URL).toString();
 
 export const HOME_TITLE = 'Exhale, a Quiet Guided Breathing Tool for Calmer Moments';
 export const HOME_DESCRIPTION =

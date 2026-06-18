@@ -28,6 +28,21 @@ Allow: /
 User-agent: GoogleMessages
 Allow: /
 
+User-agent: GoogleOther-Image
+Allow: /
+
+User-agent: Messenger
+Allow: /
+
+User-agent: MessengerForiOS
+Allow: /
+
+User-agent: Orca
+Allow: /
+
+User-agent: FB_IAB
+Allow: /
+
 User-agent: *
 Allow: /
 
