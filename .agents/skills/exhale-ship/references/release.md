@@ -28,8 +28,12 @@ Abort the release gate on the first failing required command. Summarize the fail
 
 ## Deployment
 
-- After a successful push, check deployment status with the available Vercel path in this environment, such as the Vercel plugin or `npx.cmd vercel` commands if configured.
-- If deployment tooling is unavailable or unauthenticated, report the local release status and the missing deployment check.
+- After a successful push, check deployment status with the available Vercel path in this environment.
+- First look for a linked Vercel project such as `.vercel/project.json` or an available Vercel plugin/connector.
+- If the checkout is not linked, use the repository's known production context from `PRODUCT.md` and `docs/DEPLOYMENT.md`, then report that local deployment status cannot be confirmed from the checkout alone.
+- If the Vercel CLI is authenticated and a deployment URL or alias is known, prefer read-only checks such as `npx.cmd vercel logs <url-or-alias>` over redeploy commands.
+- Do not run `npx.cmd vercel redeploy`, change Vercel environment variables, or create a deployment unless the user explicitly asks.
+- If deployment tooling is unavailable, unauthenticated, or unlinked, report the local release status and the missing deployment check.
 
 ## Output
 

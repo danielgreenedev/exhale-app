@@ -42,7 +42,7 @@ Lead review outputs with findings. If no blocking issues exist, say so plainly a
 
 ## Delegation
 
-Keep the default workflow single-session. If the user explicitly asks for subagents or parallel agent work, split by disjoint responsibility:
+Keep the default workflow single-session. If the user explicitly asks for subagents or parallel agent work, read `references/subagents.md` and split by disjoint responsibility:
 
 - Code review agent: read-only source and tests.
 - Design review agent: read-only UI, CSS, browser inspection, and design docs.

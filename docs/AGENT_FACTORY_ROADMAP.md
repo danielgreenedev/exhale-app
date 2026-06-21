@@ -25,34 +25,34 @@ Status: complete
 
 ## Phase 2: Review Gates
 
-Status: planned
+Status: complete for first factory run; ongoing per change
 
-- Run the code review gate against working-tree changes.
-- Run the design gate only when UI, CSS, Tailwind, or visible copy changes.
-- Use `npm.cmd run audit:impeccable` and browser inspection when UI changes require visual verification.
-- Record P0/P1 blockers separately from lower-risk follow-ups.
+- Ran the code review gate against the no-post-exhale rhythm changes.
+- Ran the design gate for UI/copy changes and confirmed no new source-level design violations.
+- Used `npm.cmd run audit:impeccable`; current warnings are pre-existing color-token warnings around Tailwind emerald/gray defaults and the Next dev portal, not regressions from the rhythm change.
+- Recorded no P0/P1 blockers for the first factory run.
 
 ## Phase 3: Documentation Harmonization
 
-Status: planned
+Status: complete for first factory run; ongoing per change
 
-- Update `docs/HANDOFF.md` with current branch state, recent changes, and verification results.
-- Cross-check product and design changes against `PRODUCT.md`, `CLAUDE.md`, and `DESIGN.md`.
-- Move resolved questions or feedback into the appropriate docs only when the change itself answers them.
+- Updated `docs/HANDOFF.md`, `CLAUDE.md`, `DESIGN.md`, `docs/TODO.md`, `docs/OPEN_QUESTIONS.md`, and `docs/USER_FEEDBACK.md` for the no-post-exhale rhythm model.
+- Cross-checked product and design changes against `PRODUCT.md`, `CLAUDE.md`, and `DESIGN.md`.
+- Fixed docs drift found by the gate: removed the retired `quiet-blush` design token and removed active tester prompt wording that still asked about `Pause`.
 
 ## Phase 4: Guarded Release
 
-Status: planned
+Status: local validation complete; push/deployment pending explicit approval
 
-- Inspect `git status -sb` and avoid broad staging by default.
-- Run `npm.cmd run lint`, `npm.cmd test -- --runInBand`, and `npm.cmd run build`.
-- Summarize staged candidates and verification output.
-- Commit, push, and check deployment status only after explicit user approval.
+- Inspected `git status -sb` and avoided broad staging.
+- Ran `git diff --check`, `npm.cmd run lint`, `npm.cmd test -- --runInBand`, and `npm.cmd run build`.
+- Committed the validated release candidate as `7f42735 feat: retire post-exhale phase and add ship workflow`.
+- Remaining gated step: push `master` and check Vercel deployment status after explicit approval.
 
 ## Phase 5: Optional Factory Expansion
 
-Status: planned
+Status: in progress
 
-- Add subagent prompts for parallel code/design/doc review after the single-session skill proves useful.
-- Add Vercel deployment checks through the existing Vercel CLI/plugin path if the guarded release flow needs it.
-- Consider MCP additions only when a repeated task cannot be handled reliably with current tools.
+- Added subagent prompt templates for optional parallel code, design, docs, and release-readiness review.
+- Tightened the guarded release playbook with deployment-check paths that do not assume a linked Vercel project.
+- MCP additions remain deferred; current Codex desktop tools, Browser/Playwright capabilities, npm scripts, and git commands are enough for the current factory loop.
