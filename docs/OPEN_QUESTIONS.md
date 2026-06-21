@@ -1,6 +1,6 @@
 # Exhale Open Questions
 
-Last updated: June 8, 2026 (older low-vision HUD readability feedback added)
+Last updated: June 21, 2026 (generic/derivative design signal added)
 
 Use this as a living parking lot for product, validation, trust, accessibility, and strategy questions that are not ready to become implementation tasks. As questions are answered, add the answer, date, evidence, and any resulting TODO/doc updates.
 
@@ -636,6 +636,30 @@ Future options:
 - Add a self-serve deletion confirmation flow after Google sign-in.
 
 ## Strategy
+
+### Is Exhale visually distinct enough to avoid feeling generic or derivative?
+
+Context: T-2026-06-21-22 said the design looked generic and derivative. This came from a software-development and mental-health-advocacy perspective, so weigh it as a design-trust signal rather than a direct first-breath usability failure.
+
+Current answer: Open. Do not redesign from one signal alone. Use it to guide follow-up and, if repeated, a scoped visual-distinctiveness pass that makes Exhale more ownable without adding wellness-brand noise, decorative clutter, or friction before Begin.
+
+Follow-up questions to ask:
+
+```text
+Which screen or moment felt most generic: the first screen, active breathing session, completion screen, Practice History, or the whole system?
+```
+
+```text
+What did it remind you of?
+```
+
+```text
+Was the generic feeling caused more by color, typography, layout, motion, copy, the orb/circle treatment, or something else?
+```
+
+```text
+What one visual moment would make Exhale feel more specific without making it busier?
+```
 
 ### What is the primary purpose of the Garden skin?
 

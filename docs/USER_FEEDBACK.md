@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: June 12, 2026 (latest beta question set)
+Last updated: June 21, 2026 (latest design-distinctiveness signal)
 
 ## Purpose
 
@@ -9,6 +9,32 @@ Use this document to capture user critique, usability notes, and product observa
 ## Current Test Surface
 
 Use `https://exhale.guide` for the current beta round. Use a Vercel preview only when a future test needs changes that should not be visible on production yet.
+
+## 2026-06-21, T-2026-06-21-22, Professional And Advocacy Reviewer, Generic/Derivative Design Signal
+
+### Context
+
+- Feedback came from a software-development and mental-health-advocacy perspective.
+- The reviewer said the design looked generic and derivative.
+- This is a design-trust and brand-distinctiveness signal, not yet a usability failure or a target-audience retention signal.
+
+### Product Signal
+
+- The Still Water visual system may be reading as too template-like to design- and software-fluent viewers.
+- This challenges whether Exhale has enough ownable visual language beyond calm, dark, and minimal.
+- Do not answer this by adding louder wellness tropes, decorative noise, onboarding, or feature copy. The useful direction is a more specific Exhale signature that still protects first-breath calm.
+
+### Actionable Recommendations
+
+1. Ask for specifics before redesigning: which screen, element, palette, typography, motion, or composition felt derivative, and what did it remind the reviewer of?
+2. If this repeats, run a scoped Impeccable critique focused on originality and ownable visual language, not a broad product redesign.
+3. Treat any distinctiveness pass as secondary to current first-breath usability, rhythm clarity, accessibility, and completion validation.
+
+### Open Questions
+
+1. Is the generic read caused by the home screen, active session, completion screen, practice/history surfaces, or the system as a whole?
+2. Does the target beta audience perceive generic as low-trust or forgettable, or does the restraint help them start breathing?
+3. What can become more ownable without making Exhale feel louder, branded, instructional, or less immediate?
 
 ## 2026-06-21, T-2026-06-21-21, Family Clinician And Yoga Teacher, Rhythm Ratio Safety
 
@@ -39,7 +65,7 @@ Use `https://exhale.guide` for the current beta round. Use a Vercel preview only
 - If Firefox on Windows 11 appears to enter a session with sound off, verify whether Session Setup actually selected `Off` or whether Web Audio simply has not started yet. The former is a settings persistence bug; the latter is expected browser autoplay behavior if it resolves after a tap.
 - When a tester reports "Brave" or "Chrome" from a Facebook-shared link, verify whether they are actually in Facebook's in-app preview browser. Facebook preview can render Exhale correctly while still blocking or degrading browser features such as fullscreen.
 - Facebook and Messenger in-app browsers are limited-capability containers. If sound, fullscreen, or browser controls feel broken there, ask the tester to retry in Chrome, Brave, Safari, or their normal default browser before classifying the issue as a browser-specific app bug.
-- Parked Impeccable follow-ups should wait until the next beta response: renewed rhythm confusion after the no-post-exhale change triggers `/impeccable clarify active rhythm`; continued visual overload/readability friction triggers `/impeccable distill active session HUD`; another Meta-webview audio/capability failure triggers `/impeccable harden Meta in-app browser state`; first-cycle cue feedback triggers `/impeccable onboard first-run cue`.
+- Parked Impeccable follow-ups should wait until the next beta response: renewed rhythm confusion after the no-post-exhale change triggers `/impeccable clarify active rhythm`; continued visual overload/readability friction triggers `/impeccable distill active session HUD`; repeated generic/derivative critique triggers `/impeccable critique` for visual distinctiveness; another Meta-webview audio/capability failure triggers `/impeccable harden Meta in-app browser state`; first-cycle cue feedback triggers `/impeccable onboard first-run cue`.
 
 ## Privacy Rules
 
