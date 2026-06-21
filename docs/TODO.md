@@ -1,13 +1,14 @@
 # Exhale To-Do List
 
-Last updated: June 8, 2026 (older low-vision HUD readability hardening)
+Last updated: June 21, 2026 (post-exhale pause retired)
 
 ## Completed Rhythm Changes
 
+- Accepted 2026-06-21 clinical-family rhythm feedback plus broad Relax/Pause dislike: every preset now keeps guided exhale longer than guided inhale; Box's legacy storage id now presents 4-7-8; Flow is a true no-hold/no-pause 4-6 loop; all internal and visible post-exhale Relax/Pause mechanics are removed.
 - Settling In now lasts 8 seconds before the first guided inhale.
-- The default Steady rhythm is now 4-4-6-4 (cycle 18s), with a 4-second Relax phase (internal phase enum `rest`). The pattern was originally 4-4-6-8 at the 2026-05-19 alternate-rhythm launch and was revised on 2026-05-26 after Relax-too-long beta feedback.
+- The default Steady rhythm is now 4-2-6 (cycle 12s), with no post-exhale phase. It replaced the earlier 4-4-6-4 Relax shape and the brief 4-2-6-2 Pause compromise on 2026-06-21 after rhythm-ratio feedback and 90% user dislike reinforced existing Relax ambiguity.
 - Session breath counts were recalibrated so the 3, 5, 7, and 10 minute labels stay accurate.
-- Top-level session length buttons now show only time labels; rhythm-specific timing details stay behind the optional `View timing` reveal instead of the first decision surface.
+- Top-level session length buttons now show only time labels; rhythm-specific timing details stay behind the optional `Show pattern` reveal instead of the first decision surface.
 
 ## Completed UI Polish
 
@@ -20,7 +21,7 @@ Last updated: June 8, 2026 (older low-vision HUD readability hardening)
 - Still is now audibly present.
 - Circle Size and Sound live inside Session Setup from the start; the 3-session hiding rule was removed.
 - Audio now shows an explicit Off option instead of an icon-only mute control.
-- `View timing` now reads as a secondary button with a disclosure caret instead of plain text.
+- `Show pattern` now reads as a secondary button with a disclosure caret instead of plain text.
 - When available, Resume now appears directly below Begin and before Session Setup.
 
 ## Completed Beta Feedback Polish
@@ -200,14 +201,14 @@ Driven by project owner refinement on the sign-in footer link.
 ## Completed Discoverability Pass
 
 - Open Graph and Twitter card metadata added to `src/app/layout.tsx`, with `metadataBase: https://exhale.guide` so relative asset URLs resolve correctly.
-- Static 1200x630 social preview image at `public/og-image.png` using the Still Water aesthetic (orb with rings, wordmark, subtle `Begin` cue).
+- Static 1200x630 social preview images at `public/og-image.png`, `public/og-image-v2.png`, and current `public/og-image-v3.png` use the Still Water aesthetic (orb with rings, wordmark, subtle `Begin` cue).
 - The earlier dynamic `src/app/opengraph-image.tsx` route was removed because Next's file-based metadata route auto-injected `/opengraph-image?...` as `og:image`, overriding the configured static URL.
 - `public/robots.txt` explicitly allows Meta and Facebook crawlers, Twitterbot, LinkedInBot, Slackbot, and general traffic.
 - `src/app/sitemap.ts` serves `/sitemap.xml` for the home, privacy, and terms pages, and `public/robots.txt` advertises the sitemap URL.
 - `public/BingSiteAuth.xml` supports Bing Webmaster Tools verification. The owner reports Google and Bing verification complete; Bing URL Inspection shows the home URL indexed successfully.
 - The home page now has a static Suspense fallback with an Exhale H1 so crawlers see an H1 before client hydration. This addresses Bing's `H1 tag missing` warning without changing the hydrated home UI.
 - Vercel firewall: custom Facebook crawler bypass rule plus system bypass rules for observed Meta IP ranges (104.210.140.0/24, 173.252.82.0/24, 173.252.87.0/24, 57.141.18.0/24, 69.63.184.0/24).
-- Verified live: 200 responses for `/`, `/robots.txt`, and `/og-image.png`; correct OG meta tags in rendered HTML; Facebook crawler user-agent receives 200 from outside Meta.
+- Verified live before the 2026-06-18 cache-bust: 200 responses for `/`, `/robots.txt`, and `/og-image-v2.png`; correct OG meta tags in rendered HTML; Facebook crawler user-agent receives 200 from outside Meta. Current metadata points at `/og-image-v3.png`.
 - Troubleshooting walkthrough kept in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md` for future resume.
 
 ## Completed Policy Pages
@@ -220,9 +221,9 @@ Driven by project owner refinement on the sign-in footer link.
 
 Alternate rhythm options shipped end to end:
 
-- `RHYTHMS` registry in `src/lib/breathing.ts` with four visible paces: Steady 4-4-6-4 (internal id `standard`, default; originally 4-4-6-8, revised 2026-05-26), Soft 3-2-4-4 (internal id `gentle`), Box 4-4-4-4 (internal id `box`, replaced Full on 2026-06-04), and Flow 4-0-6-2. Per-rhythm session-cycle recalibration keeps the 3/5/7/10 minute labels honest.
+- `RHYTHMS` registry in `src/lib/breathing.ts` with four visible paces: Steady 4-2-6 (internal id `standard`, default), Soft 3-1-5 (internal id `gentle`), 4-7-8 (internal id `box` for compatibility), and Flow 4-6. Per-rhythm session-cycle recalibration keeps the 3/5/7/10 minute labels honest.
 - Rhythm threaded through `useBreathingSession`, `BreathingOrb`, `GameHUD`, `useAudioEngine`, and `game/page.tsx` via a locked-at-first-render `rhythmRef` pattern.
-- Session Setup rhythm picker now uses label-only pace tiles (Steady / Soft / Box / Flow); the connected helper row is human-first, and technical phase timing stays hidden by default behind `View timing` to avoid intimidating the skeptical primary user.
+- Session Setup rhythm picker now uses label-only pace tiles (Steady / Soft / 4-7-8 / Flow); the connected helper row is human-first, and technical phase timing stays hidden by default behind `Show pattern` to avoid intimidating the skeptical primary user.
 - localStorage key `exhale-rhythm` plus Supabase `user_settings.rhythm` column (migration 002), with isRhythmId guard on parse.
 - Back-compat aliases (`BREATHING_PATTERN`, `CYCLE_DURATION`, `SESSION_CYCLES`) removed; all consumers read rhythm-aware data.
 - 11 new tests cover the registry shape, cycle recalibration accuracy, getPhaseAtTime boundary behavior with non-default rhythms, and the rhythm-lock invariant.
@@ -235,7 +236,7 @@ Two tester-follow-up tasks land here as Stage 0 work below.
 
 - Renamed the third rhythm `slow` to `full` (label, id, type) and added a per-rhythm one-word `summary` field for aria labels and helper context. Technical signature moved out of the tile and into the connected helper.
 - Practice History link now hidden on the home page until at least one completed session exists, so first-visit users see exactly one decision (length) and one action (Begin).
-- Rhythm tile sub-labels were removed after mobile review; label-only tiles leave the connected helper to carry the extra context. The detailed phase list is now hidden by default behind `View timing`.
+- Rhythm tile sub-labels were removed after mobile review; label-only tiles leave the connected helper to carry the extra context. The detailed phase list is now hidden by default behind `Show pattern`.
 - Data migration 003 rewrites any cloud `rhythm = 'slow'` values to `'full'`.
 
 ## Completed Audit-Driven Polish (2026-05-19)
@@ -318,9 +319,9 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 - Guardrails: no profile screen, avatars, passwords, account settings, premium gate, or auth-first onboarding as part of this task.
 - Acceptance completed: the same Supabase user shows Email and Google providers enabled, and a fresh Firefox production session restored practice history through Google sign-in. Keep email-code sync available unless follow-up testing shows it is redundant.
 
-2. Pending follow-up with rhythm-concern testers: ask whether Box feels clearer than the retired Full/Relax shape, and ask the four Rest/Hold-frictioned testers (T-2026-05-19-03, -05, -06, -07) whether Flow fits better than their current choice. Use the Flow/Box follow-up questions in `docs/USER_FEEDBACK.md` so the tiny-pause and post-exhale-hold questions are asked consistently. Capture answers in `docs/USER_FEEDBACK.md`. Flow shipped on 2026-05-20 without the original pre-merge validation gate; Box shipped on 2026-06-04 after the Relax confusion signal strengthened.
+2. Pending follow-up with rhythm-concern testers: ask whether 4-7-8 feels calming or too demanding, and whether Flow's no-hold/no-pause loop feels smoother than Steady. Use the refreshed Flow and 4-7-8 follow-up questions in `docs/USER_FEEDBACK.md`. Capture answers in `docs/USER_FEEDBACK.md`.
 
-2a. Resolved 2026-05-19: the Rest phase is now labeled `Relax` with the single-word instruction `Breathe`. The phase enum stays `rest` as the internal discriminator. `Relax` preserves imperative-verb parity with Inhale/Hold/Exhale and reads as permission rather than instruction; the one-word instruction stops the copy from competing with the phase label for attention. See `CLAUDE.md` Core Mechanic and `src/lib/breathing.ts` for the canonical statement.
+2a. Superseded 2026-06-21: `Relax` / `Breathe`, `Relax` / `Breathe naturally`, and the brief `Pause` compromise did not resolve the semantics issue. The `rest` phase enum and post-exhale phase object were removed entirely.
 
 2b. Resolved 2026-05-19: the `Next [phase]` HUD text cue was removed because it competed with the central phase label and countdown. Audio pre-cue and ring-color lead remain.
 
@@ -348,7 +349,7 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 These can wait until after Stage 0 feedback signal is in.
 
-6a. Resolved 2026-05-20: Flow rhythm shipped to production (4-0-6-2, 12s cycle, label "Flow", summary "Continuous"). See "Completed Flow Rhythm" section below. The original design-sketch validation gate was waived in favor of shipping and collecting post-launch tester signal; follow-up with T-2026-05-19-03, -05, -06, -07 on Flow fit is now Stage 0 item 2.
+6a. Resolved 2026-05-20; revised 2026-06-21: Flow originally shipped as 4-0-6-2, then moved to a true 4-6 two-phase loop after later pause-friction feedback. Follow-up with T-2026-05-19-03, -05, -06, -07 on Flow fit is now Stage 0 item 2.
 
 6b. Active open question, not a build task: should rhythms support progressive/ramping shapes rather than only steady patterns? The second independent signal arrived on 2026-05-22 from T-2026-05-22-13, after the original T-2026-05-19-07 competitive-escalation ask. This is now written up in `docs/OPEN_QUESTIONS.md`. Next step is tester clarification, not implementation: determine whether the need is a first-cycle/first-few-cycles ease-in, a whole-session escalation, or mostly a Relax-clarity problem. Preserve the locked-at-start predictability invariant unless a future scoped ramp design explicitly explains the curve before the session starts.
 
@@ -370,7 +371,7 @@ These can wait until after Stage 0 feedback signal is in.
 6f. Conditional Flow revision: evaluate a no-pause Flow variant.
 
 - Trigger: at least one more Flow tester independently reports that the 2-second Relax/pause feels rushed, spastic, interruptive, or pulls them out of the continuous Inhale/Exhale loop. T-2026-05-19-08 has already confirmed they would remove the pause; the remaining question is whether that signal repeats beyond one tester.
-- Candidate: Flow 4-0-6-0. Keep the current Inhale and Exhale timing because T-2026-05-19-08 said those felt smooth and well-paced.
+- Candidate: Flow 4-6. Keep the current Inhale and Exhale timing because T-2026-05-19-08 said those felt smooth and well-paced.
 - Avoid solving this with more explanatory copy. The feedback says the interruption happens too quickly to process, so extra words are unlikely to help.
 - Keep parked until Stage 0 Flow follow-up produces a second confirming signal.
 
@@ -430,7 +431,7 @@ These can wait until after Stage 0 feedback signal is in.
 
 7. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Secondary-user feedback asked about changing colors; evaluate that through a theme/skin system before considering freeform color controls. Run `/impeccable shape Garden skin` before building.
 
-8. Resolved 2026-05-19: the Facebook preview now renders correctly on shared posts; the Sharing Debugger issue cleared once Meta's cache aged out, matching the working hypothesis. Playbook preserved in `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md` for future reference. When the Garden skin lands, consider an updated OG image that shows both aesthetics — that is the only related thread still on the radar.
+8. Resolved 2026-05-19 for Facebook feed posts: the Facebook preview now renders correctly on shared posts; the Sharing Debugger issue cleared once Meta's cache aged out, matching the working hypothesis. Observed 2026-06-15: Facebook Messenger messages still do not show the rich preview even though Facebook feed posts, Discord, and Telegram do. Treat Messenger as a separate cache/fetch/client-rendering surface and use `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md` before changing metadata again. When the Garden skin lands, consider an updated OG image that shows both aesthetics - that is the only related product-side thread still on the radar.
 
 9. Resolved 2026-05-20: quiet privacy/terms footer added to home, session complete, and stats. See "Completed Policy Footer" section above.
 

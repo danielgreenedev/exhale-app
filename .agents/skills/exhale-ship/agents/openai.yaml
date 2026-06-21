@@ -1,0 +1,4 @@
+interface:
+  display_name: "Exhale Ship"
+  short_description: "Guarded Exhale review and release flow"
+  default_prompt: "Use $exhale-ship to run the guarded Exhale shipping workflow."

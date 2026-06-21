@@ -656,7 +656,7 @@ function GameContent() {
               className={`exhale-settle-hint max-w-[17rem] px-4 text-center text-xs leading-relaxed tracking-[0.04em] font-light ${isFirstVisit ? 'text-still-white/68' : 'invisible'}`}
               style={{ textShadow: '0 1px 8px rgba(15,23,18,0.75)' }}
             >
-              Inhale, hold, exhale, then breathe naturally.
+              Inhale, hold, longer exhale.
             </p>
           </div>
         </div>

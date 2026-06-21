@@ -76,7 +76,7 @@ Current answer: Open, promoted from parked idea to candidate. Keep visual-first 
 
 Possible approaches:
 
-- Spoken phase names only: "Inhale", "Hold", "Exhale", "Relax".
+- Spoken phase names only: "Inhale", "Hold", "Exhale", "Pause".
 - Spoken anticipatory prompts: "exhale next" or a very soft countdown cue, if visual-only cues remain unclear.
 - A separate voice-guided mode inside Session Setup Audio.
 - A one-time optional tutorial with voice, rather than voice during every session.
@@ -309,14 +309,16 @@ Context: Originally raised by T-2026-05-19-03 (did not care for Rest, suggested 
 
 2026-05-23 second update: T-2026-05-23-18, a pediatrician, liked the app but said Relax took her out of the moment because the pause was too long. She also did not know whether to hold breath, breathe deep, or breathe normally during Relax, and noted that some square breathing techniques use a short hold after exhaling. This is another independent clinical signal that Steady's 8-second Relax is semantically and structurally confusing.
 
+2026-06-21 update: family-clinician pranayama feedback plus the owner's report that roughly 90% of users dislike the Relax/Pause mechanic promoted this from "try clearer framing" to "remove the post-exhale step." Current presets remove the internal `rest` slot entirely.
+
 Possible directions:
 
-- Add a fourth rhythm preset with Hold=0 or Rest=0 (or both) instead of exposing free-phase customization. Working candidate: a "Flow" rhythm with no Hold, e.g. 4-0-6-2 or 4-0-6-0. Tracked as a Stage 1 sketch task in `docs/TODO.md`.
-- Reframe Rest's identity further beyond the Relax/Breathe rename if the awkwardness signal continues.
+- Keep curated presets instead of exposing free-phase customization. Flow is now the no-hold/no-pause option at 4-6.
+- Do not continue reframing Rest's identity for current presets; the visible post-exhale step is removed.
 - Allow per-phase duration overrides inside Session Setup (closer to free customization; reintroduces decision friction).
-- Test whether the default Steady fourth phase should be shorter or more explicitly a post-exhale hold. Be careful: "hold after exhale" is recognizable in square breathing, but may be less accessible for anxious users than permission to breathe naturally.
+- If future evidence argues for reintroducing a post-exhale hold, validate it explicitly against anxious or breath-capacity-constrained users first. Current decision is zero visible post-exhale time.
 
-Current answer: **Partially answered as of 2026-05-20, but Flow's shape and Steady's 8-second Relax both need revalidation.** Flow (4-0-6-2) shipped as a fourth rhythm preset rather than as a gated preview build; the original pre-merge validation gate was waived. First Flow follow-up signal from T-2026-05-19-08 says no-Hold helps, but the 2-second Relax/pause interrupts the otherwise smooth Inhale/Exhale loop. The same tester explicitly prefers removing the pause. New Steady/default-path signals from T-2026-05-23-14 and T-2026-05-23-18 say the 8-second Relax feels counterproductive or too long and remains unclear. Post-launch validation is now Stage 0 item 2 in `docs/TODO.md`: follow up with Rest/Hold-frictioned testers and ask whether Flow fits better than their current choice **and** whether it would be better with no pause at all. If an independent tester repeats the Flow pause complaint, test 4-0-6-0 before considering free per-phase customization. Separately, test whether Steady's Relax should be shorter or reframed.
+Current answer: **Answered as of 2026-06-21.** Rest/Relax/Pause is no longer part of the current phase model. Steady is 4-2-6, Soft is 3-1-5, 4-7-8 remains optional for users who want a classic structured hold, and Flow is 4-6 for users who dislike holds entirely. Free per-phase customization remains deferred because curated presets cover the current signal without asking first-time users to tune four axes before breathing.
 
 ### Should Exhale support progressive/ramping rhythms?
 
@@ -409,21 +411,23 @@ After a 3-minute session, would "3 minutes complete" feel clearer than showing t
 Do you care about the exact seconds, or only that the session matched the time you picked?
 ```
 
-### Does Box resolve the retired Full/Relax confusion?
+### Does 4-7-8 resolve the retired Full/Relax/Box confusion?
 
 Context: T-2026-05-19-08 tried Quick / Full / Small / Warm while at resting heart rate and found the 10-second Exhale difficult, but also said Full could be useful when someone needs focused help slowing breath from panic. Later Relax feedback from multiple testers, plus the app designer's own reaction on 2026-06-04, showed that the post-exhale Relax phase was still cognitively confusing. Full was replaced by Box (`box`, 4-4-4-4) so the fourth beat is an expected Hold after Exhale.
 
-Current answer: Full is retired. Validate whether Box feels clearer than Full/Relax and whether it earns a permanent place as the structured alternate.
+Current answer: Full and equal Box are retired. As of 2026-06-21, the legacy `box` storage id presents 4-7-8, and the default path removes the post-exhale phase entirely. Validate whether 4-7-8 feels calming or too demanding, and whether Flow's no-hold/no-pause loop is a better alternate for users who dislike holds.
 
 Follow-up:
 
 ```text
-Does Box feel clearer than Full/Relax, especially the hold after exhale?
+Does 4-7-8 feel clearer than Full/Relax/Box, or does the 7-second hold feel too demanding?
 ```
 
 #### Flow rhythm design sketch (2026-05-19)
 
 Working hypothesis: a fourth preset that removes Hold and shortens Relax to a transition beat addresses the Rest/Hold-friction signal without exposing free per-phase customization. Name: `Flow`.
+
+2026-06-21 status: superseded by later feedback. Flow is now a true 4-6 two-phase loop; the post-exhale transition beat was removed instead of reframed.
 
 Candidate shapes (tradeoff matrix):
 
@@ -447,7 +451,7 @@ Code implications (for Codex; no implementation in this sketch):
 2. `getNextPhase` currently returns the literal next index, including 0-duration phases. Change needed: skip zero-duration phases so the anticipation cue does not lead into a phase that has no time on screen. Single-line fix in `breathing.ts`.
 3. `getOrbScale` is correct as-is. 0-duration phases never become the active phase, so they never have a scale computed. `prevScale` carries continuity across them (Exhale ends at 0.45, next Inhale begins from 0.45).
 4. `useAudioEngine.playAnticipationCue` and `BreathingOrb`'s guide-ring lead both consume `nextPhase` from `useBreathingSession`. If `getNextPhase` is fixed to skip zero-duration phases, these inherit correct behavior automatically — no further change.
-5. Session Setup tile needs a new entry. Final shipped label: `Flow`; summary: `Continuous`; helper description now reads "No hold, steady momentum." Technical timing is hidden behind `View timing`.
+5. Session Setup tile needs a new entry. Final shipped label: `Flow`; summary: `Continuous`; helper description now reads "No hold, steady momentum." Technical timing is hidden behind `Show pattern`.
 6. `RhythmId` union, `isRhythmId` guard, settings parser, and tests all need `'flow'` added. Supabase currently stores `user_settings.rhythm` as plain text with no enum/check constraint, so no database migration is required unless we intentionally add a constraint later. Existing parsers fall back to `DEFAULT_RHYTHM` on unknown values, so older clients hitting a flow-row stay safe.
 7. Tests in `src/__tests__/breathing.test.ts` to cover: Flow registry shape, `getNextPhase` zero-skip behavior, `getPhaseAtTime` boundaries across a Flow cycle, and cycle recalibration counts.
 
@@ -471,8 +475,7 @@ Open subquestions parked for after the sketch lands:
 
 Constraints to note for implementation:
 
-- Keep Flow as a 4-phase rhythm with zero-duration phases rather than removing phases from the registry; a truly variable phase count would be a larger refactor.
-- `getNextPhase` must skip zero-duration phases so anticipation does not point at an invisible phase.
+- Superseded 2026-06-21: Flow is now variable-length with no hidden Hold or Pause phase.
 
 Related: see Rest renaming brainstorm in the working-tree handoff notes; even with the same phase structure, label and instruction copy can do a lot of work.
 
@@ -674,7 +677,9 @@ Move answered questions here with date, answer, evidence, and follow-up.
 
 ### Is Facebook preview worth more attention?
 
-Answer: No further work needed. The Facebook Sharing Debugger 403 / preview-rendering issue cleared on its own once Meta's cache aged out from the original `exhale.guide` scrape. The current live build renders correctly when shared on Facebook. The working hypothesis (Meta-side parser/cache state, not an Exhale-side issue) held up — no app-side change was the fix, time was. App-side Open Graph metadata, the static `/og-image.png`, the `robots.txt` allowances for Meta/Facebook crawlers, and the Vercel firewall bypass rules for observed Meta IP ranges all stay in place as belt-and-braces protection against a recurrence.
+Answer: No further work needed. The Facebook Sharing Debugger 403 / preview-rendering issue cleared on its own once Meta's cache aged out from the original `exhale.guide` scrape. The current live build renders correctly when shared on Facebook. The working hypothesis (Meta-side parser/cache state, not an Exhale-side issue) held up — no app-side change was the fix, time was. App-side Open Graph metadata, the current static `/og-image-v3.png`, the prior `/og-image-v2.png`, the legacy `/og-image.png`, the `robots.txt` allowances for Meta/Facebook crawlers, and the Vercel firewall bypass rules for observed Meta IP ranges all stay in place as belt-and-braces protection against a recurrence.
+
+2026-06-15 note: Facebook feed posts, Discord, and Telegram render rich previews, but Facebook Messenger messages do not. Treat Messenger as a separate Meta fetch/cache/client-rendering surface, not evidence that the shared Facebook/Open Graph implementation has regressed. Use `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md` if Messenger sharing becomes important enough to investigate.
 
 Date answered: 2026-05-19
 
@@ -694,13 +699,13 @@ Follow-up: Promoted Priority added to `docs/ROADMAP.md` and `docs/TODO.md` to de
 
 ### Should Exhale offer customizable breath rhythms?
 
-Answer: Curated presets, not free customization. Four rhythms are now available inside Session Setup as visible pace choices: Steady (internal id `standard`, 4-4-6-4 as of 2026-05-26, originally 4-4-6-8), Soft (internal id `gentle`, 3-2-4-4), Box (`box`, 4-4-4-4, replacing Full on 2026-06-04), and Flow (`flow`, 4-0-6-2). Each persists through `exhale-rhythm` localStorage and `user_settings.rhythm` cloud column; legacy `full` and `slow` values normalize to `box`. Free per-phase customization is intentionally not exposed; the presets handle the rhythm-fit complaints captured so far without forcing the skeptical primary user to make a multi-axis decision before pressing Begin.
+Answer: Curated presets, not free customization. Four rhythms are now available inside Session Setup as visible pace choices: Steady (internal id `standard`, 4-2-6 as of 2026-06-21), Soft (internal id `gentle`, 3-1-5), 4-7-8 (`box`, using the legacy storage id), and Flow (`flow`, 4-6). Each persists through `exhale-rhythm` localStorage and `user_settings.rhythm` cloud column; legacy `full` and `slow` values normalize to `box`. Free per-phase customization is intentionally not exposed; the presets handle the rhythm-fit complaints captured so far without forcing the skeptical primary user to make a multi-axis decision before pressing Begin.
 
 Date answered: 2026-05-19
 
 Evidence: Promoted Priority work shipped end to end (`docs/ROADMAP.md`, `docs/TODO.md` Completed Promoted Priority section). Original rhythm-fit signals from `docs/USER_FEEDBACK.md` entries T-2026-05-18-01 through T-2026-05-19-05.
 
-Follow-up: Beta-test Box and Flow against the Relax-confusion testers. If complaints persist beyond what the presets cover, revisit free customization. Otherwise treat free customization as deliberately deferred.
+Follow-up: Beta-test the no-post-exhale default, 4-7-8, and Flow against the Relax/Pause-confusion testers. If complaints persist beyond what the presets cover, revisit free customization. Otherwise treat free customization as deliberately deferred.
 
 ### Template
 

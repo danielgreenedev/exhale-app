@@ -23,7 +23,7 @@ export default function GameHUD({
   centerHidden = false,
   rhythm = RHYTHMS[DEFAULT_RHYTHM],
 }: Props) {
-  const minutesLeft = Math.ceil(((totalCycles - cycleNumber + 1) * rhythm.cycleDuration) / 60);
+  const minutesLeft = Math.max(1, Math.round(((totalCycles - cycleNumber + 1) * rhythm.cycleDuration) / 60));
   const settled = cycleNumber >= 2;
   const [previousPhase, setPreviousPhase] = useState<PhaseConfig | null>(null);
   const lastPhaseRef = useRef(currentPhase);
@@ -39,7 +39,7 @@ export default function GameHUD({
   }, [currentPhase]);
 
   const labelOpacity = settled ? 0.9 : 0.96;
-  const timerIsLoadBearing = currentPhase.phase === 'hold' || currentPhase.phase === 'rest';
+  const timerIsLoadBearing = currentPhase.phase === 'hold';
   const timerOpacity = !settled ? 0.88 : timerIsLoadBearing ? 0.76 : 0.34;
 
   return (

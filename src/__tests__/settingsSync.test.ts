@@ -12,13 +12,13 @@ describe('practice settings rhythm compatibility', () => {
     localStorage.clear();
   });
 
-  it('maps the retired Full rhythm to Box when reading local settings', () => {
+  it('maps the retired Full rhythm to the structured rhythm storage id', () => {
     localStorage.setItem(RHYTHM_STORAGE_KEY, 'full');
 
     expect(readLocalPracticeSettings().rhythm).toBe('box');
   });
 
-  it('maps the older Slow rhythm to Box when reading local settings', () => {
+  it('maps the older Slow rhythm to the structured rhythm storage id', () => {
     localStorage.setItem(RHYTHM_STORAGE_KEY, 'slow');
 
     expect(readLocalPracticeSettings().rhythm).toBe('box');

@@ -1,18 +1,22 @@
 # Social Preview Troubleshooting
 
-Last updated: June 9, 2026 (Google Messages image cache-bust)
+Last updated: June 18, 2026 (Pixel Messages/Messenger cache-bust)
 
 This note documents social/Open Graph preview troubleshooting done for `https://exhale.guide`.
 
 ## Current Status
 
-Resolved 2026-05-19 for Facebook. The Facebook preview now renders correctly for `exhale.guide` on shared posts. The Sharing Debugger 403 / parser issue cleared on its own once Meta's cache aged out; no further app-side or infrastructure change was needed beyond the work captured below. The earlier working conclusion (Meta-side parser/cache state, not an Exhale-side issue) held up.
+Resolved 2026-05-19 for Facebook feed posts. The Facebook preview now renders correctly for `exhale.guide` on shared posts. The Sharing Debugger 403 / parser issue cleared on its own once Meta's cache aged out; no further app-side or infrastructure change was needed beyond the work captured below. The earlier working conclusion (Meta-side parser/cache state, not an Exhale-side issue) held up.
 
 Resolved 2026-05-20 for Discord and Telegram. Both platforms showed no link preview even though the OG metadata and image were valid. Vercel Firewall live view showed crawler traffic from `Discordbot` and `TelegramBot (like TwitterBot)` being challenged. After adding Telegram to `robots.txt` and allowing the Discord/Telegram crawler user agents through Vercel Firewall, previews worked on both platforms.
+
+Observed 2026-06-15 for Facebook Messenger messages. The rich preview renders in a Facebook feed post and still renders in Discord and Telegram, but a Facebook Messenger message does not show the preview. Live checks from a local shell confirmed that known social crawler user agents (`facebookexternalhit`, `Facebot`, `meta-externalagent`, and `Discordbot`) receive `200 OK` for both `/` and `/og-image-v2.png`; generic `curl` still receives Vercel's `429` security challenge for both resources. Treat this as a Messenger-specific fetch path, cache state, or client rendering decision unless Vercel Firewall live traffic shows a denied/challenged Messenger request.
 
 Observed 2026-06-08 for Google Messages on a Pixel 9 Pro XL running the latest full public Pixel Android release. The preview renders as a compact title/domain card with no image. Google's crawler documentation lists `GoogleMessages` as the user agent for Google Messages link previews. Spoofed `GoogleMessages` requests to both `/` and `/og-image.png` returned `429 Too Many Requests` with `X-Vercel-Mitigated: challenge`, so the likely cause is Vercel challenging the fetcher before it can parse the OG metadata or retrieve the image.
 
 Updated 2026-06-09: after adding the Vercel bypass rule, spoofed `GoogleMessages` requests returned `200 OK` for both `/` and `/og-image.png`, and Google Messages showed preview text but still no image. Because the OG image URL was the same URL that previously returned a Vercel challenge, `src/app/layout.tsx` now points previews at `/og-image-v2.png` to force a fresh image fetch instead of reusing a failed image cache entry.
+
+Updated 2026-06-18: Pixel 9 Google Messages and Facebook Messenger still showed no rich preview for the project owner. Live checks from this shell confirmed `GoogleMessages`, `facebookexternalhit`, and `meta-externalfetcher` receive `200 OK` for `/`, and `GoogleMessages`/`facebookexternalhit` receive `200 OK` for `/og-image-v2.png`. Generic `curl`, `MessengerForiOS`, `Orca-Android`, and a Facebook in-app-browser-shaped Android user agent still receive Vercel's `429` challenge. The app now points previews at `/og-image-v3.png`, adds `og:image:secure_url`/`twitter:image:secure_url`, and extends `robots.txt` with Messenger/Orca-style entries. The remaining required infrastructure check is a Vercel Firewall bypass for the exact Messenger/Orca traffic observed in Live mode.
 
 Keep this document as a reference playbook in case a future domain change, OG image swap, or Garden-skin update triggers similar cache symptoms. The Vercel firewall bypass rules and `robots.txt` allowances should not be reverted; they cost nothing to keep and prevent regressions if social platforms change crawler IPs again.
 
@@ -22,7 +26,7 @@ Show a rich Facebook/social preview for Exhale with:
 
 - Title: `Exhale, a Quiet Guided Breathing Tool for Calmer Moments`
 - Description: `A quiet, free breathing tool with gentle pacing, optional rhythms, and soft sound for stressful moments. No account required.`
-- Image: `https://exhale.guide/og-image.png`
+- Image: `https://exhale.guide/og-image-v3.png`
 
 ## App-Side Changes Made
 
@@ -44,9 +48,11 @@ The expected rendered tags are:
 ```html
 <meta property="og:title" content="Exhale, a Quiet Guided Breathing Tool for Calmer Moments"/>
 <meta property="og:description" content="A quiet, free breathing tool with gentle pacing, optional rhythms, and soft sound for stressful moments. No account required."/>
-<meta property="og:image" content="https://exhale.guide/og-image.png"/>
+<meta property="og:image" content="https://exhale.guide/og-image-v3.png"/>
+<meta property="og:image:secure_url" content="https://exhale.guide/og-image-v3.png"/>
 <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://exhale.guide/og-image.png"/>
+<meta name="twitter:image" content="https://exhale.guide/og-image-v3.png"/>
+<meta name="twitter:image:secure_url" content="https://exhale.guide/og-image-v3.png"/>
 ```
 
 ### Static preview image
@@ -69,6 +75,12 @@ After the 2026-06-09 Google Messages cache-bust, Open Graph and Twitter metadata
 
 ```text
 https://exhale.guide/og-image-v2.png
+```
+
+After the 2026-06-18 Pixel Messages/Messenger cache-bust, Open Graph and Twitter metadata point at:
+
+```text
+https://exhale.guide/og-image-v3.png
 ```
 
 The original `/og-image.png` remains in `public/` as a stable legacy asset.
@@ -110,6 +122,21 @@ Allow: /
 User-agent: GoogleMessages
 Allow: /
 
+User-agent: GoogleOther-Image
+Allow: /
+
+User-agent: Messenger
+Allow: /
+
+User-agent: MessengerForiOS
+Allow: /
+
+User-agent: Orca
+Allow: /
+
+User-agent: FB_IAB
+Allow: /
+
 User-agent: *
 Allow: /
 ```
@@ -144,7 +171,38 @@ https://exhale.guide/?gm_preview=YYYYMMDD
 
 If the custom bypass rule matches but Vercel system DDoS mitigation still challenges the request, inspect live Firewall traffic for the actual Google Messages request and add a System Bypass Rule for the exact observed IP or CIDR scoped to `exhale.guide`. Verify the request is actually from Google first; Google user agents can be spoofed, and Google publishes user-triggered fetcher IP ranges plus reverse-DNS guidance.
 
-If `GoogleMessages` receives `200 OK` for both the page and the image but Messages still omits the image, rotate the OG image URL again, for example from `/og-image-v2.png` to `/og-image-v3.png`, then deploy and test with a brand-new page URL query. This avoids a stale failed-image cache tied to the image URL itself.
+If `GoogleMessages` receives `200 OK` for both the page and the image but Messages still omits the image, rotate the OG image URL again, for example from `/og-image-v3.png` to `/og-image-v4.png`, then deploy and test with a brand-new page URL query. This avoids a stale failed-image cache tied to the image URL itself.
+
+## Facebook Messenger Message No-Preview
+
+Observed 2026-06-15:
+
+- Facebook feed posts render the rich preview.
+- Discord and Telegram render the rich preview.
+- Facebook Messenger messages do not render the rich preview.
+- Known Meta crawler user agents receive `200 OK` for both the page and the current OG image.
+- Generic, non-crawler requests from this shell receive Vercel's `429` security challenge for both the page and image.
+
+Conclusion:
+
+```text
+The app metadata and current OG image are valid. Messenger is the only failing surface, so do not reopen the whole Open Graph stack. Investigate Messenger-specific fetch/cache behavior first.
+```
+
+Troubleshooting path:
+
+1. Send a cache-busted URL in a new Messenger thread:
+
+   ```text
+   https://exhale.guide/?messenger_preview=YYYYMMDD
+   ```
+
+2. Keep Vercel Firewall open with the time filter set to `Live` while sending the message.
+3. Filter for requests to `/`, `/robots.txt`, and `/og-image-v3.png`.
+4. Look for user agents containing `facebookexternalhit`, `Facebot`, `meta-externalagent`, `meta-externalfetcher`, `Messenger`, `Orca`, or other Meta/Messenger markers.
+5. If a Messenger-related request is challenged or denied, confirm the request is from Meta infrastructure, then add either a custom user-agent bypass or a system bypass for the exact verified IP/CIDR scoped to `exhale.guide`.
+6. If no Messenger-related request appears, assume Messenger is using cached state or a client-side no-preview decision. Re-test with a different device/account/thread and a cache-busted URL before changing the app.
+7. If Messenger receives `200 OK` for both the page and image but still omits the preview, treat it as Messenger cache/product behavior. Only rotate from `/og-image-v3.png` to `/og-image-v4.png` if Messenger sharing becomes important enough to justify another deploy/cache-bust cycle.
 
 ## Discord and Telegram No-Preview Resolution
 
@@ -202,10 +260,16 @@ Local and live checks confirmed:
 
 - `https://exhale.guide/` returns `200`.
 - `https://exhale.guide/robots.txt` returns `200`.
-- `https://exhale.guide/og-image.png` returns `200`.
-- `https://exhale.guide/og-image.png` returns `Content-Type: image/png`.
+- `https://exhale.guide/og-image-v2.png` returns `200` and `Content-Type: image/png`.
+- Legacy `https://exhale.guide/og-image.png` still returns `200` and `Content-Type: image/png`.
 - The homepage HTML includes the expected `og:image` tag.
 - Requests using a spoofed `facebookexternalhit` user-agent returned `200` from outside Meta.
+
+After deploying the 2026-06-18 cache-bust, verify:
+
+- `https://exhale.guide/og-image-v3.png` returns `200`.
+- `https://exhale.guide/og-image-v3.png` returns `Content-Type: image/png`.
+- The homepage HTML includes `og:image` and `twitter:image` tags pointing at `https://exhale.guide/og-image-v3.png`.
 
 ## Facebook Debugger Failure
 
@@ -365,7 +429,7 @@ Pause and let Facebook's scrape cache settle before making more changes.
    ```text
    /robots.txt
    /
-   /og-image.png
+   /og-image-v3.png
    ```
 
 6. Confirm whether `Denied` increments.
@@ -379,7 +443,7 @@ Pause and let Facebook's scrape cache settle before making more changes.
 9. Test the image directly in Facebook Debugger:
 
    ```text
-   https://exhale.guide/og-image.png
+   https://exhale.guide/og-image-v3.png
    ```
 
 10. If Vercel sees no live request after "Scrape Again," assume Meta-side cache/stuck debugger state and wait before further changes.
@@ -391,7 +455,7 @@ PowerShell:
 ```powershell
 Invoke-WebRequest -Uri 'https://exhale.guide/' -UseBasicParsing
 Invoke-WebRequest -Uri 'https://exhale.guide/robots.txt' -UseBasicParsing
-Invoke-WebRequest -Uri 'https://exhale.guide/og-image.png' -UseBasicParsing
+Invoke-WebRequest -Uri 'https://exhale.guide/og-image-v3.png' -UseBasicParsing
 ```
 
 Facebook user-agent:

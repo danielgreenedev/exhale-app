@@ -1,6 +1,6 @@
 import { PHASE_COLORS } from '@/lib/colors';
 
-export type BreathingPhase = 'inhale' | 'hold' | 'exhale' | 'rest';
+export type BreathingPhase = 'inhale' | 'hold' | 'exhale';
 export type SessionLength = 'quick' | 'short' | 'medium' | 'long';
 export type RhythmId = 'standard' | 'gentle' | 'box' | 'flow';
 
@@ -30,11 +30,10 @@ export interface Rhythm {
   sessionCycles: Record<SessionLength, number>;
 }
 
-// Most rhythms share the same per-phase identity (label, instruction, color, target orb scale)
-// and differ only in per-phase duration. Box overrides the fourth phase so the post-exhale
-// beat is a recognizable hold instead of the ambiguous Relax phase.
-const BASE_PHASES: Omit<PhaseConfig, 'duration'>[] = [
-  {
+// Rhythms are variable-length: Flow is a true Inhale/Exhale loop, while
+// Steady/Soft/4-7-8 include a Hold. There is no hidden post-exhale phase.
+const PHASE_DETAILS: Record<BreathingPhase, Omit<PhaseConfig, 'duration'>> = {
+  inhale: {
     phase: 'inhale',
     label: 'Inhale',
     instruction: 'Breathe in slowly through your nose',
@@ -42,7 +41,7 @@ const BASE_PHASES: Omit<PhaseConfig, 'duration'>[] = [
     color: PHASE_COLORS.inhale.color,
     glowColor: PHASE_COLORS.inhale.glowColor,
   },
-  {
+  hold: {
     phase: 'hold',
     label: 'Hold',
     instruction: 'Hold gently, keep it easy',
@@ -50,7 +49,7 @@ const BASE_PHASES: Omit<PhaseConfig, 'duration'>[] = [
     color: PHASE_COLORS.hold.color,
     glowColor: PHASE_COLORS.hold.glowColor,
   },
-  {
+  exhale: {
     phase: 'exhale',
     label: 'Exhale',
     instruction: 'Breathe out slowly through your mouth',
@@ -58,31 +57,7 @@ const BASE_PHASES: Omit<PhaseConfig, 'duration'>[] = [
     color: PHASE_COLORS.exhale.color,
     glowColor: PHASE_COLORS.exhale.glowColor,
   },
-  {
-    // Non-box rhythms keep a distinct Relax phase; Box overrides this beat with
-    // a second Hold so the pattern matches familiar square-breathing expectations.
-    phase: 'rest',
-    label: 'Relax',
-    instruction: 'Breathe naturally',
-    targetOrbScale: 0.45,
-    color: PHASE_COLORS.rest.color,
-    glowColor: PHASE_COLORS.rest.glowColor,
-  },
-];
-
-const BOX_PHASES: Omit<PhaseConfig, 'duration'>[] = [
-  BASE_PHASES[0],
-  BASE_PHASES[1],
-  BASE_PHASES[2],
-  {
-    phase: 'hold',
-    label: 'Hold',
-    instruction: 'Hold gently after exhale',
-    targetOrbScale: 0.45,
-    color: PHASE_COLORS.hold.color,
-    glowColor: PHASE_COLORS.hold.glowColor,
-  },
-];
+};
 
 // Target session durations in seconds, mapped from the human-facing minute labels.
 // Cycle counts are derived per rhythm so each session length stays close to its label.
@@ -93,11 +68,8 @@ const SESSION_LENGTH_TARGETS: Record<SessionLength, number> = {
   long: 600,    // ~10 min
 };
 
-function buildPattern(
-  durations: [number, number, number, number],
-  phases: Omit<PhaseConfig, 'duration'>[] = BASE_PHASES
-): PhaseConfig[] {
-  return phases.map((base, i) => ({ ...base, duration: durations[i] }));
+function phaseConfig(phase: BreathingPhase, duration: number): PhaseConfig {
+  return { ...PHASE_DETAILS[phase], duration };
 }
 
 function sumDurations(pattern: PhaseConfig[]): number {
@@ -118,17 +90,16 @@ function buildRhythm(
   label: string,
   summary: string,
   description: string,
-  durations: [number, number, number, number],
-  phases?: Omit<PhaseConfig, 'duration'>[]
+  pattern: Array<readonly [BreathingPhase, number]>
 ): Rhythm {
-  const pattern = buildPattern(durations, phases);
-  const cycleDuration = sumDurations(pattern);
+  const phasePattern = pattern.map(([phase, duration]) => phaseConfig(phase, duration));
+  const cycleDuration = sumDurations(phasePattern);
   return {
     id,
     label,
     summary,
     description,
-    pattern,
+    pattern: phasePattern,
     cycleDuration,
     sessionCycles: recalibrateCycles(cycleDuration),
   };
@@ -139,30 +110,29 @@ export const RHYTHMS: Record<RhythmId, Rhythm> = {
     'standard',
     'Steady',
     'Balanced',
-    'A balanced, grounding baseline rhythm.',
-    [4, 4, 6, 4]
+    'Simple pacing with a longer release.',
+    [['inhale', 4], ['hold', 2], ['exhale', 6]]
   ),
   gentle: buildRhythm(
     'gentle',
     'Soft',
     'Accessible',
-    'Shorter, lighter cycles for easier breathing.',
-    [3, 2, 4, 4]
+    'Lighter hold, easy longer exhale.',
+    [['inhale', 3], ['hold', 1], ['exhale', 5]]
   ),
   box: buildRhythm(
     'box',
-    'Box',
-    'Structured',
-    'Equal counts with a clear hold after exhale.',
-    [4, 4, 4, 4],
-    BOX_PHASES
+    '4-7-8',
+    'Classic',
+    'Long hold, longer release. Keep it easy.',
+    [['inhale', 4], ['hold', 7], ['exhale', 8]]
   ),
   flow: buildRhythm(
     'flow',
     'Flow',
     'Continuous',
-    'No hold, steady momentum.',
-    [4, 0, 6, 2]
+    'No holds, just inhale and longer exhale.',
+    [['inhale', 4], ['exhale', 6]]
   ),
 };
 
@@ -194,28 +164,21 @@ export function getPhaseAtTime(
     }
     accumulated += config.duration;
   }
-  const last = rhythm.pattern[rhythm.pattern.length - 1];
-  return { config: last, timeInPhase: last.duration, phaseIndex: rhythm.pattern.length - 1 };
+  const lastIndex = rhythm.pattern.length - 1;
+  const last = rhythm.pattern[lastIndex];
+  return { config: last, timeInPhase: last.duration, phaseIndex: lastIndex };
 }
 
 // The effective anticipation-cue lead window for a given phase. Capped at 25% of phase duration
-// so short phases (Soft 2s Hold, Flow 2s Relax) don't have a lead that occupies 40% of the
-// phase and reads as jittery. Long phases use the full PHASE_LOOKAHEAD_SECONDS constant.
-// Zero-duration phases return 0; getPhaseAtTime never makes them active, but defensive coding.
+// so short phases don't have a lead that occupies too much of the phase and reads as jittery.
+// Long phases use the full PHASE_LOOKAHEAD_SECONDS constant.
 export function getPhaseLookahead(phase: PhaseConfig): number {
   if (phase.duration <= 0) return 0;
   return Math.min(PHASE_LOOKAHEAD_SECONDS, phase.duration * 0.25);
 }
 
 export function getNextPhase(phaseIndex: number, rhythm: Rhythm = RHYTHMS[DEFAULT_RHYTHM]): PhaseConfig {
-  // Skip zero-duration phases so anticipation cues never lead into a phase with no screen time.
-  // Flow (4-0-6-2) has a zero-duration Hold; without this skip, the cue between Inhale and Exhale
-  // would target Hold and never reach Exhale.
   const len = rhythm.pattern.length;
-  for (let i = 1; i <= len; i++) {
-    const next = rhythm.pattern[(phaseIndex + i) % len];
-    if (next.duration > 0) return next;
-  }
   return rhythm.pattern[(phaseIndex + 1) % len];
 }
 

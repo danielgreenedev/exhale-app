@@ -1,6 +1,6 @@
 # Codex Handoff
 
-Last updated: 2026-06-07 (Google-only sign-in simplification)
+Last updated: 2026-06-21 (post-exhale pause retired)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
@@ -24,8 +24,8 @@ This document is overwritten on each handoff. The previous handoff's content doe
 
 ## Durable Invariants
 
-- **Four visible paces.** Steady (4-4-6-4, cycle 18s), Soft (3-2-4-4, cycle 13s), Box (4-4-4-4, cycle 16s), Flow (4-0-6-2, cycle 12s).
-- **Fourth phase handling.** Steady, Soft, and Flow use `Relax` / `Breathe naturally` with internal phase enum `'rest'`. Box uses a second user-facing `Hold` after Exhale.
+- **Four visible paces.** Steady (4-2-6, cycle 12s), Soft (3-1-5, cycle 9s), 4-7-8 (storage id `box`, cycle 19s), Flow (4-6, cycle 10s).
+- **Post-exhale handling.** There is no internal or visible post-exhale `rest`, Relax, or Pause phase. Do not reintroduce one without fresh validation.
 - **Rhythm lock.** `rhythmRef` locking in session/audio/orb code is intentional. Rhythm is fixed at session start.
 - **Meta webview layout.** Game `main` keeps `100dvh` inline style with `h-screen` fallback, and `BreathingOrb` keeps the width-aware radius clamp. Removing either side risks regressing Facebook in-app browser layout.
 - **Cue hierarchy.** Center orb is the primary timing object. Outer guide ring and incoming-color lead stay quiet support.
@@ -38,11 +38,11 @@ This document is overwritten on each handoff. The previous handoff's content doe
 Next highest-leverage validation asks:
 
 1. **Pixel/Facebook owner retest:** in Facebook Android on Pixel 9 Pro XL, Circle Size Large, confirm whether the orb and outer guide ring now fit fully without left/right clipping.
-2. **Box vs Flow rhythm check:** after one Box session and one Flow session, ask whether Box's post-exhale Hold feels clearer than Relax, or whether Flow feels better because it minimizes pauses.
+2. **No-post-exhale rhythm check:** ask Relax/Pause-friction testers whether default Steady now feels smoother with only Inhale, Hold, and Exhale. Then compare 4-7-8 for structured practice and Flow for users who dislike holds entirely.
 3. **Meta-browser sound/capability check:** in Facebook or Messenger in-app browsers, note whether sound works, whether the menu hint is understandable, and whether opening in the normal browser changes behavior.
 4. **HUD readability check:** confirm whether phase text and transitions feel readable and smooth after the dimmer-orb/crossfade pass.
 
-Keep Steady default changes, no-pause Flow variants, voice guidance, Garden skin, Android TWA, and parked Impeccable follow-ups behind one more validation pass.
+Keep further Steady default changes, voice guidance, Garden skin, Android TWA, and parked Impeccable follow-ups behind one more validation pass.
 
 ## Do Not Revert / Preserve
 

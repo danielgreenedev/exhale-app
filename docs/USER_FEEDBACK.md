@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: June 8, 2026 (older low-vision phone readability feedback)
+Last updated: June 12, 2026 (latest beta question set)
 
 ## Purpose
 
@@ -10,13 +10,36 @@ Use this document to capture user critique, usability notes, and product observa
 
 Use `https://exhale.guide` for the current beta round. Use a Vercel preview only when a future test needs changes that should not be visible on production yet.
 
+## 2026-06-21, T-2026-06-21-21, Family Clinician And Yoga Teacher, Rhythm Ratio Safety
+
+### Context
+
+- Feedback came from a clinician with HIV/AIDS, hematology, oncology, and family-practice training who also teaches yoga in a patient community.
+- They liked the app overall, but worried that part of the rhythm seemed to make the inhale longer than the exhale.
+- They recommended being careful with ratios, favoring established pranayama shapes, and thinking explicitly in terms of inhale, internal hold, exhale, and post-exhale pause.
+
+### Product Signal
+
+- This reinforces the existing Relax/Rest ambiguity thread: a post-exhale `Relax` beat can be interpreted as extra inhaling or uncontrolled breathing inside the guided ratio.
+- The product owner reports roughly 90% of users dislike the Relax/Pause mechanic, so the problem is now strong enough to treat as a mechanics issue rather than a copy issue.
+- Equal Box timing no longer feels like the safest structured alternate for Exhale's stated calming purpose.
+- Accepted direction: every preset should keep guided exhale longer than guided inhale; remove visible post-exhale mechanics; avoid long retention as the default; keep 4-7-8 optional rather than first-run.
+
+### Accepted Changes
+
+1. Default Steady moves to 4-2-6.
+2. Soft moves to 3-1-5.
+3. The legacy `box` storage id becomes visible 4-7-8.
+4. Flow becomes a true 4-6 no-hold loop.
+5. User-facing `Relax` / `Pause` and the internal `rest` phase are removed from all current presets.
+
 ## Current QA Notes
 
 - First-run defaults should remain 3 minutes / Medium circle / Steady pace / Air background sound.
 - If Firefox on Windows 11 appears to enter a session with sound off, verify whether Session Setup actually selected `Off` or whether Web Audio simply has not started yet. The former is a settings persistence bug; the latter is expected browser autoplay behavior if it resolves after a tap.
 - When a tester reports "Brave" or "Chrome" from a Facebook-shared link, verify whether they are actually in Facebook's in-app preview browser. Facebook preview can render Exhale correctly while still blocking or degrading browser features such as fullscreen.
 - Facebook and Messenger in-app browsers are limited-capability containers. If sound, fullscreen, or browser controls feel broken there, ask the tester to retry in Chrome, Brave, Safari, or their normal default browser before classifying the issue as a browser-specific app bug.
-- Parked Impeccable follow-ups should wait until the next beta response: Relax confusion triggers `/impeccable clarify Relax phase`; continued visual overload/readability friction triggers `/impeccable distill active session HUD`; another Meta-webview audio/capability failure triggers `/impeccable harden Meta in-app browser state`; first-cycle cue feedback triggers `/impeccable onboard first-run cue`.
+- Parked Impeccable follow-ups should wait until the next beta response: renewed rhythm confusion after the no-post-exhale change triggers `/impeccable clarify active rhythm`; continued visual overload/readability friction triggers `/impeccable distill active session HUD`; another Meta-webview audio/capability failure triggers `/impeccable harden Meta in-app browser state`; first-cycle cue feedback triggers `/impeccable onboard first-run cue`.
 
 ## Privacy Rules
 
@@ -38,16 +61,25 @@ Send a short, open prompt so feedback stays practical:
 
 ## Next Tester Prompt
 
-Use this for the next clean beta pass after the Box rhythm replacement, Pixel/Facebook Large-orb clamp, HUD readability pass, and search crawler cleanup:
+Use this for the next clean beta pass after the Box rhythm replacement, Pixel/Facebook Large circle clamp, HUD readability hardening, Meta-browser hint cleanup, and search crawler cleanup.
+
+Current validation priorities:
+
+- First-run clarity: can someone start and follow the default session without explanation?
+- HUD readability: can testers read the phase label and instruction on the active circle, especially on phones?
+- Transition feel: do phase changes feel smooth, or rushed/jumpy/confusing?
+- Meta in-app browser behavior: do Facebook or Messenger still affect circle fit, sound, fullscreen, or browser controls?
+- Rhythm fit: do 4-7-8 or Flow answer Pause/ratio friction better than default Steady?
 
 ```text
 Could you try the default 3-minute session first, without opening any settings?
 
-I am especially curious about four things:
-- If you are in Facebook or Messenger, does the circle fit fully on screen without the sides clipping?
-- Is the phase text easy to read, and do the phase changes feel smooth enough?
-- If you try Box and Flow, which feels clearer or calmer: Box's hold-after-exhale, or Flow's fewer pauses?
-- Does sound work in Facebook/Messenger, and does it work differently after opening the same link in your normal browser?
+I am especially curious about five things:
+- Could you settle in and follow the first minute without needing extra explanation?
+- Is the phase text easy to read on your device during Inhale, Hold, and Exhale?
+- Do the phase changes feel smooth, or does any moment feel rushed, jumpy, or confusing?
+- If you opened this from Facebook or Messenger, does the circle fit fully on screen, and do sound or fullscreen work differently after opening the same link in your normal browser?
+- If you have another few minutes, try 4-7-8 and Flow. Which feels clearer or calmer: 4-7-8's longer hold and release, Flow's fewer interruptions, or the default Steady rhythm?
 
 After that, tell me what worked, what felt off, and the one thing you would change first.
 ```
@@ -69,7 +101,7 @@ Use these when asking someone to try Exhale for the first time. Ask them to star
 - Could you start breathing without thinking too much?
 - Did Settling In feel helpful before the first breath, or did it feel like a delay?
 - Did the pace feel rushed, pressuring, or make you gasp/catch up?
-- Did Relax help you reset, or did it interrupt the rhythm?
+- Did the Exhale-to-Inhale loop feel smooth, or did it need a clearer handoff?
 - Did the phase changes feel easy to follow, or did they lag your brain a bit?
 - Could you tell what phase was coming next without reading extra text?
 - Were the words, contrast, and sounds easy enough to notice without feeling distracting?
@@ -91,17 +123,17 @@ Use these after someone mentions Hold, Relax, rushed transitions, interruption, 
 
 - Did Flow feel smoother than the other pace you tried?
 - Did removing Hold help?
-- Did the tiny pause after Exhale help you reset, or would Flow feel better as inhale/exhale only with no pause at all?
+- Did the direct Exhale-to-Inhale handoff feel natural, or too abrupt?
 - Did the pause, cue, or circle movement ever feel rushed, pushy, or interruptive?
 - Would you choose Flow again, or would you pick a different pace?
 
-## Box Follow-Up Questions
+## 4-7-8 Follow-Up Questions
 
-Use these after someone says Relax is confusing, counterproductive, or too much like an unexplained pause, then tries the Box pace:
+Use these after someone says Pause/Relax is confusing, counterproductive, or too much like an unexplained pause, then tries the 4-7-8 pace:
 
-- Did Box feel clearer than the pace with Relax?
-- Did the hold after Exhale feel expected, or did it feel uncomfortable?
-- Would you choose Box, Flow, or Steady if you were actually stressed?
+- Did 4-7-8 feel clear, or did the hold feel too long?
+- Did the longer exhale feel calming, or did it make you strain?
+- Would you choose 4-7-8, Flow, or Steady if you were actually stressed?
 
 ## Targeted Follow-Up Queue
 

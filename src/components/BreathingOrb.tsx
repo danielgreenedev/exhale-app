@@ -225,8 +225,8 @@ export default function BreathingOrb({
         ctx.fillRect(0, 0, w, h);
       }
 
-      // Orb size — smoothly animated through phaseProgress
-      // inhale: grow 0.45→1.0, exhale: shrink 1.0→0.45, hold/rest: maintain
+      // Orb size — smoothly animated through phaseProgress.
+      // Inhale grows, Exhale shrinks, Hold maintains with a slight swell.
       let animatedScale: number;
       if (reducedMotion) {
         animatedScale = phase.targetOrbScale;
@@ -240,7 +240,6 @@ export default function BreathingOrb({
         // Subtle held-breath swell: sine arc peaks at midpoint, ~2% scale
         animatedScale = phase.targetOrbScale + 0.022 * Math.sin(pp * Math.PI);
       } else {
-        // rest: completely still
         animatedScale = phase.targetOrbScale;
       }
       const sc = orbScaleRef.current;

@@ -35,10 +35,6 @@ export const PHASE_COLORS = {
     color: 'hsl(148, 35%, 53%)',
     glowColor: 'hsla(148, 35%, 53%, 0.28)',
   },
-  rest: {
-    color: 'hsl(348, 42%, 66%)',
-    glowColor: 'hsla(348, 42%, 66%, 0.28)',
-  },
 } as const;
 
 export const CANVAS_COLORS = {

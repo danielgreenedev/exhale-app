@@ -14,6 +14,7 @@ out/
 
 # local agent settings
 .claude/settings.local.json
+.codex-remote-attachments/
 
 # misc
 .DS_Store
@@ -27,3 +28,4 @@ debug.log
 
 # local visual QA artifacts
 tmp/
+output/playwright/

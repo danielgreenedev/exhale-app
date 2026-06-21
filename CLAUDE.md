@@ -14,18 +14,18 @@ This means: no required sign-up, no required accounts, no onboarding gates, no s
 
 ## Core Mechanic
 
-Selectable breathing rhythm exposed inside Session Setup on the home screen. Four visible pace options, default Steady. Current internal ids are `standard`, `gentle`, `box`, and `flow`; legacy saved ids `full` and `slow` normalize to `box` for storage compatibility:
+Selectable breathing rhythm exposed inside Session Setup on the home screen. Four visible pace options, default Steady. Current internal ids are `standard`, `gentle`, `box`, and `flow`; legacy saved ids `full` and `slow` normalize to `box` for storage compatibility. The `box` storage id now presents the 4-7-8 preset rather than equal box breathing:
 
-- **Steady** (`standard`) - 4-4-6-4 (18s cycle, 3.3 breaths/min). Default for first-time users.
-- **Soft** (`gentle`) - 3-2-4-4 (13s cycle, 4.6 breaths/min). Shorter, lighter cycles for easier breathing.
-- **Box** (`box`) - 4-4-4-4 (16s cycle, 3.75 breaths/min). Familiar square-breathing structure with a hold after exhale.
-- **Flow** (`flow`) - 4-0-6-2 (12s cycle, 5.0 breaths/min). No hold, steady momentum. Hold phase has zero duration but stays in the canonical four-phase shape; `getNextPhase` skips zero-duration phases so the anticipation cue never lands on Hold during Flow.
+- **Steady** (`standard`) - 4-2-6 (12s cycle, 5.0 breaths/min). Default for first-time users.
+- **Soft** (`gentle`) - 3-1-5 (9s cycle, 6.7 breaths/min). Shorter, lighter cycles with a longer exhale.
+- **4-7-8** (`box`) - 4-7-8 (19s cycle, 3.2 breaths/min). Classic structured option; the id remains `box` only for storage compatibility.
+- **Flow** (`flow`) - 4-6 (10s cycle, 6.0 breaths/min). No hold or pause, just inhale and longer exhale.
 
 Fully guided, with no user input needed during a session. Session lengths: quick (~3m), short (~5m), medium (~7m), long (~10m). Cycle counts are recalibrated per rhythm so each minute label stays close to its target across all four patterns.
 
-The fourth phase is usually labeled `Relax` (not `Rest`) with instruction `Breathe naturally`. In Steady, Soft, and Flow it is a brief breath-back beat between exhale and the next inhale. Box is the exception: its fourth beat is another `Hold` after exhale, matching the familiar square-breathing mental model and avoiding the Relax ambiguity that persisted in beta feedback.
+There is no post-exhale phase in the current phase model. This changed on 2026-06-21 after broad tester dislike of the Relax/Pause mechanic and clinical-family pranayama feedback reinforced that the post-exhale beat was semantically confusing and could make the rhythm feel inhale-heavy.
 
-Phase transitions have anticipatory support because beta feedback showed that exact boundary changes can take a beat to process. In the final 0.8s of each phase (or 25% of phase duration on short phases — whichever is smaller), the guide ring around the orb picks up the next phase's color and a quiet pre-cue tone plays when sound is on. The cap is set by `getPhaseLookahead(phase)` in `src/lib/breathing.ts`; the ceiling `PHASE_LOOKAHEAD_SECONDS = 0.8` is what most phases use, but Soft's 2s Hold, Soft's 3s Inhale, and Flow's 2s Relax all get a proportionally shorter lead so the cue does not occupy 40% of the phase. No textual HUD cue is shown; an earlier attempt at a `Next [phase]` label competed with the central phase label and countdown for attention, so it was removed.
+Phase transitions have anticipatory support because beta feedback showed that exact boundary changes can take a beat to process. In the final 0.8s of each phase (or 25% of phase duration on short phases, whichever is smaller), the guide ring around the orb picks up the next phase's color and a quiet pre-cue tone plays when sound is on. The cap is set by `getPhaseLookahead(phase)` in `src/lib/breathing.ts`; the ceiling `PHASE_LOOKAHEAD_SECONDS = 0.8` is what long phases use, while Steady's 2s Hold gets a 0.5s lead, Soft's 1s Hold gets a 0.25s lead, and Soft's 3s Inhale gets a 0.75s lead. No textual HUD cue is shown; an earlier attempt at a `Next [phase]` label competed with the central phase label and countdown for attention, so it was removed.
 
 The active phase label and the Settling In label intentionally share the same semibold, shadowed treatment for legibility over the moving orb. The instruction line below the phase label remains visible throughout the session, is brighter than decorative UI text, and is shadowed for older/low-vision mobile users.
 
@@ -76,7 +76,6 @@ These shift the entire canvas (orb, glow, rings, particles) during a session:
 - Inhale: `hsl(198, 45%, 63%)` — blue
 - Hold: `hsl(40, 55%, 61%)` — orange
 - Exhale: `hsl(148, 35%, 53%)` — green
-- Relax: `hsl(348, 42%, 66%)` — pink (phase enum `rest`)
 
 Amber (`hsl(38, 92%, 65%)` approx) appears only on the session complete screen — it signals closure, not phase.
 
@@ -114,9 +113,9 @@ These are intentional — don't undo them without understanding the rationale:
 - **No user input during a session** — fully guided, not hold-to-breathe. Reduces intimidation for first-timers who don't know when to inhale.
 - **Anonymous by default, Sign In by choice** — users can breathe and keep local history without signing in. The visible sign-in path is Google-only and exists to track history across devices; the session flow must never become auth-gated.
 - **Abstract orb** — chosen over thematic visuals (ocean, lantern, mandala). More universal, less culturally loaded, works for any user.
-- **Selectable pace (Steady / Soft / Box / Flow)** — Steady and Soft cover the default/accessibility path. Box replaced Full on 2026-06-04 after Relax remained cognitively confusing even to the app designer; its post-exhale hold is familiar and explicit. Flow remains the smoother low-interruption option. Default stays Steady 4-4-6-4. Alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
-- **Fourth phase handling** — Steady, Soft, and Flow use `Relax` with `Breathe naturally`; Box uses a second `Hold` after exhale. Do not reintroduce ambiguous post-exhale copy without fresh beta evidence.
-- **Anticipatory cue in the final 0.8s of each phase, or 25% of phase duration, whichever is smaller** — guide-ring picks up the next-phase color and audio plays a quiet pre-cue. The proportional cap keeps the lead from feeling jittery on short phases (Soft Hold, Flow Relax). No HUD text cue (removed because it competed with the central phase label and countdown).
+- **Selectable pace (Steady / Soft / 4-7-8 / Flow)** — Steady and Soft cover the default/accessibility path. 4-7-8 uses the legacy `box` id for compatibility, after clinical-family feedback on 2026-06-21 made equal box breathing and Relax semantics feel misaligned with the app's calming intent. Flow remains the smoother no-hold option. Default is Steady 4-2-6. Alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
+- **Post-exhale handling** — there is no internal or visible post-exhale `Relax`, `Pause`, `Breathe naturally`, or `rest` phase in current rhythms. Do not reintroduce one without fresh beta evidence.
+- **Anticipatory cue in the final 0.8s of each phase, or 25% of phase duration, whichever is smaller** — guide-ring picks up the next-phase color and audio plays a quiet pre-cue. The proportional cap keeps the lead from feeling jittery on short phases. No HUD text cue (removed because it competed with the central phase label and countdown).
 - **8s Settling In before first breath** — gives the user a quiet transition from "reading the screen" to "being in the session."
 - **New-user defaults** — Quick / 3 min and medium Circle Size are the first-run defaults so the first session feels short and visually balanced.
 - **Session resume (60s window)** — exiting a session shows an exit guard; sessionStorage holds state for 60s so accidental exits don't lose progress.

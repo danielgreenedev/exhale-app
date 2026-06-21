@@ -385,7 +385,7 @@ function HomeContent() {
 
         {firstVisit && (
           <p className="-mt-1 text-center text-xs leading-relaxed tracking-[0.04em] text-still-white/64">
-            First cycle: inhale, hold, exhale, then breathe naturally.
+            First cycle: inhale, hold, longer exhale.
           </p>
         )}
         </form>
@@ -427,7 +427,7 @@ function HomeContent() {
           >
             <div className="flex items-center justify-between gap-3 px-1">
               <p className="text-xs leading-relaxed tracking-[0.04em] text-still-white/58">
-                Steady pace, medium circle, Air sound are already set.
+                Steady uses a simple longer exhale.
               </p>
             </div>
 
@@ -477,7 +477,7 @@ function HomeContent() {
                       <div className="grid grid-cols-4 gap-1 p-1">
                         {(Object.values(RHYTHMS)).map((r) => {
                           const active = selectedRhythm === r.id;
-                          const sig = r.pattern.map((p) => p.duration).join('-');
+                          const sig = r.pattern.filter((p) => p.duration > 0).map((p) => p.duration).join('-');
                           return (
                             <label
                               key={r.id}
@@ -535,34 +535,31 @@ function HomeContent() {
 
                   {showSequenceTiming && (
                     <div id="sequence-timing" className="pt-1">
-                      {describedRhythm.pattern.map((phase, index) => {
-                        const mutedPhase = describedRhythm.id === 'flow' && phase.phase === 'hold';
-                        return (
+                      {describedRhythm.pattern.filter((phase) => phase.duration > 0).map((phase, index) => (
+                        <div
+                          key={`${phase.phase}-${index}`}
+                          className="grid grid-cols-[auto_1fr_auto] items-center gap-3 py-2.5 border-b border-still-white/8 opacity-100 transition-opacity duration-300 last:border-b-0"
+                        >
                           <div
-                            key={`${phase.phase}-${index}`}
-                            className={`grid grid-cols-[auto_1fr_auto] items-center gap-3 py-2.5 border-b border-still-white/8 last:border-b-0 transition-opacity duration-300 ${mutedPhase ? 'opacity-45' : 'opacity-100'}`}
-                          >
-                            <div
-                              className="h-2.5 w-2.5 rounded-full shrink-0"
-                              style={{
-                                backgroundColor: phase.color,
-                              }}
-                              aria-hidden="true"
-                            />
-                            <div className="min-w-0 flex-1">
-                              <p className="text-still-white/82 text-[11px] leading-tight tracking-[0.22em] uppercase font-light">
-                                {phase.label}
-                              </p>
-                              <p className="text-still-white/58 text-[11px] tracking-[0.04em] font-light leading-snug normal-case">
-                                {phase.instruction}
-                              </p>
-                            </div>
-                            <span className="text-still-white/62 text-[11px] tabular-nums tracking-[0.12em] font-light">
-                              {phase.duration}s
-                            </span>
+                            className="h-2.5 w-2.5 rounded-full shrink-0"
+                            style={{
+                              backgroundColor: phase.color,
+                            }}
+                            aria-hidden="true"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-still-white/82 text-[11px] leading-tight tracking-[0.22em] uppercase font-light">
+                              {phase.label}
+                            </p>
+                            <p className="text-still-white/58 text-[11px] tracking-[0.04em] font-light leading-snug normal-case">
+                              {phase.instruction}
+                            </p>
                           </div>
-                        );
-                      })}
+                          <span className="text-still-white/62 text-[11px] tabular-nums tracking-[0.12em] font-light">
+                            {phase.duration}s
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>

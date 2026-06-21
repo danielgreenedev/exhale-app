@@ -8,7 +8,6 @@ colors:
   coastal-haze: "#76b2cb"
   amber-warmth: "#d2ae65"
   forest-floor: "#5db184"
-  quiet-blush: "#cd8492"
   warm-closure: "#fbbf24"
   still-white: "#f5f5f2"
 typography:
@@ -139,7 +138,6 @@ These shift the entire canvas (orb, glow, progress rings, particles) with each b
 - **Coastal Haze** (`#76b2cb`) — Inhale. A muted steel blue. Opening, expanding, the color of breathing in.
 - **Amber Warmth** (`#d2ae65`) — Hold. Warm amber-gold. Sustained, interior, candlelit.
 - **Forest Floor** (`#5db184`) — Exhale. Sage green. Releasing, settling, returning.
-- **Quiet Blush** (`#cd8492`) — Relax phase (phase enum `rest`). Dusty rose-pink. Soft, restorative, the color of permission to breathe naturally between guided inhales.
 
 ### Neutral
 - **Forest Night** (`#0f1712`): The ground. Near-black with a visible green tint — not pure void, but the darkness before a forest dawn. Every screen.
@@ -162,7 +160,7 @@ These shift the entire canvas (orb, glow, progress rings, particles) with each b
 
 - **Display** (extralight 200, 2.25rem, tracking 0.25em, uppercase): The "Exhale" wordmark on the home screen. One instance per app.
 - **Headline** (extralight 200, 1.875rem, tracking 0.3em, uppercase): Screen titles — "Practice", "Complete". Airy and formal.
-- **Title** (semibold 600, 2.75rem mobile / 3rem desktop, tracking 0.12em mobile, uppercase): The active phase label during a session — "Inhale", "Hold", "Exhale", "Relax". Beginning in uses the same treatment because it functions as the pre-session state label. Together with the Begin button label, these are the only semibold uses in the system. Their weight is earned: they are the only instructions the user needs.
+- **Title** (semibold 600, 2.75rem mobile / 3rem desktop, tracking 0.12em mobile, uppercase): The active phase label during a session — "Inhale", "Hold", or "Exhale". Beginning in uses the same treatment because it functions as the pre-session state label. Together with the Begin button label, these are the only semibold uses in the system. Their weight is earned: they are the only instructions the user needs.
 - **Body** (light 300, 0.875rem, tracking 0.04em): Taglines, descriptions, session complete quotes. Sentence case. 55–72% white. Body copy uses only subtle tracking; wide spacing is reserved for uppercase labels and controls.
 - **Label** (light 300, 0.75rem, tracking 0.18–0.28em, uppercase): Most button text, metadata, and stat labels. Secondary actions sit at 0.18em. The Begin button is the one sanctioned exception, using semibold 600 at tracking 0.20em for legibility against the emerald fill; see Begin (Primary) below.
 - **Timer** (thin 100, 3.75rem, tabular-nums): The countdown during a session. Uses `font-variant-numeric: tabular-nums` to prevent layout shift as numbers change.
@@ -209,11 +207,11 @@ The brand mark and the product itself. Three contexts:
 
 ### Breathing Rhythm
 
-The default Steady rhythm is 4-4-6-4: Inhale 4 seconds, Hold 4 seconds, Exhale 6 seconds, Relax 4 seconds (phase enum `rest`). Relax is a short breath-back beat that lets the user take a natural inhale before the next guided cycle; "Relax" labels the phase rather than "Rest" because the body wants to inhale during this window, not hold still. Steady Relax was shortened from 8 seconds to 4 seconds on 2026-05-26 after multiple beta testers reported the longer pause felt too long and counterproductive (T-2026-05-23-14, T-2026-05-23-18 among others). On 2026-06-04, Full was replaced with Box after Relax remained cognitively confusing; Box uses a second Hold after Exhale so the fourth beat is expected. The pre-session Beginning in state lasts 4 seconds, shows a countdown with a subtle progress ring, and is skipped when resuming a session or tapping Breathe Again from completion. Soft, Box, and Flow presets reshape the per-phase durations; see the Rhythm component spec.
+The default Steady rhythm is 4-2-6: Inhale 4 seconds, Hold 2 seconds, Exhale 6 seconds, and no post-exhale step. Every visible rhythm keeps the guided exhale longer than the guided inhale. There is no internal or visible `rest` phase in the current model. This replaced the earlier Relax / Breathe naturally / Pause framing on 2026-06-21 after broad tester dislike and clinical-family pranayama feedback reinforced that the post-exhale beat was semantically confusing and could make the rhythm feel inhale-heavy. The pre-session Beginning in state lasts 4 seconds, shows a countdown with a subtle progress ring, and is skipped when resuming a session or tapping Breathe Again from completion. Soft, 4-7-8, and Flow presets reshape the per-phase durations; see the Rhythm component spec.
 
 ### Anticipatory Phase Cue
 
-In the final lead window before each phase change, the guide ring around the orb crossfades to the incoming phase color and a quiet pre-cue tone plays when sound is on. The lead window is per-phase: `getPhaseLookahead(phase)` returns `Math.min(PHASE_LOOKAHEAD_SECONDS, phase.duration * 0.25)`, with `PHASE_LOOKAHEAD_SECONDS = 0.8`. Long phases get the full 0.8s; short phases (≤3.2s) get capped at 25% of their own duration so the cue never occupies 40% of the phase and reads as jittery. Concretely: Soft Hold 2s → 0.5s lead, Soft Inhale 3s → 0.75s lead, Flow Relax 2s → 0.5s lead, everything else → 0.8s. The intent is to give the brain a beat to register the upcoming transition without changing the actual phase timing. No textual HUD cue is shown; an earlier `Next [phase]` text experiment competed with the central phase label and the countdown for attention and was removed. Hook returns `nextPhase`, `phaseLeadProgress` (0-1), and `timeUntilPhaseEnd` so other consumers can opt in to anticipation without re-deriving them.
+In the final lead window before each phase change, the guide ring around the orb crossfades to the incoming phase color and a quiet pre-cue tone plays when sound is on. The lead window is per-phase: `getPhaseLookahead(phase)` returns `Math.min(PHASE_LOOKAHEAD_SECONDS, phase.duration * 0.25)`, with `PHASE_LOOKAHEAD_SECONDS = 0.8`. Long phases get the full 0.8s; short phases (<=3.2s) get capped at 25% of their own duration so the cue never occupies 40% of the phase and reads as jittery. Concretely: Steady Hold 2s -> 0.5s lead, Soft Hold 1s -> 0.25s lead, Soft Inhale 3s -> 0.75s lead, long inhales/exhales/holds -> 0.8s. The intent is to give the brain a beat to register the upcoming transition without changing the actual phase timing. No textual HUD cue is shown; an earlier `Next [phase]` text experiment competed with the central phase label and the countdown for attention and was removed. Hook returns `nextPhase`, `phaseLeadProgress` (0-1), and `timeUntilPhaseEnd` so other consumers can opt in to anticipation without re-deriving them.
 
 ### Progress Indicators
 
@@ -230,22 +228,22 @@ Phase changes should feel like a handoff rather than a switch. The HUD keeps the
 
 The active phase label and Beginning in label use semibold 600 with a dark text shadow because they sit directly on the canvas orb and must read on bright phase colors. On phones, phase labels use lower tracking than ordinary uppercase labels so older and low-vision users can parse the word shape. The active label is 2.75rem on mobile, 3rem on desktop, and stays at 90-96% Still White opacity.
 
-Visible session instruction is phase-only: `Inhale`, `Hold`, `Exhale`, `Relax`, plus the countdown. Do not place a sentence instruction over the orb. The timer is large enough to read from a phone at arm's length and never fades below a faint-but-visible state. A local forest-night contrast backplate sits behind the phase word and timer. In `prefers-contrast: more`, the canvas removes ambient washes, particle texture, and soft halos while strengthening the orb rim, guide ring, phase label, and countdown.
+Visible session instruction is phase-only: `Inhale`, `Hold`, and `Exhale` (Flow uses only `Inhale` and `Exhale`), plus the countdown. Do not place a sentence instruction over the orb. The timer is large enough to read from a phone at arm's length and never fades below a faint-but-visible state. A local forest-night contrast backplate sits behind the phase word and timer. In `prefers-contrast: more`, the canvas removes ambient washes, particle texture, and soft halos while strengthening the orb rim, guide ring, phase label, and countdown.
 
 ### Rhythm
 
 The breathing pattern itself is selectable inside the `Sequence` tab of Session Setup under the label `Pace`. Four options:
 
-- **Steady** (`standard`, `Balanced`) — 4-4-6-4, 18s cycle. Default for first-time users.
-- **Soft** (`gentle`, `Accessible`) — 3-2-4-4, 13s cycle. Shorter, lighter cycles for easier breathing.
-- **Box** (`box`, `Structured`) — 4-4-4-4, 16s cycle. Familiar square-breathing structure with a clear hold after exhale.
-- **Flow** (`flow`, `Continuous`) — 4-0-6-2, 12s cycle. No hold, steady momentum. Hold phase has zero duration but keeps the canonical four-phase shape.
+- **Steady** (`standard`, `Balanced`) — 4-2-6, 12s cycle. Default for first-time users.
+- **Soft** (`gentle`, `Accessible`) — 3-1-5, 9s cycle. Shorter, lighter cycles with a longer exhale.
+- **4-7-8** (`box`, `Classic`) — 4-7-8, 19s cycle. The storage id remains `box` for compatibility with saved settings and legacy `full` / `slow` mappings, but the visible preset is now the classic 4-7-8 shape.
+- **Flow** (`flow`, `Continuous`) — 4-6, 10s cycle. No hold or pause, just inhale and longer exhale.
 
-Each tile shows only the pace name (uppercase 10px tracking-0.02em): `Steady`, `Soft`, `Box`, `Flow`. One-word descriptors (`Balanced`, `Accessible`, `Structured`, `Continuous`) stay in aria-labels for screen readers and implementation clarity, but are not visible inside the compact tile. This keeps the picker readable at mobile width and prevents the skeptical primary user from parsing breathwork notation before pressing Begin.
+Each tile shows only the pace name (uppercase 10px tracking-0.02em): `Steady`, `Soft`, `4-7-8`, `Flow`. One-word descriptors (`Balanced`, `Accessible`, `Classic`, `Continuous`) stay in aria-labels for screen readers and implementation clarity, but are not visible inside the compact tile. This keeps the picker readable at mobile width and prevents the skeptical primary user from parsing breathwork notation before pressing Begin.
 
 Rhythm uses the same quiet emerald selected-state language as Time, Circle Size, and Sound. Default is `Steady` (stored as internal id `standard`). The choice persists through `exhale-rhythm` in localStorage and `user_settings.rhythm` in Supabase; legacy `full` and `slow` values normalize to `box`. Rhythm cannot change mid-session; the picker is read once at session start and the resulting pattern drives the orb timing, audio cue ramps, and HUD time-remaining calculation. Switching rhythm requires returning to the home screen and starting a new session.
 
-Sequence descriptions appear in the connected helper row below the tiles so desktop hover, keyboard focus, and mobile taps all expose the same context without relying on native title tooltips. Helper copy is human-first and non-technical: pace name plus one short descriptive sentence. The technical phase list is hidden by default behind a quiet secondary `Show pattern` button with a disclosure caret; when opened, the vertical phase preview follows the same hover/focus/selection state so the phase times update while a user previews a sequence. Flow's zero-duration Hold row is slightly muted to show that Hold stays in the canonical sequence shape but does not take time.
+Sequence descriptions appear in the connected helper row below the tiles so desktop hover, keyboard focus, and mobile taps all expose the same context without relying on native title tooltips. Helper copy is human-first and non-technical: pace name plus one short descriptive sentence. The technical phase list is hidden by default behind a quiet secondary `Show pattern` button with a disclosure caret; when opened, the vertical phase preview follows the same hover/focus/selection state so the phase times update while a user previews a sequence. The pattern preview shows the actual phases in the selected rhythm.
 
 ### Background Sound Palettes
 

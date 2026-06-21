@@ -125,7 +125,6 @@ const CUE_MAP: Record<BreathingPhase, [number, number]> = {
   inhale: [493.88, 739.99],
   hold: [440.0, 659.25],
   exhale: [392.0, 587.33],
-  rest: [329.63, 493.88],
 };
 
 function isActivePalette(id: SoundPaletteId): id is ActiveSoundPaletteId {
@@ -420,8 +419,6 @@ export function useAudioEngine(
       } else if (phase === 'exhale') {
         breathFilter.frequency.setValueAtTime(config.breathMax, nowB);
         breathFilter.frequency.linearRampToValueAtTime(config.breathMin, nowB + phaseDuration);
-      } else {
-        breathFilter.frequency.setValueAtTime(config.breathMin, nowB);
       }
     }
 
