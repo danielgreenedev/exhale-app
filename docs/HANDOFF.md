@@ -1,26 +1,28 @@
 # Codex Handoff
 
-Last updated: 2026-06-21 (post-exhale pause retired)
+Last updated: 2026-06-21 (agent factory roadmap concluded)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
 ## Branch State
 
-- Branch: `master`. Working tree should be clean after the current SEO/docs pass is committed and pushed.
-- Recent commit history before this pass:
-  - `5d86e5b` - Bing site verification file and local artifact ignore rules.
-  - `c120dbe` - Static sitemap route plus `robots.txt` sitemap declaration.
-  - `06ec5a9` - Full rhythm replaced by Box.
-  - `743e510` - Handoff rewrite for the prior Facebook in-app browser pass.
-  - `5f45fb5` - Orb-overflow fix in Facebook in-app browser; Meta hint copy tightened.
-- Verification standard: `npm.cmd run lint`, `npm.cmd test -- --runInBand`, and `npm.cmd run build`. Restore `next-env.d.ts` to the checked-in dev-routes import if `next build` rewrites it.
+- Branch: `master`, synced with `origin/master` through `0d057f0`.
+- Working tree should be clean except for the intentionally untracked local reference PDF `docs/agent_factory_start_guide.pdf`.
+- Recent commit history:
+  - `0d057f0` - Design-distinctiveness feedback captured in feedback/open-question docs.
+  - `b27ed48` - Agent factory roadmap advanced with subagent/deployment references.
+  - `7f42735` - Post-exhale phase retired and `exhale-ship` workflow added.
+  - `3c8cbdc` - Social preview image cache bust.
+  - `bbff871` - Baseline SEO metadata improved.
+- Verification standard: `git diff --check`, `npm.cmd run lint`, `npm.cmd test -- --runInBand`, and `npm.cmd run build`. Restore `next-env.d.ts` to the checked-in dev-routes import if `next build` rewrites it.
 
 ## What Changed Most Recently
 
-- **Search crawler coverage.** `src/app/sitemap.ts` now serves `/sitemap.xml` for `/`, `/privacy`, and `/terms`; `public/robots.txt` advertises `Sitemap: https://exhale.guide/sitemap.xml`.
-- **Bing verification.** `public/BingSiteAuth.xml` is deployed at `/BingSiteAuth.xml`. The owner reports Google and Bing are now verified; Bing URL Inspection shows `https://exhale.guide` indexed successfully.
-- **Home H1 hardening.** Bing flagged `H1 tag missing`. The visible app already renders `<h1>Exhale</h1>` after client hydration, but the static HTML for `/` was bailing out to client rendering because the home page reads `useSearchParams`. `HomeFallback` now gives the static HTML a crawler-visible Exhale H1 while preserving the hydrated app UI.
-- **Crawler caveat.** Spoofed `bingbot` command-line requests can still hit Vercel's challenge response. Since real Bing verification/indexing is working, treat this as monitor-only. If Bing or Google inspection later fails to fetch the live page, use Vercel Firewall / Verified Bots allow rules rather than changing app markup.
+- **Agent factory concluded.** `docs/AGENT_FACTORY_ROADMAP.md` now treats the roadmap as concluded and the factory as an operational process. The repo-local `.agents/skills/exhale-ship/` skill owns the guarded workflow.
+- **Review/release gates exist.** The skill has focused playbooks for code review, design review, docs harmonization, release checks, and optional subagent delegation.
+- **First factory run shipped.** The no-post-exhale rhythm model was reviewed, validated, committed, and pushed to `master`.
+- **Deployment caveat.** The checkout has no `.vercel/project.json`; command-line `curl.exe -I https://exhale.guide` receives Vercel's challenge/429 response, matching the known tooling caveat in `docs/DEPLOYMENT.md`. Confirm production deployment status through GitHub/Vercel's authenticated UI or an authenticated CLI surface when needed.
+- **Design-distinctiveness feedback captured.** T-2026-06-21-22 is recorded anonymously in `docs/USER_FEEDBACK.md`, and `docs/OPEN_QUESTIONS.md` now tracks whether Exhale feels visually distinct enough to avoid reading as generic or derivative.
 
 ## Durable Invariants
 
@@ -41,6 +43,7 @@ Next highest-leverage validation asks:
 2. **No-post-exhale rhythm check:** ask Relax/Pause-friction testers whether default Steady now feels smoother with only Inhale, Hold, and Exhale. Then compare 4-7-8 for structured practice and Flow for users who dislike holds entirely.
 3. **Meta-browser sound/capability check:** in Facebook or Messenger in-app browsers, note whether sound works, whether the menu hint is understandable, and whether opening in the normal browser changes behavior.
 4. **HUD readability check:** confirm whether phase text and transitions feel readable and smooth after the dimmer-orb/crossfade pass.
+5. **Design distinctiveness follow-up:** ask the professional/advocacy reviewer which screen or visual choice felt generic, what it reminded them of, and whether the issue was color, layout, motion, type, copy, or the orb treatment.
 
 Keep further Steady default changes, voice guidance, Garden skin, Android TWA, and parked Impeccable follow-ups behind one more validation pass.
 

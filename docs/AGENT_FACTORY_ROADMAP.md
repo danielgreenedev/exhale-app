@@ -42,17 +42,37 @@ Status: complete for first factory run; ongoing per change
 
 ## Phase 4: Guarded Release
 
-Status: local validation complete; push/deployment pending explicit approval
+Status: complete for first factory run; ongoing per release
 
 - Inspected `git status -sb` and avoided broad staging.
 - Ran `git diff --check`, `npm.cmd run lint`, `npm.cmd test -- --runInBand`, and `npm.cmd run build`.
 - Committed the validated release candidate as `7f42735 feat: retire post-exhale phase and add ship workflow`.
-- Remaining gated step: push `master` and check Vercel deployment status after explicit approval.
+- Pushed `master` through `0d057f0 docs: capture design distinctiveness feedback`.
+- Checked deployment linkage after push. The checkout is not linked with `.vercel/project.json`, and command-line `curl.exe -I https://exhale.guide` receives Vercel's challenge/429 response. This matches the existing deployment-doc caveat for tool requests, so local Vercel deployment status cannot be proven from this checkout alone.
+- Remaining release behavior is now operational, not roadmap work: after future pushes, check GitHub/Vercel status through the available authenticated surface.
 
 ## Phase 5: Optional Factory Expansion
 
-Status: in progress
+Status: complete as an operational baseline
 
 - Added subagent prompt templates for optional parallel code, design, docs, and release-readiness review.
 - Tightened the guarded release playbook with deployment-check paths that do not assume a linked Vercel project.
 - MCP additions remain deferred; current Codex desktop tools, Browser/Playwright capabilities, npm scripts, and git commands are enough for the current factory loop.
+
+## Conclusion
+
+Status: roadmap concluded
+
+The Exhale agent factory is now a repo-local, guarded workflow rather than a loose idea. It has:
+
+- A concise `exhale-ship` skill with focused reference gates.
+- Review paths for code, design, docs, release, and optional subagent delegation.
+- A validated first factory run covering the no-post-exhale rhythm release.
+- Explicit guardrails for staging, committing, pushing, deployment checks, MCP additions, and subagent use.
+
+Future work should treat the factory as an operating process:
+
+- Run the relevant gates whenever source, design, docs, release readiness, or feedback changes.
+- Keep MCP additions deferred until a repeated gap appears that current Codex desktop tools cannot cover.
+- Keep subagents optional and explicitly requested, not the default path.
+- Preserve the untracked source PDF (`docs/agent_factory_start_guide.pdf`) as local reference material unless the owner explicitly wants it versioned or removed.
