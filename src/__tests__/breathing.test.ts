@@ -113,7 +113,7 @@ describe('RHYTHMS registry', () => {
     expect(RHYTHMS.box.pattern.map((p) => p.duration)).toEqual([4, 7, 8]);
     expect(RHYTHMS.box.cycleDuration).toBe(19);
     expect(RHYTHMS.box.sessionCycles).toEqual({ quick: 9, short: 16, medium: 22, long: 32 });
-    expect(RHYTHMS.box.label).toBe('4-7-8');
+    expect(RHYTHMS.box.label).toBe('Relax');
   });
 
   it('current rhythms do not include a post-exhale phase', () => {
@@ -152,7 +152,7 @@ describe('RHYTHMS registry', () => {
   it('rhythm labels and descriptions stay human-facing', () => {
     expect(RHYTHMS.standard.label).toBe('Steady');
     expect(RHYTHMS.gentle.label).toBe('Soft');
-    expect(RHYTHMS.box.label).toBe('4-7-8');
+    expect(RHYTHMS.box.label).toBe('Relax');
     expect(RHYTHMS.flow.label).toBe('Flow');
 
     (['standard', 'gentle', 'box', 'flow'] as const).forEach((id) => {

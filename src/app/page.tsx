@@ -8,9 +8,9 @@ import {
   DEFAULT_RHYTHM,
   DEFAULT_SESSION_LENGTH,
   RHYTHMS,
-  RHYTHM_STORAGE_KEY,
-  RhythmId,
-  SessionLength,
+  type Rhythm,
+  type RhythmId,
+  type SessionLength,
   normalizeRhythmId,
 } from '@/lib/breathing';
 import { useAudioEngine } from '@/hooks/useAudioEngine';
@@ -66,6 +66,25 @@ const SESSION_OPTIONS: SessionOption[] = [
   { length: 'medium', label: '7 min', ariaLabel: '7 minute session' },
   { length: 'long', label: '10 min', ariaLabel: '10 minute session' },
 ];
+
+const PHASE_SHORT_LABELS = {
+  inhale: 'In',
+  hold: 'Hold',
+  exhale: 'Out',
+} as const;
+
+const PHASE_BAR_MAX_SECONDS = Math.max(
+  ...Object.values(RHYTHMS).flatMap((rhythm) =>
+    rhythm.pattern.filter((phase) => phase.duration > 0).map((phase) => phase.duration)
+  )
+);
+
+function formatRhythmPattern(rhythm: Rhythm): string {
+  return rhythm.pattern
+    .filter((phase) => phase.duration > 0)
+    .map((phase) => `${phase.label.toLowerCase()} ${phase.duration} seconds`)
+    .join(', ');
+}
 
 const SOUND_TEXTURE_PALETTES = SOUND_PALETTES.filter((palette) => palette.id !== 'off');
 const SOUND_OFF_PALETTE = SOUND_PALETTES.find((palette) => palette.id === 'off');
@@ -132,12 +151,9 @@ function HomeContent() {
   const [firstVisit, setFirstVisit] = useState(false);
   const [sessionSetupAvailable, setSessionSetupAvailable] = useState(false);
   const [showSessionSetup, setShowSessionSetup] = useState(false);
-  const [showSequenceTiming, setShowSequenceTiming] = useState(false);
   const [setupTab, setSetupTab] = useState<SetupTab>('sequence');
   const [previewingSound, setPreviewingSound] = useState<SoundPaletteId | null>(null);
-  const [previewingRhythm, setPreviewingRhythm] = useState<RhythmId | null>(null);
 
-  const describedRhythm = RHYTHMS[previewingRhythm ?? selectedRhythm];
   const sessionOptions = SESSION_OPTIONS;
   const settingsSyncedRef = useRef(false);
   const previewStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -425,12 +441,6 @@ function HomeContent() {
             aria-label="Session setup"
             className="w-full border-y border-still-white/10 py-2 flex flex-col gap-3"
           >
-            <div className="flex items-center justify-between gap-3 px-1">
-              <p className="text-xs leading-relaxed tracking-[0.04em] text-still-white/58">
-                Steady uses a simple longer exhale.
-              </p>
-            </div>
-
             <div
               className="grid grid-cols-3 gap-1 rounded-lg border border-still-white/10 bg-still-white/[0.02] p-1"
               role="tablist"
@@ -473,95 +483,71 @@ function HomeContent() {
                     <span id="sequence-label" className="text-still-white/62 text-xs tracking-[0.14em] uppercase font-light">
                       Pace
                     </span>
-                    <div className="overflow-hidden rounded-lg border border-still-white/10 bg-still-white/[0.02]">
-                      <div className="grid grid-cols-4 gap-1 p-1">
-                        {(Object.values(RHYTHMS)).map((r) => {
-                          const active = selectedRhythm === r.id;
-                          const sig = r.pattern.filter((p) => p.duration > 0).map((p) => p.duration).join('-');
-                          return (
-                            <label
-                              key={r.id}
-                              onMouseEnter={() => setPreviewingRhythm(r.id)}
-                              onMouseLeave={() => setPreviewingRhythm(null)}
-                              onFocus={() => setPreviewingRhythm(r.id)}
-                              onBlur={() => setPreviewingRhythm(null)}
-                              className={`
-                                min-h-11 min-w-0 flex items-center justify-center rounded-md border px-0.5 cursor-pointer transition-all duration-300
-                                ${active
-                                  ? SELECTED_SETTING_CLASS
-                                  : 'border-still-white/16 text-still-white/58 hover:border-still-white/30 hover:text-still-white/78'}
-                                has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-3 has-[:focus-visible]:outline-emerald-200/80
-                              `}
-                            >
-                              <input
-                                type="radio"
-                                name="rhythm"
-                                value={r.id}
-                                form="session-form"
-                                checked={active}
-                                aria-label={`${r.label} pace. ${r.summary}. ${r.description} Timing ${sig}.`}
-                                aria-describedby="rhythm-description"
-                                onChange={() => updateRhythm(r.id)}
-                                className="sr-only"
-                              />
-                              <span className="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-[11px] tracking-[0.02em] uppercase font-light leading-none">
-                                {r.label}
+                    <div className="grid gap-2">
+                      {(Object.values(RHYTHMS)).map((r) => {
+                        const active = selectedRhythm === r.id;
+                        const patternLabel = formatRhythmPattern(r);
+                        return (
+                          <label
+                            key={r.id}
+                            className={`
+                              min-h-[5.25rem] rounded-lg border px-3 py-2.5 cursor-pointer transition-all duration-300
+                              ${active
+                                ? SELECTED_SETTING_CLASS
+                                : 'border-still-white/14 bg-still-white/[0.015] text-still-white/72 hover:border-still-white/30 hover:bg-still-white/[0.04] hover:text-still-white/86'}
+                              has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-3 has-[:focus-visible]:outline-emerald-200/80
+                            `}
+                          >
+                            <input
+                              type="radio"
+                              name="rhythm"
+                              value={r.id}
+                              form="session-form"
+                              checked={active}
+                              aria-label={`${r.label} pace. ${r.summary}. Pattern: ${patternLabel}.`}
+                              onChange={() => updateRhythm(r.id)}
+                              className="sr-only"
+                            />
+                            <span className="grid grid-cols-[4.35rem_1fr] items-center gap-3">
+                              <span className="min-w-0">
+                                <span className={`block truncate text-[11px] leading-none tracking-[0.12em] uppercase font-light ${active ? 'text-emerald-50/92' : 'text-still-white/82'}`}>
+                                  {r.label}
+                                </span>
+                                <span className={`mt-2 block text-[10px] leading-none tabular-nums tracking-[0.06em] font-light ${active ? 'text-emerald-100/72' : 'text-still-white/58'}`}>
+                                  {r.pattern.filter((phase) => phase.duration > 0).map((phase) => phase.duration).join(' / ')}
+                                </span>
                               </span>
-                            </label>
-                          );
-                        })}
-                      </div>
-                      <p
-                        id="rhythm-description"
-                        className="min-h-[2.75rem] border-t border-still-white/10 px-3 py-2 text-xs leading-relaxed tracking-[0.04em] text-still-white/70"
-                      >
-                        <span className="uppercase tracking-[0.14em] text-still-white/78">{describedRhythm.label}</span>
-                        <span className="px-1.5 text-still-white/40">/</span>
-                        {describedRhythm.description}
-                      </p>
+                              <span className="flex min-w-0 flex-col gap-1.5" aria-hidden="true">
+                                {r.pattern.filter((phase) => phase.duration > 0).map((phase, index) => (
+                                  <span
+                                    key={`${r.id}-${phase.phase}-${index}`}
+                                    className="grid grid-cols-[2.35rem_1fr_1.4rem] items-center gap-1.5"
+                                  >
+                                    <span className={`text-[9px] leading-none uppercase tracking-[0.08em] font-light ${active ? 'text-emerald-50/72' : 'text-still-white/58'}`}>
+                                      {PHASE_SHORT_LABELS[phase.phase]}
+                                    </span>
+                                    <span className="h-1.5 overflow-hidden rounded-full bg-still-white/[0.08]">
+                                      <span
+                                        className="block h-full rounded-full transition-[width,opacity] duration-300"
+                                        style={{
+                                          width: `${Math.max(phase.duration / PHASE_BAR_MAX_SECONDS * 100, 8)}%`,
+                                          backgroundColor: phase.color,
+                                          opacity: active ? 0.88 : 0.62,
+                                        }}
+                                      />
+                                    </span>
+                                    <span className={`text-right text-[10px] leading-none tabular-nums tracking-[0.02em] font-light ${active ? 'text-emerald-50/76' : 'text-still-white/62'}`}>
+                                      {phase.duration}s
+                                    </span>
+                                  </span>
+                                ))}
+                              </span>
+                            </span>
+                          </label>
+                        );
+                      })}
                     </div>
                   </div>
-
-                  <button
-                    type="button"
-                    aria-expanded={showSequenceTiming}
-                    aria-controls="sequence-timing"
-                    onClick={() => setShowSequenceTiming((show) => !show)}
-                    className="self-center inline-flex min-h-11 min-w-36 items-center justify-center gap-2 rounded-lg border border-still-white/18 bg-still-white/[0.025] px-4 py-2 text-xs uppercase tracking-[0.1em] text-still-white/62 transition-all duration-300 hover:border-still-white/30 hover:bg-still-white/[0.055] hover:text-still-white/82 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-emerald-200/80"
-                  >
-                    <span>{showSequenceTiming ? 'Hide pattern' : 'Show pattern'}</span>
-                    <DisclosureCaret open={showSequenceTiming} />
-                  </button>
-
-                  {showSequenceTiming && (
-                    <div id="sequence-timing" className="pt-1">
-                      {describedRhythm.pattern.filter((phase) => phase.duration > 0).map((phase, index) => (
-                        <div
-                          key={`${phase.phase}-${index}`}
-                          className="grid grid-cols-[auto_1fr_auto] items-center gap-3 py-2.5 border-b border-still-white/8 opacity-100 transition-opacity duration-300 last:border-b-0"
-                        >
-                          <div
-                            className="h-2.5 w-2.5 rounded-full shrink-0"
-                            style={{
-                              backgroundColor: phase.color,
-                            }}
-                            aria-hidden="true"
-                          />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-still-white/82 text-[11px] leading-tight tracking-[0.22em] uppercase font-light">
-                              {phase.label}
-                            </p>
-                            <p className="text-still-white/58 text-[11px] tracking-[0.04em] font-light leading-snug normal-case">
-                              {phase.instruction}
-                            </p>
-                          </div>
-                          <span className="text-still-white/62 text-[11px] tabular-nums tracking-[0.12em] font-light">
-                            {phase.duration}s
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               )}
 

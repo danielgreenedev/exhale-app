@@ -31,7 +31,7 @@ export interface Rhythm {
 }
 
 // Rhythms are variable-length: Flow is a true Inhale/Exhale loop, while
-// Steady/Soft/4-7-8 include a Hold. There is no hidden post-exhale phase.
+// Steady/Soft/Relax include a Hold. There is no hidden post-exhale phase.
 const PHASE_DETAILS: Record<BreathingPhase, Omit<PhaseConfig, 'duration'>> = {
   inhale: {
     phase: 'inhale',
@@ -122,7 +122,7 @@ export const RHYTHMS: Record<RhythmId, Rhythm> = {
   ),
   box: buildRhythm(
     'box',
-    '4-7-8',
+    'Relax',
     'Classic',
     'Long hold, longer release. Keep it easy.',
     [['inhale', 4], ['hold', 7], ['exhale', 8]]

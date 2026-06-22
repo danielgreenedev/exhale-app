@@ -14,11 +14,11 @@ This means: no required sign-up, no required accounts, no onboarding gates, no s
 
 ## Core Mechanic
 
-Selectable breathing rhythm exposed inside Session Setup on the home screen. Four visible pace options, default Steady. Current internal ids are `standard`, `gentle`, `box`, and `flow`; legacy saved ids `full` and `slow` normalize to `box` for storage compatibility. The `box` storage id now presents the 4-7-8 preset rather than equal box breathing:
+Selectable breathing rhythm exposed inside Session Setup on the home screen. Four visible pace options, default Steady. Current internal ids are `standard`, `gentle`, `box`, and `flow`; legacy saved ids `full` and `slow` normalize to `box` for storage compatibility. The visible `Relax` option uses the `box` storage id and presents the 4-7-8 preset rather than equal box breathing:
 
 - **Steady** (`standard`) - 4-2-6 (12s cycle, 5.0 breaths/min). Default for first-time users.
 - **Soft** (`gentle`) - 3-1-5 (9s cycle, 6.7 breaths/min). Shorter, lighter cycles with a longer exhale.
-- **4-7-8** (`box`) - 4-7-8 (19s cycle, 3.2 breaths/min). Classic structured option; the id remains `box` only for storage compatibility.
+- **Relax** (`box`) - 4-7-8 (19s cycle, 3.2 breaths/min). Classic structured option; the id remains `box` only for storage compatibility.
 - **Flow** (`flow`) - 4-6 (10s cycle, 6.0 breaths/min). No hold or pause, just inhale and longer exhale.
 
 Fully guided, with no user input needed during a session. Session lengths: quick (~3m), short (~5m), medium (~7m), long (~10m). Cycle counts are recalibrated per rhythm so each minute label stays close to its target across all four patterns.
@@ -113,14 +113,14 @@ These are intentional — don't undo them without understanding the rationale:
 - **No user input during a session** — fully guided, not hold-to-breathe. Reduces intimidation for first-timers who don't know when to inhale.
 - **Anonymous by default, Sign In by choice** — users can breathe and keep local history without signing in. The visible sign-in path is Google-only and exists to track history across devices; the session flow must never become auth-gated.
 - **Abstract orb** — chosen over thematic visuals (ocean, lantern, mandala). More universal, less culturally loaded, works for any user.
-- **Selectable pace (Steady / Soft / 4-7-8 / Flow)** — Steady and Soft cover the default/accessibility path. 4-7-8 uses the legacy `box` id for compatibility, after clinical-family feedback on 2026-06-21 made equal box breathing and Relax semantics feel misaligned with the app's calming intent. Flow remains the smoother no-hold option. Default is Steady 4-2-6. Alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
-- **Post-exhale handling** — there is no internal or visible post-exhale `Relax`, `Pause`, `Breathe naturally`, or `rest` phase in current rhythms. Do not reintroduce one without fresh beta evidence.
+- **Selectable pace (Steady / Soft / Relax / Flow)** — Steady and Soft cover the default/accessibility path. Relax uses the legacy `box` id for compatibility and keeps the 4-7-8 timing visible in the picker. Flow remains the smoother no-hold option. Default is Steady 4-2-6. Alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
+- **Post-exhale handling** — there is no internal or visible post-exhale `Relax`, `Pause`, `Breathe naturally`, or `rest` phase in current rhythms. `Relax` is a selectable rhythm name, not a phase. Do not reintroduce a post-exhale phase without fresh beta evidence.
 - **Anticipatory cue in the final 0.8s of each phase, or 25% of phase duration, whichever is smaller** — guide-ring picks up the next-phase color and audio plays a quiet pre-cue. The proportional cap keeps the lead from feeling jittery on short phases. No HUD text cue (removed because it competed with the central phase label and countdown).
 - **8s Settling In before first breath** — gives the user a quiet transition from "reading the screen" to "being in the session."
 - **New-user defaults** — Quick / 3 min and medium Circle Size are the first-run defaults so the first session feels short and visually balanced.
 - **Session resume (60s window)** — exiting a session shows an exit guard; sessionStorage holds state for 60s so accidental exits don't lose progress.
 - **Resume directly below Begin** — when a resumable session exists, the continuation action sits next to the primary start action before Session Setup.
-- **Session Setup disclosure** — one quiet drawer below Begin/Resume contains the sequence, Circle Size, and Sound for everyone. There is no completed-session rule for hiding controls.
+- **Session Setup disclosure** — one quiet drawer below Begin/Resume contains the sequence, Circle Size, and Sound after the visitor has completed at least one local session. If localStorage is unavailable, show setup rather than trapping the user in defaults.
 - **Persistent phase instruction** — the HUD instruction remains visible after cycle 2. Low-vision phone feedback showed that hiding the instruction can make the session visually unusable even when the user can otherwise use a phone.
 
 ## Accessibility Baseline (Already Built)

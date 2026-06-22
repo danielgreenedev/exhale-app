@@ -207,7 +207,7 @@ The brand mark and the product itself. Three contexts:
 
 ### Breathing Rhythm
 
-The default Steady rhythm is 4-2-6: Inhale 4 seconds, Hold 2 seconds, Exhale 6 seconds, and no post-exhale step. Every visible rhythm keeps the guided exhale longer than the guided inhale. There is no internal or visible `rest` phase in the current model. This replaced the earlier Relax / Breathe naturally / Pause framing on 2026-06-21 after broad tester dislike and clinical-family pranayama feedback reinforced that the post-exhale beat was semantically confusing and could make the rhythm feel inhale-heavy. The pre-session Beginning in state lasts 4 seconds, shows a countdown with a subtle progress ring, and is skipped when resuming a session or tapping Breathe Again from completion. Soft, 4-7-8, and Flow presets reshape the per-phase durations; see the Rhythm component spec.
+The default Steady rhythm is 4-2-6: Inhale 4 seconds, Hold 2 seconds, Exhale 6 seconds, and no post-exhale step. Every visible rhythm keeps the guided exhale longer than the guided inhale. There is no internal or visible `rest` phase in the current model. This replaced the earlier post-exhale Relax / Breathe naturally / Pause framing on 2026-06-21 after broad tester dislike and clinical-family pranayama feedback reinforced that the post-exhale beat was semantically confusing and could make the rhythm feel inhale-heavy. The pre-session Beginning in state lasts 4 seconds, shows a countdown with a subtle progress ring, and is skipped when resuming a session or tapping Breathe Again from completion. Soft, Relax, and Flow presets reshape the per-phase durations; see the Rhythm component spec.
 
 ### Anticipatory Phase Cue
 
@@ -236,14 +236,14 @@ The breathing pattern itself is selectable inside the `Sequence` tab of Session 
 
 - **Steady** (`standard`, `Balanced`) — 4-2-6, 12s cycle. Default for first-time users.
 - **Soft** (`gentle`, `Accessible`) — 3-1-5, 9s cycle. Shorter, lighter cycles with a longer exhale.
-- **4-7-8** (`box`, `Classic`) — 4-7-8, 19s cycle. The storage id remains `box` for compatibility with saved settings and legacy `full` / `slow` mappings, but the visible preset is now the classic 4-7-8 shape.
+- **Relax** (`box`, `Classic`) — 4-7-8, 19s cycle. The storage id remains `box` for compatibility with saved settings and legacy `full` / `slow` mappings.
 - **Flow** (`flow`, `Continuous`) — 4-6, 10s cycle. No hold or pause, just inhale and longer exhale.
 
-Each tile shows only the pace name (uppercase 10px tracking-0.02em): `Steady`, `Soft`, `4-7-8`, `Flow`. One-word descriptors (`Balanced`, `Accessible`, `Classic`, `Continuous`) stay in aria-labels for screen readers and implementation clarity, but are not visible inside the compact tile. This keeps the picker readable at mobile width and prevents the skeptical primary user from parsing breathwork notation before pressing Begin.
+Each option is a compact selection card for `Steady`, `Soft`, `Relax`, and `Flow`. The visible card shows the pace name, the numeric signature, and the actual phase pattern as proportional timing bars with phase seconds. One-word descriptors (`Balanced`, `Accessible`, `Classic`, `Continuous`) stay in aria-labels for screen readers and implementation clarity, not as visible persuasion copy. This makes rhythm choice concrete without asking the user to imagine what "soft" or "flow" means.
 
 Rhythm uses the same quiet emerald selected-state language as Time, Circle Size, and Sound. Default is `Steady` (stored as internal id `standard`). The choice persists through `exhale-rhythm` in localStorage and `user_settings.rhythm` in Supabase; legacy `full` and `slow` values normalize to `box`. Rhythm cannot change mid-session; the picker is read once at session start and the resulting pattern drives the orb timing, audio cue ramps, and HUD time-remaining calculation. Switching rhythm requires returning to the home screen and starting a new session.
 
-Sequence descriptions appear in the connected helper row below the tiles so desktop hover, keyboard focus, and mobile taps all expose the same context without relying on native title tooltips. Helper copy is human-first and non-technical: pace name plus one short descriptive sentence. The technical phase list is hidden by default behind a quiet secondary `Show pattern` button with a disclosure caret; when opened, the vertical phase preview follows the same hover/focus/selection state so the phase times update while a user previews a sequence. The pattern preview shows the actual phases in the selected rhythm.
+The pattern preview is part of the picker, not a second reveal. Every pace card shows the true phase sequence in place: Inhale, optional Hold, Exhale, with seconds and proportional bar lengths. The selected state keeps the same quiet emerald language as other settings. The picker does not use a separate `Show pattern` disclosure because that adds friction precisely where clarity is needed.
 
 ### Background Sound Palettes
 
@@ -257,7 +257,7 @@ Circle Size lives in the `Visual` tab and uses compact S/M/L radio controls. New
 
 ### Session Setup Disclosure
 
-Session Setup is the single push-down disclosure below Begin and Resume, shown only after the visitor has completed at least one local session. First-visit users see exactly one decision (length) and one action (Begin); after completion, the disclosure label becomes `Adjust next session`. The gate is local and anonymous, based on `exhale-stats`; if localStorage is unavailable, show setup rather than trapping the user in defaults. Session Setup contains a three-part segmented tab row: `Sequence`, `Visual`, and `Audio`. Sequence contains the four label-only pace options plus a connected helper row; the local section label says `Pace`. Detailed phase timing is hidden by default behind a secondary `Show pattern` button. Visual contains Circle Size. Audio contains Off plus the four sound textures. Practice History stays outside Session Setup because it is navigation, not a preference, and is shown only after at least one completed session.
+Session Setup is the single push-down disclosure below Begin and Resume, shown only after the visitor has completed at least one local session. First-visit users see exactly one decision (length) and one action (Begin); after completion, the disclosure label becomes `Adjust next session`. The gate is local and anonymous, based on `exhale-stats`; if localStorage is unavailable, show setup rather than trapping the user in defaults. Session Setup contains a three-part segmented tab row: `Sequence`, `Visual`, and `Audio`. Sequence contains four pace cards under the local section label `Pace`; each card includes the breathing pattern directly. Visual contains Circle Size. Audio contains Off plus the four sound textures. Practice History stays outside Session Setup because it is navigation, not a preference, and is shown only after at least one completed session.
 
 ### Stats Rows
 
