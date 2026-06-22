@@ -22,7 +22,7 @@ import {
 import { PolicyFooter } from '@/components/PolicyFooter';
 import { OrbMark } from '@/components/OrbMark';
 import { readStats, computeStats, storageAvailable } from '@/hooks/useSessionStats';
-import { SURFACE_GLOWS } from '@/lib/colors';
+import { PHASE_COLORS, SURFACE_GLOWS } from '@/lib/colors';
 import { useUserId } from '@/lib/auth';
 import { logAppEvent } from '@/lib/appEvents';
 import {
@@ -53,10 +53,12 @@ interface SessionOption {
 type SetupTab = 'sequence' | 'visual' | 'audio';
 
 const SETUP_TABS: Array<{ id: SetupTab; label: string }> = [
-  { id: 'sequence', label: 'Sequence' },
+  { id: 'sequence', label: 'Pattern' },
   { id: 'visual', label: 'Visual' },
   { id: 'audio', label: 'Audio' },
 ];
+
+const RHYTHM_PICKER_ORDER: RhythmId[] = ['gentle', 'standard', 'flow', 'box'];
 
 // Keep the first decision as simple as possible. Rhythm-specific breath counts
 // stay in the rhythm helper so the length picker remains only about time.
@@ -72,6 +74,20 @@ const PHASE_SHORT_LABELS = {
   hold: 'Hold',
   exhale: 'Out',
 } as const;
+
+const ORB_SIZE_OPTIONS = [
+  { scale: 0.75, label: 'S', sizeClass: 'w-3 h-3', color: PHASE_COLORS.inhale.color },
+  { scale: 1.0, label: 'M', sizeClass: 'w-4 h-4', color: PHASE_COLORS.hold.color },
+  { scale: 1.25, label: 'L', sizeClass: 'w-5 h-5', color: PHASE_COLORS.exhale.color },
+] as const;
+
+const SOUND_PALETTE_ACCENTS: Record<SoundPaletteId, string> = {
+  air: PHASE_COLORS.inhale.color,
+  warm: PHASE_COLORS.hold.color,
+  low: PHASE_COLORS.exhale.color,
+  quiet: PHASE_COLORS.inhale.color,
+  off: 'rgba(245,245,242,0.44)',
+};
 
 const PHASE_BAR_MAX_SECONDS = Math.max(
   ...Object.values(RHYTHMS).flatMap((rhythm) =>
@@ -401,7 +417,7 @@ function HomeContent() {
 
         {firstVisit && (
           <p className="-mt-1 text-center text-xs leading-relaxed tracking-[0.04em] text-still-white/64">
-            First cycle: inhale, hold, longer exhale.
+            First cycle: inhale, exhale.
           </p>
         )}
         </form>
@@ -481,10 +497,11 @@ function HomeContent() {
                 <div className="flex flex-col gap-3 w-full">
                   <div className="flex flex-col gap-2 w-full px-1" role="radiogroup" aria-labelledby="sequence-label">
                     <span id="sequence-label" className="text-still-white/62 text-xs tracking-[0.14em] uppercase font-light">
-                      Pace
+                      Breathing Sequence
                     </span>
                     <div className="grid gap-2">
-                      {(Object.values(RHYTHMS)).map((r) => {
+                      {RHYTHM_PICKER_ORDER.map((id) => {
+                        const r = RHYTHMS[id];
                         const active = selectedRhythm === r.id;
                         const patternLabel = formatRhythmPattern(r);
                         return (
@@ -556,9 +573,7 @@ function HomeContent() {
                   <div className="flex items-center justify-between w-full">
                     <span className="text-still-white/62 text-xs tracking-[0.14em] uppercase font-light">Circle size</span>
                     <div className="flex gap-4 items-end" role="radiogroup" aria-label="Circle size">
-                      {([0.75, 1.0, 1.25] as const).map((scale, i) => {
-                        const sizes = ['w-3 h-3', 'w-4 h-4', 'w-5 h-5'] as const;
-                        const labels = ['S', 'M', 'L'] as const;
+                      {ORB_SIZE_OPTIONS.map(({ scale, label, sizeClass, color }) => {
                         const active = Math.abs(orbScale - scale) < 0.01;
                         return (
                           <label
@@ -577,12 +592,18 @@ function HomeContent() {
                               value={scale}
                               form="session-form"
                               checked={active}
-                              aria-label={`Circle size ${labels[i]}`}
+                              aria-label={`Circle size ${label}`}
                               onChange={() => updateOrbScale(scale)}
                               className="sr-only"
                             />
-                            <div className={`${sizes[i]} rounded-full transition-colors duration-300 ${active ? 'bg-emerald-pulse' : 'bg-still-white/70'}`} />
-                            <span className="text-[10px] tracking-widest font-light">{labels[i]}</span>
+                            <div
+                              className={`${sizeClass} rounded-full transition-opacity duration-300`}
+                              style={{
+                                backgroundColor: color,
+                                opacity: active ? 0.95 : 0.58,
+                              }}
+                            />
+                            <span className="text-[10px] tracking-widest font-light">{label}</span>
                           </label>
                         );
                       })}
@@ -652,6 +673,14 @@ function HomeContent() {
                             className="sr-only"
                           />
                           <span className="flex items-center justify-center gap-1.5">
+                            <span
+                              aria-hidden="true"
+                              className="h-1.5 w-1.5 rounded-full"
+                              style={{
+                                backgroundColor: SOUND_PALETTE_ACCENTS[palette.id],
+                                opacity: active ? 0.95 : 0.62,
+                              }}
+                            />
                             {palette.label}
                             {previewing && (
                               <span

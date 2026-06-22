@@ -2,14 +2,14 @@ export const SOUND_STORAGE_KEY = 'exhale-sound-palette';
 
 export const SOUND_PALETTES = [
   {
-    id: 'air',
-    label: 'Air',
-    ariaLabel: 'Still Air, filtered air with a barely tonal pad',
-  },
-  {
     id: 'warm',
     label: 'Warm',
     ariaLabel: 'Warm Current, a softer and fuller pad',
+  },
+  {
+    id: 'air',
+    label: 'Air',
+    ariaLabel: 'Still Air, filtered air with a barely tonal pad',
   },
   {
     id: 'low',
@@ -30,7 +30,7 @@ export const SOUND_PALETTES = [
 
 export type SoundPaletteId = (typeof SOUND_PALETTES)[number]['id'];
 
-export const DEFAULT_SOUND_PALETTE: SoundPaletteId = 'air';
+export const DEFAULT_SOUND_PALETTE: SoundPaletteId = 'warm';
 
 export function isSoundPaletteId(value: string | null | undefined): value is SoundPaletteId {
   return SOUND_PALETTES.some((palette) => palette.id === value);

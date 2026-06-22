@@ -14,18 +14,18 @@ This means: no required sign-up, no required accounts, no onboarding gates, no s
 
 ## Core Mechanic
 
-Selectable breathing rhythm exposed inside Session Setup on the home screen. Four visible pace options, default Steady. Current internal ids are `standard`, `gentle`, `box`, and `flow`; legacy saved ids `full` and `slow` normalize to `box` for storage compatibility. The visible `Relax` option uses the `box` storage id and presents the 4-7-8 preset rather than equal box breathing:
+Selectable breathing rhythm exposed inside Session Setup on the home screen. Four visible pace options appear in this order: Soft, Box, Flow, Relax. Default is Soft. Current internal ids are `gentle`, `standard`, `flow`, and `box`; legacy saved ids `full` and `slow` normalize to `box` for storage compatibility. The visible `Relax` option uses the `box` storage id and presents the 4-7-8 preset:
 
-- **Steady** (`standard`) - 4-2-6 (12s cycle, 5.0 breaths/min). Default for first-time users.
-- **Soft** (`gentle`) - 3-1-5 (9s cycle, 6.7 breaths/min). Shorter, lighter cycles with a longer exhale.
-- **Relax** (`box`) - 4-7-8 (19s cycle, 3.2 breaths/min). Classic structured option; the id remains `box` only for storage compatibility.
+- **Soft** (`gentle`) - 4-4 (8s cycle, 7.5 breaths/min). Default for first-time users; no holds, just an easy in and out.
+- **Box** (`standard`) - 4-4-4-4 (16s cycle, 3.75 breaths/min). Structured square-breathing option; the second Hold stays at the exhaled orb scale.
 - **Flow** (`flow`) - 4-6 (10s cycle, 6.0 breaths/min). No hold or pause, just inhale and longer exhale.
+- **Relax** (`box`) - 4-7-8 (19s cycle, 3.2 breaths/min). Classic 4-7-8 option; the id remains `box` only for storage compatibility.
 
 Fully guided, with no user input needed during a session. Session lengths: quick (~3m), short (~5m), medium (~7m), long (~10m). Cycle counts are recalibrated per rhythm so each minute label stays close to its target across all four patterns.
 
-There is no post-exhale phase in the current phase model. This changed on 2026-06-21 after broad tester dislike of the Relax/Pause mechanic and clinical-family pranayama feedback reinforced that the post-exhale beat was semantically confusing and could make the rhythm feel inhale-heavy.
+There is no `rest` phase or post-exhale Relax/Pause mechanic in the current phase model. Box includes a second `Hold` after Exhale, but it remains a true hold phase and keeps the orb at the exhaled-small scale. The previous post-exhale Relax/Pause mechanic was retired on 2026-06-21 after broad tester dislike and clinical-family pranayama feedback reinforced that the post-exhale beat was semantically confusing and could make the rhythm feel inhale-heavy.
 
-Phase transitions have anticipatory support because beta feedback showed that exact boundary changes can take a beat to process. In the final 0.8s of each phase (or 25% of phase duration on short phases, whichever is smaller), the guide ring around the orb picks up the next phase's color and a quiet pre-cue tone plays when sound is on. The cap is set by `getPhaseLookahead(phase)` in `src/lib/breathing.ts`; the ceiling `PHASE_LOOKAHEAD_SECONDS = 0.8` is what long phases use, while Steady's 2s Hold gets a 0.5s lead, Soft's 1s Hold gets a 0.25s lead, and Soft's 3s Inhale gets a 0.75s lead. No textual HUD cue is shown; an earlier attempt at a `Next [phase]` label competed with the central phase label and countdown for attention, so it was removed.
+Phase transitions have anticipatory support because beta feedback showed that exact boundary changes can take a beat to process. In the final 0.8s of each phase (or 25% of phase duration on short phases, whichever is smaller), the guide ring around the orb picks up the next phase's color and a quiet pre-cue tone plays when sound is on. The cap is set by `getPhaseLookahead(phase)` in `src/lib/breathing.ts`; shipped phases are currently 4s or longer, so they use the full `PHASE_LOOKAHEAD_SECONDS = 0.8` lead. The proportional cap stays for future short phases. No textual HUD cue is shown; an earlier attempt at a `Next [phase]` label competed with the central phase label and countdown for attention, so it was removed.
 
 The active phase label and the Settling In label intentionally share the same semibold, shadowed treatment for legibility over the moving orb. The instruction line below the phase label remains visible throughout the session, is brighter than decorative UI text, and is shadowed for older/low-vision mobile users.
 
@@ -56,14 +56,14 @@ The center orb is the primary timing object. Keep the outer guide ring and incom
 - **Friction is the enemy.** Every extra tap, label, or decision is a barrier for the target user. Cut before adding.
 - **The orb is the product.** All UI is secondary to the breathing experience on the canvas.
 - **Calm over clever.** No animations for their own sake. Motion should reinforce breathing rhythm.
-- **Dark, minimal, emerald accent.** Amber only on session complete (signals closure). No other accent colors.
+- **Dark, minimal, emerald accent.** Amber only on session complete (signals closure). Phase colors may appear only as tiny semantic markers for breath-related settings/history, never as a second accent system.
 - **No guilt mechanics.** Stats and streaks are for reflection, not pressure.
 
 ## Audio System
 
 Web Audio API synthesis only — no external audio files. Zero load time, works offline.
 
-- Background sound palettes: Off, Air, Warm, Deep, Still. Air is the default.
+- Background sound palettes: Off, Warm, Air, Deep, Still. Warm is the default.
 - Phase cues are synthesized from per-phase tone pairs in `CUE_MAP`; the rhythm-aware breath filter ramps with the active phase duration.
 - Autoplay policy is already handled: attempts auto-start, falls back to first user interaction.
 - During active sessions, `scheduleAmbientStop` schedules a Web Audio clock fade-out at the guided-session deadline so Chrome background-tab throttling cannot leave the ambient bed running after completion.
@@ -113,14 +113,14 @@ These are intentional — don't undo them without understanding the rationale:
 - **No user input during a session** — fully guided, not hold-to-breathe. Reduces intimidation for first-timers who don't know when to inhale.
 - **Anonymous by default, Sign In by choice** — users can breathe and keep local history without signing in. The visible sign-in path is Google-only and exists to track history across devices; the session flow must never become auth-gated.
 - **Abstract orb** — chosen over thematic visuals (ocean, lantern, mandala). More universal, less culturally loaded, works for any user.
-- **Selectable pace (Steady / Soft / Relax / Flow)** — Steady and Soft cover the default/accessibility path. Relax uses the legacy `box` id for compatibility and keeps the 4-7-8 timing visible in the picker. Flow remains the smoother no-hold option. Default is Steady 4-2-6. Alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
-- **Post-exhale handling** — there is no internal or visible post-exhale `Relax`, `Pause`, `Breathe naturally`, or `rest` phase in current rhythms. `Relax` is a selectable rhythm name, not a phase. Do not reintroduce a post-exhale phase without fresh beta evidence.
+- **Selectable pace (Soft / Box / Flow / Relax)** — Soft is the default easiest no-hold loop, Box is the 4-4-4-4 structure, Flow is the smoother no-hold option, and Relax uses the legacy `box` id for compatibility while keeping the 4-7-8 timing visible in the picker. Alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
+- **Post-exhale handling** — there is no internal or visible post-exhale `Relax`, `Pause`, `Breathe naturally`, or `rest` phase in current rhythms. `Relax` is a selectable rhythm name, not a phase. Box's second post-exhale beat is a `Hold`, not a rest/relax phase. Do not reintroduce a post-exhale rest phase without fresh beta evidence.
 - **Anticipatory cue in the final 0.8s of each phase, or 25% of phase duration, whichever is smaller** — guide-ring picks up the next-phase color and audio plays a quiet pre-cue. The proportional cap keeps the lead from feeling jittery on short phases. No HUD text cue (removed because it competed with the central phase label and countdown).
 - **8s Settling In before first breath** — gives the user a quiet transition from "reading the screen" to "being in the session."
-- **New-user defaults** — Quick / 3 min and medium Circle Size are the first-run defaults so the first session feels short and visually balanced.
+- **New-user defaults** — Quick / 3 min, Soft rhythm, medium Circle Size, and Warm sound are the first-run defaults so the first session feels short, gentle, visually balanced, and warm when audio is allowed.
 - **Session resume (60s window)** — exiting a session shows an exit guard; sessionStorage holds state for 60s so accidental exits don't lose progress.
 - **Resume directly below Begin** — when a resumable session exists, the continuation action sits next to the primary start action before Session Setup.
-- **Session Setup disclosure** — one quiet drawer below Begin/Resume contains the sequence, Circle Size, and Sound after the visitor has completed at least one local session. If localStorage is unavailable, show setup rather than trapping the user in defaults.
+- **Session Setup disclosure** — one quiet drawer below Begin/Resume contains Pattern, Visual, and Audio settings after the visitor has completed at least one local session. If localStorage is unavailable, show setup rather than trapping the user in defaults.
 - **Persistent phase instruction** — the HUD instruction remains visible after cycle 2. Low-vision phone feedback showed that hiding the instruction can make the session visually unusable even when the user can otherwise use a phone.
 
 ## Accessibility Baseline (Already Built)
@@ -150,7 +150,8 @@ Full design system documentation lives in two files at the project root. Read th
 
 Key named rules to enforce on every change:
 - Emerald accent ≤10% coverage outside the session canvas
-- Amber only on session complete — nowhere else
+- Amber only on session complete — nowhere else. The Hold phase marker uses `PHASE_COLORS.hold`, not the closure amber.
+- Phase colors outside the active canvas are limited to tiny semantic markers in rhythm, Circle Size, Sound, and Practice History surfaces.
 - Only `font-thin/extralight/light/semibold` (100/200/300/600) — no `font-normal`
 - No `italic` anywhere in the interface
 - No `box-shadow` for structural elevation. Static orb marks also avoid colored glow shadows; luminous phase light belongs inside the session canvas.

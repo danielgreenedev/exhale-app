@@ -1,6 +1,6 @@
 # Exhale Roadmap
 
-Last updated: June 7, 2026
+Last updated: June 22, 2026
 
 Exhale is organized around learning gates, not feature batches. Each stage carries one question: do we have enough signal to invest in the next stage? Engineering effort follows validation.
 
@@ -61,17 +61,17 @@ Pulled forward from Stage 1 after five of six recent beta testers reported rhyth
 
 Shipped:
 
-- Four selectable paces surfaced inside Session Setup, with label-only tiles and human-first helper descriptions:
-  - **Steady** (`standard`) — 4-4-6-4, 18s cycle. Default for first-time users. (Relax shortened from 8s to 4s on 2026-05-26.)
-  - **Soft** (`gentle`) — 3-2-4-4, 13s cycle. Shorter, lighter cycles.
-  - **Box** (`box`) — 4-4-4-4, 16s cycle. Familiar square-breathing structure with a hold after exhale. (Replaced Full on 2026-06-04 after Relax remained cognitively confusing.)
-  - **Flow** (`flow`) — 4-0-6-2, 12s cycle. No hold, steady momentum.
+- Four selectable paces surfaced inside Session Setup, with concrete pattern cards that show proportional phase bars and seconds:
+  - **Soft** (`gentle`) — 4-4, 8s cycle. Default for first-time users; no holds, just an easy in and out.
+  - **Box** (`standard`) — 4-4-4-4, 16s cycle. Structured square-breathing option; the second Hold after Exhale stays at the exhaled orb scale.
+  - **Flow** (`flow`) — 4-6, 10s cycle. No hold or pause, just inhale and longer exhale.
+  - **Relax** (`box`) — 4-7-8, 19s cycle. Classic structured option; the storage id remains `box` for compatibility.
 - Per-rhythm cycle counts recalibrated so all four minute labels stay close to their targets.
 - Rhythm threads through `useBreathingSession`, `BreathingOrb`, `GameHUD`, `useAudioEngine`, and `game/page.tsx` via a Rhythm object captured at first render.
 - Local persistence through `exhale-rhythm` localStorage key; cloud round-trip through `user_settings.rhythm` (Supabase migrations 002-004).
-- Picking a pace updates the helper row; detailed phase timing is available behind `View timing`.
+- Picking a pace shows the pattern inside the selected option; there is no separate `Show pattern` / `View timing` disclosure.
 
-The next signal worth gathering: ask testers whether Box feels clearer than the retired Full/Relax shape, and ask Flow testers whether the remaining 2-second Relax/pause helps or interrupts the rhythm. First Flow follow-up says no-Hold helps but the pause may need to become no-pause. That tester follow-up is captured as TODO item.
+The next signal worth gathering: ask testers whether default Soft feels accessible and calming, whether Box feels clear as the structured option, whether Flow works for users who dislike holds but want a longer exhale, and whether Relax's 4-7-8 timing feels calming or too demanding.
 
 ## Stage 1, Ship-quality polish
 
@@ -81,10 +81,10 @@ Make Exhale feel like a "v1 you would link publicly."
 - Discoverability: Open Graph tags, social card image, meta description, friendly page title; consider a small landing-screen treatment on the home page.
 - Privacy policy page and terms of use page; footer links from main pages.
 - Color contrast audit on text at low opacity (white/28 to 38 against forest-night).
-- In-session HUD readability audit by phase color: title/instruction text must remain readable over Inhale, Hold, Exhale, and Relax circles without becoming glaring. June 8 low-vision phone feedback promoted this from polish to accessibility. Default HUD text hardening is shipped; still validate whether optional High Visual Contrast / Large Text is needed.
+- In-session HUD readability audit by phase color: title/instruction text must remain readable over Inhale, Hold, and Exhale circles without becoming glaring. June 8 low-vision phone feedback promoted this from polish to accessibility. Default HUD text hardening is shipped; still validate whether optional High Visual Contrast / Large Text is needed.
 - Accessibility candidates, after targeted validation:
   - **High Visual Contrast**: optional visual mode that makes phase colors and cues easier to tell apart for colorblind users, low-vision users, and first-time users who cannot distinguish phase changes quickly enough. Prefer stronger color separation plus non-color cue differences over a generic "colorblind mode" label.
-  - **Voice Cues**: optional Audio setting that speaks only phase names (`Inhale`, `Hold`, `Exhale`, `Relax`) for blind users, screen-reader users, or testers who need non-visual guidance. Keep off by default and separate from background sound. Validate human-recorded or very neutral voice treatment before shipping; beta feedback now includes explicit concern that an obviously AI voice could hurt trust.
+  - **Voice Cues**: optional Audio setting that speaks only phase names (`Inhale`, `Hold`, `Exhale`) for blind users, screen-reader users, or testers who need non-visual guidance. Keep off by default and separate from background sound. Validate human-recorded or very neutral voice treatment before shipping; beta feedback now includes explicit concern that an obviously AI voice could hurt trust.
 - Ongoing polish in response to beta feedback.
 
 ## Stage 2, Distribution

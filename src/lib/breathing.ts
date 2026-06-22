@@ -6,7 +6,7 @@ export type RhythmId = 'standard' | 'gentle' | 'box' | 'flow';
 
 export const DEFAULT_SESSION_LENGTH: SessionLength = 'quick';
 export const DEFAULT_ORB_SCALE = 1;
-export const DEFAULT_RHYTHM: RhythmId = 'standard';
+export const DEFAULT_RHYTHM: RhythmId = 'gentle';
 export const RHYTHM_STORAGE_KEY = 'exhale-rhythm';
 export const PHASE_LOOKAHEAD_SECONDS = 0.8;
 
@@ -22,7 +22,7 @@ export interface PhaseConfig {
 
 export interface Rhythm {
   id: RhythmId;
-  label: string;        // Short name shown on the rhythm tile (e.g., "Steady").
+  label: string;        // Short name shown on the rhythm tile (e.g., "Box").
   summary: string;      // One-word relative descriptor for aria labels and helper context.
   description: string;  // Short scannable phrase shown in the connected rhythm helper.
   pattern: PhaseConfig[];
@@ -31,7 +31,7 @@ export interface Rhythm {
 }
 
 // Rhythms are variable-length: Flow is a true Inhale/Exhale loop, while
-// Steady/Soft/Relax include a Hold. There is no hidden post-exhale phase.
+// Box includes a second Hold at the exhaled scale. There is no hidden rest phase.
 const PHASE_DETAILS: Record<BreathingPhase, Omit<PhaseConfig, 'duration'>> = {
   inhale: {
     phase: 'inhale',
@@ -68,8 +68,12 @@ const SESSION_LENGTH_TARGETS: Record<SessionLength, number> = {
   long: 600,    // ~10 min
 };
 
-function phaseConfig(phase: BreathingPhase, duration: number): PhaseConfig {
-  return { ...PHASE_DETAILS[phase], duration };
+function phaseConfig(
+  phase: BreathingPhase,
+  duration: number,
+  targetOrbScale = PHASE_DETAILS[phase].targetOrbScale
+): PhaseConfig {
+  return { ...PHASE_DETAILS[phase], duration, targetOrbScale };
 }
 
 function sumDurations(pattern: PhaseConfig[]): number {
@@ -90,9 +94,9 @@ function buildRhythm(
   label: string,
   summary: string,
   description: string,
-  pattern: Array<readonly [BreathingPhase, number]>
+  pattern: Array<readonly [BreathingPhase, number] | readonly [BreathingPhase, number, number]>
 ): Rhythm {
-  const phasePattern = pattern.map(([phase, duration]) => phaseConfig(phase, duration));
+  const phasePattern = pattern.map(([phase, duration, targetOrbScale]) => phaseConfig(phase, duration, targetOrbScale));
   const cycleDuration = sumDurations(phasePattern);
   return {
     id,
@@ -108,17 +112,17 @@ function buildRhythm(
 export const RHYTHMS: Record<RhythmId, Rhythm> = {
   standard: buildRhythm(
     'standard',
-    'Steady',
-    'Balanced',
-    'Simple pacing with a longer release.',
-    [['inhale', 4], ['hold', 2], ['exhale', 6]]
+    'Box',
+    'Structured',
+    'Even pacing with a hold after each breath.',
+    [['inhale', 4], ['hold', 4], ['exhale', 4], ['hold', 4, 0.45]]
   ),
   gentle: buildRhythm(
     'gentle',
     'Soft',
     'Accessible',
-    'Lighter hold, easy longer exhale.',
-    [['inhale', 3], ['hold', 1], ['exhale', 5]]
+    'No holds, an easy in and out.',
+    [['inhale', 4], ['exhale', 4]]
   ),
   box: buildRhythm(
     'box',

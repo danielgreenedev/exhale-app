@@ -1,19 +1,19 @@
 # Codex Handoff
 
-Last updated: 2026-06-21 (agent factory roadmap concluded)
+Last updated: 2026-06-22 (Soft default rhythm and Warm default sound)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
 ## Branch State
 
-- Branch: `master`, synced with `origin/master` through `0d057f0`.
-- Working tree should be clean except for the intentionally untracked local reference PDF `docs/agent_factory_start_guide.pdf`.
+- Branch: `master`, synced with `origin/master` through `fe8be2f`.
+- Working tree is currently dirty with the Soft/Box rhythm update, Warm sound default, settings/history phase-color accents, docs alignment, and a pre-existing local `.gitignore` edit.
 - Recent commit history:
+  - `fe8be2f` - Rhythm picker pattern cards show timing directly.
+  - `6dc32b4` - Agent factory roadmap concluded.
   - `0d057f0` - Design-distinctiveness feedback captured in feedback/open-question docs.
   - `b27ed48` - Agent factory roadmap advanced with subagent/deployment references.
   - `7f42735` - Post-exhale phase retired and `exhale-ship` workflow added.
-  - `3c8cbdc` - Social preview image cache bust.
-  - `bbff871` - Baseline SEO metadata improved.
 - Verification standard: `git diff --check`, `npm.cmd run lint`, `npm.cmd test -- --runInBand`, and `npm.cmd run build`. Restore `next-env.d.ts` to the checked-in dev-routes import if `next build` rewrites it.
 
 ## What Changed Most Recently
@@ -22,12 +22,16 @@ This document is overwritten on each handoff. The previous handoff's content doe
 - **Review/release gates exist.** The skill has focused playbooks for code review, design review, docs harmonization, release checks, and optional subagent delegation.
 - **First factory run shipped.** The no-post-exhale rhythm model was reviewed, validated, committed, and pushed to `master`.
 - **Deployment caveat.** The checkout has no `.vercel/project.json`; command-line `curl.exe -I https://exhale.guide` receives Vercel's challenge/429 response, matching the known tooling caveat in `docs/DEPLOYMENT.md`. Confirm production deployment status through GitHub/Vercel's authenticated UI or an authenticated CLI surface when needed.
-- **Design-distinctiveness feedback captured.** T-2026-06-21-22 is recorded anonymously in `docs/USER_FEEDBACK.md`, and `docs/OPEN_QUESTIONS.md` now tracks whether Exhale feels visually distinct enough to avoid reading as generic or derivative.
+- **Pattern picker refreshed.** Breathing Sequence cards now show proportional phase bars and seconds directly; the separate pattern reveal is gone.
+- **Owner rhythm update in progress.** Visible order is Soft, Box, Flow, Relax. Default Soft (`gentle`) is 4-4, Box (`standard`) is 4-4-4-4, Flow is 4-6, and Relax (`box`) is 4-7-8 for legacy storage compatibility.
+- **Settings naming/defaults updated.** Session Setup tabs now read Pattern, Visual, Audio; the old Pace label now reads Breathing Sequence; Circle Size defaults to Medium; Audio shows Warm before Air and defaults to Warm.
+- **Settings/history color accents added.** Tiny phase-color markers now appear in rhythm cards, Circle Size, Background sound, and Practice History. These are semantic markers, not a new accent system.
+- **Current local validation passed.** `git diff --check`, `npm.cmd run lint`, `npm.cmd test -- --runInBand`, and `npm.cmd run build` passed on 2026-06-22. Playwright mobile QA at 390px confirmed Pattern / Visual / Audio labels, Soft / Medium / Warm defaults, Warm-before-Air order, Practice History phase-color accents, and no horizontal overflow. `next-env.d.ts` was restored to the checked-in dev route-types import after build.
 
 ## Durable Invariants
 
-- **Four visible paces.** Steady (4-2-6, cycle 12s), Soft (3-1-5, cycle 9s), 4-7-8 (storage id `box`, cycle 19s), Flow (4-6, cycle 10s).
-- **Post-exhale handling.** There is no internal or visible post-exhale `rest`, Relax, or Pause phase. Do not reintroduce one without fresh validation.
+- **Four visible paces.** Soft (`gentle`, 4-4, cycle 8s, default), Box (`standard`, 4-4-4-4, cycle 16s), Flow (`flow`, 4-6, cycle 10s), Relax (`box`, 4-7-8, cycle 19s).
+- **Post-exhale handling.** There is no internal or visible post-exhale `rest`, Relax, Pause, or natural-breathing phase. Box's fourth beat is a true `Hold` after Exhale and stays at the exhaled orb scale. Do not reintroduce a rest/relax phase without fresh validation.
 - **Rhythm lock.** `rhythmRef` locking in session/audio/orb code is intentional. Rhythm is fixed at session start.
 - **Meta webview layout.** Game `main` keeps `100dvh` inline style with `h-screen` fallback, and `BreathingOrb` keeps the width-aware radius clamp. Removing either side risks regressing Facebook in-app browser layout.
 - **Cue hierarchy.** Center orb is the primary timing object. Outer guide ring and incoming-color lead stay quiet support.
@@ -40,12 +44,12 @@ This document is overwritten on each handoff. The previous handoff's content doe
 Next highest-leverage validation asks:
 
 1. **Pixel/Facebook owner retest:** in Facebook Android on Pixel 9 Pro XL, Circle Size Large, confirm whether the orb and outer guide ring now fit fully without left/right clipping.
-2. **No-post-exhale rhythm check:** ask Relax/Pause-friction testers whether default Steady now feels smoother with only Inhale, Hold, and Exhale. Then compare 4-7-8 for structured practice and Flow for users who dislike holds entirely.
+2. **Current rhythm check:** ask testers whether default Soft feels accessible and calming, whether Box feels clear as the structured option, whether Flow is smoother for longer-exhale no-hold users, and whether Relax's 4-7-8 timing feels calming or too demanding.
 3. **Meta-browser sound/capability check:** in Facebook or Messenger in-app browsers, note whether sound works, whether the menu hint is understandable, and whether opening in the normal browser changes behavior.
 4. **HUD readability check:** confirm whether phase text and transitions feel readable and smooth after the dimmer-orb/crossfade pass.
 5. **Design distinctiveness follow-up:** ask the professional/advocacy reviewer which screen or visual choice felt generic, what it reminded them of, and whether the issue was color, layout, motion, type, copy, or the orb treatment.
 
-Keep further Steady default changes, voice guidance, Garden skin, Android TWA, and parked Impeccable follow-ups behind one more validation pass.
+Keep further default-rhythm changes, voice guidance, Garden skin, Android TWA, and parked Impeccable follow-ups behind one more validation pass.
 
 ## Do Not Revert / Preserve
 

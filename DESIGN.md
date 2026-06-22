@@ -133,7 +133,7 @@ A near-monochrome ground with one living accent and four phase colors that breat
 - **Warm Closure** (`#fbbf24`): Amber, used exclusively on the session complete screen. Signals end-of-session warmth and closure. Not a brand color — a moment color. Never appears before a session ends.
 
 ### Tertiary — Phase Colors
-These shift the entire canvas (orb, glow, progress rings, particles) with each breath phase. They are never used as UI chrome — not for buttons, borders, backgrounds, or labels outside the session canvas.
+These shift the entire canvas (orb, glow, progress rings, particles) with each breath phase. Outside the active session canvas, they may appear only as tiny semantic markers that explain breath-related choices or history: proportional bars in rhythm cards, small dots in Circle Size, small dots in Background sound, and small dots in Practice History. They are not general UI chrome and must not become buttons, borders, backgrounds, large labels, or overlays.
 
 - **Coastal Haze** (`#76b2cb`) — Inhale. A muted steel blue. Opening, expanding, the color of breathing in.
 - **Amber Warmth** (`#d2ae65`) — Hold. Warm amber-gold. Sustained, interior, candlelit.
@@ -147,7 +147,7 @@ These shift the entire canvas (orb, glow, progress rings, particles) with each b
 ### Named Rules
 **The Amber Exception Rule.** Amber (`#fbbf24`) appears on one screen, for one purpose: session closure. If you are tempted to use amber anywhere else, the answer is no.
 
-**The One Accent Rule.** Emerald is the only accent. Phase colors belong to the canvas, not the UI. Do not use phase colors for buttons, labels, borders, or overlays outside of the session canvas. The exit guard backdrop is a forest-night scrim, not emerald.
+**The One Accent Rule.** Emerald is the only interface accent. Phase colors are allowed outside the canvas only as tiny semantic markers for breath-related settings and history. Do not use phase colors for buttons, labels, borders, filled surfaces, or overlays. The exit guard backdrop is a forest-night scrim, not emerald.
 
 ## 3. Typography
 
@@ -207,11 +207,11 @@ The brand mark and the product itself. Three contexts:
 
 ### Breathing Rhythm
 
-The default Steady rhythm is 4-2-6: Inhale 4 seconds, Hold 2 seconds, Exhale 6 seconds, and no post-exhale step. Every visible rhythm keeps the guided exhale longer than the guided inhale. There is no internal or visible `rest` phase in the current model. This replaced the earlier post-exhale Relax / Breathe naturally / Pause framing on 2026-06-21 after broad tester dislike and clinical-family pranayama feedback reinforced that the post-exhale beat was semantically confusing and could make the rhythm feel inhale-heavy. The pre-session Beginning in state lasts 4 seconds, shows a countdown with a subtle progress ring, and is skipped when resuming a session or tapping Breathe Again from completion. Soft, Relax, and Flow presets reshape the per-phase durations; see the Rhythm component spec.
+The default Soft rhythm is 4-4: Inhale 4 seconds, Exhale 4 seconds. It is the first-run path because it avoids holds while still showing the real breath pattern. Box remains available as the structured 4-4-4-4 option: Inhale 4 seconds, Hold 4 seconds, Exhale 4 seconds, Hold 4 seconds. Box's second Hold stays at the exhaled-small orb scale so the visual does not expand after the release. Every visible rhythm keeps the guided exhale at least as long as the guided inhale. There is no internal or visible `rest` phase in the current model. This replaced the earlier post-exhale Relax / Breathe naturally / Pause framing on 2026-06-21 after broad tester dislike and clinical-family pranayama feedback reinforced that the post-exhale beat was semantically confusing and could make the rhythm feel inhale-heavy. The pre-session Beginning in state lasts 4 seconds, shows a countdown with a subtle progress ring, and is skipped when resuming a session or tapping Breathe Again from completion. Soft, Box, Flow, and Relax presets reshape the per-phase durations; see the Rhythm component spec.
 
 ### Anticipatory Phase Cue
 
-In the final lead window before each phase change, the guide ring around the orb crossfades to the incoming phase color and a quiet pre-cue tone plays when sound is on. The lead window is per-phase: `getPhaseLookahead(phase)` returns `Math.min(PHASE_LOOKAHEAD_SECONDS, phase.duration * 0.25)`, with `PHASE_LOOKAHEAD_SECONDS = 0.8`. Long phases get the full 0.8s; short phases (<=3.2s) get capped at 25% of their own duration so the cue never occupies 40% of the phase and reads as jittery. Concretely: Steady Hold 2s -> 0.5s lead, Soft Hold 1s -> 0.25s lead, Soft Inhale 3s -> 0.75s lead, long inhales/exhales/holds -> 0.8s. The intent is to give the brain a beat to register the upcoming transition without changing the actual phase timing. No textual HUD cue is shown; an earlier `Next [phase]` text experiment competed with the central phase label and the countdown for attention and was removed. Hook returns `nextPhase`, `phaseLeadProgress` (0-1), and `timeUntilPhaseEnd` so other consumers can opt in to anticipation without re-deriving them.
+In the final lead window before each phase change, the guide ring around the orb crossfades to the incoming phase color and a quiet pre-cue tone plays when sound is on. The lead window is per-phase: `getPhaseLookahead(phase)` returns `Math.min(PHASE_LOOKAHEAD_SECONDS, phase.duration * 0.25)`, with `PHASE_LOOKAHEAD_SECONDS = 0.8`. Shipped phases are currently 4s or longer, so they use the full 0.8s lead; shorter future phases are capped at 25% of their own duration so the cue never occupies too much of the phase and reads as jittery. The intent is to give the brain a beat to register the upcoming transition without changing the actual phase timing. No textual HUD cue is shown; an earlier `Next [phase]` text experiment competed with the central phase label and the countdown for attention and was removed. Hook returns `nextPhase`, `phaseLeadProgress` (0-1), and `timeUntilPhaseEnd` so other consumers can opt in to anticipation without re-deriving them.
 
 ### Progress Indicators
 
@@ -232,36 +232,36 @@ Visible session instruction is phase-only: `Inhale`, `Hold`, and `Exhale` (Flow 
 
 ### Rhythm
 
-The breathing pattern itself is selectable inside the `Sequence` tab of Session Setup under the label `Pace`. Four options:
+The breathing pattern itself is selectable inside the `Pattern` tab of Session Setup under the label `Breathing Sequence`. Four options, shown in picker order:
 
-- **Steady** (`standard`, `Balanced`) — 4-2-6, 12s cycle. Default for first-time users.
-- **Soft** (`gentle`, `Accessible`) — 3-1-5, 9s cycle. Shorter, lighter cycles with a longer exhale.
-- **Relax** (`box`, `Classic`) — 4-7-8, 19s cycle. The storage id remains `box` for compatibility with saved settings and legacy `full` / `slow` mappings.
+- **Soft** (`gentle`, `Accessible`) — 4-4, 8s cycle. Default for first-time users; no holds, just an easy in and out.
+- **Box** (`standard`, `Structured`) — 4-4-4-4, 16s cycle. Structured square-breathing option; the second Hold after Exhale stays at the exhaled orb scale.
 - **Flow** (`flow`, `Continuous`) — 4-6, 10s cycle. No hold or pause, just inhale and longer exhale.
+- **Relax** (`box`, `Classic`) — 4-7-8, 19s cycle. The storage id remains `box` for compatibility with saved settings and legacy `full` / `slow` mappings.
 
-Each option is a compact selection card for `Steady`, `Soft`, `Relax`, and `Flow`. The visible card shows the pace name, the numeric signature, and the actual phase pattern as proportional timing bars with phase seconds. One-word descriptors (`Balanced`, `Accessible`, `Classic`, `Continuous`) stay in aria-labels for screen readers and implementation clarity, not as visible persuasion copy. This makes rhythm choice concrete without asking the user to imagine what "soft" or "flow" means.
+Each option is a compact selection card for `Soft`, `Box`, `Flow`, and `Relax`. The visible card shows the pace name, the numeric signature, and the actual phase pattern as proportional timing bars with phase seconds. One-word descriptors (`Accessible`, `Structured`, `Continuous`, `Classic`) stay in aria-labels for screen readers and implementation clarity, not as visible persuasion copy. This makes rhythm choice concrete without asking the user to imagine what "soft" or "flow" means.
 
-Rhythm uses the same quiet emerald selected-state language as Time, Circle Size, and Sound. Default is `Steady` (stored as internal id `standard`). The choice persists through `exhale-rhythm` in localStorage and `user_settings.rhythm` in Supabase; legacy `full` and `slow` values normalize to `box`. Rhythm cannot change mid-session; the picker is read once at session start and the resulting pattern drives the orb timing, audio cue ramps, and HUD time-remaining calculation. Switching rhythm requires returning to the home screen and starting a new session.
+Rhythm uses the same quiet emerald selected-state language as Time, Circle Size, and Sound. Default is `Soft` (stored as internal id `gentle`). The choice persists through `exhale-rhythm` in localStorage and `user_settings.rhythm` in Supabase; legacy `full` and `slow` values normalize to `box`. Rhythm cannot change mid-session; the picker is read once at session start and the resulting pattern drives the orb timing, audio cue ramps, and HUD time-remaining calculation. Switching rhythm requires returning to the home screen and starting a new session.
 
 The pattern preview is part of the picker, not a second reveal. Every pace card shows the true phase sequence in place: Inhale, optional Hold, Exhale, with seconds and proportional bar lengths. The selected state keeps the same quiet emerald language as other settings. The picker does not use a separate `Show pattern` disclosure because that adds friction precisely where clarity is needed.
 
 ### Background Sound Palettes
 
-Background sound is optional and synthesized only. The home screen exposes Off plus four texture choices: Air, Warm, Deep, and Still. Air is the default and should stay closest to silence: filtered air, a low grounding tone, and a sparse open pad. Warm can add more body. Deep shifts the bed darker and lower. Still removes almost all tonality but remains audible as a very quiet breath tone.
+Background sound is optional and synthesized only. The home screen exposes Off plus four texture choices: Warm, Air, Deep, and Still. Warm is the default and adds a little body without becoming foreground audio. Air should stay closest to silence: filtered air, a low grounding tone, and a sparse open pad. Deep shifts the bed darker and lower. Still removes almost all tonality but remains audible as a very quiet breath tone. Sound options may include tiny phase-color dots as quiet material cues, but selected state remains emerald.
 
 The palette control belongs in the `Audio` tab inside Session Setup, below the primary Begin flow, and its visible label is `Background sound` so users understand these choices affect the ambient bed rather than the phase cues. Sound textures use the same quiet emerald selected state as other radio controls. Selecting Air, Warm, Deep, or Still plays a brief soft preview, shows a small selected-tile preview indicator, announces the preview to screen readers, then fades out. Selecting the visible Off option stops sound immediately. No sound plays on page load from a saved setting. During active sessions, ambient sound also schedules a Web Audio clock fade-out at the guided-session deadline so Chrome background-tab throttling cannot leave the sound bed droning after completion.
 
 ### Circle Size
 
-Circle Size lives in the `Visual` tab and uses compact S/M/L radio controls. New users default to M. The active size uses the same emerald border, faint tint, and green-lit label as Time, Sequence, and Audio selections, so all home-screen preferences share one checked-state language while Begin stays the only solid green control.
+Circle Size lives in the `Visual` tab and uses compact S/M/L radio controls. New users default to M. The active size uses the same emerald border, faint tint, and green-lit label as Time, Pattern, and Audio selections, so all home-screen preferences share one checked-state language while Begin stays the only solid green control. The S/M/L dots may use Inhale/Hold/Exhale phase colors to echo the orb, but they stay small and informational.
 
 ### Session Setup Disclosure
 
-Session Setup is the single push-down disclosure below Begin and Resume, shown only after the visitor has completed at least one local session. First-visit users see exactly one decision (length) and one action (Begin); after completion, the disclosure label becomes `Adjust next session`. The gate is local and anonymous, based on `exhale-stats`; if localStorage is unavailable, show setup rather than trapping the user in defaults. Session Setup contains a three-part segmented tab row: `Sequence`, `Visual`, and `Audio`. Sequence contains four pace cards under the local section label `Pace`; each card includes the breathing pattern directly. Visual contains Circle Size. Audio contains Off plus the four sound textures. Practice History stays outside Session Setup because it is navigation, not a preference, and is shown only after at least one completed session.
+Session Setup is the single push-down disclosure below Begin and Resume, shown only after the visitor has completed at least one local session. First-visit users see exactly one decision (length) and one action (Begin); after completion, the disclosure label becomes `Adjust next session`. The gate is local and anonymous, based on `exhale-stats`; if localStorage is unavailable, show setup rather than trapping the user in defaults. Session Setup contains a three-part segmented tab row: `Pattern`, `Visual`, and `Audio`. Pattern contains four breathing-sequence cards under the local section label `Breathing Sequence`; each card includes the breathing pattern directly. Visual contains Circle Size. Audio contains Off plus the four sound textures. Practice History stays outside Session Setup because it is navigation, not a preference, and is shown only after at least one completed session.
 
 ### Stats Rows
 
-Flat list, no cards, no side borders. Each row: `border-b border-still-white/10`, `py-5`, label in label style at 58% white, value in headline style at 86% white. The asymmetry (tiny label, large value) creates hierarchy without structural chrome.
+Flat list, no cards, no side borders. Each row: `border-b border-still-white/10`, `py-5`, label in label style at 58% white, value in headline style at 86% white. Tiny phase-color dots may sit beside labels and recent-session dates to carry the orb language into reflection without turning history into a progress dashboard. The asymmetry (tiny label, large value) creates hierarchy without structural chrome.
 
 Practice history is pure reflection. Show only `Sessions`, `Total time`, `Days practiced`, and `Recent sessions`. Do not show weekly counts, streaks, milestones, badges, future targets, unearned markers, or any progress frame that nudges the user to maintain a pattern.
 
@@ -302,7 +302,7 @@ If the roadmap's admin/support panel is built, it should feel like a quiet opera
 - **Don't** use glassmorphism: no `backdrop-filter: blur()` on UI chrome. The canvas has depth; the UI does not.
 - **Don't** use gradient text (`background-clip: text`). Phase colors on the orb are earned; gradient text on labels is decoration.
 - **Don't** use a colored overlay for dialog/guard backdrops. The exit guard background is a tinted forest-night scrim, not emerald, a phase color, or pure black.
-- **Don't** add a second accent color. Emerald and amber are the full palette. Phase colors belong to the canvas only.
+- **Don't** add a second accent color. Emerald and amber are the full palette. Phase colors outside the canvas are limited to tiny semantic markers in rhythm, Circle Size, Sound, and Practice History.
 - **Don't** use `italic` anywhere in the interface. There is no italic role in this system. Emphasis is conveyed via opacity, not decoration.
 - **Don't** design like Headspace or Calm — no onboarding carousels, no premium gate framing, no illustrated brand characters, no teacher voices.
 - **Don't** design like a fitness app — no streak counters as pressure, no achievement popups, no guilt mechanics.

@@ -1,6 +1,6 @@
 # Exhale User Feedback
 
-Last updated: June 21, 2026 (latest design-distinctiveness signal)
+Last updated: June 22, 2026 (Soft default and Warm default prompt alignment)
 
 ## Purpose
 
@@ -59,9 +59,11 @@ Use `https://exhale.guide` for the current beta round. Use a Vercel preview only
 4. Flow becomes a true 4-6 no-hold loop.
 5. User-facing `Relax` / `Pause` and the internal `rest` phase are removed from all current presets.
 
+2026-06-22 owner update: default is now visible Soft (`gentle`) at 4-4, Box (`standard`) is 4-4-4-4, Flow remains 4-6, and Relax remains 4-7-8 on the legacy `box` storage id. Box's fourth beat is a true Hold after Exhale, not a rest/relax phase.
+
 ## Current QA Notes
 
-- First-run defaults should remain 3 minutes / Medium circle / Steady pace / Air background sound.
+- First-run defaults should remain 3 minutes / Medium circle / Soft pace / Warm background sound.
 - If Firefox on Windows 11 appears to enter a session with sound off, verify whether Session Setup actually selected `Off` or whether Web Audio simply has not started yet. The former is a settings persistence bug; the latter is expected browser autoplay behavior if it resolves after a tap.
 - When a tester reports "Brave" or "Chrome" from a Facebook-shared link, verify whether they are actually in Facebook's in-app preview browser. Facebook preview can render Exhale correctly while still blocking or degrading browser features such as fullscreen.
 - Facebook and Messenger in-app browsers are limited-capability containers. If sound, fullscreen, or browser controls feel broken there, ask the tester to retry in Chrome, Brave, Safari, or their normal default browser before classifying the issue as a browser-specific app bug.
@@ -85,6 +87,32 @@ Send a short, open prompt so feedback stays practical:
 3. If you have time, open Session Setup and Practice History.
 4. Send back what worked, what felt off, and anything you would change first.
 
+## Appearance And UI Feedback Prompt
+
+Use this when collecting visual, interface, and distinctiveness feedback. Start with one open prompt, then use the follow-ups only if the tester is willing to say more. Do not lead with "generic" unless the tester uses that word first.
+
+```text
+Could you try Exhale once and focus on how it looks and feels, not just whether it works?
+
+I am especially curious about:
+- What three words would you use to describe the app before pressing Begin?
+- Does it feel calm, trustworthy, polished, generic, too dark, too plain, or too busy?
+- Is anything hard to read, hard to notice, or visually distracting on your device?
+- During the breathing session, do the circle, phase text, colors, and motion feel easy to follow?
+- Which screen feels most like Exhale? Which screen feels least specific or least memorable?
+- What one visual detail would you keep exactly as-is?
+- What one visual detail would you change first?
+
+If it reminds you of another app, website, or design style, tell me what it reminds you of.
+```
+
+### Appearance Follow-Up Notes
+
+- Ask target-audience testers whether the restraint helps them start breathing or makes the app feel forgettable.
+- Ask design-aware reviewers which specific element feels derivative: layout, type, color, motion, orb/circle treatment, copy, or the overall composition.
+- Separate "generic but usable" from "generic and low-trust." The first may be acceptable for Stage 0; the second is a brand problem.
+- Do not treat a request for more personality as permission to add onboarding, decorative wellness imagery, noisy gradients, or mascot-like elements.
+
 ## Next Tester Prompt
 
 Use this for the next clean beta pass after the Box rhythm replacement, Pixel/Facebook Large circle clamp, HUD readability hardening, Meta-browser hint cleanup, and search crawler cleanup.
@@ -95,7 +123,7 @@ Current validation priorities:
 - HUD readability: can testers read the phase label and instruction on the active circle, especially on phones?
 - Transition feel: do phase changes feel smooth, or rushed/jumpy/confusing?
 - Meta in-app browser behavior: do Facebook or Messenger still affect circle fit, sound, fullscreen, or browser controls?
-- Rhythm fit: do 4-7-8 or Flow answer Pause/ratio friction better than default Steady?
+- Rhythm fit: does default Soft feel accessible and calming, does Box feel clear as the structured option, does Flow help no-hold users, and does Relax's 4-7-8 feel calming or too demanding?
 
 ```text
 Could you try the default 3-minute session first, without opening any settings?
@@ -105,7 +133,7 @@ I am especially curious about five things:
 - Is the phase text easy to read on your device during Inhale, Hold, and Exhale?
 - Do the phase changes feel smooth, or does any moment feel rushed, jumpy, or confusing?
 - If you opened this from Facebook or Messenger, does the circle fit fully on screen, and do sound or fullscreen work differently after opening the same link in your normal browser?
-- If you have another few minutes, try 4-7-8 and Flow. Which feels clearer or calmer: 4-7-8's longer hold and release, Flow's fewer interruptions, or the default Steady rhythm?
+- If you have another few minutes, try Box, Flow, and Relax. Which feels clearer or calmer: the default Soft rhythm, Box's structured square pattern, Flow's longer exhale, or Relax's 4-7-8?
 
 After that, tell me what worked, what felt off, and the one thing you would change first.
 ```
@@ -220,7 +248,7 @@ Priority questions:
 
 - Would a tiny first-session preview like `Inhale -> Hold -> Exhale -> Relax` have helped, or would it make the app feel too instructional?
 - If Relax had briefly said "Breathe naturally" the first time only, would that have answered your question without adding too much text?
-- Was the audio too quiet because of device volume, browser behavior, or because the default Air sound itself felt too thin?
+- Was the audio too quiet because of device volume, browser behavior, or because the default Warm sound itself felt too thin?
 
 Decision guardrail: if this tester and T-2026-05-22-13 both prefer a preview/first-cycle clarification, sketch that before changing rhythm durations.
 
@@ -772,7 +800,7 @@ Use these when a tester is willing to do functionality testing after at least on
 #### Open Questions
 
 1. Would a first-session-only sequence cue feel helpful, or would it make the app feel more instructional?
-2. Was the audio too quiet because of device/browser volume, default Air texture, or the selected sound setting?
+2. Was the audio too quiet because of device/browser volume, default Warm texture, or the selected sound setting?
 
 ### 2026-05-21, T-2026-05-21-11, First-Time User, Voice Guidance Request
 

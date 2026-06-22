@@ -15,6 +15,7 @@ out/
 # local agent settings
 .claude/settings.local.json
 .codex-remote-attachments/
+docs/agent_factory_start_guide.pdf
 
 # misc
 .DS_Store

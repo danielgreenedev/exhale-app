@@ -1,14 +1,15 @@
 # Exhale To-Do List
 
-Last updated: June 21, 2026 (post-exhale pause retired)
+Last updated: June 22, 2026 (Soft default, Warm default, and phase-color setting accents)
 
 ## Completed Rhythm Changes
 
-- Accepted 2026-06-21 clinical-family rhythm feedback plus broad Relax/Pause dislike: every preset now keeps guided exhale longer than guided inhale; Box's legacy storage id now presents Relax with 4-7-8 timing; Flow is a true no-hold/no-pause 4-6 loop; all internal and visible post-exhale Relax/Pause mechanics are removed.
+- Accepted 2026-06-21 clinical-family rhythm feedback plus broad Relax/Pause dislike: visible post-exhale Relax/Pause mechanics are removed; Relax is now only the selectable 4-7-8 rhythm using the legacy `box` storage id.
+- Accepted 2026-06-22 owner rhythm direction: picker order is Soft, Box, Flow, Relax; default Soft (`gentle`) is 4-4; Box (`standard`) is 4-4-4-4; Flow remains 4-6; Relax (`box`) remains 4-7-8.
 - Settling In now lasts 8 seconds before the first guided inhale.
-- The default Steady rhythm is now 4-2-6 (cycle 12s), with no post-exhale phase. It replaced the earlier 4-4-6-4 Relax shape and the brief 4-2-6-2 Pause compromise on 2026-06-21 after rhythm-ratio feedback and 90% user dislike reinforced existing Relax ambiguity.
+- The default visible rhythm is now Soft 4-4 (cycle 8s), with Box 4-4-4-4 available as the structured square-breathing option. Box's second Hold after Exhale is a true `hold` phase held at the exhaled-small orb scale, not a rest/relax phase.
 - Session breath counts were recalibrated so the 3, 5, 7, and 10 minute labels stay accurate.
-- Top-level session length buttons now show only time labels; rhythm-specific timing details live inside each Pace option in Session Setup instead of the first decision surface.
+- Top-level session length buttons now show only time labels; rhythm-specific timing details live inside each Breathing Sequence option in Session Setup instead of the first decision surface.
 
 ## Completed UI Polish
 
@@ -16,13 +17,15 @@ Last updated: June 21, 2026 (post-exhale pause retired)
 - Off is separated from sound textures and uses a mute icon.
 - Time, Circle Size, and Sound selected states share one quieter visual language.
 - View Sequence and Settings were merged into one Session Setup drawer.
-- Session Setup was split into three tabs to reduce density: Sequence, Visual, and Audio.
+- Session Setup was split into three tabs to reduce density: Pattern, Visual, and Audio.
 - Begin remains the only solid green primary action.
 - Still is now audibly present.
 - Circle Size and Sound live inside Session Setup from the start; the 3-session hiding rule was removed.
 - Audio now shows an explicit Off option instead of an icon-only mute control.
-- Pace options now show proportional phase bars and seconds directly, so the old `Show pattern` disclosure is removed.
+- Breathing Sequence options now show proportional phase bars and seconds directly, so the old `Show pattern` disclosure is removed.
+- Audio texture choices now show Warm before Air, and Warm is the default background sound.
 - When available, Resume now appears directly below Begin and before Session Setup.
+- Visual, Audio, and Practice History now use tiny phase-color markers from the orb palette so settings/history feel connected to the breathing object without adding a second accent system.
 
 ## Completed Beta Feedback Polish
 
@@ -55,7 +58,7 @@ Driven by T-2026-06-08-20: an older low-vision phone tester could not read any i
 - Settling In now uses the same strong phase-label treatment, positioning, and shadowed instruction style as the active session labels so the intro state feels consistent and legible.
 - Center-orb timing hierarchy was reinforced: the orb rim is slightly stronger, while the outer guide/progress line and incoming soft cue are lower contrast and less neon so users are less likely to chase the pre-cue.
 - First-pass sound trust was hardened: Web Audio no longer reports active if the context remains suspended, and iPhone-class browsers get a timely silent-mode hint after Settling In when sound is active.
-- Remaining validation: test sound perception on a real iPhone in normal mode and silent mode, across Safari and the browser used by the tester if possible. Include app-switching away from Safari and back, because tester feedback suggests that may affect perceived sound. Add Facebook's in-app browser on iPhone 14 and Google Pixel/Android to this matrix after T-2026-05-21-10 reported no audio when opening Exhale from a Facebook post inside the Facebook iOS app, and the project owner saw similar Facebook in-app browser behavior on Pixel. Also validate latest Firefox on Windows 11 after a fresh build/profile: Session Setup should default to Air, while the in-session sound icon may still appear inactive until Web Audio starts from a user gesture.
+- Remaining validation: test sound perception on a real iPhone in normal mode and silent mode, across Safari and the browser used by the tester if possible. Include app-switching away from Safari and back, because tester feedback suggests that may affect perceived sound. Add Facebook's in-app browser on iPhone 14 and Google Pixel/Android to this matrix after T-2026-05-21-10 reported no audio when opening Exhale from a Facebook post inside the Facebook iOS app, and the project owner saw similar Facebook in-app browser behavior on Pixel. Also validate latest Firefox on Windows 11 after a fresh build/profile: Session Setup should default to Warm, while the in-session sound icon may still appear inactive until Web Audio starts from a user gesture.
 - Open question added: whether Full needs clearer state-specific framing after a resting-heart-rate tester found the 10-second exhale difficult but potentially useful during panic/stress.
 
 ## Completed Pre-Commit Impeccable Audit Follow-Up
@@ -221,9 +224,9 @@ Driven by project owner refinement on the sign-in footer link.
 
 Alternate rhythm options shipped end to end:
 
-- `RHYTHMS` registry in `src/lib/breathing.ts` with four visible paces: Steady 4-2-6 (internal id `standard`, default), Soft 3-1-5 (internal id `gentle`), Relax 4-7-8 (internal id `box` for compatibility), and Flow 4-6. Per-rhythm session-cycle recalibration keeps the 3/5/7/10 minute labels honest.
+- `RHYTHMS` registry in `src/lib/breathing.ts` with four visible paces: Soft 4-4 (internal id `gentle`, default), Box 4-4-4-4 (internal id `standard`), Flow 4-6, and Relax 4-7-8 (internal id `box` for compatibility). Per-rhythm session-cycle recalibration keeps the 3/5/7/10 minute labels honest.
 - Rhythm threaded through `useBreathingSession`, `BreathingOrb`, `GameHUD`, `useAudioEngine`, and `game/page.tsx` via a locked-at-first-render `rhythmRef` pattern.
-- Session Setup rhythm picker now uses pattern cards for Steady / Soft / Relax / Flow, with proportional phase bars and seconds visible inside each selectable option.
+- Session Setup rhythm picker now uses pattern cards for Soft / Box / Flow / Relax, with proportional phase bars and seconds visible inside each selectable option.
 - localStorage key `exhale-rhythm` plus Supabase `user_settings.rhythm` column (migration 002), with isRhythmId guard on parse.
 - Back-compat aliases (`BREATHING_PATTERN`, `CYCLE_DURATION`, `SESSION_CYCLES`) removed; all consumers read rhythm-aware data.
 - 11 new tests cover the registry shape, cycle recalibration accuracy, getPhaseAtTime boundary behavior with non-default rhythms, and the rhythm-lock invariant.
@@ -319,17 +322,17 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 - Guardrails: no profile screen, avatars, passwords, account settings, premium gate, or auth-first onboarding as part of this task.
 - Acceptance completed: the same Supabase user shows Email and Google providers enabled, and a fresh Firefox production session restored practice history through Google sign-in. Keep email-code sync available unless follow-up testing shows it is redundant.
 
-2. Pending follow-up with rhythm-concern testers: ask whether Relax's 4-7-8 timing feels calming or too demanding, and whether Flow's no-hold/no-pause loop feels smoother than Steady. Use the refreshed Flow and 4-7-8 follow-up questions in `docs/USER_FEEDBACK.md`. Capture answers in `docs/USER_FEEDBACK.md`.
+2. Pending follow-up with rhythm-concern testers: ask whether default Soft feels accessible and calming, whether Box feels clear as the structured option, whether Relax's 4-7-8 timing feels calming or too demanding, and whether Flow's no-hold/no-pause loop feels smoother for users who dislike holds. Use the refreshed rhythm follow-up questions in `docs/USER_FEEDBACK.md`. Capture answers in `docs/USER_FEEDBACK.md`.
 
 2a. Superseded 2026-06-21: `Relax` / `Breathe`, `Relax` / `Breathe naturally`, and the brief `Pause` compromise did not resolve the semantics issue. The `rest` phase enum and post-exhale phase object were removed entirely.
 
 2b. Resolved 2026-05-19: the `Next [phase]` HUD text cue was removed because it competed with the central phase label and countdown. Audio pre-cue and ring-color lead remain.
 
-3. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check. Use the refreshed Brand-New User, Session Setup, Flow, Transition Cue Diagnostic, Practice History And Sync, and Targeted Follow-Up Queue question sets in `docs/USER_FEEDBACK.md`. First latest-build signal from T-2026-05-19-08 on default Quick / Steady is positive: no gasp/catch-up/strain, default Relax did not interrupt, and the session felt useful. New first-time signal from T-2026-05-21-10 says phase uncertainty caused stress and prevented completion; when asked whether they could tell what phase was coming next without extra text, they answered no, not at all. New clinical-observer signal from T-2026-05-22-13 says Settling In felt too short, Relax read like a possible breathing pause, and a progressive build-up might help. Ask targeted follow-ups before changing durations or rhythm math.
+3. Pending feedback/data collection: run one more first-use clarity and rhythm comfort check. Use the refreshed Brand-New User, Session Setup, Flow, Transition Cue Diagnostic, Practice History And Sync, and Targeted Follow-Up Queue question sets in `docs/USER_FEEDBACK.md`. Prior latest-build signal from T-2026-05-19-08 on the old default Quick / Steady path was positive: no gasp/catch-up/strain, default Relax did not interrupt, and the session felt useful. New first-time signal from T-2026-05-21-10 says phase uncertainty caused stress and prevented completion; when asked whether they could tell what phase was coming next without extra text, they answered no, not at all. New clinical-observer signal from T-2026-05-22-13 says Settling In felt too short, Relax read like a possible breathing pause, and a progressive build-up might help. Ask targeted follow-ups before changing durations or rhythm math again.
 
 3a. Pending targeted follow-up with T-2026-05-22-13: clarify whether "at least 5 breaths" means a literal multi-breath settle or simply a longer arrival buffer; whether the 8-second Relax felt like a held pause versus permission to breathe naturally; whether clearer Relax framing would reduce the ramp request; and whether "build up" means a short ease-in over the first few cycles or escalation across the whole session. Do not implement longer Settling In, a progressive rhythm, or a post-exhale Relax phase rename until these answers are captured.
 
-4. Pending feedback/data collection: validate whether the new anticipatory transition cues help users keep up with phase shifts. Ask: "Did the color lead or soft pre-cue make the phase changes easier to follow, or did they add noise?" First latest-build signal from T-2026-05-19-08 is positive on default Quick / Steady: color leads and soft pre-cues were liked and felt natural. Keep testing because the same tester still found Flow's short pause/cue pushy, and T-2026-05-21-10 found phase colors too similar and wanted stronger transition signaling. T-2026-05-23-18 could follow transitions and did not want extra time between phases, so avoid adding global transition seconds unless more evidence appears.
+4. Pending feedback/data collection: validate whether the anticipatory transition cues help users keep up with phase shifts. Ask: "Did the color lead or soft pre-cue make the phase changes easier to follow, or did they add noise?" Prior signal from T-2026-05-19-08 was positive on the old default Quick / Steady path: color leads and soft pre-cues were liked and felt natural. Keep testing on the current Soft / Box / Flow / Relax set because T-2026-05-21-10 found phase colors too similar and wanted stronger transition signaling. T-2026-05-23-18 could follow transitions and did not want extra time between phases, so avoid adding global transition seconds unless more evidence appears.
 
 4a. Pending feedback/data collection: validate whether the softened outer guide line now reads as support rather than a timing object to chase. First Full follow-up from T-2026-05-19-08 said the center circle timing was relaxing, but the line could feel like being already behind because it begins before the orb changes. The current implementation lowers guide-line contrast/chroma and strengthens the orb rim; ask the next design-eye tester whether the orb clearly feels primary.
 
@@ -343,7 +346,7 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 
 5. Pending feedback/data collection: recruit a small open beta group (roughly 10 to 20 testers from the target audience) and capture feedback in `docs/USER_FEEDBACK.md`.
 
-6. Pending feedback/data collection: after a meaningful sample of synced sessions, review Supabase `app_events` by pace. `session_started`, `session_complete`, and `session_exited` payloads include `rhythm`, so reads can compare completion rate, return rate, and drop-off phase across Steady / Soft / Box / Flow alongside tester notes.
+6. Pending feedback/data collection: after a meaningful sample of synced sessions, review Supabase `app_events` by pace. `session_started`, `session_complete`, and `session_exited` payloads include `rhythm`, so reads can compare completion rate, return rate, and drop-off phase across Soft / Box / Flow / Relax alongside tester notes.
 
 ### Stage 1, ship-quality polish
 

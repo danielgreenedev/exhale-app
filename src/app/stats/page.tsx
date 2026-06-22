@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { readStats, computeStats, storageAvailable, writeStats } from '@/hooks/useSessionStats';
 import type { SessionRecord } from '@/hooks/useSessionStats';
-import { SURFACE_GLOWS } from '@/lib/colors';
+import { PHASE_COLORS, SURFACE_GLOWS } from '@/lib/colors';
 import { mergeSyncedSessions, missingLocalSessions } from '@/lib/sessionSync';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
@@ -24,6 +24,11 @@ function formatDate(dateStr: string): string {
 type SyncState = 'idle' | 'codeSent' | 'verifying' | 'synced';
 type SubmitMode = 'signin' | 'link';
 const SIGN_IN_COPY = 'Sign in to track your history across all devices.';
+const PRACTICE_ACCENTS = [
+  PHASE_COLORS.inhale.color,
+  PHASE_COLORS.hold.color,
+  PHASE_COLORS.exhale.color,
+] as const;
 
 export function expectedCodeLength(submitMode: SubmitMode | null): number {
   return submitMode === 'link' ? 8 : 6;
@@ -293,6 +298,11 @@ export default function StatsPage() {
   const hours = Math.floor(totalMinutes / 60);
   const mins = totalMinutes % 60;
   const timeLabel = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+  const statRows = [
+    { label: 'Sessions', value: String(totalSessions), color: PHASE_COLORS.inhale.color },
+    { label: 'Total time', value: timeLabel, color: PHASE_COLORS.hold.color },
+    { label: 'Days practiced', value: String(totalDays), color: PHASE_COLORS.exhale.color },
+  ];
 
   return (
     <main className="min-h-screen bg-forest-night flex flex-col items-center px-4 py-10 sm:px-6 sm:py-14 text-still-white">
@@ -333,17 +343,18 @@ export default function StatsPage() {
         ) : (
           <>
             <div className="flex flex-col gap-0 w-full">
-              {[
-                { label: 'Sessions', value: String(totalSessions) },
-                { label: 'Total time', value: timeLabel },
-                { label: 'Days practiced', value: String(totalDays) },
-              ].map(({ label, value }) => (
+              {statRows.map(({ label, value, color }) => (
                 <div
                   key={label}
                   className="flex justify-between items-baseline py-5 border-b border-still-white/10"
                 >
-                  <span className="text-xs tracking-[0.15em] uppercase font-light text-still-white/58">
-                    {label}
+                  <span className="flex items-center gap-2 text-xs tracking-[0.15em] uppercase font-light text-still-white/58">
+                    <span
+                      aria-hidden="true"
+                      className="h-1.5 w-1.5 rounded-full"
+                      style={{ backgroundColor: color, opacity: 0.72 }}
+                    />
+                    <span>{label}</span>
                   </span>
                   <span className="text-2xl font-extralight text-still-white/86">{value}</span>
                 </div>
@@ -351,8 +362,17 @@ export default function StatsPage() {
             </div>
 
             <div className="flex flex-col gap-0 w-full">
-              <p className="text-still-white/52 text-xs tracking-[0.15em] uppercase font-light mb-4">
-                Recent sessions
+              <p className="flex items-center gap-2 text-still-white/52 text-xs tracking-[0.15em] uppercase font-light mb-4">
+                <span className="flex items-center gap-1" aria-hidden="true">
+                  {PRACTICE_ACCENTS.map((color) => (
+                    <span
+                      key={color}
+                      className="h-1 w-1 rounded-full"
+                      style={{ backgroundColor: color, opacity: 0.66 }}
+                    />
+                  ))}
+                </span>
+                <span>Recent sessions</span>
               </p>
               {sessions
                 .slice(-5)
@@ -362,7 +382,17 @@ export default function StatsPage() {
                     key={i}
                     className="flex justify-between items-center py-3 border-b border-still-white/10"
                   >
-                    <span className="text-still-white/62 text-sm font-light">{formatDate(s.date)}</span>
+                    <span className="flex items-center gap-2 text-still-white/62 text-sm font-light">
+                      <span
+                        aria-hidden="true"
+                        className="h-1.5 w-1.5 rounded-full"
+                        style={{
+                          backgroundColor: PRACTICE_ACCENTS[i % PRACTICE_ACCENTS.length],
+                          opacity: 0.58,
+                        }}
+                      />
+                      <span>{formatDate(s.date)}</span>
+                    </span>
                     <span className="text-still-white/52 text-xs tracking-widest">
                       {Math.round(s.duration / 60)}m · {s.cycles} breaths
                     </span>

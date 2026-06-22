@@ -44,10 +44,16 @@ describe('useBreathingSession - initial state', () => {
   });
 
   it('exposes the correct totalCycles for each session length', () => {
-    expect(renderHook(() => useBreathingSession('quick')).result.current.totalCycles).toBe(15);
-    expect(renderHook(() => useBreathingSession('short')).result.current.totalCycles).toBe(25);
-    expect(renderHook(() => useBreathingSession('medium')).result.current.totalCycles).toBe(35);
-    expect(renderHook(() => useBreathingSession('long')).result.current.totalCycles).toBe(50);
+    expect(renderHook(() => useBreathingSession('quick')).result.current.totalCycles).toBe(23);
+    expect(renderHook(() => useBreathingSession('short')).result.current.totalCycles).toBe(38);
+    expect(renderHook(() => useBreathingSession('medium')).result.current.totalCycles).toBe(53);
+    expect(renderHook(() => useBreathingSession('long')).result.current.totalCycles).toBe(75);
+  });
+
+  it('uses Soft as the default rhythm', () => {
+    const { result } = renderHook(() => useBreathingSession('short'));
+    expect(result.current.rhythm.id).toBe('gentle');
+    expect(result.current.cycleDuration).toBe(8);
   });
 
   it('starts at cycle 1', () => {
@@ -112,31 +118,17 @@ describe('useBreathingSession - phase progression', () => {
     expect(result.current.currentPhase.phase).toBe('inhale');
   });
 
-  it('is in hold phase during t=4-6s', () => {
+  it('is in exhale phase during t=4-8s', () => {
     const { result } = renderHook(() => useBreathingSession('short'));
     act(() => { result.current.start(); });
     advance(5000);
-    expect(result.current.currentPhase.phase).toBe('hold');
-  });
-
-  it('is in exhale phase during t=6-12s', () => {
-    const { result } = renderHook(() => useBreathingSession('short'));
-    act(() => { result.current.start(); });
-    advance(10000);
     expect(result.current.currentPhase.phase).toBe('exhale');
   });
 
-  it('stays in exhale at the end of the cycle because there is no post-exhale phase', () => {
+  it('wraps back to inhale at the start of the second cycle around t=8s', () => {
     const { result } = renderHook(() => useBreathingSession('short'));
     act(() => { result.current.start(); });
-    advance(11900);
-    expect(result.current.currentPhase.phase).toBe('exhale');
-  });
-
-  it('wraps back to inhale at the start of the second cycle around t=12s', () => {
-    const { result } = renderHook(() => useBreathingSession('short'));
-    act(() => { result.current.start(); });
-    advance(12500);
+    advance(8500);
     expect(result.current.currentPhase.phase).toBe('inhale');
     expect(result.current.cycleNumber).toBe(2);
   });
@@ -154,7 +146,7 @@ describe('useBreathingSession - phase progression', () => {
     act(() => { result.current.start(); });
     advance(3500);
     expect(result.current.currentPhase.phase).toBe('inhale');
-    expect(result.current.nextPhase.phase).toBe('hold');
+    expect(result.current.nextPhase.phase).toBe('exhale');
     expect(result.current.phaseLeadProgress).toBeGreaterThan(0);
   });
 
@@ -169,23 +161,23 @@ describe('useBreathingSession - phase progression', () => {
 
 describe('useBreathingSession - session completion', () => {
   it('completes after all cycles elapse', () => {
-    const { result } = renderHook(() => useBreathingSession('quick')); // 15 x 12s = 180s
+    const { result } = renderHook(() => useBreathingSession('quick')); // 23 x 8s = 184s
     act(() => { result.current.start(); });
-    for (let t = 0; t <= 181_000; t += 1000) advance(1000);
+    for (let t = 0; t <= 185_000; t += 1000) advance(1000);
     expect(result.current.sessionState).toBe('complete');
   });
 
   it('sessionProgress reaches 1 on completion', () => {
     const { result } = renderHook(() => useBreathingSession('quick'));
     act(() => { result.current.start(); });
-    for (let t = 0; t <= 181_000; t += 1000) advance(1000);
+    for (let t = 0; t <= 185_000; t += 1000) advance(1000);
     expect(result.current.sessionProgress).toBeCloseTo(1, 2);
   });
 });
 
 describe('useBreathingSession - resume from initialElapsed', () => {
   it('starts mid-session when initialElapsed is provided', () => {
-    const { result } = renderHook(() => useBreathingSession('short', 9));
+    const { result } = renderHook(() => useBreathingSession('short', 5));
     expect(result.current.currentPhase.phase).toBe('exhale');
   });
 
@@ -198,9 +190,9 @@ describe('useBreathingSession - resume from initialElapsed', () => {
 describe('useBreathingSession - alternate rhythm', () => {
   it('uses the gentle rhythm cycle duration and cycle count', () => {
     const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.gentle));
-    expect(result.current.cycleDuration).toBe(9);
-    expect(result.current.totalCycles).toBe(33);
-    expect(result.current.sessionDuration).toBe(9 * 33);
+    expect(result.current.cycleDuration).toBe(8);
+    expect(result.current.totalCycles).toBe(38);
+    expect(result.current.sessionDuration).toBe(8 * 38);
     expect(result.current.rhythm.id).toBe('gentle');
   });
 
@@ -212,20 +204,17 @@ describe('useBreathingSession - alternate rhythm', () => {
   });
 
   it('respects gentle rhythm phase boundaries during a running session', () => {
-    // Soft (internal id: gentle) is a 3-1-5 cycle with no post-exhale phase.
+    // Soft (internal id: gentle) is a 4-4 cycle with no hold.
     const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.gentle));
     act(() => { result.current.start(); });
 
-    advance(1000); // t=1s, inhale window 0-3
+    advance(1000); // t=1s, inhale window 0-4
     expect(result.current.currentPhase.phase).toBe('inhale');
 
-    advance(2500); // t=3.5s, hold window 3-4
-    expect(result.current.currentPhase.phase).toBe('hold');
-
-    advance(1000); // t=4.5s, exhale window 4-9
+    advance(3500); // t=4.5s, exhale window 4-8
     expect(result.current.currentPhase.phase).toBe('exhale');
 
-    advance(5000); // t=9.5s, wraps into cycle 2 inhale
+    advance(4000); // t=8.5s, wraps into cycle 2 inhale
     expect(result.current.currentPhase.phase).toBe('inhale');
     expect(result.current.cycleNumber).toBe(2);
   });
@@ -238,7 +227,7 @@ describe('useBreathingSession - alternate rhythm', () => {
     expect(result.current.rhythm.id).toBe('gentle');
     rerender({ r: RHYTHMS.box });
     expect(result.current.rhythm.id).toBe('gentle');
-    expect(result.current.cycleDuration).toBe(9);
+    expect(result.current.cycleDuration).toBe(8);
   });
 });
 
@@ -248,40 +237,37 @@ describe('useBreathingSession - proportional anticipation cue cap', () => {
   // bucket sees stale state. Each test below uses a fresh renderHook + single advance, and
   // picks sample points that cross a quarter boundary so the updateKey actually changes.
 
-  // Steady (internal id: standard) Inhale is 4s; cap doesn't engage (4 * 0.25 = 1s > 0.8s ceiling).
+  // Box (internal id: standard) Inhale is 4s; cap doesn't engage (4 * 0.25 = 1s > 0.8s ceiling).
   // Lead window stays at the full 0.8s, activating at t=3.2s.
-  it('Steady Inhale lead is inactive at t=2.5s (0.7s before the 0.8s window opens)', () => {
-    const { result } = renderHook(() => useBreathingSession('short'));
+  it('Box Inhale lead is inactive at t=2.5s (0.7s before the 0.8s window opens)', () => {
+    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.standard));
     act(() => { result.current.start(); });
     advance(2500);
     expect(result.current.currentPhase.phase).toBe('inhale');
     expect(result.current.phaseLeadProgress).toBe(0);
   });
 
-  it('Steady Inhale lead is active at t=3.5s (0.3s into the 0.8s window)', () => {
-    const { result } = renderHook(() => useBreathingSession('short'));
+  it('Box Inhale lead is active at t=3.5s (0.3s into the 0.8s window)', () => {
+    const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.standard));
     act(() => { result.current.start(); });
     advance(3500);
     expect(result.current.currentPhase.phase).toBe('inhale');
     expect(result.current.phaseLeadProgress).toBeGreaterThan(0);
   });
 
-  // Soft Hold is 1s; cap engages at 25% = 0.25s. Hold runs t=3..4.
-  // Under the old 0.8s constant, t=3.6s (0.4s before end) would have leadProgress > 0;
-  // under the cap, the lead window only opens at t=3.75s.
-  it('Soft Hold lead is inactive at t=3.6s (0.4s before end, outside the 0.25s cap)', () => {
+  it('Soft Exhale lead is inactive at t=7.0s (1.0s before end, outside the 0.8s window)', () => {
     const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.gentle));
     act(() => { result.current.start(); });
-    advance(3600);
-    expect(result.current.currentPhase.phase).toBe('hold');
+    advance(7000);
+    expect(result.current.currentPhase.phase).toBe('exhale');
     expect(result.current.phaseLeadProgress).toBe(0);
   });
 
-  it('Soft Hold lead is active at t=3.85s (0.15s before end, inside the 0.25s cap)', () => {
+  it('Soft Exhale lead is active at t=7.5s (0.5s before end, inside the 0.8s window)', () => {
     const { result } = renderHook(() => useBreathingSession('short', 0, RHYTHMS.gentle));
     act(() => { result.current.start(); });
-    advance(3850);
-    expect(result.current.currentPhase.phase).toBe('hold');
+    advance(7500);
+    expect(result.current.currentPhase.phase).toBe('exhale');
     expect(result.current.phaseLeadProgress).toBeGreaterThan(0);
   });
 

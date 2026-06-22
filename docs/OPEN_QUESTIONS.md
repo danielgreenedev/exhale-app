@@ -318,7 +318,7 @@ Possible directions:
 - Allow per-phase duration overrides inside Session Setup (closer to free customization; reintroduces decision friction).
 - If future evidence argues for reintroducing a post-exhale hold, validate it explicitly against anxious or breath-capacity-constrained users first. Current decision is zero visible post-exhale time.
 
-Current answer: **Answered as of 2026-06-21.** Rest/Relax/Pause is no longer part of the current phase model. Steady is 4-2-6, Soft is 3-1-5, 4-7-8 remains optional for users who want a classic structured hold, and Flow is 4-6 for users who dislike holds entirely. Free per-phase customization remains deferred because curated presets cover the current signal without asking first-time users to tune four axes before breathing.
+Current answer: **Answered, updated 2026-06-22.** Rest/Relax/Pause is no longer part of the current phase model. The visible pace set is Soft 4-4 as the default, Box 4-4-4-4 as the structured option, Flow 4-6, and Relax 4-7-8 using the legacy `box` storage id. Box's fourth beat is a true Hold after Exhale, not a natural-breathing rest/relax phase. Free per-phase customization remains deferred because curated presets cover the current signal without asking first-time users to tune four axes before breathing.
 
 ### Should Exhale support progressive/ramping rhythms?
 
@@ -415,12 +415,12 @@ Do you care about the exact seconds, or only that the session matched the time y
 
 Context: T-2026-05-19-08 tried Quick / Full / Small / Warm while at resting heart rate and found the 10-second Exhale difficult, but also said Full could be useful when someone needs focused help slowing breath from panic. Later Relax feedback from multiple testers, plus the app designer's own reaction on 2026-06-04, showed that the post-exhale Relax phase was still cognitively confusing. Full was replaced by Box (`box`, 4-4-4-4) so the fourth beat is an expected Hold after Exhale.
 
-Current answer: Full and equal Box are retired. As of 2026-06-21, the legacy `box` storage id presents 4-7-8, and the default path removes the post-exhale phase entirely. Validate whether 4-7-8 feels calming or too demanding, and whether Flow's no-hold/no-pause loop is a better alternate for users who dislike holds.
+Current answer: Full and the old equal-Box `box` storage slot are retired. As of 2026-06-22, visible Relax uses the legacy `box` storage id for 4-7-8, while visible Box is the structured `standard` rhythm at 4-4-4-4. Default Soft (`gentle`) is 4-4. Validate whether Soft feels accessible and calming as the first-run default, whether Box feels clear as the structured option, whether Relax's 4-7-8 timing feels calming or too demanding, and whether Flow's no-hold/no-pause loop is a better alternate for users who dislike holds.
 
 Follow-up:
 
 ```text
-Does 4-7-8 feel clearer than Full/Relax/Box, or does the 7-second hold feel too demanding?
+Does default Soft feel accessible and calming? Does Box feel clear as the structured option? Does Relax's 4-7-8 feel clearer than the retired Full/Relax shapes, or does the 7-second hold feel too demanding?
 ```
 
 #### Flow rhythm design sketch (2026-05-19)
@@ -723,13 +723,13 @@ Follow-up: Promoted Priority added to `docs/ROADMAP.md` and `docs/TODO.md` to de
 
 ### Should Exhale offer customizable breath rhythms?
 
-Answer: Curated presets, not free customization. Four rhythms are now available inside Session Setup as visible pace choices: Steady (internal id `standard`, 4-2-6 as of 2026-06-21), Soft (internal id `gentle`, 3-1-5), 4-7-8 (`box`, using the legacy storage id), and Flow (`flow`, 4-6). Each persists through `exhale-rhythm` localStorage and `user_settings.rhythm` cloud column; legacy `full` and `slow` values normalize to `box`. Free per-phase customization is intentionally not exposed; the presets handle the rhythm-fit complaints captured so far without forcing the skeptical primary user to make a multi-axis decision before pressing Begin.
+Answer: Curated presets, not free customization. Four rhythms are now available inside Session Setup as visible pace choices: Soft (`gentle`, 4-4, default), Box (`standard`, 4-4-4-4), Flow (`flow`, 4-6), and Relax (`box`, 4-7-8 using the legacy storage id). Each persists through `exhale-rhythm` localStorage and `user_settings.rhythm` cloud column; legacy `full` and `slow` values normalize to `box`. Free per-phase customization is intentionally not exposed; the presets handle the rhythm-fit complaints captured so far without forcing the skeptical primary user to make a multi-axis decision before pressing Begin.
 
 Date answered: 2026-05-19
 
 Evidence: Promoted Priority work shipped end to end (`docs/ROADMAP.md`, `docs/TODO.md` Completed Promoted Priority section). Original rhythm-fit signals from `docs/USER_FEEDBACK.md` entries T-2026-05-18-01 through T-2026-05-19-05.
 
-Follow-up: Beta-test the no-post-exhale default, 4-7-8, and Flow against the Relax/Pause-confusion testers. If complaints persist beyond what the presets cover, revisit free customization. Otherwise treat free customization as deliberately deferred.
+Follow-up: Beta-test default Soft, Box, Flow, and Relax against the Relax/Pause-confusion and rhythm-fit testers. If complaints persist beyond what the presets cover, revisit free customization. Otherwise treat free customization as deliberately deferred.
 
 ### Template
 
