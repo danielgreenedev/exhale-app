@@ -1,0 +1,4 @@
+interface:
+  display_name: "Exhale Sync Audit"
+  short_description: "Audit Exhale auth and storage drift"
+  default_prompt: "Use $exhale-sync-audit to audit Exhale state, auth, and Supabase sync drift."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Exhale Beta Triage"
+  short_description: "Turn tester notes into Exhale decisions"
+  default_prompt: "Use $exhale-beta-triage to triage the latest tester feedback into decisions and follow-ups."

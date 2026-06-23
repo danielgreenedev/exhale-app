@@ -76,3 +76,22 @@ Future work should treat the factory as an operating process:
 - Keep MCP additions deferred until a repeated gap appears that current Codex desktop tools cannot cover.
 - Keep subagents optional and explicitly requested, not the default path.
 - Preserve the untracked source PDF (`docs/agent_factory_start_guide.pdf`) as local reference material unless the owner explicitly wants it versioned or removed.
+
+## Operational Skill Additions
+
+Status: added after roadmap conclusion
+
+Four focused repo-local skills now extend the operating process without changing the guarded release core:
+
+- `exhale-beta-triage` classifies tester notes into accepted work, parked ideas, rejected directions, already-handled reports, and validation questions.
+- `exhale-accessibility-lab` reviews low-vision, reduced-motion, contrast, keyboard, ARIA, touch, sound, and active-session accessibility risk.
+- `exhale-device-qa` runs repeatable viewport/browser/state checks for first-run, returning-user, active-session, completion, stats, and mobile/webview-sensitive flows.
+- `exhale-sync-audit` reviews localStorage, sessionStorage resume, anonymous auth, Google sign-in, Supabase settings sync, cloud history merge, and localhost bypass drift.
+
+These skills should feed `exhale-ship` rather than replace it. Use them to sharpen evidence and QA before the final release gate.
+
+## Owner Decision Guardrail
+
+Status: active
+
+`exhale-ship` now owns the threshold for when Codex must stop and ask the owner. P0 always blocks release; P1 blocks the current change unless the fix is narrow and preserves documented behavior; P2 only needs owner input for scope, priority, or risk-acceptance decisions; P3 should be parked or reported without interruption. The guardrail also requires owner approval before commits, pushes, deployments, external-service changes, dependency/MCP additions, production database policy/schema changes, or overrides of durable product/design non-goals.

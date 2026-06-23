@@ -104,7 +104,7 @@ function formatRhythmPattern(rhythm: Rhythm): string {
 
 const SOUND_TEXTURE_PALETTES = SOUND_PALETTES.filter((palette) => palette.id !== 'off');
 const SOUND_OFF_PALETTE = SOUND_PALETTES.find((palette) => palette.id === 'off');
-const SELECTED_SETTING_CLASS = 'border-emerald-pulse/60 bg-emerald-pulse/10 text-emerald-100/90 hover:border-emerald-pulse/75 hover:bg-emerald-pulse/15 hover:text-emerald-50';
+const SELECTED_SETTING_CLASS = 'border-emerald-pulse/60 bg-emerald-pulse/10 text-[#b4f4dd]/90 hover:border-emerald-pulse/75 hover:bg-emerald-pulse/15 hover:text-[#b4f4dd]';
 
 interface ResumeData {
   length: SessionLength;
@@ -385,7 +385,7 @@ function HomeContent() {
                     min-h-14 sm:min-h-16 rounded-2xl border transition-all duration-300 flex items-center justify-center text-center cursor-pointer
                     ${active
                       ? SELECTED_SETTING_CLASS
-                      : 'border-still-white/26 text-still-white/80 hover:border-still-white/40 hover:bg-still-white/5 hover:text-still-white/92'}
+                      : 'border-still-white/25 text-still-white/80 hover:border-still-white/40 hover:bg-still-white/5 hover:text-still-white/92'}
                     has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-emerald-200/80
                   `}
                 >

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Exhale Device QA"
+  short_description: "Run repeatable Exhale device checks"
+  default_prompt: "Use $exhale-device-qa to check Exhale across key device and browser states."

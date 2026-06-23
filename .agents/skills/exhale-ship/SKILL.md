@@ -27,7 +27,8 @@ Treat those files as canonical. Do not duplicate long rule text from them unless
 2. Run the code review gate when source, tests, auth, sync, rhythm, audio, or routing changed. Read `references/code-review.md`.
 3. Run the design review gate only when UI, CSS, Tailwind, visible copy, or interaction behavior changed. Read `references/design-review.md`.
 4. Run the docs harmonizer when product behavior, design rules, verification state, open questions, or feedback changed. Read `references/docs-harmonizer.md`.
-5. Run the release gate only after review blockers are resolved or the user asks for release readiness. Read `references/release.md`.
+5. Apply the owner decision guardrail before accepting risk, expanding scope, or choosing among materially different fixes. Read `references/owner-decision.md`.
+6. Run the release gate only after review blockers are resolved or the user asks for release readiness. Read `references/release.md`.
 
 Stop for confirmation before committing, pushing, deploying, adding MCP servers, or changing automation behavior.
 
@@ -39,6 +40,19 @@ Stop for confirmation before committing, pushing, deploying, adding MCP servers,
 - P3: Optional polish.
 
 Lead review outputs with findings. If no blocking issues exist, say so plainly and list remaining verification gaps.
+
+## Owner Decision Guardrail
+
+Use severity plus decision type to decide when to stop for the owner.
+
+- P0: Always blocks release. Fix obvious local defects when the user asked for a fix, but ask before accepting risk, choosing a tradeoff, touching external services, or shipping.
+- P1: Blocks the current change. Fix when the remedy is narrow and preserves documented behavior; ask when the remedy changes product direction, default behavior, privacy/auth/sync posture, accessibility tradeoffs, or has multiple credible options.
+- P2: Usually proceed or document without asking. Ask only when it expands scope, consumes meaningful time, changes roadmap priority, or asks the owner to accept known risk.
+- P3: Do not interrupt. Park, document, or include as optional polish.
+
+Always ask before committing, pushing, deploying, changing external services, adding dependencies/MCP servers, changing database policy/schema in production, or overriding a durable product/design non-goal. If the owner is unavailable, choose the safest non-shipping path: fix clear defects, document uncertainty, and do not release with unresolved P0/P1 risk.
+
+Read references/owner-decision.md when a finding may need owner input.
 
 ## Delegation
 

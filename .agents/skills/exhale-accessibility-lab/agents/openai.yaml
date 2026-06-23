@@ -1,0 +1,4 @@
+interface:
+  display_name: "Exhale Accessibility Lab"
+  short_description: "Review Exhale for accessibility risks"
+  default_prompt: "Use $exhale-accessibility-lab to audit the current Exhale change for accessibility and low-vision risks."

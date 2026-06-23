@@ -1,13 +1,13 @@
 # Codex Handoff
 
-Last updated: 2026-06-22 (Soft default rhythm and Warm default sound)
+Last updated: 2026-06-23 (completion quote stabilization and full factory guardrail pass)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
 ## Branch State
 
-- Branch: `master`, synced with `origin/master` through `fe8be2f`.
-- Working tree is currently dirty with the Soft/Box rhythm update, Warm sound default, settings/history phase-color accents, docs alignment, and a pre-existing local `.gitignore` edit.
+- Branch: `master`, tracking `origin/master`.
+- Working tree is currently dirty with completion quote stabilization, new Exhale specialist skills, the `exhale-ship` owner decision guardrail, and agent factory roadmap/handoff docs.
 - Recent commit history:
   - `fe8be2f` - Rhythm picker pattern cards show timing directly.
   - `6dc32b4` - Agent factory roadmap concluded.
@@ -15,11 +15,15 @@ This document is overwritten on each handoff. The previous handoff's content doe
   - `b27ed48` - Agent factory roadmap advanced with subagent/deployment references.
   - `7f42735` - Post-exhale phase retired and `exhale-ship` workflow added.
 - Verification standard: `git diff --check`, `npm.cmd run lint`, `npm.cmd test -- --runInBand`, and `npm.cmd run build`. Restore `next-env.d.ts` to the checked-in dev-routes import if `next build` rewrites it.
+- Current validation on 2026-06-23: `git diff --check`, `npm.cmd run lint`, `npm.cmd test -- --runInBand` (9 suites, 115 tests), `npm.cmd run build`, and `npm.cmd run audit:impeccable` passed. Chrome-channel Playwright QA passed first-visit home, returning home, Meta-style active session with Large circle, completion, stats, desktop home, and long-quote completion layout checks. The audit wrapper now calls the current Impeccable `detect` command and ignores the Next.js dev overlay portal finding outside the Exhale UI.
 
 ## What Changed Most Recently
 
+- **Completion quote stabilization.** `SessionComplete` now waits for one resolved completion quote instead of showing a local fallback and then swapping to a fetched quote. `src/lib/completionQuote.ts` owns remote quote fetch, normalization, and a short fallback timeout; focused Jest tests cover remote, empty, and slow quote paths.
+- **Factory expanded.** Repo-local skills now cover beta triage, sync drift audit, accessibility lab review, and device QA. `exhale-ship` remains the final guarded release gate.
+- **Owner decision guardrail active.** `exhale-ship` now records when Codex must stop for owner input: P0/P1 risk acceptance, product/design/auth/sync/accessibility tradeoffs, external-service changes, dependencies/MCP additions, production DB/schema/policy changes, and commit/push/deploy actions.
 - **Agent factory concluded.** `docs/AGENT_FACTORY_ROADMAP.md` now treats the roadmap as concluded and the factory as an operational process. The repo-local `.agents/skills/exhale-ship/` skill owns the guarded workflow.
-- **Review/release gates exist.** The skill has focused playbooks for code review, design review, docs harmonization, release checks, and optional subagent delegation.
+- **Review/release gates exist.** The skill has focused playbooks for code review, design review, docs harmonization, owner decision guardrails, release checks, and optional subagent delegation.
 - **First factory run shipped.** The no-post-exhale rhythm model was reviewed, validated, committed, and pushed to `master`.
 - **Deployment caveat.** The checkout has no `.vercel/project.json`; command-line `curl.exe -I https://exhale.guide` receives Vercel's challenge/429 response, matching the known tooling caveat in `docs/DEPLOYMENT.md`. Confirm production deployment status through GitHub/Vercel's authenticated UI or an authenticated CLI surface when needed.
 - **Pattern picker refreshed.** Breathing Sequence cards now show proportional phase bars and seconds directly; the separate pattern reveal is gone.
