@@ -83,7 +83,7 @@ These are decisions made and should not be revisited without strong cause:
 
 The roadmap is evidence-gated. Stage 0 is still validation: recruit roughly 10 to 20 testers from the target audience, watch completion/return/drop-off signal, and avoid broad feature expansion until retention signal is real.
 
-Stage 1 is ship-quality polish: accessibility, discoverability, privacy/terms, theme polish, and beta-driven refinements. The Garden skin and High Visual Contrast / Large Text or voice cues are candidates, not defaults.
+Stage 1 is ship-quality polish: accessibility, discoverability and SEO optimization, privacy/terms, theme polish, and beta-driven refinements. The Garden skin and High Visual Contrast / Large Text or voice cues are candidates, not defaults.
 
 Stage 2 is distribution: Android Trusted Web Activity after polish and discoverability work; iOS remains a PWA-first path unless reception justifies native App Store cost.
 

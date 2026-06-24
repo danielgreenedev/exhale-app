@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: June 22, 2026 (Soft default, Warm default, and phase-color setting accents)
+Last updated: June 24, 2026 (SEO roadmap clarification)
 
 ## Completed Rhythm Changes
 
@@ -431,6 +431,8 @@ These can wait until after Stage 0 feedback signal is in.
 - `/impeccable harden Meta in-app browser state`: run only if another Facebook, Messenger, or Meta in-app browser tester reports audio or capability failure beyond fullscreen.
 - `/impeccable onboard first-run cue`: run only after the next tester tells us whether the first-cycle cue helped, felt too instructional, or was ignored.
 - Rationale: the current build is a clean testable hypothesis. Do not change Relax timing, HUD density, Meta-webview copy, or first-run cue behavior until fresh tester feedback tells us which branch is real.
+
+6m. Planned SEO optimization pass: make Stage 1 discoverability explicit beyond the already shipped metadata, sitemap, robots, and social-preview work. Scope should include keyword/intent fit for anxiety breathing and paced breathing, title/meta/canonical review, search-result copy, structured data only if it genuinely fits, and performance/indexability checks. Keep the home screen calm and two-tap; do not solve SEO by adding a marketing-heavy landing page or extra first-breath friction.
 
 7. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Secondary-user feedback asked about changing colors; evaluate that through a theme/skin system before considering freeform color controls. Run `/impeccable shape Garden skin` before building.
 

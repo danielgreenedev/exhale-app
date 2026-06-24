@@ -1,6 +1,6 @@
 # Exhale Roadmap
 
-Last updated: June 22, 2026
+Last updated: June 24, 2026
 
 Exhale is organized around learning gates, not feature batches. Each stage carries one question: do we have enough signal to invest in the next stage? Engineering effort follows validation.
 
@@ -78,7 +78,7 @@ The next signal worth gathering: ask testers whether default Soft feels accessib
 Make Exhale feel like a "v1 you would link publicly."
 
 - Garden warmer skin, with floral accents and a sun-through-leaves character. Toggle between this and the current "Still Water" aesthetic.
-- Discoverability: Open Graph tags, social card image, meta description, friendly page title; consider a small landing-screen treatment on the home page.
+- Discoverability and SEO optimization: Open Graph tags, social card image, meta description, friendly page title, sitemap, robots, canonical URLs, keyword/intent fit for anxiety breathing and paced breathing, and search-result copy. Existing metadata/social-preview plumbing is the baseline; the remaining SEO pass should improve organic search discoverability without turning the home screen into a marketing page or adding friction before the first breath.
 - Privacy policy page and terms of use page; footer links from main pages.
 - Color contrast audit on text at low opacity (white/28 to 38 against forest-night).
 - In-session HUD readability audit by phase color: title/instruction text must remain readable over Inhale, Hold, and Exhale circles without becoming glaring. June 8 low-vision phone feedback promoted this from polish to accessibility. Default HUD text hardening is shipped; still validate whether optional High Visual Contrast / Large Text is needed.
