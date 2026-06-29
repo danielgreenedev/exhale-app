@@ -41,19 +41,19 @@ const PRACTICE_ACCENTS = [
 
 const AUTH_BUTTON_CLASSES: Record<AuthButtonKind, { base: string; active: string; icon: string }> = {
   google: {
-    base: 'border-[#4285f4]/36 text-still-white/70 bg-still-white/[0.02] hover:border-[#4285f4]/90 hover:bg-[#4285f4]/[0.16] hover:text-still-white/95 active:border-[#4285f4]/90 active:bg-[#4285f4]/[0.24]',
-    active: 'border-[#4285f4]/90 bg-[#4285f4]/[0.24] text-still-white/95',
-    icon: 'border-[#4285f4]/26 bg-still-white/[0.92] group-hover:border-[#4285f4]/45 group-hover:bg-still-white group-active:border-[#4285f4]/65 group-active:bg-still-white',
+    base: 'border-still-white/[0.24] text-still-white/[0.70] bg-still-white/[0.02] hover:border-still-white/[0.62] hover:bg-still-white/[0.12] hover:text-still-white/[0.95] active:border-still-white/[0.74] active:bg-still-white/[0.20]',
+    active: 'border-still-white/[0.74] bg-still-white/[0.20] text-still-white/[0.95]',
+    icon: 'border-still-white/[0.22] bg-still-white/[0.92] group-hover:border-still-white/[0.52] group-hover:bg-still-white group-active:border-still-white/[0.70] group-active:bg-still-white',
   },
   apple: {
-    base: 'border-still-white/24 text-still-white/72 bg-still-white/[0.035] hover:border-still-white/70 hover:bg-still-white/[0.14] hover:text-still-white/95 active:border-still-white/78 active:bg-still-white/[0.24]',
-    active: 'border-still-white/78 bg-still-white/[0.24] text-still-white/95',
-    icon: 'border-still-white/24 bg-still-white/[0.06] text-still-white/86 group-hover:bg-still-white/[0.18] group-active:bg-still-white/[0.26]',
+    base: 'border-still-white/[0.24] text-still-white/[0.72] bg-still-white/[0.035] hover:border-still-white/[0.70] hover:bg-still-white/[0.14] hover:text-still-white/[0.95] active:border-still-white/[0.78] active:bg-still-white/[0.24]',
+    active: 'border-still-white/[0.78] bg-still-white/[0.24] text-still-white/[0.95]',
+    icon: 'border-still-white/[0.24] bg-still-white/[0.06] text-still-white/[0.86] group-hover:bg-still-white/[0.18] group-active:bg-still-white/[0.26]',
   },
   email: {
-    base: 'border-emerald-pulse/28 text-emerald-50/72 bg-emerald-pulse/[0.035] hover:border-emerald-pulse/68 hover:bg-emerald-pulse/[0.16] hover:text-emerald-50/95 active:border-emerald-pulse/78 active:bg-emerald-pulse/[0.24]',
-    active: 'border-emerald-pulse/78 bg-emerald-pulse/[0.24] text-emerald-50/95',
-    icon: 'border-emerald-pulse/24 bg-emerald-pulse/[0.08] text-emerald-100/86 group-hover:bg-emerald-pulse/[0.20] group-active:bg-emerald-pulse/[0.28]',
+    base: 'border-emerald-pulse/[0.28] text-still-white/[0.72] bg-emerald-pulse/[0.035] hover:border-emerald-pulse/[0.68] hover:bg-emerald-pulse/[0.16] hover:text-still-white/[0.95] active:border-emerald-pulse/[0.78] active:bg-emerald-pulse/[0.24]',
+    active: 'border-emerald-pulse/[0.78] bg-emerald-pulse/[0.24] text-still-white/[0.95]',
+    icon: 'border-emerald-pulse/[0.24] bg-emerald-pulse/[0.08] text-still-white/[0.86] group-hover:bg-emerald-pulse/[0.20] group-active:bg-emerald-pulse/[0.28]',
   },
 };
 
@@ -517,27 +517,27 @@ export default function StatsPage() {
         <div className="flex flex-col items-center gap-5">
           <OrbMark size="stats" ring breathe />
           <div className="flex flex-col items-center gap-2">
-            <h1 className="text-3xl font-extralight tracking-[0.3em] uppercase text-still-white/88">
+            <h1 className="text-3xl font-extralight tracking-[0.3em] uppercase text-still-white/[0.88]">
               Practice
             </h1>
-            <p className="text-still-white/55 text-xs tracking-[0.04em] font-light">Your breathing history</p>
+            <p className="text-still-white/[0.55] text-xs tracking-[0.04em] font-light">Your breathing history</p>
           </div>
         </div>
 
         {!storageOk && (
-          <p className="text-amber-100/72 text-xs font-light text-center leading-relaxed -mb-4">
+          <p className="text-amber-warmth/[0.82] text-xs font-light text-center leading-relaxed -mb-4">
             Session history requires storage access to save.
           </p>
         )}
 
         {totalSessions === 0 ? (
           <div className="flex w-full flex-col items-center gap-3 text-center">
-            <p className="text-still-white/62 text-sm font-light leading-relaxed">
+            <p className="text-still-white/[0.62] text-sm font-light leading-relaxed">
               Your first completed session will appear here.
             </p>
             <Link
               href="/"
-              className="w-full min-h-11 py-3 rounded-2xl border border-emerald-pulse/35 bg-emerald-pulse/10 text-emerald-100/95 text-xs tracking-[0.18em] uppercase font-light hover:border-emerald-pulse/55 hover:bg-emerald-pulse/16 transition-all duration-300 flex items-center justify-center"
+              className="w-full min-h-11 py-3 rounded-2xl border border-emerald-pulse/[0.35] bg-emerald-pulse/[0.10] text-still-white/[0.90] text-xs tracking-[0.18em] uppercase font-light hover:border-emerald-pulse/[0.55] hover:bg-emerald-pulse/[0.16] hover:text-still-white transition-all duration-300 flex items-center justify-center"
             >
               Begin a session
             </Link>
@@ -548,9 +548,9 @@ export default function StatsPage() {
               {statRows.map(({ label, value, color }) => (
                 <div
                   key={label}
-                  className="flex justify-between items-baseline py-5 border-b border-still-white/10"
+                  className="flex justify-between items-baseline py-5 border-b border-still-white/[0.10]"
                 >
-                  <span className="flex items-center gap-2 text-xs tracking-[0.15em] uppercase font-light text-still-white/58">
+                  <span className="flex items-center gap-2 text-xs tracking-[0.15em] uppercase font-light text-still-white/[0.58]">
                     <span
                       aria-hidden="true"
                       className="h-1.5 w-1.5 rounded-full"
@@ -558,13 +558,13 @@ export default function StatsPage() {
                     />
                     <span>{label}</span>
                   </span>
-                  <span className="text-2xl font-extralight text-still-white/86">{value}</span>
+                  <span className="text-2xl font-extralight text-still-white/[0.86]">{value}</span>
                 </div>
               ))}
             </div>
 
             <div className="flex flex-col gap-0 w-full">
-              <p className="flex items-center gap-2 text-still-white/52 text-xs tracking-[0.15em] uppercase font-light mb-4">
+              <p className="flex items-center gap-2 text-still-white/[0.52] text-xs tracking-[0.15em] uppercase font-light mb-4">
                 <span className="flex items-center gap-1" aria-hidden="true">
                   {PRACTICE_ACCENTS.map((color) => (
                     <span
@@ -582,9 +582,9 @@ export default function StatsPage() {
                 .map((s, i) => (
                   <div
                     key={i}
-                    className="flex justify-between items-center py-3 border-b border-still-white/10"
+                    className="flex justify-between items-center py-3 border-b border-still-white/[0.10]"
                   >
-                    <span className="flex items-center gap-2 text-still-white/62 text-sm font-light">
+                    <span className="flex items-center gap-2 text-still-white/[0.62] text-sm font-light">
                       <span
                         aria-hidden="true"
                         className="h-1.5 w-1.5 rounded-full"
@@ -595,7 +595,7 @@ export default function StatsPage() {
                       />
                       <span>{formatDate(s.date)}</span>
                     </span>
-                    <span className="text-still-white/52 text-xs tracking-widest">
+                    <span className="text-still-white/[0.52] text-xs tracking-widest">
                       {Math.round(s.duration / 60)}m · {s.cycles} breaths
                     </span>
                   </div>
@@ -606,25 +606,25 @@ export default function StatsPage() {
 
         <div
           id="sync"
-          className={`flex flex-col gap-3 w-full border-t border-still-white/10 scroll-mt-6 ${totalSessions === 0 ? 'pt-4 opacity-80' : 'pt-2'}`}
+          className={`flex flex-col gap-3 w-full border-t border-still-white/[0.10] scroll-mt-6 ${totalSessions === 0 ? 'pt-4' : 'pt-2'}`}
         >
-          <p className="text-still-white/58 text-xs tracking-[0.15em] uppercase font-light">
+          <p className="text-still-white/[0.62] text-xs tracking-[0.15em] uppercase font-light">
             Sign In
           </p>
 
           {!ready ? (
             <div className="flex flex-col gap-2">
-              <p className="text-still-white/55 text-xs font-light leading-relaxed -mt-1">
+              <p className="text-still-white/[0.55] text-xs font-light leading-relaxed -mt-1">
                 Checking sync on this device.
               </p>
             </div>
           ) : syncState === 'synced' && syncedEmail ? (
             <div className="flex flex-col gap-3">
-              <p className="text-still-white/58 text-sm font-light leading-relaxed">
+              <p className="text-still-white/[0.58] text-sm font-light leading-relaxed">
                 Signed in as {syncedEmail}. Your history can follow you across devices.
               </p>
               {emailUpdatesMessage && (
-                <p className="text-emerald-100/72 text-xs font-light leading-relaxed">
+                <p className="text-emerald-pulse/[0.78] text-xs font-light leading-relaxed">
                   {emailUpdatesMessage}
                 </p>
               )}
@@ -654,22 +654,22 @@ export default function StatsPage() {
                 type="button"
                 onClick={handleStopSync}
                 disabled={busyAction !== null}
-                className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 text-still-white/58 text-xs tracking-[0.2em] uppercase font-light hover:border-still-white/30 hover:text-still-white/75 hover:bg-still-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                className="w-full min-h-11 py-3 rounded-2xl border border-still-white/[0.18] text-still-white/[0.58] text-xs tracking-[0.2em] uppercase font-light hover:border-still-white/[0.30] hover:text-still-white/[0.75] hover:bg-still-white/[0.05] disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
               >
                 {busyAction === 'signout' ? 'Signing out...' : 'Sign out here'}
               </button>
               {error && (
-                <p className="text-amber-100/72 text-xs font-light leading-relaxed">
+                <p className="text-amber-warmth/[0.82] text-xs font-light leading-relaxed">
                   {error}
                 </p>
               )}
             </div>
           ) : (syncState === 'codeSent' || syncState === 'verifying') && syncedEmail ? (
             <div className="flex flex-col gap-3">
-              <p className="text-still-white/58 text-sm font-light leading-relaxed">
+              <p className="text-still-white/[0.58] text-sm font-light leading-relaxed">
                 We sent a sign-in email to {syncedEmail}. Open the link, or enter the code if the email shows one.
               </p>
-              <p className="text-still-white/55 text-xs font-light leading-relaxed -mt-1">
+              <p className="text-still-white/[0.55] text-xs font-light leading-relaxed -mt-1">
                 You can use Google, Apple, or email next time.
               </p>
               <label htmlFor="otp-code" className="sr-only">{expectedCodeLength(submitMode)}-digit code</label>
@@ -685,13 +685,13 @@ export default function StatsPage() {
                 disabled={syncState === 'verifying'}
                 autoComplete="one-time-code"
                 aria-label={`${expectedCodeLength(submitMode)}-digit confirmation code`}
-                className="w-full min-h-14 px-4 py-3 rounded-2xl bg-transparent border border-still-white/18 text-still-white/90 placeholder:text-still-white/25 text-2xl tracking-[0.5em] font-light text-center tabular-nums focus:border-still-white/40 focus:outline-none transition-colors duration-300 disabled:opacity-50"
+                className="w-full min-h-14 px-4 py-3 rounded-2xl bg-transparent border border-still-white/[0.18] text-still-white/[0.90] placeholder:text-still-white/[0.25] text-2xl tracking-[0.5em] font-light text-center tabular-nums focus:border-still-white/[0.40] focus:outline-none transition-colors duration-300 disabled:opacity-50"
               />
               <button
                 type="button"
                 onClick={handleVerifyClick}
                 disabled={code.length !== expectedCodeLength(submitMode) || syncState === 'verifying'}
-                className="w-full min-h-11 py-3 rounded-2xl border border-emerald-pulse/35 bg-emerald-pulse/10 text-emerald-100/95 text-xs tracking-[0.2em] uppercase font-light hover:border-emerald-pulse/55 hover:bg-emerald-pulse/16 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                className="w-full min-h-11 py-3 rounded-2xl border border-emerald-pulse/[0.35] bg-emerald-pulse/[0.10] text-still-white/[0.90] text-xs tracking-[0.2em] uppercase font-light hover:border-emerald-pulse/[0.55] hover:bg-emerald-pulse/[0.16] hover:text-still-white disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
               >
                 {syncState === 'verifying' ? 'Verifying...' : 'Confirm'}
               </button>
@@ -703,37 +703,37 @@ export default function StatsPage() {
                   setSubmitMode(null);
                   setCode('');
                 }}
-                className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 text-still-white/58 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:text-still-white/75 hover:bg-still-white/5 transition-all duration-300"
+                className="w-full min-h-11 py-3 rounded-2xl border border-still-white/[0.18] text-still-white/[0.58] text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/[0.30] hover:text-still-white/[0.75] hover:bg-still-white/[0.05] transition-all duration-300"
               >
                 Use another email
               </button>
               {error && (
-                <p className="text-amber-100/72 text-xs font-light leading-relaxed text-center">
+                <p className="text-amber-warmth/[0.82] text-xs font-light leading-relaxed text-center">
                   {error}
                 </p>
               )}
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              <p className="text-still-white/58 text-xs font-light leading-relaxed -mt-1">
+              <p className="text-still-white/[0.58] text-xs font-light leading-relaxed -mt-1">
                 {SIGN_IN_COPY}
               </p>
               <label
                 htmlFor="email-updates"
-                className="flex min-h-11 items-start gap-3 rounded-2xl border border-still-white/12 px-3 py-3 text-still-white/58 hover:border-still-white/22 transition-colors duration-300"
+                className="flex min-h-11 items-start gap-3 rounded-2xl border border-still-white/[0.12] px-3 py-3 text-still-white/[0.58] hover:border-still-white/[0.22] transition-colors duration-300"
               >
                 <input
                   id="email-updates"
                   type="checkbox"
                   checked={emailUpdatesOptIn}
                   onChange={(event) => setEmailUpdatesOptIn(event.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-still-white/30 bg-transparent accent-emerald-pulse"
+                  className="mt-0.5 h-4 w-4 rounded border-still-white/[0.30] bg-transparent accent-emerald-pulse"
                 />
                 <span className="flex flex-col gap-1 text-left">
-                  <span className="text-xs tracking-[0.14em] uppercase font-light text-still-white/70">
+                  <span className="text-xs tracking-[0.14em] uppercase font-light text-still-white/[0.70]">
                     Email Updates
                   </span>
-                  <span className="text-xs font-light leading-relaxed text-still-white/55">
+                  <span className="text-xs font-light leading-relaxed text-still-white/[0.55]">
                     Optional notes about Exhale. Unchecked means no updates.
                   </span>
                 </span>
@@ -765,7 +765,7 @@ export default function StatsPage() {
                   onChange={(event) => setEmailInput(event.target.value)}
                   placeholder="you@example.com"
                   autoComplete="email"
-                  className="w-full min-h-12 rounded-2xl border border-still-white/18 bg-transparent px-4 py-3 text-sm font-light text-still-white/86 placeholder:text-still-white/35 focus:border-still-white/40 focus:outline-none transition-colors duration-300"
+                  className="w-full min-h-12 rounded-2xl border border-still-white/[0.18] bg-transparent px-4 py-3 text-sm font-light text-still-white/[0.86] placeholder:text-still-white/[0.35] focus:border-still-white/[0.40] focus:outline-none transition-colors duration-300"
                 />
                 <AuthProviderButton
                   kind="email"
@@ -777,7 +777,7 @@ export default function StatsPage() {
                 </AuthProviderButton>
               </form>
               {error && (
-                <p className="text-amber-100/72 text-xs font-light leading-relaxed text-center mt-1">
+                <p className="text-amber-warmth/[0.82] text-xs font-light leading-relaxed text-center mt-1">
                   {error}
                 </p>
               )}
@@ -786,14 +786,14 @@ export default function StatsPage() {
         </div>
 
         {showIosInstallTip && (
-          <p className="text-still-white/55 text-xs font-light leading-relaxed text-center px-2 -mb-1">
+          <p className="text-still-white/[0.55] text-xs font-light leading-relaxed text-center px-2 -mb-1">
             Add Exhale to your Home Screen for full-screen practice. Tap the Share icon in Safari, then Add to Home Screen.
           </p>
         )}
 
         <Link
           href="/"
-          className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 text-still-white/58 text-xs tracking-[0.2em] uppercase font-light hover:border-still-white/30 hover:text-still-white/75 transition-all duration-300 flex items-center justify-center"
+          className="w-full min-h-11 py-3 rounded-2xl border border-still-white/[0.18] text-still-white/[0.58] text-xs tracking-[0.2em] uppercase font-light hover:border-still-white/[0.30] hover:text-still-white/[0.75] transition-all duration-300 flex items-center justify-center"
           aria-label="Back to home"
         >
           ← Back

@@ -638,14 +638,14 @@ function GameContent() {
                 aria-hidden="true"
               />
               <span
-                className="relative text-7xl font-thin leading-none tabular-nums text-still-white/92"
+                className="relative text-7xl font-thin leading-none tabular-nums text-still-white/[0.92]"
                 style={{ textShadow: '0 1px 2px rgba(8,14,10,0.98), 0 4px 18px rgba(8,14,10,0.9)' }}
               >
                 {settleSecondsRemaining}
               </span>
             </div>
             <p
-              className="exhale-settle-subtitle min-h-8 max-w-[27rem] px-1 text-center text-sm font-light leading-snug tracking-[0.04em] text-still-white/78"
+              className="exhale-settle-subtitle min-h-8 max-w-[27rem] px-1 text-center text-sm font-light leading-snug tracking-[0.04em] text-still-white/[0.78]"
               style={{ textShadow: '0 2px 14px rgba(15,23,18,0.92), 0 1px 4px rgba(15,23,18,0.9)' }}
             >
               Breathe normally
@@ -653,7 +653,7 @@ function GameContent() {
           </div>
           <div className="pb-[calc(7rem+env(safe-area-inset-bottom))] flex flex-col items-center gap-1.5">
             <p
-              className={`exhale-settle-hint max-w-[17rem] px-4 text-center text-xs leading-relaxed tracking-[0.04em] font-light ${isFirstVisit ? 'text-still-white/68' : 'invisible'}`}
+              className={`exhale-settle-hint max-w-[17rem] px-4 text-center text-xs leading-relaxed tracking-[0.04em] font-light ${isFirstVisit ? 'text-still-white/[0.68]' : 'invisible'}`}
               style={{ textShadow: '0 1px 8px rgba(15,23,18,0.75)' }}
             >
               Inhale, hold, longer exhale.
@@ -666,7 +666,7 @@ function GameContent() {
       {!settling && (sessionState === 'running' || sessionState === 'paused') && (
         <button
           onClick={handleTogglePause}
-          className="absolute bottom-[max(1.5rem,calc(env(safe-area-inset-bottom)+0.75rem))] left-6 min-h-11 min-w-20 text-still-white/72 hover:text-still-white/92 text-xs tracking-[0.2em] uppercase font-light border border-still-white/22 hover:border-still-white/38 hover:bg-still-white/5 px-4 py-2 rounded-lg transition-all duration-300"
+          className="absolute bottom-[max(1.5rem,calc(env(safe-area-inset-bottom)+0.75rem))] left-6 min-h-11 min-w-20 text-still-white/[0.72] hover:text-still-white/[0.92] text-xs tracking-[0.2em] uppercase font-light border border-still-white/[0.22] hover:border-still-white/[0.38] hover:bg-still-white/[0.05] px-4 py-2 rounded-lg transition-all duration-300"
           aria-label={sessionState === 'paused' ? 'Resume session' : 'Pause session'}
         >
           {sessionState === 'paused' ? 'Resume' : 'Pause'}
@@ -677,7 +677,7 @@ function GameContent() {
       {!showExitGuard && (settling || sessionState === 'running' || sessionState === 'paused') && (
         <button
           onClick={requestExit}
-          className={`absolute bottom-[max(1.5rem,calc(env(safe-area-inset-bottom)+0.75rem))] right-6 min-h-11 min-w-20 text-xs tracking-[0.2em] uppercase font-light border px-4 py-2 rounded-lg transition-all duration-300 ${settling ? 'text-still-white/55 hover:text-still-white/75 border-still-white/18 hover:border-still-white/30 hover:bg-still-white/5' : 'text-still-white/62 hover:text-still-white/82 border-still-white/22 hover:border-still-white/38 hover:bg-still-white/5'}`}
+          className={`absolute bottom-[max(1.5rem,calc(env(safe-area-inset-bottom)+0.75rem))] right-6 min-h-11 min-w-20 text-xs tracking-[0.2em] uppercase font-light border px-4 py-2 rounded-lg transition-all duration-300 ${settling ? 'text-still-white/[0.55] hover:text-still-white/[0.75] border-still-white/[0.18] hover:border-still-white/[0.30] hover:bg-still-white/[0.05]' : 'text-still-white/[0.62] hover:text-still-white/[0.82] border-still-white/[0.22] hover:border-still-white/[0.38] hover:bg-still-white/[0.05]'}`}
           aria-label="Exit session"
         >
           ← Exit
@@ -712,15 +712,15 @@ function GameContent() {
             }
             className={`min-h-11 min-w-11 rounded-lg border transition-all duration-300 flex items-center justify-center ${
               audioActive
-                ? 'border-emerald-pulse/34 bg-emerald-pulse/10 text-emerald-100/90 hover:border-emerald-pulse/52 hover:bg-emerald-pulse/15'
-                : 'border-still-white/22 text-still-white/62 hover:border-still-white/38 hover:bg-still-white/5 hover:text-still-white/82'
-            } disabled:pointer-events-none disabled:border-still-white/12 disabled:text-still-white/40`}
+                ? 'border-emerald-pulse/[0.34] bg-emerald-pulse/[0.10] text-still-white/[0.90] hover:border-emerald-pulse/[0.52] hover:bg-emerald-pulse/[0.15]'
+                : 'border-still-white/[0.22] text-still-white/[0.62] hover:border-still-white/[0.38] hover:bg-still-white/[0.05] hover:text-still-white/[0.82]'
+            } disabled:pointer-events-none disabled:border-still-white/[0.12] disabled:text-still-white/[0.40]`}
           >
             {audioActive ? <SoundOnIcon /> : <SoundOffIcon />}
           </button>
           {(showAudioPrompt || showSilentModeHint) && soundPalette !== 'off' && (
             <p
-              className="absolute bottom-full left-1/2 mb-2 w-max max-w-[13rem] -translate-x-1/2 text-center text-[11px] font-light tracking-[0.04em] text-still-white/62"
+              className="absolute bottom-full left-1/2 mb-2 w-max max-w-[13rem] -translate-x-1/2 text-center text-[11px] font-light tracking-[0.04em] text-still-white/[0.62]"
               style={{ textShadow: '0 1px 6px rgba(15,23,18,0.65)' }}
             >
               {showAudioPrompt ? 'tap for sound' : 'still quiet? check silent mode'}
@@ -737,13 +737,13 @@ function GameContent() {
         >
           <div className="flex flex-col items-center gap-2 pointer-events-none">
             <p
-              className="text-still-white/64 text-sm tracking-[0.4em] uppercase font-extralight"
+              className="text-still-white/[0.64] text-sm tracking-[0.4em] uppercase font-extralight"
               style={{ textShadow: '0 1px 8px rgba(15,23,18,0.7)' }}
             >
               Paused
             </p>
             <p
-              className="text-still-white/58 text-xs tracking-[0.18em] font-light"
+              className="text-still-white/[0.58] text-xs tracking-[0.18em] font-light"
               style={{ textShadow: '0 1px 6px rgba(15,23,18,0.6)' }}
             >
               tap · space to resume
@@ -756,7 +756,7 @@ function GameContent() {
       {/* Fullscreen toggle — top right (hidden on iOS Safari) */}
       {metaInAppBrowser && !showExitGuard && !settling && (
         <p
-          className="absolute right-5 top-20 max-w-[10.5rem] text-right text-[10px] font-light uppercase leading-snug tracking-[0.1em] text-still-white/55"
+          className="absolute right-5 top-20 max-w-[10.5rem] text-right text-[10px] font-light uppercase leading-snug tracking-[0.1em] text-still-white/[0.55]"
           style={{ textShadow: '0 1px 8px rgba(15,23,18,0.72)' }}
         >
           Tap menu (top-right) for sound and fullscreen
@@ -767,7 +767,7 @@ function GameContent() {
         <button
           onClick={toggleFullscreen}
           aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-          className="absolute top-6 right-6 min-h-11 min-w-11 flex items-center justify-center rounded-lg text-still-white/58 hover:text-still-white/82 hover:bg-still-white/5 transition-colors duration-300"
+          className="absolute top-6 right-6 min-h-11 min-w-11 flex items-center justify-center rounded-lg text-still-white/[0.58] hover:text-still-white/[0.82] hover:bg-still-white/[0.05] transition-colors duration-300"
         >
           {isFullscreen ? (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -790,7 +790,7 @@ function GameContent() {
       {/* Exit guard overlay */}
       {showExitGuard && (
         <div
-          className="absolute inset-0 flex items-center justify-center bg-forest-night/85 z-20"
+          className="absolute inset-0 flex items-center justify-center bg-forest-night/[0.85] z-20"
           onClick={handleExitGuardResume}
         >
           <div
@@ -805,14 +805,14 @@ function GameContent() {
             <div className="flex flex-col gap-2">
               <p
                 id="exit-guard-title"
-                className="text-still-white/90 text-xl font-extralight tracking-[0.25em] uppercase"
+                className="text-still-white/[0.90] text-xl font-extralight tracking-[0.25em] uppercase"
                 style={{ textShadow: '0 2px 12px rgba(15,23,18,0.8)' }}
               >
                 Leave this session?
               </p>
               <p
                 id="exit-guard-description"
-                className="text-still-white/62 text-xs tracking-[0.04em] font-light"
+                className="text-still-white/[0.62] text-xs tracking-[0.04em] font-light"
                 style={{ textShadow: '0 1px 6px rgba(15,23,18,0.6)' }}
               >
                 {settling ? 'You can come back whenever you are ready.' : 'Your progress is saved for 60 seconds.'}
@@ -822,13 +822,13 @@ function GameContent() {
               <button
                 ref={exitGuardResumeRef}
                 onClick={handleExitGuardResume}
-                className="w-full min-h-11 py-4 rounded-2xl border border-emerald-pulse/45 bg-emerald-pulse/10 text-emerald-100/95 text-sm tracking-[0.22em] uppercase font-light hover:bg-emerald-pulse/18 hover:border-emerald-pulse/65 transition-all duration-300"
+                className="w-full min-h-11 py-4 rounded-2xl border border-emerald-pulse/[0.45] bg-emerald-pulse/[0.10] text-still-white/[0.92] text-sm tracking-[0.22em] uppercase font-light hover:bg-emerald-pulse/[0.18] hover:border-emerald-pulse/[0.65] hover:text-still-white transition-all duration-300"
               >
                 Resume
               </button>
               <button
                 onClick={() => { setShowExitGuard(false); doExit(); }}
-                className="w-full min-h-11 py-3 rounded-2xl text-still-white/62 text-sm tracking-[0.22em] uppercase font-light hover:text-still-white/80 hover:bg-still-white/5 transition-colors duration-300"
+                className="w-full min-h-11 py-3 rounded-2xl text-still-white/[0.62] text-sm tracking-[0.22em] uppercase font-light hover:text-still-white/[0.80] hover:bg-still-white/[0.05] transition-colors duration-300"
               >
                 Exit
               </button>

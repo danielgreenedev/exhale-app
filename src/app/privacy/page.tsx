@@ -39,10 +39,10 @@ export default function PrivacyPage() {
         <header className="flex flex-col items-start gap-4">
           <OrbMark size="policy" />
           <div className="flex flex-col gap-2">
-            <h1 className="text-2xl font-extralight tracking-[0.3em] uppercase text-still-white/88">
+            <h1 className="text-2xl font-extralight tracking-[0.3em] uppercase text-still-white/[0.88]">
               Privacy
             </h1>
-            <p className="text-still-white/58 text-xs tracking-[0.05em] font-light">
+            <p className="text-still-white/[0.58] text-xs tracking-[0.05em] font-light">
               Last updated June 29, 2026
             </p>
           </div>
@@ -60,7 +60,7 @@ export default function PrivacyPage() {
             On every visit, Exhale keeps a small amount of data in your browser&apos;s local
             storage so the app remembers your preferences and practice without an account:
           </p>
-          <ul className="list-disc pl-5 mt-3 space-y-1.5 marker:text-still-white/35">
+          <ul className="list-disc pl-5 mt-3 space-y-1.5 marker:text-still-white/[0.35]">
             <li>Your session history (date, duration, breath count, session length).</li>
             <li>Your settings (circle size, sound choice, rhythm, last session length).</li>
             <li>A first-visit flag so the app does not repeat its first-run hints.</li>
@@ -86,7 +86,7 @@ export default function PrivacyPage() {
             practice to Google, Apple, or an email magic link. This is optional.
             You can keep using Exhale without any sign-in.
           </p>
-          <ul className="list-disc pl-5 mt-3 space-y-1.5 marker:text-still-white/35">
+          <ul className="list-disc pl-5 mt-3 space-y-1.5 marker:text-still-white/[0.35]">
             <li>
               With Google or Apple, that provider and Supabase handle the sign-in flow.
               With email sign-in, Supabase sends a one-time magic link. Exhale uses the
@@ -174,7 +174,7 @@ export default function PrivacyPage() {
 
         <Link
           href="/"
-          className="mt-4 inline-flex min-h-11 items-center text-still-white/58 text-xs tracking-[0.08em] uppercase font-light hover:text-still-white/78 transition-colors duration-300"
+          className="mt-4 inline-flex min-h-11 items-center text-still-white/[0.58] text-xs tracking-[0.08em] uppercase font-light hover:text-still-white/[0.78] transition-colors duration-300"
         >
           &larr; Back to Exhale
         </Link>
@@ -186,10 +186,10 @@ export default function PrivacyPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-still-white/58 text-xs tracking-[0.08em] uppercase font-light">
+      <h2 className="text-still-white/[0.58] text-xs tracking-[0.08em] uppercase font-light">
         {title}
       </h2>
-      <div className="text-still-white/74 text-[15px] font-light leading-relaxed">
+      <div className="text-still-white/[0.74] text-[15px] font-light leading-relaxed">
         {children}
       </div>
     </section>

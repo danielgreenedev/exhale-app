@@ -108,7 +108,7 @@
 
 .exhale-settle-title {
   animation: exhaleSettleTitle 3.9s ease forwards;
-  opacity: 0;
+  opacity: 1;
 }
 
 .exhale-settle-subtitle {
@@ -123,8 +123,7 @@
 }
 
 @keyframes exhaleSettleTitle {
-  0% { opacity: 0; }
-  16% { opacity: 1; }
+  0% { opacity: 1; }
   78% { opacity: 1; }
   100% { opacity: 0; }
 }

@@ -104,7 +104,7 @@ function formatRhythmPattern(rhythm: Rhythm): string {
 
 const SOUND_TEXTURE_PALETTES = SOUND_PALETTES.filter((palette) => palette.id !== 'off');
 const SOUND_OFF_PALETTE = SOUND_PALETTES.find((palette) => palette.id === 'off');
-const SELECTED_SETTING_CLASS = 'border-emerald-pulse/60 bg-emerald-pulse/10 text-[#b4f4dd]/90 hover:border-emerald-pulse/75 hover:bg-emerald-pulse/15 hover:text-[#b4f4dd]';
+const SELECTED_SETTING_CLASS = 'border-emerald-pulse/[0.60] bg-emerald-pulse/[0.10] text-still-white/[0.90] hover:border-emerald-pulse/[0.75] hover:bg-emerald-pulse/[0.15] hover:text-still-white';
 
 interface ResumeData {
   length: SessionLength;
@@ -358,10 +358,10 @@ function HomeContent() {
           </div>
 
           <div className="flex flex-col items-center gap-1.5">
-            <h1 className="text-4xl sm:text-5xl font-extralight tracking-[0.25em] sm:tracking-[0.38em] uppercase text-still-white/90">
+            <h1 className="text-4xl sm:text-5xl font-extralight tracking-[0.25em] sm:tracking-[0.38em] uppercase text-still-white/[0.90]">
               Exhale
             </h1>
-            <p className="text-still-white/72 text-sm tracking-[0.04em] font-light text-center">
+            <p className="text-still-white/[0.72] text-sm tracking-[0.04em] font-light text-center">
               Guided breathing for a calmer mind
             </p>
           </div>
@@ -385,8 +385,8 @@ function HomeContent() {
                     min-h-14 sm:min-h-16 rounded-2xl border transition-all duration-300 flex items-center justify-center text-center cursor-pointer
                     ${active
                       ? SELECTED_SETTING_CLASS
-                      : 'border-still-white/25 text-still-white/80 hover:border-still-white/40 hover:bg-still-white/5 hover:text-still-white/92'}
-                    has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-emerald-200/80
+                      : 'border-still-white/[0.25] text-still-white/[0.80] hover:border-still-white/[0.40] hover:bg-still-white/[0.05] hover:text-still-white/[0.92]'}
+                    has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-emerald-pulse/[0.80]
                   `}
                 >
                   <input
@@ -410,13 +410,13 @@ function HomeContent() {
         <button
           type="submit"
           aria-label="Begin breathing session"
-          className="w-full py-4 sm:py-5 rounded-2xl bg-emerald-pulse border border-emerald-pulse text-forest-night text-sm tracking-[0.2em] uppercase font-semibold hover:bg-emerald-200 hover:border-emerald-200 active:scale-[0.98] transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-100/85"
+          className="w-full py-4 sm:py-5 rounded-2xl bg-emerald-pulse border border-emerald-pulse text-forest-night text-sm tracking-[0.2em] uppercase font-semibold hover:bg-forest-floor hover:border-forest-floor active:scale-[0.98] transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-pulse/[0.85]"
         >
           Begin
         </button>
 
         {firstVisit && (
-          <p className="-mt-1 text-center text-xs leading-relaxed tracking-[0.04em] text-still-white/64">
+          <p className="-mt-1 text-center text-xs leading-relaxed tracking-[0.04em] text-still-white/[0.64]">
             First cycle: inhale, exhale.
           </p>
         )}
@@ -427,12 +427,12 @@ function HomeContent() {
           <Link
             href={`/game?length=${resumeData.length}&resume=${resumeData.elapsed.toFixed(1)}`}
             aria-label={`Resume ${resumeData.length} session, ${formatDuration(Math.floor(resumeData.elapsed))} in`}
-            className="w-full py-3.5 px-6 rounded-2xl border border-still-white/22 text-still-white/68 hover:border-still-white/34 hover:text-still-white/84 transition-all duration-300 -mt-1 flex flex-col items-center gap-0.5"
+            className="w-full py-3.5 px-6 rounded-2xl border border-still-white/[0.22] text-still-white/[0.68] hover:border-still-white/[0.34] hover:text-still-white/[0.84] transition-all duration-300 -mt-1 flex flex-col items-center gap-0.5"
           >
             <span className="text-sm tracking-[0.18em] uppercase font-light">
               ↩ Resume {resumeData.length}
             </span>
-            <span className="text-xs tracking-[0.04em] font-light text-still-white/64 normal-case">
+            <span className="text-xs tracking-[0.04em] font-light text-still-white/[0.64] normal-case">
               {formatDuration(Math.floor(resumeData.elapsed))} in · from your last session
             </span>
           </Link>
@@ -444,7 +444,7 @@ function HomeContent() {
             onClick={() => setShowSessionSetup((show) => !show)}
             aria-expanded={showSessionSetup}
             aria-controls="session-setup"
-            className="w-full min-h-11 py-3 rounded-2xl border border-still-white/22 text-still-white/68 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/34 hover:text-still-white/84 hover:bg-still-white/5 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 text-center"
+            className="w-full min-h-11 py-3 rounded-2xl border border-still-white/[0.22] text-still-white/[0.68] text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/[0.34] hover:text-still-white/[0.84] hover:bg-still-white/[0.05] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 text-center"
           >
             <span>{homeStat ? 'Adjust next session' : 'Session setup'}</span>
             <DisclosureCaret open={showSessionSetup} />
@@ -455,10 +455,10 @@ function HomeContent() {
           <section
             id="session-setup"
             aria-label="Session setup"
-            className="w-full border-y border-still-white/10 py-2 flex flex-col gap-3"
+            className="w-full border-y border-still-white/[0.10] py-2 flex flex-col gap-3"
           >
             <div
-              className="grid grid-cols-3 gap-1 rounded-lg border border-still-white/10 bg-still-white/[0.02] p-1"
+              className="grid grid-cols-3 gap-1 rounded-lg border border-still-white/[0.10] bg-still-white/[0.02] p-1"
               role="tablist"
               aria-label="Session setup sections"
             >
@@ -477,8 +477,8 @@ function HomeContent() {
                       min-h-11 rounded-md border text-xs tracking-[0.08em] uppercase font-light transition-all duration-300
                       ${active
                         ? SELECTED_SETTING_CLASS
-                        : 'border-transparent text-still-white/60 hover:border-still-white/18 hover:bg-still-white/5 hover:text-still-white/80'}
-                      focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-emerald-200/80
+                        : 'border-transparent text-still-white/[0.60] hover:border-still-white/[0.18] hover:bg-still-white/[0.05] hover:text-still-white/[0.80]'}
+                      focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-emerald-pulse/[0.80]
                     `}
                   >
                     {tab.label}
@@ -496,7 +496,7 @@ function HomeContent() {
               {setupTab === 'sequence' && (
                 <div className="flex flex-col gap-3 w-full">
                   <div className="flex flex-col gap-2 w-full px-1" role="radiogroup" aria-labelledby="sequence-label">
-                    <span id="sequence-label" className="text-still-white/62 text-xs tracking-[0.14em] uppercase font-light">
+                    <span id="sequence-label" className="text-still-white/[0.62] text-xs tracking-[0.14em] uppercase font-light">
                       Breathing Sequence
                     </span>
                     <div className="grid gap-2">
@@ -511,8 +511,8 @@ function HomeContent() {
                               min-h-[5.25rem] rounded-lg border px-3 py-2.5 cursor-pointer transition-all duration-300
                               ${active
                                 ? SELECTED_SETTING_CLASS
-                                : 'border-still-white/14 bg-still-white/[0.015] text-still-white/72 hover:border-still-white/30 hover:bg-still-white/[0.04] hover:text-still-white/86'}
-                              has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-3 has-[:focus-visible]:outline-emerald-200/80
+                                : 'border-still-white/[0.14] bg-still-white/[0.015] text-still-white/[0.72] hover:border-still-white/[0.30] hover:bg-still-white/[0.04] hover:text-still-white/[0.86]'}
+                              has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-3 has-[:focus-visible]:outline-emerald-pulse/[0.80]
                             `}
                           >
                             <input
@@ -527,10 +527,10 @@ function HomeContent() {
                             />
                             <span className="grid grid-cols-[4.35rem_1fr] items-center gap-3">
                               <span className="min-w-0">
-                                <span className={`block truncate text-[11px] leading-none tracking-[0.12em] uppercase font-light ${active ? 'text-emerald-50/92' : 'text-still-white/82'}`}>
+                                <span className={`block truncate text-[11px] leading-none tracking-[0.12em] uppercase font-light ${active ? 'text-still-white/[0.92]' : 'text-still-white/[0.82]'}`}>
                                   {r.label}
                                 </span>
-                                <span className={`mt-2 block text-[10px] leading-none tabular-nums tracking-[0.06em] font-light ${active ? 'text-emerald-100/72' : 'text-still-white/58'}`}>
+                                <span className={`mt-2 block text-[10px] leading-none tabular-nums tracking-[0.06em] font-light ${active ? 'text-still-white/[0.72]' : 'text-still-white/[0.58]'}`}>
                                   {r.pattern.filter((phase) => phase.duration > 0).map((phase) => phase.duration).join(' / ')}
                                 </span>
                               </span>
@@ -540,7 +540,7 @@ function HomeContent() {
                                     key={`${r.id}-${phase.phase}-${index}`}
                                     className="grid grid-cols-[2.35rem_1fr_1.4rem] items-center gap-1.5"
                                   >
-                                    <span className={`text-[9px] leading-none uppercase tracking-[0.08em] font-light ${active ? 'text-emerald-50/72' : 'text-still-white/58'}`}>
+                                    <span className={`text-[9px] leading-none uppercase tracking-[0.08em] font-light ${active ? 'text-still-white/[0.72]' : 'text-still-white/[0.58]'}`}>
                                       {PHASE_SHORT_LABELS[phase.phase]}
                                     </span>
                                     <span className="h-1.5 overflow-hidden rounded-full bg-still-white/[0.08]">
@@ -553,7 +553,7 @@ function HomeContent() {
                                         }}
                                       />
                                     </span>
-                                    <span className={`text-right text-[10px] leading-none tabular-nums tracking-[0.02em] font-light ${active ? 'text-emerald-50/76' : 'text-still-white/62'}`}>
+                                    <span className={`text-right text-[10px] leading-none tabular-nums tracking-[0.02em] font-light ${active ? 'text-still-white/[0.76]' : 'text-still-white/[0.62]'}`}>
                                       {phase.duration}s
                                     </span>
                                   </span>
@@ -571,7 +571,7 @@ function HomeContent() {
               {setupTab === 'visual' && (
                 <div className="flex flex-col gap-3 w-full px-1">
                   <div className="flex items-center justify-between w-full">
-                    <span className="text-still-white/62 text-xs tracking-[0.14em] uppercase font-light">Circle size</span>
+                    <span className="text-still-white/[0.62] text-xs tracking-[0.14em] uppercase font-light">Circle size</span>
                     <div className="flex gap-4 items-end" role="radiogroup" aria-label="Circle size">
                       {ORB_SIZE_OPTIONS.map(({ scale, label, sizeClass, color }) => {
                         const active = Math.abs(orbScale - scale) < 0.01;
@@ -582,8 +582,8 @@ function HomeContent() {
                               min-h-11 min-w-11 flex flex-col items-center justify-center gap-1.5 rounded-lg border cursor-pointer transition-all duration-300
                               ${active
                                 ? SELECTED_SETTING_CLASS
-                                : 'border-transparent text-still-white/60 hover:border-still-white/16 hover:bg-still-white/5 hover:text-still-white/80'}
-                              has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-emerald-200/80
+                                : 'border-transparent text-still-white/[0.60] hover:border-still-white/[0.16] hover:bg-still-white/[0.05] hover:text-still-white/[0.80]'}
+                              has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-emerald-pulse/[0.80]
                             `}
                           >
                             <input
@@ -615,7 +615,7 @@ function HomeContent() {
               {setupTab === 'audio' && (
                 <div className="flex flex-col gap-3 w-full px-1" role="radiogroup" aria-labelledby="sound-label">
                   <div className="flex items-center justify-between gap-3">
-                    <span id="sound-label" className="text-still-white/62 text-xs tracking-[0.14em] uppercase font-light">
+                    <span id="sound-label" className="text-still-white/[0.62] text-xs tracking-[0.14em] uppercase font-light">
                       Background sound
                     </span>
 
@@ -626,8 +626,8 @@ function HomeContent() {
                           min-h-11 min-w-16 flex items-center justify-center gap-1.5 rounded-lg border px-2 text-[10px] tracking-[0.12em] uppercase font-light cursor-pointer transition-all duration-300
                           ${soundPalette === SOUND_OFF_PALETTE.id
                             ? SELECTED_SETTING_CLASS
-                            : 'border-still-white/16 text-still-white/58 hover:border-still-white/30 hover:bg-still-white/5 hover:text-still-white/78'}
-                          has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-3 has-[:focus-visible]:outline-emerald-200/80
+                            : 'border-still-white/[0.16] text-still-white/[0.58] hover:border-still-white/[0.30] hover:bg-still-white/[0.05] hover:text-still-white/[0.78]'}
+                          has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-3 has-[:focus-visible]:outline-emerald-pulse/[0.80]
                         `}
                       >
                         <input
@@ -658,8 +658,8 @@ function HomeContent() {
                             min-h-11 flex items-center justify-center rounded-lg border px-1 text-[10px] tracking-[0.12em] uppercase font-light cursor-pointer transition-all duration-300
                             ${active
                               ? SELECTED_SETTING_CLASS
-                              : 'border-still-white/16 text-still-white/58 hover:border-still-white/30 hover:text-still-white/78'}
-                            has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-3 has-[:focus-visible]:outline-emerald-200/80
+                              : 'border-still-white/[0.16] text-still-white/[0.58] hover:border-still-white/[0.30] hover:text-still-white/[0.78]'}
+                            has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-3 has-[:focus-visible]:outline-emerald-pulse/[0.80]
                           `}
                         >
                           <input
@@ -685,7 +685,7 @@ function HomeContent() {
                             {previewing && (
                               <span
                                 aria-hidden="true"
-                                className="h-1.5 w-1.5 rounded-full bg-emerald-100 motion-safe:animate-pulse"
+                                className="h-1.5 w-1.5 rounded-full bg-emerald-pulse motion-safe:animate-pulse"
                               />
                             )}
                           </span>
@@ -704,14 +704,14 @@ function HomeContent() {
         )}
 
         {homeStat && (
-          <div className="flex flex-col gap-3 w-full pt-3 border-t border-still-white/10">
+          <div className="flex flex-col gap-3 w-full pt-3 border-t border-still-white/[0.10]">
             <Link
               href="/stats"
-              className="w-full min-h-14 py-3 rounded-2xl border border-still-white/20 text-still-white/60 hover:border-still-white/34 hover:text-still-white/78 hover:bg-still-white/5 active:scale-[0.98] transition-all duration-300 flex flex-col items-center justify-center gap-0.5 text-center"
+              className="w-full min-h-14 py-3 rounded-2xl border border-still-white/[0.20] text-still-white/[0.60] hover:border-still-white/[0.34] hover:text-still-white/[0.78] hover:bg-still-white/[0.05] active:scale-[0.98] transition-all duration-300 flex flex-col items-center justify-center gap-0.5 text-center"
               aria-label={`View practice history, ${homeStat.sessions} session${homeStat.sessions !== 1 ? 's' : ''}`}
             >
               <span className="text-xs tracking-[0.18em] uppercase font-light">Practice history</span>
-              <span className="text-[10px] leading-none tracking-[0.04em] font-light text-still-white/50 normal-case">
+              <span className="text-[10px] leading-none tracking-[0.04em] font-light text-still-white/[0.50] normal-case">
                 {homeStat.sessions} session{homeStat.sessions !== 1 ? 's' : ''}
               </span>
             </Link>
@@ -748,10 +748,10 @@ function HomeFallback() {
           </div>
 
           <div className="flex flex-col items-center gap-1.5">
-            <h1 className="text-4xl sm:text-5xl font-extralight tracking-[0.25em] sm:tracking-[0.38em] uppercase text-still-white/90">
+            <h1 className="text-4xl sm:text-5xl font-extralight tracking-[0.25em] sm:tracking-[0.38em] uppercase text-still-white/[0.90]">
               Exhale
             </h1>
-            <p className="text-still-white/72 text-sm tracking-[0.04em] font-light text-center">
+            <p className="text-still-white/[0.72] text-sm tracking-[0.04em] font-light text-center">
               Guided breathing for a calmer mind
             </p>
           </div>

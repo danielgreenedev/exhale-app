@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 
 const linkClass =
-  'inline-flex min-h-9 items-center justify-center whitespace-nowrap rounded-xl border border-still-white/12 bg-still-white/[0.025] px-3 text-still-white/62 hover:border-still-white/24 hover:bg-still-white/[0.055] hover:text-still-white/80 active:border-still-white/30 active:bg-still-white/[0.08] active:text-still-white/88 transition-[background-color,border-color,color] duration-200 ease-out';
+  'inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-lg border border-still-white/[0.12] bg-still-white/[0.025] px-3 text-still-white/[0.62] hover:border-still-white/[0.24] hover:bg-still-white/[0.055] hover:text-still-white/[0.80] active:border-still-white/[0.30] active:bg-still-white/[0.08] active:text-still-white/[0.88] transition-[background-color,border-color,color] duration-200 ease-out';
 
 export function PolicyFooter() {
   const { ready, isAnonymous } = useAuth();
