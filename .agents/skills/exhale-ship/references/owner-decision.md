@@ -14,7 +14,7 @@ Ask before proceeding when any item involves:
 - Revisiting durable non-goals from `PRODUCT.md`, such as required accounts, push reminders, social features, premium framing, external audio files, mascot/persona, or onboarding gates.
 - Changing Supabase schema, RLS, OAuth provider behavior, Vercel settings, environment variables, analytics semantics, retention/deletion behavior, or production data.
 - Adding dependencies, MCP servers, external services, background automation, scheduled jobs, or recurring reminders.
-- Committing, staging broad file sets, pushing, deploying, redeploying, or creating branches/PRs when not explicitly requested.
+- Committing, staging broad file sets, pushing, deploying, redeploying, or creating branches/PRs when not explicitly requested in the current turn.
 - Spending substantial time on speculative P2/P3 polish outside the user's stated goal.
 
 ## Usually Do Not Ask

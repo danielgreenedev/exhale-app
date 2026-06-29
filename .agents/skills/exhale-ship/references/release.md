@@ -6,7 +6,9 @@ Use this gate for release readiness, final verification, committing, pushing, or
 
 - Run `git status -sb`.
 - Confirm whether the user wants validation only or a commit/push flow.
+- Confirm the active shipping mode: `precommit`, `prepush`, or `production`.
 - Avoid `git add .` by default. Stage explicit files after review, and never stage unrelated or generated artifacts accidentally.
+- Read `production-pipeline.md` before staging, committing, pushing, or reporting production readiness.
 
 ## Validation
 
@@ -21,10 +23,12 @@ Abort the release gate on the first failing required command. Summarize the fail
 
 ## Git Operations
 
-- Commit only after explicit user approval.
+- Before committing, run the commit analysis and cleanup step in `production-pipeline.md`.
+- Commit only after explicit user approval or an unambiguous current-turn request to commit.
 - Use the current branch unless the user names another branch.
 - Use a descriptive commit message tied to the actual change.
-- Push only after tests/build pass and the user explicitly approves the push.
+- Push only after tests/build pass and explicit approval or an unambiguous current-turn request to push.
+- After committing or pushing, rerun `git status -sb` and report the resulting branch state.
 
 ## Deployment
 
