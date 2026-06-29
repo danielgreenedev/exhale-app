@@ -45,7 +45,8 @@ The center orb is the primary timing object. Keep the outer guide ring and incom
 - `src/hooks/useSessionStats.ts` — localStorage + Supabase session persistence
 - `src/lib/breathing.ts` — RHYTHMS registry, phase configs, session lengths, easing math
 - `src/lib/sound.ts` — sound palette labels and storage IDs
-- `src/lib/auth.tsx` — anonymous-first auth with optional Google sign-in
+- `src/lib/auth.tsx` — anonymous-first auth with optional Google, Apple, and email sign-in
+- `src/lib/emailUpdates.ts` — opt-in-only Email Updates consent helper
 - `src/lib/supabase.ts` — browser Supabase client singleton
 - `src/lib/settingsSync.ts` — local/cloud round-trip for orb scale, sound, session length, rhythm
 - `src/lib/sessionSync.ts` — local/cloud session merge helpers (dedup-aware)
@@ -91,17 +92,19 @@ Do not reuse these keys for new features:
 | `exhale-session-length` | localStorage | Last picked session length (`quick` / `short` / `medium` / `long`) |
 | `exhale-rhythm` | localStorage | Last picked breathing rhythm (`standard` / `gentle` / `box` / `flow`; legacy `full` / `slow` normalize to `box`) |
 | `exhale-visited` | localStorage | First-visit flag (cleared = first visit) |
+| `exhale-email-updates-pending` | localStorage | Short-lived pending Email Updates opt-in marker while OAuth or magic-link sign-in redirects complete |
 | `exhale-resume` | sessionStorage | In-progress session state, 60s TTL |
 
 ## Supabase Data
 
-Supabase is optional from the user's point of view and appears through Sign In for history across devices. The visible path is Google OAuth via Supabase Auth, while preserving anonymous local use as the default. Footer `Sign In` starts Google directly for anonymous visitors with no local practice history; if local history exists, it opens Practice first so the user can see what will be connected. Google sign-in should use `signInWithOAuth()` from idle/anonymous states, because new browsers get anonymous Supabase sessions by default. Use `linkIdentity()` only as a legacy bridge from an already signed-in email-code user state.
+Supabase is optional from the user's point of view and appears through Sign In for history across devices. The visible paths are Google OAuth, Apple OAuth, and email magic link through Supabase Auth, while preserving anonymous local use as the default. Footer `Sign In` opens Practice so the user can choose a provider and optionally check Email Updates. OAuth sign-in should use `signInWithOAuth()` from idle/anonymous states, because new browsers get anonymous Supabase sessions by default. Use `linkIdentity()` only as a bridge from an already signed-in non-anonymous user state.
 
 | Table | Purpose |
 |-------|---------|
 | `breathing_sessions` | Cloud practice history |
 | `user_settings` | Timer length, Circle Size, sound choice, and rhythm |
 | `app_events` | Lightweight counts for timer selection, session start, early exit, and completion |
+| `email_update_subscriptions` | Explicit opt-in consent for future Email Updates |
 | `quotes` | Rotating inspirational quotes for the session complete screen (read-only via RLS) |
 
 Local development on `localhost` / `127.0.0.1` uses local-only auth by default so blocked Supabase requests do not trigger the Next.js dev overlay during visual QA. To deliberately test local Supabase auth/sync, run `localStorage.setItem('exhale-enable-local-supabase', '1')` in the browser and reload.
@@ -111,7 +114,7 @@ Local development on `localhost` / `127.0.0.1` uses local-only auth by default s
 These are intentional — don't undo them without understanding the rationale:
 
 - **No user input during a session** — fully guided, not hold-to-breathe. Reduces intimidation for first-timers who don't know when to inhale.
-- **Anonymous by default, Sign In by choice** — users can breathe and keep local history without signing in. The visible sign-in path is Google-only and exists to track history across devices; the session flow must never become auth-gated.
+- **Anonymous by default, Sign In by choice** — users can breathe and keep local history without signing in. Visible sign-in choices are Google, Apple, and email magic link, and exist to track history across devices; the session flow must never become auth-gated.
 - **Abstract orb** — chosen over thematic visuals (ocean, lantern, mandala). More universal, less culturally loaded, works for any user.
 - **Selectable pace (Soft / Box / Flow / Relax)** — Soft is the default easiest no-hold loop, Box is the 4-4-4-4 structure, Flow is the smoother no-hold option, and Relax uses the legacy `box` id for compatibility while keeping the 4-7-8 timing visible in the picker. Alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
 - **Post-exhale handling** — there is no internal or visible post-exhale `Relax`, `Pause`, `Breathe naturally`, or `rest` phase in current rhythms. `Relax` is a selectable rhythm name, not a phase. Box's second post-exhale beat is a `Hold`, not a rest/relax phase. Do not reintroduce a post-exhale rest phase without fresh beta evidence.

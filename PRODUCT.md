@@ -44,7 +44,7 @@ Emotional goal: the user should feel held, not guided. The orb teaches through m
 3. **Silence is a feature.** Empty states, pauses, and minimal copy are not gaps; they are the product.
 4. **History is optional.** Stats exist for users who want them. They are never surfaced as a primary motivation or a source of pressure. Never on the critical path to breathing.
 5. **Every screen feels like the same app.** The emerald orb mark anchors home and stats. Color, type, and spacing are consistent. The amber shift on session complete is the only intentional deviation.
-6. **Sign-in is optional.** Google sign-in exists only to carry history and preferences between devices. It includes practice history, timer length, Circle Size, sound choice, and rhythm. It must never become a condition for breathing.
+6. **Sign-in is optional.** Google, Apple, and email sign-in exist only to carry history and preferences between devices. Synced data includes practice history, timer length, Circle Size, sound choice, and rhythm. Sign-in must never become a condition for breathing.
 
 ## Emotional Arc
 
@@ -75,9 +75,9 @@ These are decisions made and should not be revisited without strong cause:
 - Deployment source: GitHub `master`.
 - Preview branch: GitHub `preview`, deployed by Vercel as a pre-production branch.
 - Public domain: `https://exhale.guide`.
-- Optional sign-in depends on Supabase Auth with Google as the visible provider. Legacy email-code templates may remain configured for older accounts, but email code is no longer offered as the normal sign-in path.
-- Auth email, when needed for legacy/recovery states, runs through Supabase Auth custom SMTP. Do not introduce marketing email into the breathing product surface.
-- Supabase tables currently used: `breathing_sessions`, `user_settings`, `app_events`, and `quotes`.
+- Optional sign-in depends on Supabase Auth with Google, Apple, and email magic-link providers. The visible path must stay inside Practice and footer recovery, never before breathing.
+- Auth email runs through Supabase Auth custom SMTP. Email Updates are opt-in only through an unchecked checkbox during sign-in; provider email addresses are not marketing consent by themselves.
+- Supabase tables currently used: `breathing_sessions`, `user_settings`, `app_events`, `email_update_subscriptions`, and `quotes`.
 
 ## Roadmap Posture
 

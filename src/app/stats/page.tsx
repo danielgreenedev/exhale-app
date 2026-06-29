@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import Link from 'next/link';
 import { readStats, computeStats, storageAvailable, writeStats } from '@/hooks/useSessionStats';
 import type { SessionRecord } from '@/hooks/useSessionStats';
@@ -9,6 +10,12 @@ import { mergeSyncedSessions, missingLocalSessions } from '@/lib/sessionSync';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
 import { syncUserSettings } from '@/lib/settingsSync';
+import {
+  clearPendingEmailUpdatesOptIn,
+  consumePendingEmailUpdatesOptIn,
+  rememberEmailUpdatesOptIn,
+  type EmailUpdatesProvider,
+} from '@/lib/emailUpdates';
 import { PolicyFooter } from '@/components/PolicyFooter';
 import { OrbMark } from '@/components/OrbMark';
 
@@ -23,6 +30,7 @@ function formatDate(dateStr: string): string {
 
 type SyncState = 'idle' | 'codeSent' | 'verifying' | 'synced';
 type SubmitMode = 'signin' | 'link';
+type BusyAction = EmailUpdatesProvider | 'signout' | null;
 const SIGN_IN_COPY = 'Sign in to track your history across all devices.';
 const PRACTICE_ACCENTS = [
   PHASE_COLORS.inhale.color,
@@ -60,19 +68,19 @@ export function friendlySyncError(message?: string): string {
   return message || 'Something went quiet on our side. Please try again.';
 }
 
-function friendlyOAuthError(message?: string): string {
+function friendlyOAuthError(message?: string, providerLabel = 'Sign-in'): string {
   const text = (message ?? '').toLowerCase();
   if (text.includes('manual') && text.includes('link')) {
-    return 'Google sync needs identity linking enabled in Supabase first.';
+    return `${providerLabel} needs identity linking enabled in Supabase first.`;
   }
   if (looksLikeExistingEmailError(message)) {
-    return 'That Google email is attached to an older Exhale email sign-in. Contact support if this is your account.';
+    return `That email is attached to an older Exhale sign-in. Contact support if this is your account.`;
   }
   if (text.includes('provider') || text.includes('not enabled')) {
-    return 'Google sync is not ready yet. Check the Supabase Google provider setup.';
+    return `${providerLabel} is not ready yet. Check the Supabase provider setup.`;
   }
   if ((text.includes('already') && text.includes('linked')) || text.includes('identity_already')) {
-    return 'That Google account is already connected. Try Sign In With Google again.';
+    return `That account is already connected. Try ${providerLabel} again.`;
   }
   return friendlySyncError(message);
 }
@@ -141,17 +149,22 @@ export default function StatsPage() {
     refreshUser,
     signOutToAnonymous,
     startGoogleBackupSync,
+    startAppleBackupSync,
+    startEmailSignIn,
   } = useAuth();
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
   const [storageOk, setStorageOk] = useState(true);
 
   const [code, setCode] = useState('');
+  const [emailInput, setEmailInput] = useState('');
+  const [emailUpdatesOptIn, setEmailUpdatesOptIn] = useState(false);
+  const [emailUpdatesMessage, setEmailUpdatesMessage] = useState('');
   const [syncState, setSyncState] = useState<SyncState>('idle');
   const [submitMode, setSubmitMode] = useState<SubmitMode | null>(null);
   const [syncedEmail, setSyncedEmail] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [busyAction, setBusyAction] = useState<BusyAction>(null);
   const [error, setError] = useState('');
-  const [hasGoogleIdentity, setHasGoogleIdentity] = useState(false);
+  const [connectedProviders, setConnectedProviders] = useState<string[]>([]);
   const [showIosInstallTip, setShowIosInstallTip] = useState(false);
 
   // iOS Safari has no Fullscreen API, so the in-session toggle is hidden on iPhone.
@@ -170,7 +183,11 @@ export default function StatsPage() {
     setStorageOk(storageAvailable());
 
     (async () => {
-      if (!ready || syncState === 'codeSent' || syncState === 'verifying') return;
+      if (
+        !ready ||
+        syncState === 'codeSent' ||
+        syncState === 'verifying'
+      ) return;
 
       if (userId && authEmail && !isAnonymous) {
         setSyncedEmail(authEmail);
@@ -199,13 +216,42 @@ export default function StatsPage() {
     const oauthError = readOAuthReturnError();
     if (!oauthError) return;
 
-    setError(friendlyOAuthError(oauthError));
+    const searchParams = new URLSearchParams(window.location.search);
+    const provider = searchParams.get('sync');
+    const providerLabel = provider === 'apple'
+      ? 'Apple sign-in'
+      : provider === 'email'
+        ? 'Email sign-in'
+        : 'Google sign-in';
+
+    setError(friendlyOAuthError(oauthError, providerLabel));
     window.history.replaceState(null, '', '/stats');
   }, []);
 
   useEffect(() => {
+    if (!ready || !userId || !authEmail || isAnonymous) return;
+
+    let active = true;
+
+    void consumePendingEmailUpdatesOptIn(userId, authEmail).then(({ recorded, error: optInError }) => {
+      if (!active) return;
+      if (recorded) {
+        setEmailUpdatesMessage('Email Updates enabled.');
+        return;
+      }
+      if (optInError && optInError !== 'Email updates will be enabled after sign-in finishes.') {
+        setEmailUpdatesMessage('Email Updates could not be enabled yet. Please try again later.');
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [authEmail, isAnonymous, ready, userId]);
+
+  useEffect(() => {
     if (!ready || !userId || isAnonymous) {
-      setHasGoogleIdentity(false);
+      setConnectedProviders([]);
       return;
     }
 
@@ -213,7 +259,7 @@ export default function StatsPage() {
 
     void supabase.auth.getUserIdentities().then(({ data, error: identitiesError }) => {
       if (!active || identitiesError) return;
-      setHasGoogleIdentity(data.identities.some((identity) => identity.provider === 'google'));
+      setConnectedProviders(data.identities.map((identity) => identity.provider));
     });
 
     return () => {
@@ -271,27 +317,76 @@ export default function StatsPage() {
     if (code.length === expectedCodeLength(submitMode)) void submitCode(code);
   };
 
-  const handleGoogleSync = async () => {
-    setBusy(true);
+  const prepareEmailUpdatesOptIn = (provider: EmailUpdatesProvider): boolean => {
+    setEmailUpdatesMessage('');
+
+    if (!emailUpdatesOptIn) {
+      clearPendingEmailUpdatesOptIn();
+      return true;
+    }
+
+    const remembered = rememberEmailUpdatesOptIn(provider);
+    if (!remembered) {
+      setError('Email Updates could not be saved in this browser. Leave it unchecked, or enable storage and try again.');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleProviderSync = async (provider: 'google' | 'apple') => {
+    if (!prepareEmailUpdatesOptIn(provider)) return;
+
+    setBusyAction(provider);
     setError('');
-    const { error: googleError } = await startGoogleBackupSync();
-    if (googleError) {
-      setError(friendlyOAuthError(googleError));
-      setBusy(false);
+    const startProvider = provider === 'google' ? startGoogleBackupSync : startAppleBackupSync;
+    const { error: providerError } = await startProvider();
+    if (providerError) {
+      clearPendingEmailUpdatesOptIn();
+      setError(friendlyOAuthError(providerError, provider === 'google' ? 'Google sign-in' : 'Apple sign-in'));
+      setBusyAction(null);
       return;
     }
-    setBusy(false);
+    setBusyAction(null);
+  };
+
+  const handleEmailSignIn = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const email = emailInput.trim();
+    if (!email) {
+      setError('Enter your email address to send a sign-in link.');
+      return;
+    }
+    if (!prepareEmailUpdatesOptIn('email')) return;
+
+    setBusyAction('email');
+    setError('');
+    const { error: emailError } = await startEmailSignIn(email);
+    if (emailError) {
+      clearPendingEmailUpdatesOptIn();
+      setError(friendlySyncError(emailError));
+      setBusyAction(null);
+      return;
+    }
+
+    setSyncedEmail(email);
+    setSubmitMode('signin');
+    setCode('');
+    setSyncState('codeSent');
+    setBusyAction(null);
   };
 
   const handleStopSync = async () => {
-    setBusy(true);
+    setBusyAction('signout');
     setError('');
+    setEmailUpdatesMessage('');
     await signOutToAnonymous();
     setSyncState('idle');
     setSyncedEmail(null);
     setCode('');
     setSessions(readStats().sessions);
-    setBusy(false);
+    setBusyAction(null);
   };
 
   const { totalSessions, totalMinutes, totalDays } = computeStats(sessions);
@@ -421,23 +516,38 @@ export default function StatsPage() {
               <p className="text-still-white/58 text-sm font-light leading-relaxed">
                 Signed in as {syncedEmail}. Your history can follow you across devices.
               </p>
-              {!hasGoogleIdentity && (
+              {emailUpdatesMessage && (
+                <p className="text-emerald-100/72 text-xs font-light leading-relaxed">
+                  {emailUpdatesMessage}
+                </p>
+              )}
+              {!connectedProviders.includes('google') && (
                 <button
                   type="button"
-                  onClick={handleGoogleSync}
-                  disabled={busy}
+                  onClick={() => handleProviderSync('google')}
+                  disabled={busyAction !== null}
                   className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 bg-still-white/[0.03] text-still-white/72 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:bg-still-white/[0.06] hover:text-still-white/86 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
                 >
-                  {busy ? 'Opening Google...' : 'Sign In With Google'}
+                  {busyAction === 'google' ? 'Opening Google...' : 'Sign In With Google'}
+                </button>
+              )}
+              {!connectedProviders.includes('apple') && (
+                <button
+                  type="button"
+                  onClick={() => handleProviderSync('apple')}
+                  disabled={busyAction !== null}
+                  className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 bg-still-white/[0.03] text-still-white/72 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:bg-still-white/[0.06] hover:text-still-white/86 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                >
+                  {busyAction === 'apple' ? 'Opening Apple...' : 'Sign In With Apple'}
                 </button>
               )}
               <button
                 type="button"
                 onClick={handleStopSync}
-                disabled={busy}
+                disabled={busyAction !== null}
                 className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 text-still-white/58 text-xs tracking-[0.2em] uppercase font-light hover:border-still-white/30 hover:text-still-white/75 hover:bg-still-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
               >
-                {busy ? 'Signing out...' : 'Sign out here'}
+                {busyAction === 'signout' ? 'Signing out...' : 'Sign out here'}
               </button>
               {error && (
                 <p className="text-amber-100/72 text-xs font-light leading-relaxed">
@@ -448,10 +558,10 @@ export default function StatsPage() {
           ) : (syncState === 'codeSent' || syncState === 'verifying') && syncedEmail ? (
             <div className="flex flex-col gap-3">
               <p className="text-still-white/58 text-sm font-light leading-relaxed">
-                We sent a {expectedCodeLength(submitMode)}-digit code to {syncedEmail}. Open the email and enter the code below.
+                We sent a sign-in email to {syncedEmail}. Open the link, or enter the code if the email shows one.
               </p>
               <p className="text-still-white/55 text-xs font-light leading-relaxed -mt-1">
-                This is an older email-code sign-in step. Finish it once, then use Google next time.
+                You can use Google, Apple, or email next time.
               </p>
               <label htmlFor="otp-code" className="sr-only">{expectedCodeLength(submitMode)}-digit code</label>
               <input
@@ -476,6 +586,18 @@ export default function StatsPage() {
               >
                 {syncState === 'verifying' ? 'Verifying...' : 'Confirm'}
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSyncState('idle');
+                  setSyncedEmail(null);
+                  setSubmitMode(null);
+                  setCode('');
+                }}
+                className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 text-still-white/58 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:text-still-white/75 hover:bg-still-white/5 transition-all duration-300"
+              >
+                Use another email
+              </button>
               {error && (
                 <p className="text-amber-100/72 text-xs font-light leading-relaxed text-center">
                   {error}
@@ -487,18 +609,69 @@ export default function StatsPage() {
               <p className="text-still-white/58 text-xs font-light leading-relaxed -mt-1">
                 {SIGN_IN_COPY}
               </p>
+              <label
+                htmlFor="email-updates"
+                className="flex min-h-11 items-start gap-3 rounded-2xl border border-still-white/12 px-3 py-3 text-still-white/58 hover:border-still-white/22 transition-colors duration-300"
+              >
+                <input
+                  id="email-updates"
+                  type="checkbox"
+                  checked={emailUpdatesOptIn}
+                  onChange={(event) => setEmailUpdatesOptIn(event.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-still-white/30 bg-transparent accent-emerald-pulse"
+                />
+                <span className="flex flex-col gap-1 text-left">
+                  <span className="text-xs tracking-[0.14em] uppercase font-light text-still-white/70">
+                    Email Updates
+                  </span>
+                  <span className="text-xs font-light leading-relaxed text-still-white/55">
+                    Optional notes about Exhale. Unchecked means no updates.
+                  </span>
+                </span>
+              </label>
               <button
                 type="button"
-                onClick={handleGoogleSync}
-                disabled={busy}
+                onClick={() => handleProviderSync('google')}
+                disabled={busyAction !== null}
                 className={`w-full min-h-11 py-3 rounded-2xl border text-xs tracking-[0.18em] uppercase font-light disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 ${
                   totalSessions === 0
                     ? 'border-still-white/14 text-still-white/58 hover:border-still-white/24 hover:text-still-white/72'
                     : 'border-still-white/18 bg-still-white/[0.03] text-still-white/72 hover:border-still-white/30 hover:bg-still-white/[0.06] hover:text-still-white/86'
                 }`}
               >
-                {busy ? 'Opening Google...' : 'Sign In With Google'}
+                {busyAction === 'google' ? 'Opening Google...' : 'Sign In With Google'}
               </button>
+              <button
+                type="button"
+                onClick={() => handleProviderSync('apple')}
+                disabled={busyAction !== null}
+                className={`w-full min-h-11 py-3 rounded-2xl border text-xs tracking-[0.18em] uppercase font-light disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 ${
+                  totalSessions === 0
+                    ? 'border-still-white/14 text-still-white/58 hover:border-still-white/24 hover:text-still-white/72'
+                    : 'border-still-white/18 bg-still-white/[0.03] text-still-white/72 hover:border-still-white/30 hover:bg-still-white/[0.06] hover:text-still-white/86'
+                }`}
+              >
+                {busyAction === 'apple' ? 'Opening Apple...' : 'Sign In With Apple'}
+              </button>
+              <form className="flex flex-col gap-2" onSubmit={handleEmailSignIn}>
+                <label htmlFor="sign-in-email" className="sr-only">Email address</label>
+                <input
+                  id="sign-in-email"
+                  type="email"
+                  value={emailInput}
+                  onChange={(event) => setEmailInput(event.target.value)}
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  className="w-full min-h-12 rounded-2xl border border-still-white/18 bg-transparent px-4 py-3 text-sm font-light text-still-white/86 placeholder:text-still-white/35 focus:border-still-white/40 focus:outline-none transition-colors duration-300"
+                />
+                <button
+                  type="submit"
+                  disabled={busyAction !== null}
+                  className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 text-still-white/58 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:text-still-white/75 hover:bg-still-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                >
+                  {busyAction === 'email' ? 'Sending Link...' : 'Email Sign In'}
+                </button>
+              </form>
               {error && (
                 <p className="text-amber-100/72 text-xs font-light leading-relaxed text-center mt-1">
                   {error}

@@ -1,6 +1,6 @@
 # Exhale To-Do List
 
-Last updated: June 24, 2026 (SEO roadmap clarification)
+Last updated: June 29, 2026 (distribution, design-pass, and monetization roadmap clarification)
 
 ## Completed Rhythm Changes
 
@@ -147,6 +147,18 @@ Driven by owner direction after reviewing Shawn Beck's auth recommendation.
 - The Google action now reads `Sign In With Google` instead of `Continue with Google`.
 - The shared footer now reads `Sign In` for anonymous users and `Signed In` for signed-in users. If an anonymous visitor has no local practice history, footer Sign In starts Google directly. If local history exists, it opens Practice first so the user can see the history before connecting it.
 - Privacy, terms, product, design, roadmap, deployment, and handoff docs were updated to reflect Google sign-in as the visible path while preserving anonymous-first use.
+
+## Completed Provider Sign-In Expansion (2026-06-29)
+
+Owner-directed auth update: Google remains, Apple and email sign-in are now visible optional choices, and Email Updates consent is opt-in only.
+
+- Practice Sign In now shows Google, Apple, and email sign-in choices below the reflective Practice content.
+- Footer Sign In opens Practice instead of auto-launching Google, so users can choose their provider and see the Email Updates checkbox.
+- Email Updates is unchecked by default. Consent is stored only when the user checks the box and sign-in completes with a real signed-in email.
+- Added `email_update_subscriptions` with RLS for explicit consent storage. Auth email alone is not marketing consent.
+- Email sign-in uses Supabase magic link with code-entry fallback for legacy email templates.
+- Privacy, terms, product, design, deployment, roadmap, and implementation docs were updated.
+- Deployment still needs the migration applied, Apple provider configured in Supabase/Apple Developer, and production/preview provider flows smoke-tested.
 
 ## Completed Facebook In-App Orb-Overflow And Meta Hint Copy (2026-05-27)
 
@@ -318,7 +330,7 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 - Preserve and merge existing local/anonymous practice history when a user starts Google sync, matching the current Backup & Sync preservation goal. Implementation uses normal Google sign-in from idle/anonymous states and reserves Supabase `linkIdentity()` for the synced email-code `Link Google` state. Practice History now writes the reconciled cloud/local session list back to local storage so the Home counter can reflect synced history after Practice has loaded it.
 - Copy direction: frame this as "Backup & Sync" or "Save across devices." It is a persistence affordance, not an account system.
 - Portfolio rationale: demonstrates a privacy-first auth architecture suitable for a resume/GitHub project while respecting the app's anonymity promise.
-- Future path: Apple Sign-In can follow later if iPhone testers or privacy-sensitive users ask for it; do not take on Apple Developer/account overhead as the first provider.
+- Superseded 2026-06-29: Apple Sign-In is now app-side implemented by owner direction. Apple Developer/Supabase provider setup remains a deployment task.
 - Guardrails: no profile screen, avatars, passwords, account settings, premium gate, or auth-first onboarding as part of this task.
 - Acceptance completed: the same Supabase user shows Email and Google providers enabled, and a fresh Firefox production session restored practice history through Google sign-in. Keep email-code sync available unless follow-up testing shows it is redundant.
 
@@ -434,7 +446,22 @@ These can wait until after Stage 0 feedback signal is in.
 
 6m. Planned SEO optimization pass: make Stage 1 discoverability explicit beyond the already shipped metadata, sitemap, robots, and social-preview work. Scope should include keyword/intent fit for anxiety breathing and paced breathing, title/meta/canonical review, search-result copy, structured data only if it genuinely fits, and performance/indexability checks. Keep the home screen calm and two-tap; do not solve SEO by adding a marketing-heavy landing page or extra first-breath friction.
 
-7. Later, after feedback intake: design and build the Garden skin as a toggle alongside the current "Still Water" aesthetic. Aesthetic direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Both skins must remain disciplined under the existing design system rules (one accent per skin, weight ceiling, no italics, no decorative shadows). Secondary-user feedback asked about changing colors; evaluate that through a theme/skin system before considering freeform color controls. Run `/impeccable shape Garden skin` before building.
+6n. Planned full Impeccable product-design pass: before public v1/distribution, review the whole active product surface with the relevant Impeccable commands instead of only the already-run audit/critique items. Recommended order:
+
+- `/impeccable critique Exhale product surface` to rescore first-run, active session, completion, Practice, policy/footer, and settings surfaces.
+- `/impeccable audit Exhale product surface` for measurable accessibility, performance, responsiveness, theming, and anti-pattern checks.
+- `/impeccable typeset Exhale product surface` for the Inter/lightweight hierarchy, low-vision readability, line length, tracking, and body-size decisions.
+- `/impeccable layout Exhale product surface` for spacing rhythm, first-viewport fit, Session Setup density, and active-session hierarchy.
+- `/impeccable adapt Exhale mobile and PWA contexts` for iOS Safari/PWA, Android Chrome/TWA, Meta in-app browser, touch targets, and viewport behavior.
+- `/impeccable harden Exhale product surface` for long text, auth/sync failures, network/offline behavior, empty states, and edge cases.
+- `/impeccable clarify Exhale copy` for sign-in, donation, paid-skin, custom-pattern, error, and policy language.
+- `/impeccable polish Exhale product surface` as the final pass after fixes land.
+
+Use `/impeccable colorize`, `/impeccable delight`, or `/impeccable overdrive` only for scoped skin proposals, not the default Still Water app. The default app should stay restrained.
+
+6o. Resolved 2026-06-29: app-side auth/sync provider expansion is implemented for Google, Apple, and email sign-in. Remaining work is deployment validation: apply migration `005-email-update-subscriptions.sql`, configure the Apple provider in Supabase/Apple Developer, verify email magic-link templates, and smoke-test provider returns on preview/production.
+
+7. Later, after feedback intake: design a skin system and build the first skin toggle alongside the current "Still Water" aesthetic. Garden is the first candidate direction: sage and moss greens on a soft warm white, organic shapes, sun-through-leaves dappled quality, gentle floral accents. Add a proposal pass for at least two alternative full-app skin/UI overhaul directions before implementation, with `/impeccable shape` run for each candidate. Both free and paid skins must remain disciplined under the design rules: one accent per skin, weight ceiling, no italics, no decorative shadows, strong contrast, and no extra friction before Begin. Secondary-user feedback asked about changing colors; evaluate that through curated skins before considering freeform color controls.
 
 8. Resolved 2026-05-19 for Facebook feed posts: the Facebook preview now renders correctly on shared posts; the Sharing Debugger issue cleared once Meta's cache aged out, matching the working hypothesis. Observed 2026-06-15: Facebook Messenger messages still do not show the rich preview even though Facebook feed posts, Discord, and Telegram do. Treat Messenger as a separate cache/fetch/client-rendering surface and use `docs/SOCIAL_PREVIEW_TROUBLESHOOTING.md` before changing metadata again. When the Garden skin lands, consider an updated OG image that shows both aesthetics - that is the only related product-side thread still on the radar.
 
@@ -447,6 +474,22 @@ Stage 2 comes after the Stage 0 and Stage 1 work above.
 10. Package Exhale as an Android Trusted Web Activity and submit to the Play Store. Land this after the Garden skin, feedback-driven changes, and discoverability work.
 
 11. iOS PWA "Add to Home Screen" affordance already exists as a quiet tip on `/stats` (2026-05-19); revisit when wider beta begins to decide if it needs a more prominent surfacing.
+
+12. Native iPhone/iOS Store release is not active, but keep it as a conditional revisit. A Capacitor shell should wait until reception, donations, or paid-theme demand justifies the Apple Developer account cost, native wrapper work, and App Review risk.
+
+### Stage 3, conditional operations and monetization
+
+These wait until Stage 0/1 reception justifies taking money. The free breathing tool must remain useful without payment, sign-in, or subscription.
+
+13. Donation button/page: add a quiet optional donation affordance that links to the owner's PayPal Business account once created. Stripe Payment Link remains a fallback if PayPal is not ready or adds too much friction. Do not place donation in the first-breath path.
+
+14. Freemium model proposal: scope paid unlocks to optional custom breathing patterns and alternative app skins/full UI overhauls. Keep curated breathing patterns, Still Water, local history, and the core session experience free. Avoid premium language on Home, Game, and Complete.
+
+15. Custom breathing-pattern proposal: define the smallest advanced editor that avoids overwhelming first-time users. Likely placement is after at least one completed session, behind Session Setup or Practice, with guardrails for safe phase durations, accessible labels, and a free preset baseline.
+
+16. Paid skin/theme-pack proposal: use the Stage 1 skin proposals to decide which two skins could sit behind the future freemium unlock. Paid skins are aesthetic alternatives, not accessibility fixes; High Visual Contrast or Large Text must stay free if built.
+
+17. Email marketing readiness: collect and use signed-in email addresses for marketing only after explicit opt-in consent. Add privacy copy, unsubscribe handling, an email-service decision, and a consent field/table before any campaign. Auth email alone is not marketing permission.
 
 ## Recommended Next Move
 

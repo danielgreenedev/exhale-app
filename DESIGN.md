@@ -269,9 +269,11 @@ Practice history is pure reflection. Show only `Sessions`, `Total time`, `Days p
 
 Sign In belongs only in the footer and on the Practice screen, below the reflective history content. It is an optional continuity affordance, not a requirement before breathing. It syncs practice history, timer length, Circle Size, sound choice, and rhythm.
 
-The default path remains anonymous local use. If an anonymous visitor has no local practice history and clicks `Sign In` in the footer, start Google sign-in directly so Exhale can create the cloud connection without an empty intermediate screen. If an anonymous visitor already has local practice history, the footer opens Practice first so they can see the history that will be connected. The Practice action reads `Sign In With Google`, with supporting copy: "Sign in to track your history across all devices."
+The default path remains anonymous local use. Footer `Sign In` opens Practice so the user can choose Google, Apple, or email sign-in without making any provider feel required. The Practice copy stays practical: "Sign in to track your history across all devices." Provider actions read `Sign In With Google`, `Sign In With Apple`, and `Email Sign In`.
 
-Do not show email-code sign-in as a normal option. Legacy email-code verification can remain as a recovery bridge for older in-progress states, but the visible path is Google-only. Do not use avatars, profile language, account settings, resend loops, premium-gate framing, or anything that makes breathing feel gated.
+Email sign-in uses a magic link as the visible path. Legacy email-code verification can remain as a recovery bridge for older in-progress states, but normal users should not see a code-first flow. Do not use avatars, profile language, account settings, resend loops, premium-gate framing, or anything that makes breathing feel gated.
+
+Email Updates consent appears as one unchecked checkbox in the Practice Sign In section. It must remain opt-in only: unchecked means no update emails. The checkbox is for future update messages, not for breathing, sync, account access, or any required step. If checked, consent is recorded only after sign-in completes with a real email identity.
 
 OAuth releases must keep `/privacy` and `/terms` current in the same change. They should explain the optional provider path in plain language, name what syncs, note third-party provider involvement, preserve the anonymous-first promise, and avoid legalistic language that makes Sign In feel mandatory.
 
@@ -307,7 +309,7 @@ If the roadmap's admin/support panel is built, it should feel like a quiet opera
 - **Don't** design like Headspace or Calm — no onboarding carousels, no premium gate framing, no illustrated brand characters, no teacher voices.
 - **Don't** design like a fitness app — no streak counters as pressure, no achievement popups, no guilt mechanics.
 - **Don't** require an account, login, OAuth, or cloud sync before breathing. Optional Sign In must never block first use.
-- **Don't** build a full account surface around Google sign-in. No profile screen, avatar, password flow, account settings, or auth-first navigation.
+- **Don't** build a full account surface around sign-in. No profile screen, avatar, password flow, account settings, or auth-first navigation.
 - **Don't** make a future admin panel look like generic SaaS. No hero metrics, bright chart walls, nested cards, or decorative dashboard chrome.
 - **Don't** add push notifications, sharing features, or social comparisons. The experience is private and self-contained.
 - **Don't** use audio files. All sound is synthesized via Web Audio API. Zero load time is part of the low-friction promise.

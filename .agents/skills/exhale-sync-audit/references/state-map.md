@@ -21,7 +21,8 @@
 - Local storage writes happen first for completed sessions; cloud insert is opportunistic when `userId` exists.
 - Only 401/403 auth invalidation should drop a cached user. Transient auth failures preserve cached session state.
 - Localhost bypass prevents blocked Supabase requests from producing noisy dev overlays unless deliberately disabled with `exhale-enable-local-supabase`.
-- Google is the visible sign-in path. Email-code behavior is legacy/recovery only.
+- Google, Apple, and email magic link are the visible sign-in paths. Email-code behavior is legacy/recovery only.
+- Email Updates consent is opt-in only and stored in `email_update_subscriptions` after sign-in completes.
 - Existing cloud settings overwrite local settings on sign-in; absent cloud settings get initialized from local settings.
 - Legacy rhythm IDs `full` and `slow` normalize to `box` for compatibility.
 - Session history merge uses date, duration, cycles, and length as the duplicate key and preserves extra local duplicates.
@@ -31,7 +32,8 @@
 
 - First visit with no storage, blocked storage, or malformed `exhale-stats`.
 - Returning anonymous user with local history using footer Sign In versus Practice Sign In.
-- OAuth return to `/stats?sync=google` and hash/query error handling.
+- OAuth return to `/stats?sync=google` or `/stats?sync=apple`, email return to `/stats?sync=email`, and hash/query error handling.
+- Checked Email Updates before redirect, followed by successful or failed consent persistence.
 - Signed-in user with cloud sessions plus local-only sessions created before sync.
 - Signed-in user with no cloud settings row but local settings present.
 - Signed-in user with invalid cloud settings values.

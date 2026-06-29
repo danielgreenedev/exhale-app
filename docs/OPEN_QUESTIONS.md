@@ -1,6 +1,6 @@
 # Exhale Open Questions
 
-Last updated: June 21, 2026 (generic/derivative design signal added)
+Last updated: June 29, 2026 (provider, freemium, donation, and skin strategy questions added)
 
 Use this as a living parking lot for product, validation, trust, accessibility, and strategy questions that are not ready to become implementation tasks. As questions are answered, add the answer, date, evidence, and any resulting TODO/doc updates.
 
@@ -540,15 +540,29 @@ Current answer: Open.
 
 ### Is optional Sign In quiet enough?
 
-Context: Sign In belongs only in the footer and Practice, and must not make Exhale feel account-gated. As of 2026-06-07, the visible path is Google-only. Fresh anonymous visitors with no local history can start Google directly from the footer; anonymous visitors with local history are routed to Practice first so they can see what will be connected.
+Context: Sign In belongs only in the footer and Practice, and must not make Exhale feel account-gated. As of 2026-06-29, visible choices are Google, Apple, and email. Footer Sign In opens Practice so the user can choose a provider and optionally opt into Email Updates.
 
 Current answer: Open.
+
+### Should Exhale offer email magic-link and Apple Sign-In as optional provider alternatives?
+
+Context: Google OAuth was the first visible provider. The owner then directed the roadmap and app to support email magic link, Google, and Apple. This is a provider-coverage question, not permission to create a fuller account system.
+
+Current answer: Answered 2026-06-29 by owner direction. Yes: keep Google, add Apple Sign-In, and add email sign-in as visible optional provider choices in Practice. App-side implementation is complete; deployment still needs Apple provider setup, email template verification, and production/preview smoke tests. All providers stay optional and never appear before breathing.
+
+Guardrails:
+
+- Anonymous local use remains the default.
+- No profile screen, avatar, password flow, account settings, or auth-first navigation.
+- Preserve and merge local practice history and settings.
+- Update `/privacy` and `/terms` in the same change.
+- Do not use provider expansion as a premium gate.
 
 ### Could OAuth (Google / Apple Sign-In) be lower-friction than email OTP for Practice History sync?
 
 Context: Practice History sync previously used email-code OTP. That required the user to leave Exhale, open their email app, find the code, switch back, and paste it. OAuth providers offer a lower-friction consent flow when the device is already signed into Google or Apple. For users who have decided to track history across devices, OAuth is a strict simplification over OTP. This is different from "should Exhale have a fuller account system" below: the framing is friction reduction inside an optional persistence path, not adding a profile surface to the app.
 
-Current answer: **Resolved and completed in Stage 0 on 2026-05-20; simplified on 2026-06-07.** Google OAuth is now the single visible sign-in path for tracking history across devices. Anonymous-first stays the default; breathing never requires sign-in. If a fresh anonymous visitor with no local history clicks footer Sign In, Exhale starts Google directly. If an anonymous visitor has local history, Exhale opens Practice first and shows the local history plus a `Sign In With Google` button. App-side wiring, Supabase/Google provider setup, manual linking, local smoke testing, production redirect smoke testing, email-code-to-Google linking, and Firefox production restore testing are complete. Supabase shows Email and Google attached to the same user, and a fresh Firefox production session restored synced Practice History through Google sign-in. Apple Sign-In remains a later candidate because it is privacy-aligned but adds Apple Developer/provider overhead.
+Current answer: **Resolved and completed in stages.** Google OAuth shipped first, was simplified on 2026-06-07, and Apple plus email sign-in were added app-side on 2026-06-29. Anonymous-first stays the default; breathing never requires sign-in. Footer Sign In opens Practice so the user can choose Google, Apple, or email. Provider sign-in merges local practice history into the signed-in cloud records and restores settings. Apple provider setup and email magic-link template verification remain deployment tasks.
 
 Why this moved up:
 
@@ -561,38 +575,38 @@ Tradeoffs worth naming before building:
 
 - A "Sign In With Google" button can read as account-gated if it appears too early or too loudly. This sits slightly against the anonymous-first brand signal, so the footer stays quiet and Begin remains the primary action.
 - OAuth introduces Google (and eventually Apple) as third-party dependencies for synced users. Non-synced users are unaffected.
-- Apple Sign-In adds review/policy overhead and a separate provider config. Defensible to defer until a tester actually asks for it.
+- Apple Sign-In adds review/policy overhead and a separate provider config, but owner direction on 2026-06-29 accepted that tradeoff.
 - Implementation cost is low: Supabase supports both providers natively, and the current anonymous-to-email sync flow already converts anonymous identities; OAuth follows the same identity-linking stance when possible.
 
 Implementation stance shipped:
 
 - Use Supabase Auth provider support, not manual OAuth handshakes.
-- Use normal Google sign-in from idle/anonymous states, because fresh browsers receive anonymous Supabase sessions by default. Use `linkIdentity()` only as a legacy bridge from an already signed-in email-code user state when the provider is not attached yet.
-- Add Google first, then evaluate Apple later.
+- Use normal provider sign-in from idle/anonymous states, because fresh browsers receive anonymous Supabase sessions by default. Use `linkIdentity()` only as a bridge from an already signed-in non-anonymous user state when the provider is not attached yet.
+- Offer Google, Apple, and email sign-in from Practice.
 - Treat OAuth as history across devices, not as a profile/account feature.
 - Preserve and merge existing local/anonymous data when a provider is linked.
-- Hide email-code sign-in from the normal UI. Keep only enough legacy support to avoid stranding older email-code users.
+- Use email magic link for normal email sign-in. Keep enough email-code support to avoid stranding older email-code users or old templates during rollout.
 - Keep `/privacy` and `/terms` aligned with the optional provider path so they describe provider sign-in, exact synced data, third-party involvement, deletion/request paths, and the anonymous-first promise.
 
 Related: the existing "fuller account system" question below addresses a different concern (account management surface area, not friction reduction within an existing optional gate).
 
 ### Would a fuller account system ever create enough value to justify the added friction?
 
-Context: Exhale currently uses anonymous Supabase identity by default and optional Google sign-in for history across devices. `PRODUCT.md` and `DESIGN.md` both protect the anonymous-first promise: no required account, login, profile, onboarding gate, or sync prompt before breathing. Any fuller auth model, such as password login, profiles, account settings, or persistent account management, would need a clear user benefit that optional Google sign-in cannot provide.
+Context: Exhale currently uses anonymous Supabase identity by default and optional Google, Apple, or email sign-in for history across devices. `PRODUCT.md` and `DESIGN.md` both protect the anonymous-first promise: no required account, login, profile, onboarding gate, or sync prompt before breathing. Any fuller auth model, such as password login, profiles, account settings, or persistent account management, would need a clear user benefit that optional provider sign-in cannot provide.
 
-Current answer: Still no fuller account system. Optional Google sign-in has shipped, but that does not authorize profiles, account settings, passwords, avatars, required login, or auth-first onboarding.
+Current answer: Still no fuller account system. Optional provider sign-in has shipped, but that does not authorize profiles, account settings, passwords, avatars, required login, or auth-first onboarding.
 
 Possible reasons to revisit:
 
 - Testers explicitly ask for stronger account recovery or account management.
-- Cross-device history feels unreliable or confusing with Google sign-in alone.
+- Cross-device history feels unreliable or confusing with provider sign-in alone.
 - Deletion, data export, privacy controls, or trust needs become hard to support without account settings.
 - A future therapist, group, or organizational use case requires managed identities.
 
 Default stance:
 
 ```text
-Do not add a fuller account surface beyond optional Google sign-in unless beta feedback shows the value outweighs the extra friction.
+Do not add a fuller account surface beyond optional provider sign-in unless beta feedback shows the value outweighs the extra friction.
 ```
 
 ## Accessibility
@@ -634,6 +648,30 @@ Future options:
 - Keep email deletion during beta.
 - Add in-app deletion inside Practice History.
 - Add a self-serve deletion confirmation flow after Google sign-in.
+
+### Can sign-in email addresses be used for email marketing?
+
+Context: The owner wants to collect email addresses from sign-ins so an email marketing campaign can be created later. Auth email can be a practical contact identifier, but privacy, trust, and email-law expectations are different from sync identity.
+
+Current answer: Partially answered and implemented 2026-06-29. Collect marketing/update permission only through the unchecked Email Updates checkbox in Practice Sign In. Do not treat Google, Apple, or magic-link sign-in as marketing consent by itself. The breathing product should not feel like a lead-capture funnel.
+
+Requirements before build:
+
+- Add clear opt-in language separate from sign-in. Implemented through the Email Updates checkbox.
+- Record consent state and timestamp. Implemented in `email_update_subscriptions`.
+- Provide unsubscribe handling and choose an email service provider.
+- Update `/privacy` and `/terms`. Completed 2026-06-29 for opt-in collection; update again before sending a real campaign.
+- Keep marketing prompts out of the first-breath path.
+
+Follow-up questions:
+
+```text
+Should marketing opt-in be offered only after a completed session, only inside Practice, or only on a future donation/support page?
+```
+
+```text
+What would the first campaign actually send: launch updates, breathing tips, skin releases, donation/support updates, or something else?
+```
 
 ## Strategy
 
@@ -689,6 +727,62 @@ When you say change colors, do you mean the orb/phase colors, the background sty
 
 ```text
 Would a few curated themes feel better than choosing every color yourself?
+```
+
+### What monetization model preserves free use and minimal friction?
+
+Context: The owner wants a freemium model for two optional feature classes: custom breathing patterns and alternative app skins/full UI overhauls. `PRODUCT.md` still protects a fully useful free app, no required account, and no premium framing before breathing.
+
+Current answer: Open. Treat freemium as Stage 3 and proposal-first, not a build task. The likely acceptable shape is optional paid unlocks for advanced personalization while the existing curated rhythms, Still Water skin, local history, and guided sessions stay free.
+
+Accepted constraints:
+
+- No payment prompt before Begin.
+- No subscription or account requirement for the core breathing session.
+- No paid gate for accessibility necessities such as High Visual Contrast, Large Text, reduced motion support, or screen-reader equivalents.
+- Paid custom patterns must include safety and readability guardrails, not freeform unsafe timing fields.
+- Paid skins must be complete, accessible design systems, not color randomizers.
+
+Open subquestions:
+
+- Are custom breathing patterns a paid feature, a donation thank-you, or an advanced free feature with paid skins only?
+- Does a future paid pattern editor create too much decision friction for the target audience?
+- Should paid skins be one-time purchases, donations incentives, or part of a broader supporter tier?
+- Where can a paywall live without making the breathing tool feel premium-gated?
+
+### What donation flow should Exhale use?
+
+Context: The roadmap previously named a Stripe link because it is usually low-friction. The owner now wants a PayPal donation button received by a business PayPal account that still needs to be created.
+
+Current answer: Open. Stage 3 should compare PayPal Business donation link/button against Stripe Payment Link once the PayPal account exists. The product preference is whichever is quietest, most trustworthy, lowest-friction, and easiest to maintain.
+
+Guardrails:
+
+- Donation is optional support, not payment for breathing.
+- Do not put donation in the first-breath path.
+- Prefer footer, Practice, Complete, or a standalone Support page over Home primary action placement.
+- Update business/legal docs if donation collection changes entity, tax, or privacy posture.
+
+### Which two alternative skins should be shaped first?
+
+Context: Garden is already on the roadmap, but the owner wants proposals for two alternative skins/design UI overhauls behind a future freemium paywall.
+
+Current answer: Open. Run `/impeccable shape` for at least two candidates before implementation. Garden should remain one candidate unless the owner explicitly replaces it.
+
+Candidate lanes to validate:
+
+- **Garden**: soft warm-white ground, sage and moss greens, organic light, subtle floral/leaf cues. Best for warmth, accessibility, and contrast from Still Water.
+- **Lantern**: dim amber-charcoal environment, paper-lantern glow, slower evening tone. Best for nighttime calm without becoming generic meditation-app purple.
+- **Linen**: quiet light-mode paper/linen texture, low-ink UI, botanical accent. Best for users who dislike dark interfaces and for iOS home-screen friendliness.
+
+Selection questions:
+
+```text
+Should the two proposal slots be Garden plus one darker alternative, or two non-dark alternatives that broaden the app beyond Still Water?
+```
+
+```text
+Should paid skins feel like aesthetic overhauls only, or should each skin include slight motion/sound differences too?
 ```
 
 ### Is Facebook preview worth more attention?

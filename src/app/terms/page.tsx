@@ -5,7 +5,7 @@ import { OrbMark } from '@/components/OrbMark';
 import { SITE_NAME, canonicalUrl } from '@/lib/seo';
 
 const title = 'Terms of Use, Exhale';
-const description = 'Terms for using Exhale, a free guided breathing tool with optional Google sign-in for practice history.';
+const description = 'Terms for using Exhale, a free guided breathing tool with optional sign-in for practice history.';
 
 export const metadata: Metadata = {
   title,
@@ -43,7 +43,7 @@ export default function TermsPage() {
               Terms
             </h1>
             <p className="text-still-white/58 text-xs tracking-[0.05em] font-light">
-              Last updated June 7, 2026
+              Last updated June 29, 2026
             </p>
           </div>
         </header>
@@ -90,20 +90,29 @@ export default function TermsPage() {
           </ul>
         </Section>
 
-        <Section title="Optional Google sign-in">
+        <Section title="Optional sign-in">
           <p>
-            Exhale can be used anonymously. Google sign-in is optional and exists only
-            to help you keep practice history and settings across devices.
+            Exhale can be used anonymously. Google, Apple, and email sign-in are
+            optional and exist only to help you keep practice history and settings
+            across devices.
           </p>
           <p className="mt-3">
-            If you choose Google sign-in, Google and Supabase are used to maintain your
-            session and connect your practice data to the same identity on another
-            device. You are responsible for access to the Google account you use for
-            Exhale.
+            If you choose provider sign-in, that provider and Supabase are used to
+            maintain your session and connect your practice data to the same identity
+            on another device. You are responsible for access to the account or email
+            address you use for Exhale.
           </p>
           <p className="mt-3">
-            Google sign-in is provided on the same best-effort basis as the rest of
+            Optional sign-in is provided on the same best-effort basis as the rest of
             Exhale. It is not required to start or complete a breathing session.
+          </p>
+        </Section>
+
+        <Section title="Email Updates">
+          <p>
+            Email Updates are optional. Checking Email Updates while signing in gives
+            Exhale permission to use your signed-in email address for future update
+            messages. Leaving the box unchecked means you are not opting in.
           </p>
         </Section>
 

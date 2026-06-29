@@ -14,7 +14,7 @@ Exhale uses Vercel for hosting, Supabase for data, and GitHub as the deployment 
 2. Commit the change on a working branch.
 3. Push to `preview`.
 4. Test the Vercel preview URL on desktop and mobile if preview access is open.
-5. For sign-in changes, test the full two-device Google sign-in flow on the preview URL.
+5. For sign-in changes, test the full two-device Google, Apple, and email magic-link sign-in flows on the preview URL.
 6. Merge or cherry-pick the tested commit to `master`.
 7. Push `master` to deploy `https://exhale.guide`.
 8. Confirm the GitHub/Vercel deployment status is successful.
@@ -26,8 +26,10 @@ Exhale uses Vercel for hosting, Supabase for data, and GitHub as the deployment 
 - `npm.cmd run build`
 - Home page starts a session.
 - Game page shows Settling In, the orb canvas, phase transitions, and sound behavior.
-- Practice History shows stats and optional Google sign-in.
-- Google sync opens the provider flow and returns to Practice History.
+- Practice History shows stats and optional Google, Apple, and email sign-in.
+- Google and Apple sync open the provider flow and return to Practice History.
+- Email sign-in sends a magic link and returns to Practice History.
+- Email Updates remain unchecked by default; checking the box records consent only after sign-in completes.
 - A second device sees synced practice history, timer length, Circle Size, sound choice, and rhythm.
 
 ## Vercel Settings
@@ -61,27 +63,29 @@ Supabase stores:
 - `breathing_sessions`: practice history.
 - `user_settings`: timer length, Circle Size, sound choice, and rhythm.
 - `app_events`: timer selections, session starts, early exits, and completions for synced users. Session start, completion, and exit payloads include `rhythm` so Supabase reads can compare completion and drop-off by pace.
+- `email_update_subscriptions`: explicit opt-in consent for future Email Updates.
 
-## Legacy Email Auth Delivery
+## Email Auth Delivery
 
-Exhale no longer offers email-code sign-in as the visible user path. Keep the Supabase Auth email OTP setup available only as a legacy/recovery bridge for older email-code accounts or in-progress email-change states. Production auth email uses Resend with a dedicated auth sending subdomain:
+Exhale offers email magic-link sign-in as an optional visible path, and keeps the older email-code verification UI only as a legacy/recovery bridge for older email-code accounts or in-progress email-change states. Production auth email uses Resend with a dedicated auth sending subdomain:
 
 - Sending domain: `auth.exhale.guide`
 - From address: `Exhale <no-reply@auth.exhale.guide>`
 - Provider: Resend via Supabase Auth custom SMTP
 - SMTP settings: host `smtp.resend.com`, port `465`, username `resend`, password stored only in Supabase as the Resend API key
 - Rationale: keep authentication email reputation separate from the main `exhale.guide` website domain and any future general-contact or marketing email. This follows Supabase's recommendation to avoid mixing auth and marketing email domains.
-- Status: configured 2026-05-21; do not include email-code verification in normal smoke tests unless deliberately testing a legacy account.
+- Status: custom SMTP configured 2026-05-21. For normal sign-in smoke tests, use a magic link. Test code verification only when deliberately testing a legacy account.
 
-## Google OAuth Setup
+## OAuth Provider Setup
 
-Google OAuth is the visible Sign In provider for tracking history across devices. Exhale should still work anonymously without it.
+Google and Apple OAuth are visible Sign In providers for tracking history across devices. Exhale should still work anonymously without them.
 
 In Supabase:
 
 - Enable the Google provider in Auth Providers.
 - Add the Google client ID and client secret from Google Cloud.
-- Enable manual identity linking so an existing legacy email-code user can attach Google if a recovery flow needs it.
+- Enable the Apple provider in Auth Providers after the Apple Developer Services ID, private key, and client secret are ready.
+- Enable manual identity linking so an existing signed-in user can attach another provider if a recovery flow needs it.
 - Add redirect URLs for each environment that will test OAuth:
   - `https://exhale.guide/stats`
   - `http://localhost:3000/stats`
@@ -100,6 +104,12 @@ In Google Cloud:
   - `https://exhale.guide/privacy`
   - `https://exhale.guide/terms`
 
+In Apple Developer:
+
+- Enable Sign in with Apple for the relevant App ID / Services ID.
+- Add the Supabase callback URL from the Supabase Apple provider screen as a return URL. It is usually `https://<project-ref>.supabase.co/auth/v1/callback`.
+- Generate the Apple private key and client secret expected by Supabase.
+
 For local OAuth testing, the app's local-only auth guard must be disabled in the browser:
 
 ```js
@@ -108,17 +118,18 @@ localStorage.setItem('exhale-enable-local-supabase', '1')
 
 Then reload `http://localhost:3000`.
 
-If a legacy email-code user tries Google with the same email before Google is
+If a legacy email-code user tries OAuth with the same email before the provider is
 attached, Supabase can return "A user with this email address has already been
-registered." That user needs a one-time recovery/linking path before Google can
+registered." That user needs a one-time recovery/linking path before OAuth can
 become their normal sign-in. From idle or anonymous browsers, the app should use
-normal Google sign-in; `linkIdentity()` is reserved for legacy signed-in
-email-code states.
+normal provider sign-in; `linkIdentity()` is reserved for already signed-in
+non-anonymous users.
 
-The Supabase email templates for sync should visibly include the OTP token:
+The Supabase email templates for normal email sign-in should send a magic link back to:
 
-- Magic Link: include `{{ .Token }}` instead of a sign-in link. This is the normal sign-in code path and currently displays as 6 digits.
-- Change Email Address: include `{{ .Token }}` instead of a confirmation link. This is the anonymous-to-email link path and may display as 8 digits; Exhale's code input must allow that longer token.
+- `https://exhale.guide/stats?sync=email`
+
+Legacy email-code templates can keep `{{ .Token }}` available for recovery states, but normal sign-in should not present code entry first.
 
 ## Do Not Commit
 

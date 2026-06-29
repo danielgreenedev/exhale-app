@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import type { AuthError, User } from '@supabase/supabase-js';
+import type { AuthError, Provider, User } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 
 // Distinguish "server says this session is invalid" from "we couldn't reach
@@ -21,13 +21,23 @@ interface AuthState {
   ready: boolean;
   refreshUser: () => Promise<void>;
   signOutToAnonymous: () => Promise<void>;
+  startOAuthBackupSync: (provider: AuthProviderName) => Promise<{ error?: string }>;
   startGoogleBackupSync: () => Promise<{ error?: string }>;
+  startAppleBackupSync: () => Promise<{ error?: string }>;
+  startEmailSignIn: (email: string) => Promise<{ error?: string }>;
 }
 
 type AuthSnapshot = Omit<
   AuthState,
-  'refreshUser' | 'signOutToAnonymous' | 'startGoogleBackupSync'
+  'refreshUser' | 'signOutToAnonymous' | 'startOAuthBackupSync' | 'startGoogleBackupSync' | 'startAppleBackupSync' | 'startEmailSignIn'
 >;
+
+export type AuthProviderName = 'google' | 'apple';
+
+const PROVIDER_LABELS: Record<AuthProviderName, string> = {
+  google: 'Google',
+  apple: 'Apple',
+};
 
 const AuthContext = createContext<AuthState>({
   userId: null,
@@ -37,7 +47,10 @@ const AuthContext = createContext<AuthState>({
   ready: false,
   refreshUser: async () => {},
   signOutToAnonymous: async () => {},
+  startOAuthBackupSync: async () => ({}),
   startGoogleBackupSync: async () => ({}),
+  startAppleBackupSync: async () => ({}),
+  startEmailSignIn: async () => ({}),
 });
 
 function userIsAnonymous(user: User | null): boolean {
@@ -136,21 +149,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await setAnonymousUser();
   }, [setAnonymousUser]);
 
-  const startGoogleBackupSync = useCallback(async (): Promise<{ error?: string }> => {
+  const startOAuthBackupSync = useCallback(async (provider: AuthProviderName): Promise<{ error?: string }> => {
+    const providerLabel = PROVIDER_LABELS[provider];
+
     if (shouldUseLocalOnlyAuth()) {
       return {
-        error: 'Google sign-in needs Supabase auth enabled for local testing. Set exhale-enable-local-supabase to 1 and reload.',
+        error: `${providerLabel} sign-in needs Supabase auth enabled for local testing. Set exhale-enable-local-supabase to 1 and reload.`,
       };
     }
 
     const redirectTo = typeof window === 'undefined'
       ? undefined
-      : `${window.location.origin}/stats?sync=google`;
+      : `${window.location.origin}/stats?sync=${provider}`;
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const credentials = {
-        provider: 'google' as const,
+        provider: provider as Provider,
         options: { redirectTo },
       };
 
@@ -170,8 +185,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return {};
     } catch (error) {
-      reportLocalAuthFallback('google sign-in failed', error);
-      return { error: 'Google sign-in could not start. Please try again.' };
+      reportLocalAuthFallback(`${provider} sign-in failed`, error);
+      return { error: `${providerLabel} sign-in could not start. Please try again.` };
+    }
+  }, []);
+
+  const startGoogleBackupSync = useCallback(
+    () => startOAuthBackupSync('google'),
+    [startOAuthBackupSync]
+  );
+
+  const startAppleBackupSync = useCallback(
+    () => startOAuthBackupSync('apple'),
+    [startOAuthBackupSync]
+  );
+
+  const startEmailSignIn = useCallback(async (email: string): Promise<{ error?: string }> => {
+    if (shouldUseLocalOnlyAuth()) {
+      return {
+        error: 'Email sign-in needs Supabase auth enabled for local testing. Set exhale-enable-local-supabase to 1 and reload.',
+      };
+    }
+
+    const emailRedirectTo = typeof window === 'undefined'
+      ? undefined
+      : `${window.location.origin}/stats?sync=email`;
+
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo,
+        },
+      });
+
+      if (error) {
+        return { error: error.message };
+      }
+
+      return {};
+    } catch (error) {
+      reportLocalAuthFallback('email sign-in failed', error);
+      return { error: 'Email sign-in could not start. Please try again.' };
     }
   }, []);
 
@@ -232,7 +287,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [setAnonymousUser]);
 
   return (
-    <AuthContext.Provider value={{ ...authState, refreshUser, signOutToAnonymous, startGoogleBackupSync }}>
+    <AuthContext.Provider
+      value={{
+        ...authState,
+        refreshUser,
+        signOutToAnonymous,
+        startOAuthBackupSync,
+        startGoogleBackupSync,
+        startAppleBackupSync,
+        startEmailSignIn,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

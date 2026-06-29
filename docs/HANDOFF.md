@@ -1,13 +1,13 @@
 # Codex Handoff
 
-Last updated: 2026-06-23 (completion quote stabilization and full factory guardrail pass)
+Last updated: 2026-06-29 (provider sign-in expansion and opt-in Email Updates)
 
 This document is overwritten on each handoff. The previous handoff's content does not need to be preserved; the commit history and `docs/TODO.md` / `docs/OPEN_QUESTIONS.md` / `docs/USER_FEEDBACK.md` are the durable record.
 
 ## Branch State
 
 - Branch: `master`, tracking `origin/master`.
-- Working tree is currently dirty with completion quote stabilization, new Exhale specialist skills, the `exhale-ship` owner decision guardrail, and agent factory roadmap/handoff docs.
+- Working tree is currently dirty with provider sign-in expansion, opt-in Email Updates consent storage, roadmap/docs updates, and prior roadmap clarification docs.
 - Recent commit history:
   - `fe8be2f` - Rhythm picker pattern cards show timing directly.
   - `6dc32b4` - Agent factory roadmap concluded.
@@ -20,6 +20,9 @@ This document is overwritten on each handoff. The previous handoff's content doe
 ## What Changed Most Recently
 
 - **Completion quote stabilization.** `SessionComplete` now waits for one resolved completion quote instead of showing a local fallback and then swapping to a fetched quote. `src/lib/completionQuote.ts` owns remote quote fetch, normalization, and a short fallback timeout; focused Jest tests cover remote, empty, and slow quote paths.
+- **Provider sign-in expansion.** Practice now offers Google, Apple, and email sign-in. Footer Sign In opens Practice instead of auto-launching Google. Email sign-in sends a Supabase magic link and still accepts a code if the email template is in a legacy code state.
+- **Email Updates opt-in.** The Practice Sign In section has one unchecked Email Updates checkbox. Consent is persisted only after sign-in completes with a real email identity, through the new `email_update_subscriptions` table. Auth email alone is not marketing consent.
+- **External setup still required.** Apply `supabase/migrations/005-email-update-subscriptions.sql`, configure the Apple provider in Supabase/Apple Developer, and verify Supabase email templates/redirect URLs before production smoke testing.
 - **Factory expanded.** Repo-local skills now cover beta triage, sync drift audit, accessibility lab review, and device QA. `exhale-ship` remains the final guarded release gate.
 - **Owner decision guardrail active.** `exhale-ship` now records when Codex must stop for owner input: P0/P1 risk acceptance, product/design/auth/sync/accessibility tradeoffs, external-service changes, dependencies/MCP additions, production DB/schema/policy changes, and commit/push/deploy actions.
 - **Agent factory concluded.** `docs/AGENT_FACTORY_ROADMAP.md` now treats the roadmap as concluded and the factory as an operational process. The repo-local `.agents/skills/exhale-ship/` skill owns the guarded workflow.
@@ -39,9 +42,9 @@ This document is overwritten on each handoff. The previous handoff's content doe
 - **Rhythm lock.** `rhythmRef` locking in session/audio/orb code is intentional. Rhythm is fixed at session start.
 - **Meta webview layout.** Game `main` keeps `100dvh` inline style with `h-screen` fallback, and `BreathingOrb` keeps the width-aware radius clamp. Removing either side risks regressing Facebook in-app browser layout.
 - **Cue hierarchy.** Center orb is the primary timing object. Outer guide ring and incoming-color lead stay quiet support.
-- **Auth/sync.** Anonymous local use remains default. Sign In is optional, Google-only in the visible UI, and framed as history across devices rather than an account gate.
+- **Auth/sync.** Anonymous local use remains default. Sign In is optional, visible choices are Google, Apple, and email, and the framing remains history across devices rather than an account gate.
 - **Supabase auth.** Only fall back to anonymous on explicit 401/403. Transient errors preserve cached sessions.
-- **Footer sign-in link.** Anonymous label `Sign In`, signed-in label `Signed In`. Anonymous visitors with no local practice history start Google sign-in directly; anonymous visitors with local history go to `/stats#sync` first.
+- **Footer sign-in link.** Anonymous label `Sign In`, signed-in label `Signed In`. Footer always opens `/stats#sync` so the user can choose Google, Apple, or email and optionally opt into Email Updates.
 
 ## Feedback Mode
 
