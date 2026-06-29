@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { FormEvent } from 'react';
+import type { ButtonHTMLAttributes, FormEvent, ReactNode } from 'react';
 import Link from 'next/link';
 import { readStats, computeStats, storageAvailable, writeStats } from '@/hooks/useSessionStats';
 import type { SessionRecord } from '@/hooks/useSessionStats';
@@ -31,12 +31,120 @@ function formatDate(dateStr: string): string {
 type SyncState = 'idle' | 'codeSent' | 'verifying' | 'synced';
 type SubmitMode = 'signin' | 'link';
 type BusyAction = EmailUpdatesProvider | 'signout' | null;
+type AuthButtonKind = EmailUpdatesProvider;
 const SIGN_IN_COPY = 'Sign in to track your history across all devices.';
 const PRACTICE_ACCENTS = [
   PHASE_COLORS.inhale.color,
   PHASE_COLORS.hold.color,
   PHASE_COLORS.exhale.color,
 ] as const;
+
+const AUTH_BUTTON_CLASSES: Record<AuthButtonKind, { base: string; active: string; icon: string }> = {
+  google: {
+    base: 'border-[#4285f4]/36 text-still-white/70 bg-still-white/[0.02] hover:border-[#4285f4]/90 hover:bg-[#4285f4]/[0.16] hover:text-still-white/95 active:border-[#4285f4]/90 active:bg-[#4285f4]/[0.24]',
+    active: 'border-[#4285f4]/90 bg-[#4285f4]/[0.24] text-still-white/95',
+    icon: 'border-[#4285f4]/26 bg-still-white/[0.92] group-hover:border-[#4285f4]/45 group-hover:bg-still-white group-active:border-[#4285f4]/65 group-active:bg-still-white',
+  },
+  apple: {
+    base: 'border-still-white/24 text-still-white/72 bg-still-white/[0.035] hover:border-still-white/70 hover:bg-still-white/[0.14] hover:text-still-white/95 active:border-still-white/78 active:bg-still-white/[0.24]',
+    active: 'border-still-white/78 bg-still-white/[0.24] text-still-white/95',
+    icon: 'border-still-white/24 bg-still-white/[0.06] text-still-white/86 group-hover:bg-still-white/[0.18] group-active:bg-still-white/[0.26]',
+  },
+  email: {
+    base: 'border-emerald-pulse/28 text-emerald-50/72 bg-emerald-pulse/[0.035] hover:border-emerald-pulse/68 hover:bg-emerald-pulse/[0.16] hover:text-emerald-50/95 active:border-emerald-pulse/78 active:bg-emerald-pulse/[0.24]',
+    active: 'border-emerald-pulse/78 bg-emerald-pulse/[0.24] text-emerald-50/95',
+    icon: 'border-emerald-pulse/24 bg-emerald-pulse/[0.08] text-emerald-100/86 group-hover:bg-emerald-pulse/[0.20] group-active:bg-emerald-pulse/[0.28]',
+  },
+};
+
+function GoogleMark({ className = '' }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={className}>
+      <path
+        fill="#4285F4"
+        d="M22.56 12.25c0-.76-.07-1.49-.2-2.2H12v4.16h5.92a5.06 5.06 0 0 1-2.19 3.32v2.71h3.55c2.08-1.92 3.28-4.75 3.28-7.99z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.55-2.71c-.99.66-2.25 1.05-3.73 1.05-2.87 0-5.3-1.94-6.16-4.54H2.18v2.8A11 11 0 0 0 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.84 14.14a6.61 6.61 0 0 1 0-4.28v-2.8H2.18a11 11 0 0 0 0 9.88l3.66-2.8z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.32c1.62 0 3.06.56 4.21 1.65l3.15-3.15A10.57 10.57 0 0 0 12 1 11 11 0 0 0 2.18 7.06l3.66 2.8C6.7 7.26 9.13 5.32 12 5.32z"
+      />
+    </svg>
+  );
+}
+
+function AppleMark({ className = '' }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={className}>
+      <path
+        fill="currentColor"
+        d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35-4.88-5.04-4.16-12.69 1.38-12.97 1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25C11.88 5.02 13.69 3.18 15.77 3c.29 2.58-2.34 4.5-3.74 4.25z"
+      />
+    </svg>
+  );
+}
+
+function MailMark({ className = '' }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3.75" y="5.75" width="16.5" height="12.5" rx="2.6" />
+      <path d="m5 8 7 5 7-5" />
+    </svg>
+  );
+}
+
+function AuthButtonIcon({ kind }: { kind: AuthButtonKind }) {
+  const iconClassName = 'h-4 w-4';
+  if (kind === 'google') return <GoogleMark className={iconClassName} />;
+  if (kind === 'apple') return <AppleMark className={iconClassName} />;
+  return <MailMark className={iconClassName} />;
+}
+
+interface AuthProviderButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  kind: AuthButtonKind;
+  pressed?: boolean;
+  children: ReactNode;
+}
+
+function AuthProviderButton({
+  kind,
+  pressed = false,
+  children,
+  className = '',
+  ...props
+}: AuthProviderButtonProps) {
+  const style = AUTH_BUTTON_CLASSES[kind];
+  return (
+    <button
+      {...props}
+      className={`group grid w-full min-h-11 grid-cols-[1.75rem_1fr_1.75rem] items-center gap-3 rounded-2xl border px-3 py-3 text-xs tracking-[0.16em] uppercase font-light transition-[background-color,border-color,color,transform] duration-200 ease-out active:scale-[0.985] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 sm:tracking-[0.18em] ${style.base} ${pressed ? style.active : ''} ${className}`}
+    >
+      <span
+        className={`flex h-7 w-7 items-center justify-center rounded-full border transition-colors duration-200 ${style.icon}`}
+      >
+        <AuthButtonIcon kind={kind} />
+      </span>
+      <span className="min-w-0 text-center leading-relaxed">{children}</span>
+      <span aria-hidden="true" />
+    </button>
+  );
+}
 
 export function expectedCodeLength(submitMode: SubmitMode | null): number {
   return submitMode === 'link' ? 8 : 6;
@@ -522,24 +630,26 @@ export default function StatsPage() {
                 </p>
               )}
               {!connectedProviders.includes('google') && (
-                <button
+                <AuthProviderButton
+                  kind="google"
                   type="button"
                   onClick={() => handleProviderSync('google')}
                   disabled={busyAction !== null}
-                  className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 bg-still-white/[0.03] text-still-white/72 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:bg-still-white/[0.06] hover:text-still-white/86 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                  pressed={busyAction === 'google'}
                 >
                   {busyAction === 'google' ? 'Opening Google...' : 'Sign In With Google'}
-                </button>
+                </AuthProviderButton>
               )}
               {!connectedProviders.includes('apple') && (
-                <button
+                <AuthProviderButton
+                  kind="apple"
                   type="button"
                   onClick={() => handleProviderSync('apple')}
                   disabled={busyAction !== null}
-                  className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 bg-still-white/[0.03] text-still-white/72 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:bg-still-white/[0.06] hover:text-still-white/86 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                  pressed={busyAction === 'apple'}
                 >
                   {busyAction === 'apple' ? 'Opening Apple...' : 'Sign In With Apple'}
-                </button>
+                </AuthProviderButton>
               )}
               <button
                 type="button"
@@ -629,30 +739,24 @@ export default function StatsPage() {
                   </span>
                 </span>
               </label>
-              <button
+              <AuthProviderButton
+                kind="google"
                 type="button"
                 onClick={() => handleProviderSync('google')}
                 disabled={busyAction !== null}
-                className={`w-full min-h-11 py-3 rounded-2xl border text-xs tracking-[0.18em] uppercase font-light disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 ${
-                  totalSessions === 0
-                    ? 'border-still-white/14 text-still-white/58 hover:border-still-white/24 hover:text-still-white/72'
-                    : 'border-still-white/18 bg-still-white/[0.03] text-still-white/72 hover:border-still-white/30 hover:bg-still-white/[0.06] hover:text-still-white/86'
-                }`}
+                pressed={busyAction === 'google'}
               >
                 {busyAction === 'google' ? 'Opening Google...' : 'Sign In With Google'}
-              </button>
-              <button
+              </AuthProviderButton>
+              <AuthProviderButton
+                kind="apple"
                 type="button"
                 onClick={() => handleProviderSync('apple')}
                 disabled={busyAction !== null}
-                className={`w-full min-h-11 py-3 rounded-2xl border text-xs tracking-[0.18em] uppercase font-light disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 ${
-                  totalSessions === 0
-                    ? 'border-still-white/14 text-still-white/58 hover:border-still-white/24 hover:text-still-white/72'
-                    : 'border-still-white/18 bg-still-white/[0.03] text-still-white/72 hover:border-still-white/30 hover:bg-still-white/[0.06] hover:text-still-white/86'
-                }`}
+                pressed={busyAction === 'apple'}
               >
                 {busyAction === 'apple' ? 'Opening Apple...' : 'Sign In With Apple'}
-              </button>
+              </AuthProviderButton>
               <form className="flex flex-col gap-2" onSubmit={handleEmailSignIn}>
                 <label htmlFor="sign-in-email" className="sr-only">Email address</label>
                 <input
@@ -664,13 +768,14 @@ export default function StatsPage() {
                   autoComplete="email"
                   className="w-full min-h-12 rounded-2xl border border-still-white/18 bg-transparent px-4 py-3 text-sm font-light text-still-white/86 placeholder:text-still-white/35 focus:border-still-white/40 focus:outline-none transition-colors duration-300"
                 />
-                <button
+                <AuthProviderButton
+                  kind="email"
                   type="submit"
                   disabled={busyAction !== null}
-                  className="w-full min-h-11 py-3 rounded-2xl border border-still-white/18 text-still-white/58 text-xs tracking-[0.18em] uppercase font-light hover:border-still-white/30 hover:text-still-white/75 hover:bg-still-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
+                  pressed={busyAction === 'email'}
                 >
                   {busyAction === 'email' ? 'Sending Link...' : 'Email Sign In'}
-                </button>
+                </AuthProviderButton>
               </form>
               {error && (
                 <p className="text-amber-100/72 text-xs font-light leading-relaxed text-center mt-1">
