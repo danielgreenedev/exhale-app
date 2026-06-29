@@ -133,15 +133,14 @@ function AuthProviderButton({
   return (
     <button
       {...props}
-      className={`group grid w-full min-h-11 grid-cols-[1.75rem_1fr_1.75rem] items-center gap-3 rounded-2xl border px-3 py-3 text-xs tracking-[0.16em] uppercase font-light transition-[background-color,border-color,color,transform] duration-200 ease-out active:scale-[0.985] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 sm:tracking-[0.18em] ${style.base} ${pressed ? style.active : ''} ${className}`}
+      className={`group flex w-full min-h-11 items-center justify-center gap-3 rounded-2xl border px-4 py-3 text-xs tracking-[0.16em] uppercase font-light transition-[background-color,border-color,color,transform] duration-200 ease-out active:scale-[0.985] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 sm:tracking-[0.18em] ${style.base} ${pressed ? style.active : ''} ${className}`}
     >
       <span
-        className={`flex h-7 w-7 items-center justify-center rounded-full border transition-colors duration-200 ${style.icon}`}
+        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${style.icon}`}
       >
         <AuthButtonIcon kind={kind} />
       </span>
       <span className="min-w-0 text-center leading-relaxed">{children}</span>
-      <span aria-hidden="true" />
     </button>
   );
 }
