@@ -1,6 +1,6 @@
 # Exhale Roadmap
 
-Last updated: June 29, 2026
+Last updated: July 11, 2026
 
 Exhale is organized around learning gates, not feature batches. Each stage carries one question: do we have enough signal to invest in the next stage? Engineering effort follows validation.
 
@@ -16,7 +16,7 @@ Confirm the premise: does the right kind of person find this useful?
 - Note: Facebook link-preview scraping still has a 403/parser issue despite verified app-side Open Graph metadata. Treat it as non-blocking unless Facebook sharing becomes important to beta acquisition.
 - Recruit roughly 10 to 20 testers from the target audience (people who do not normally use self-care apps).
 - Watch Supabase `app_events` for completion rate, return rate, and drop-off phase.
-- Current build-quality investment: optional Google, Apple, and email sign-in for history across devices is app-side complete; continue validating beta feedback and retention signal.
+- Current build-quality investment: optional Google, Apple, and email sign-in for history across devices is app-side complete and the quiet Account surface is being used for contact preferences, subscription status, and future optional premium extras; continue validating beta feedback and retention signal.
 - Decide if real retention signal exists before investing more engineering.
 
 Gate: roughly ten testers, mostly target-audience, with at least one signal of return use.
@@ -30,20 +30,20 @@ Product framing:
 - Exhale still starts anonymous and local-first. No authentication before breathing and no OAuth prompt before first use.
 - Google, Apple, and email sign-in are the visible paths for users who want history across devices. Email-code verification is retained only as a legacy/recovery bridge.
 - The goal is reliable cross-device continuity for practice history, timer length, Circle Size, sound choice, and rhythm.
-- The feature should be presented as "Sign In" with a practical history-across-devices description, not as a profile, social account, or onboarding step.
+- The feature should be presented as "Sign In" with a practical history-across-devices description, not as a profile, social account, or onboarding step before breathing. After sign-in, a quiet Account page can handle preferences, support/privacy links, and optional premium status.
 
 Technical/product rationale:
 
 - Developer feedback from Shawn Beck recommended proper OAuth on Practice History so users can persist data more reliably.
 - Google and Apple OAuth are handled through Supabase Auth provider support, and email sign-in uses Supabase magic links with legacy code-entry fallback.
-- Optional OAuth creates a cleaner path if premium features or subscriptions ever become relevant, while monetization remains conditional and deferred.
+- Optional OAuth creates a cleaner path if premium features or subscriptions become relevant, while monetization remains conditional and must never reduce the free breathing tool.
 - From a portfolio/resume perspective, this demonstrates privacy-first auth architecture: anonymous local use by default, optional OAuth-backed persistence when the user asks for it.
 
 Risks to guard:
 
 - A "Sign in with Google" button can weaken the perceived anonymity promise if it appears too early or too loudly.
 - OAuth adds third-party provider dependency for synced users. Non-synced users must remain unaffected.
-- Do not add profile screens, avatars, passwords, account settings, or auth-first navigation as part of this work.
+- Do not add profile screens, avatars, password-first flows, or auth-first navigation. Account settings may exist only after sign-in and must stay practical: subscription status, contact preferences, privacy/support, and future optional premium controls.
 
 Success shape:
 
@@ -86,7 +86,7 @@ Make Exhale feel like a "v1 you would link publicly."
 - Accessibility candidates, after targeted validation:
   - **High Visual Contrast**: optional visual mode that makes phase colors and cues easier to tell apart for colorblind users, low-vision users, and first-time users who cannot distinguish phase changes quickly enough. Prefer stronger color separation plus non-color cue differences over a generic "colorblind mode" label.
   - **Voice Cues**: optional Audio setting that speaks only phase names (`Inhale`, `Hold`, `Exhale`) for blind users, screen-reader users, or testers who need non-visual guidance. Keep off by default and separate from background sound. Validate human-recorded or very neutral voice treatment before shipping; beta feedback now includes explicit concern that an obviously AI voice could hurt trust.
-- Auth/sync provider expansion: Google, Apple, and email sign-in are now app-side visible choices. Deployment still needs Apple provider configuration, email template verification, and production validation. Any future auth work must keep anonymous local use as the default and must update `/privacy` and `/terms` in the same change.
+- Auth/sync provider expansion: Google, Apple, and email sign-in are now app-side visible choices, and Apple provider configuration was smoke-tested in production on 2026-07-11. Email template verification remains worth checking before relying on email sign-in for release. Any future auth work must keep anonymous local use as the default and must update `/privacy` and `/terms` in the same change.
 - Ongoing polish in response to beta feedback.
 
 ## Stage 2, Distribution
@@ -103,7 +103,7 @@ Only if Stage 0 and Stage 1 reception data justifies. Always preserve a fully fe
 
 - Small private admin/support panel, only when Supabase Dashboard plus docs stop being enough. Preferred first version: a custom protected Next.js route backed by Supabase, not Payload. First useful scope: synced-user deletion/support lookup, beta/tester event review, retention/drop-off summaries, and lightweight content management if completion quotes or themes become hard to maintain manually. Revisit Payload only if CMS-style editing grows beyond what a small custom panel should own.
 - Donation button/page, with PayPal Business link as the owner-preferred path once the business PayPal account exists. Stripe Payment Link remains a backup if PayPal adds friction. The donation affordance must be quiet, optional, and never appear before the user can start breathing.
-- Freemium model exploration for two optional feature classes only: custom breathing patterns and alternative app skins/full UI overhauls. The free app must keep curated breathing patterns, Still Water, local history, and the full breathing session experience. No account, payment, or subscription prompt before breathing.
+- Freemium model exploration for two optional feature classes only: custom breathing patterns and alternative app skins/full UI overhauls. The free app must keep curated breathing patterns, Still Water, local history, sync, and the full breathing session experience. No account, payment, or subscription prompt before breathing.
 - Theme-pack purchase option; the Stage 1 skin proposal/build work unlocks this. Paid skins can be aesthetic alternatives, not required accessibility fixes.
 - Email marketing readiness for signed-in users, only with explicit opt-in consent. Auth email addresses are not automatically marketing permission; this needs privacy copy, unsubscribe handling, and an email-service decision before any campaign.
 - B2B or therapist licensing, only if a clear customer surfaces.

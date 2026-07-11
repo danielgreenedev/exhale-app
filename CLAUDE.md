@@ -97,7 +97,7 @@ Do not reuse these keys for new features:
 
 ## Supabase Data
 
-Supabase is optional from the user's point of view and appears through Sign In for history across devices. The visible paths are Google OAuth, Apple OAuth, and email magic link through Supabase Auth, while preserving anonymous local use as the default. Footer `Sign In` opens Practice so the user can choose a provider and optionally check Email Updates. OAuth sign-in should use `signInWithOAuth()` from idle/anonymous states, because new browsers get anonymous Supabase sessions by default. Use `linkIdentity()` only as a bridge from an already signed-in non-anonymous user state.
+Supabase is optional from the user's point of view and appears through Sign In for history across devices. The visible paths are Google OAuth, Apple OAuth, and email magic link through Supabase Auth, while preserving anonymous local use as the default. Footer `Sign In` opens Practice so the user can choose a provider and optionally check Email Updates; once signed in, footer `Signed In` opens Account for contact preferences, subscription status, support/privacy links, and optional premium extras. OAuth sign-in should use `signInWithOAuth()` from idle/anonymous states, because new browsers get anonymous Supabase sessions by default. Use `linkIdentity()` only as a bridge from an already signed-in non-anonymous user state.
 
 | Table | Purpose |
 |-------|---------|
@@ -114,7 +114,7 @@ Local development on `localhost` / `127.0.0.1` uses local-only auth by default s
 These are intentional — don't undo them without understanding the rationale:
 
 - **No user input during a session** — fully guided, not hold-to-breathe. Reduces intimidation for first-timers who don't know when to inhale.
-- **Anonymous by default, Sign In by choice** — users can breathe and keep local history without signing in. Visible sign-in choices are Google, Apple, and email magic link, and exist to track history across devices; the session flow must never become auth-gated.
+- **Anonymous by default, Sign In by choice** — users can breathe and keep local history without signing in. Visible sign-in choices are Google, Apple, and email magic link, and exist to track history across devices; the session flow must never become auth-gated. Account settings are allowed only after the user chooses sign-in and must keep the free breathing tool clearly complete.
 - **Abstract orb** — chosen over thematic visuals (ocean, lantern, mandala). More universal, less culturally loaded, works for any user.
 - **Selectable pace (Soft / Box / Flow / Relax)** — Soft is the default easiest no-hold loop, Box is the 4-4-4-4 structure, Flow is the smoother no-hold option, and Relax uses the legacy `box` id for compatibility while keeping the 4-7-8 timing visible in the picker. Alternates are accessibility-oriented, not preference-oriented. Rhythm is locked at session start; it does not change mid-session.
 - **Post-exhale handling** — there is no internal or visible post-exhale `Relax`, `Pause`, `Breathe naturally`, or `rest` phase in current rhythms. `Relax` is a selectable rhythm name, not a phase. Box's second post-exhale beat is a `Hold`, not a rest/relax phase. Do not reintroduce a post-exhale rest phase without fresh beta evidence.

@@ -18,7 +18,7 @@ Exhale is a guided breathing tool for learning paced breathing as an anxiety cop
 
 Success: a first-time user completes a session without being confused, and returns voluntarily.
 
-No required account, no onboarding gate, no premium framing. The product should be ready to use in two taps from landing.
+No required account, no onboarding gate before breathing, no premium framing before value. The product should be ready to use in two taps from landing.
 
 Exhale is free by default. Monetization is conditional, deferred, and must never reduce the usefulness of the free breathing tool.
 
@@ -54,6 +54,7 @@ Each screen has a deliberate emotional register. New screens or features must fi
 2. **Game** — immersive, zero decisions. The user is not a user; they are a breather.
 3. **Complete** — warm closure. Amber shift. A single quote. Nothing to do.
 4. **Stats** — reflective, optional. Never pressuring. The orb mark anchors it to the brand.
+5. **Account** — practical, post-sign-in, and quiet. It reassures users the free breathing tool remains complete while surfacing contact preferences, subscription status, and future optional premium extras.
 
 ## Never Do
 
@@ -65,8 +66,8 @@ These are decisions made and should not be revisited without strong cause:
 - No hold-to-breathe interaction during sessions: the orb guides, the user follows
 - No mascot, named persona, or illustrated character
 - No required account, required login, or sync prompt before breathing
-- No profile surface, avatar, password account flow, or auth-first navigation unless future feedback proves optional Google sign-in is insufficient
-- No paywall or premium tier framing in UI copy
+- No profile theater: avatars, social profiles, password-first account flows, or auth-first navigation
+- No paywall or premium prompts before breathing, and no copy implying core breathing requires payment
 
 ## Infrastructure
 
@@ -75,8 +76,8 @@ These are decisions made and should not be revisited without strong cause:
 - Deployment source: GitHub `master`.
 - Preview branch: GitHub `preview`, deployed by Vercel as a pre-production branch.
 - Public domain: `https://exhale.guide`.
-- Optional sign-in depends on Supabase Auth with Google, Apple, and email magic-link providers. The visible path must stay inside Practice and footer recovery, never before breathing.
-- Auth email runs through Supabase Auth custom SMTP. Email Updates are opt-in only through an unchecked checkbox during sign-in; provider email addresses are not marketing consent by themselves.
+- Optional sign-in depends on Supabase Auth with Google, Apple, and email magic-link providers. The visible path must stay inside Practice, footer recovery, and the signed-in account surface, never before breathing.
+- Auth email runs through Supabase Auth custom SMTP. Email Updates are opt-in only through an unchecked checkbox during sign-in or account preferences; provider email addresses are not marketing consent by themselves.
 - Supabase tables currently used: `breathing_sessions`, `user_settings`, `app_events`, `email_update_subscriptions`, and `quotes`.
 
 ## Roadmap Posture

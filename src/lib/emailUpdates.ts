@@ -90,6 +90,64 @@ export async function recordEmailUpdatesOptIn({
   return {};
 }
 
+export async function readEmailUpdatesPreference(
+  userId: string | null
+): Promise<{ optedIn: boolean; error?: string }> {
+  if (!userId) return { optedIn: false };
+
+  const { data, error } = await supabase
+    .from('email_update_subscriptions')
+    .select('opted_in')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) {
+    return {
+      optedIn: false,
+      error: error.message,
+    };
+  }
+
+  return {
+    optedIn: Boolean(data?.opted_in),
+  };
+}
+
+export async function setEmailUpdatesPreference({
+  userId,
+  email,
+  provider,
+  optedIn,
+}: {
+  userId: string;
+  email: string;
+  provider: EmailUpdatesProvider;
+  optedIn: boolean;
+}): Promise<{ error?: string }> {
+  if (optedIn) {
+    return recordEmailUpdatesOptIn({ userId, email, provider });
+  }
+
+  if (!userId) {
+    return { error: 'Email updates could not be changed without a signed-in account.' };
+  }
+
+  const now = new Date().toISOString();
+  const { error } = await supabase
+    .from('email_update_subscriptions')
+    .update({
+      opted_in: false,
+      updated_at: now,
+    })
+    .eq('user_id', userId);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return {};
+}
+
 export async function consumePendingEmailUpdatesOptIn(
   userId: string | null,
   email: string | null

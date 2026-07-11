@@ -8,9 +8,11 @@ import { supabase } from '@/lib/supabase';
 import {
   EMAIL_UPDATES_PENDING_KEY,
   consumePendingEmailUpdatesOptIn,
+  readEmailUpdatesPreference,
   readPendingEmailUpdatesOptIn,
   recordEmailUpdatesOptIn,
   rememberEmailUpdatesOptIn,
+  setEmailUpdatesPreference,
 } from '@/lib/emailUpdates';
 
 const mockFrom = supabase.from as jest.Mock;
@@ -82,5 +84,39 @@ describe('email update opt-in helpers', () => {
     });
 
     expect(readPendingEmailUpdatesOptIn()).toMatchObject({ provider: 'google' });
+  });
+
+  it('reads an existing account email-updates preference', async () => {
+    const maybeSingle = jest.fn().mockResolvedValue({ data: { opted_in: true }, error: null });
+    const eq = jest.fn().mockReturnValue({ maybeSingle });
+    const select = jest.fn().mockReturnValue({ eq });
+    mockFrom.mockReturnValue({ select });
+
+    await expect(readEmailUpdatesPreference('user-1')).resolves.toEqual({
+      optedIn: true,
+    });
+
+    expect(mockFrom).toHaveBeenCalledWith('email_update_subscriptions');
+    expect(select).toHaveBeenCalledWith('opted_in');
+    expect(eq).toHaveBeenCalledWith('user_id', 'user-1');
+  });
+
+  it('turns off email updates from the account page', async () => {
+    const eq = jest.fn().mockResolvedValue({ error: null });
+    const update = jest.fn().mockReturnValue({ eq });
+    mockFrom.mockReturnValue({ update });
+
+    await expect(
+      setEmailUpdatesPreference({
+        userId: 'user-1',
+        email: 'person@example.com',
+        provider: 'apple',
+        optedIn: false,
+      })
+    ).resolves.toEqual({});
+
+    expect(mockFrom).toHaveBeenCalledWith('email_update_subscriptions');
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ opted_in: false }));
+    expect(eq).toHaveBeenCalledWith('user_id', 'user-1');
   });
 });

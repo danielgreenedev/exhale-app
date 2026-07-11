@@ -623,6 +623,17 @@ export default function StatsPage() {
               <p className="text-still-white/[0.58] text-sm font-light leading-relaxed">
                 Signed in as {syncedEmail}. Your history can follow you across devices.
               </p>
+              <div className="flex flex-col gap-2 rounded-2xl border border-still-white/[0.12] px-3 py-3">
+                <p className="text-still-white/[0.62] text-xs font-light leading-relaxed">
+                  Your free breathing tool stays fully available. Premium options will add optional themes and a custom pattern creator when they are ready.
+                </p>
+                <Link
+                  href="/account"
+                  className="text-emerald-pulse/[0.82] text-xs tracking-[0.14em] uppercase font-light hover:text-emerald-pulse transition-colors duration-300"
+                >
+                  Account Settings
+                </Link>
+              </div>
               {emailUpdatesMessage && (
                 <p className="text-emerald-pulse/[0.78] text-xs font-light leading-relaxed">
                   {emailUpdatesMessage}

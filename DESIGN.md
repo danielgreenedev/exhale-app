@@ -269,11 +269,13 @@ Practice history is pure reflection. Show only `Sessions`, `Total time`, `Days p
 
 Sign In belongs only in the footer and on the Practice screen, below the reflective history content. It is an optional continuity affordance, not a requirement before breathing. It syncs practice history, timer length, Circle Size, sound choice, and rhythm.
 
-The default path remains anonymous local use. Footer `Sign In` opens Practice so the user can choose Google, Apple, or email sign-in without making any provider feel required. The Practice copy stays practical: "Sign in to track your history across all devices." Provider actions read `Sign In With Google`, `Sign In With Apple`, and `Email Sign In`.
+The default path remains anonymous local use. Footer `Sign In` opens Practice so the user can choose Google, Apple, or email sign-in without making any provider feel required. After sign-in, footer `Signed In` may open Account. The Practice copy stays practical: "Sign in to track your history across all devices." Provider actions read `Sign In With Google`, `Sign In With Apple`, and `Email Sign In`.
 
-Email sign-in uses a magic link as the visible path. Legacy email-code verification can remain as a recovery bridge for older in-progress states, but normal users should not see a code-first flow. Do not use avatars, profile language, account settings, resend loops, premium-gate framing, or anything that makes breathing feel gated.
+Email sign-in uses a magic link as the visible path. Legacy email-code verification can remain as a recovery bridge for older in-progress states, but normal users should not see a code-first flow. Do not use avatars, social profile language, resend loops, premium-gate framing, or anything that makes breathing feel gated.
 
-Email Updates consent appears as one unchecked checkbox in the Practice Sign In section. It must remain opt-in only: unchecked means no update emails. The checkbox is for future update messages, not for breathing, sync, account access, or any required step. If checked, consent is recorded only after sign-in completes with a real email identity.
+Email Updates consent appears as one unchecked checkbox in the Practice Sign In section and can be changed later from Account. It must remain opt-in only: unchecked means no update emails. The checkbox is for future update messages, not for breathing, sync, account access, or any required step. If checked, consent is recorded only after sign-in completes with a real email identity.
+
+Account is a quiet post-sign-in utility surface, not an onboarding requirement. It may show basic contact info, subscription status, optional Email Updates consent, support/privacy links, and future premium controls for themes or the breathing pattern creator. Account copy must explicitly reassure that the free breathing tool remains complete.
 
 OAuth releases must keep `/privacy` and `/terms` current in the same change. They should explain the optional provider path in plain language, name what syncs, note third-party provider involvement, preserve the anonymous-first promise, and avoid legalistic language that makes Sign In feel mandatory.
 
@@ -293,7 +295,8 @@ If the roadmap's admin/support panel is built, it should feel like a quiet opera
 - **Do** keep all button text at `font-light` (300) or lighter, uppercase, with tracking `≥0.18em`. The Begin button is the one sanctioned exception, using semibold 600 at tracking 0.20em (see Begin (Primary)).
 - **Do** respect `prefers-reduced-motion`: skip the orb breathe animation and canvas particle system entirely when the OS requests it.
 - **Do** surface stats and practice history as optional, secondary navigation. Never on the critical path to breathing.
-- **Do** keep Sign In optional and quiet. It is for carrying history across devices, not for onboarding.
+- **Do** keep Sign In optional and quiet. It is for carrying history across devices, not for onboarding before breathing.
+- **Do** keep Account practical and post-sign-in: contact preferences, subscription status, privacy/support, and optional premium extras only.
 - **Do** keep active-session phase and instruction text readable for older and low-vision phone users. Use size, lower tracking, dark edge contrast, and a local halo before adding louder UI.
 - **Do** place session controls (Pause, Exit) in the bottom corners of the session screen — the thumb zone on all phone sizes.
 - **Do** give every orb mark (home, stats, complete) its outer ring at `inset -12px` to `inset -14px`, colored to match the orb's accent at low opacity (emerald for home/stats, amber for complete).
@@ -306,10 +309,10 @@ If the roadmap's admin/support panel is built, it should feel like a quiet opera
 - **Don't** use a colored overlay for dialog/guard backdrops. The exit guard background is a tinted forest-night scrim, not emerald, a phase color, or pure black.
 - **Don't** add a second accent color. Emerald and amber are the full palette. Phase colors outside the canvas are limited to tiny semantic markers in rhythm, Circle Size, Sound, and Practice History.
 - **Don't** use `italic` anywhere in the interface. There is no italic role in this system. Emphasis is conveyed via opacity, not decoration.
-- **Don't** design like Headspace or Calm — no onboarding carousels, no premium gate framing, no illustrated brand characters, no teacher voices.
+- **Don't** design like Headspace or Calm — no onboarding carousels before breathing, no premium gate framing before value, no illustrated brand characters, no teacher voices.
 - **Don't** design like a fitness app — no streak counters as pressure, no achievement popups, no guilt mechanics.
 - **Don't** require an account, login, OAuth, or cloud sync before breathing. Optional Sign In must never block first use.
-- **Don't** build a full account surface around sign-in. No profile screen, avatar, password flow, account settings, or auth-first navigation.
+- **Don't** turn Account into a profile or dashboard. No avatars, social profile fields, password-first flow, auth-first navigation, billing pressure, or anything that makes the session flow feel gated.
 - **Don't** make a future admin panel look like generic SaaS. No hero metrics, bright chart walls, nested cards, or decorative dashboard chrome.
 - **Don't** add push notifications, sharing features, or social comparisons. The experience is private and self-contained.
 - **Don't** use audio files. All sound is synthesized via Web Audio API. Zero load time is part of the low-friction promise.

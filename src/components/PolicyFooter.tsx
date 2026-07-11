@@ -12,8 +12,9 @@ export function PolicyFooter() {
   const signedIn = ready && !isAnonymous;
   const syncLabel = signedIn ? 'Signed In' : 'Sign In';
   const syncAria = signedIn
-    ? 'Open practice page; you are signed in'
+    ? 'Open account settings; you are signed in'
     : 'Open practice page to sign in';
+  const syncHref = signedIn ? '/account' : '/stats#sync';
 
   return (
     <footer className="mt-6 flex flex-wrap items-center justify-center gap-2 text-[10px] tracking-[0.14em] uppercase font-light">
@@ -26,7 +27,7 @@ export function PolicyFooter() {
         </Link>
       </span>
       <Link
-        href="/stats#sync"
+        href={syncHref}
         className={linkClass}
         aria-label={syncAria}
       >

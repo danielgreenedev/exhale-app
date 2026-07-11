@@ -1,6 +1,14 @@
 # Exhale To-Do List
 
-Last updated: June 29, 2026 (distribution, design-pass, and monetization roadmap clarification)
+Last updated: July 11, 2026 (account surface, Apple sign-in validation, and premium-option framing)
+
+## Completed Account And Sign-In Follow-Up
+
+- Apple sign-in was configured and smoke-tested successfully in production after recovering the existing Apple key/client-secret path.
+- Added a quiet signed-in Account surface for subscription status, basic contact info, Email Updates consent, support/privacy links, and future optional premium controls for themes and the breathing pattern creator.
+- Footer `Signed In` now opens Account; anonymous `Sign In` still opens Practice so users can choose Google, Apple, or email before connecting sync.
+- Account creation/sign-in copy reassures users that premium options are optional and the fully functional free breathing tool remains available.
+- Product, design, roadmap, and handoff docs now allow practical post-sign-in account settings while preserving the no-auth-before-breathing rule.
 
 ## Completed Rhythm Changes
 
@@ -331,7 +339,7 @@ Primary focus: remain in beta feedback mode. Collect feedback and usage data.
 - Copy direction: frame this as "Backup & Sync" or "Save across devices." It is a persistence affordance, not an account system.
 - Portfolio rationale: demonstrates a privacy-first auth architecture suitable for a resume/GitHub project while respecting the app's anonymity promise.
 - Superseded 2026-06-29: Apple Sign-In is now app-side implemented by owner direction. Apple Developer/Supabase provider setup remains a deployment task.
-- Guardrails: no profile screen, avatars, passwords, account settings, premium gate, or auth-first onboarding as part of this task.
+- Original guardrails for this task: no profile screen, avatars, passwords, premium gate, or auth-first onboarding. Superseded 2026-07-11 only for practical post-sign-in account settings; the no-auth-before-breathing rule still stands.
 - Acceptance completed: the same Supabase user shows Email and Google providers enabled, and a fresh Firefox production session restored practice history through Google sign-in. Keep email-code sync available unless follow-up testing shows it is redundant.
 
 2. Pending follow-up with rhythm-concern testers: ask whether default Soft feels accessible and calming, whether Box feels clear as the structured option, whether Relax's 4-7-8 timing feels calming or too demanding, and whether Flow's no-hold/no-pause loop feels smoother for users who dislike holds. Use the refreshed rhythm follow-up questions in `docs/USER_FEEDBACK.md`. Capture answers in `docs/USER_FEEDBACK.md`.
